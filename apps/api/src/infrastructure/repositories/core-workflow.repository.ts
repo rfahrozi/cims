@@ -613,6 +613,45 @@ export class CoreWorkflowRepository {
     });
   }
 
+  // M-05: Mengambil riwayat lengkap jadwal persidangan
+  async scheduleHistory(hearingId: string, user: CurrentUser): Promise<ScheduleRecord[]> {
+    if (!this.mode.postgres) {
+      return this.memory.schedules
+        .filter((schedule) => schedule.hearingId === hearingId)
+        .sort((a, b) => b.version - a.version)
+        .map((schedule) => ({
+          ...schedule,
+          displayTimezone: (schedule as Partial<ScheduleRecord>).displayTimezone ?? 'Asia/Jakarta',
+          approvalReason: (schedule as Partial<ScheduleRecord>).approvalReason ?? 'legacy-memory',
+          approvedBy: (schedule as Partial<ScheduleRecord>).approvedBy ?? 'legacy-memory',
+          approvedAt: (schedule as Partial<ScheduleRecord>).approvedAt ?? new Date().toISOString(),
+          rowVersion: (schedule as Partial<ScheduleRecord>).rowVersion ?? 1,
+        }));
+    }
+    return this.pg.transactionAs(user, async (client) => {
+      const result = await client.query(
+        `select id,hearing_id,start_at::text,end_at::text,display_timezone,version,status,approval_reason,approved_by,approved_at::text,row_version
+           from hearing_schedules
+          where hearing_id=$1
+          order by version desc`,
+        [hearingId],
+      );
+      const schedules: ScheduleRecord[] = [];
+      for (const row of result.rows) {
+        const resources = await client.query(
+          'select resource_type,resource_id,requirement from hearing_schedule_resources where schedule_id=$1 order by resource_type,resource_id',
+          [row.id],
+        );
+        schedules.push(this.mapSchedule(row, resources.rows.map((resource) => ({
+          resourceType: String(resource.resource_type) as ScheduleResource['resourceType'],
+          resourceId: String(resource.resource_id),
+          requirement: String(resource.requirement) as ScheduleResource['requirement'],
+        }))));
+      }
+      return schedules;
+    });
+  }
+
   async activeSchedule(hearingId: string, user: CurrentUser, client?: PoolClient): Promise<ScheduleRecord | undefined> {
     if (!this.mode.postgres) return (await this.schedules(hearingId, user)).find((item) => item.status === 'ACTIVE');
     const query = async (connection: PoolClient) => {

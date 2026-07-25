@@ -23,6 +23,24 @@ const PERSONA_ORG: Record<string, string> = {
   'corrections': 'CORRECTIONS',
 };
 
+// CU-05: Template checklist kesiapan standar per instansi
+const CHECKLIST_TEMPLATES: Record<string, Array<{ code: string; label: string; required: boolean }>> = {
+  COURT: [
+    { code: 'JUDGE_AVAILABLE', label: 'Hakim/Majelis siap bersidang', required: true },
+    { code: 'VIRTUAL_ROOM_READY', label: 'Infrastruktur ruang sidang berfungsi', required: true },
+    { code: 'FALLBACK_PROCEDURE', label: 'Prosedur cadangan telah disiapkan', required: false },
+  ],
+  PROSECUTION: [
+    { code: 'PROSECUTOR_AVAILABLE', label: 'Penuntut Umum siap hadir', required: true },
+    { code: 'DOCUMENTS_READY', label: 'Dokumen dakwaan/tuntutan/bukti tersedia', required: true },
+  ],
+  CORRECTIONS: [
+    { code: 'DEFENDANT_VERIFIED', label: 'Verifikasi identitas terdakwa (SOP 10.7)', required: true },
+    { code: 'ROOM_INSPECTED', label: 'Inspeksi sterilitas ruangan (SOP 10.7)', required: true },
+    { code: 'ESCORT_OFFICER_READY', label: 'Petugas pendamping siap', required: true },
+  ]
+};
+
 export function ReadinessPage() {
   const { hearingId } = useActiveHearing();
   const client = useQueryClient();
@@ -33,6 +51,11 @@ export function ReadinessPage() {
     queryKey: ['readiness', hearingId],
     queryFn: () => api<{ gate: { ready: boolean; organizations: OrganizationReadiness[] }; items: unknown[] }>(`/hearings/${hearingId}/readiness`),
     enabled: Boolean(hearingId),
+  });
+
+  const [checklistResults, setChecklistResults] = useState<Record<string, 'PASS' | 'FAIL'>>({});
+  const [techResults, setTechResults] = useState<Record<string, 'PASS' | 'FAIL'>>({
+    camera: 'PASS', microphone: 'PASS', audio: 'PASS', primary_network: 'PASS'
   });
 
   const refresh = () => client.invalidateQueries({ queryKey: ['readiness', hearingId] });
@@ -49,6 +72,8 @@ export function ReadinessPage() {
   const persona = getPersona();
   const myOrgType = PERSONA_ORG[persona];
   const isCorrections = persona === 'corrections';
+
+  const currentTemplate = myOrgType ? CHECKLIST_TEMPLATES[myOrgType] : [];
 
   async function verifyIdentity() {
     await post(
@@ -67,27 +92,34 @@ export function ReadinessPage() {
   }
 
   async function submit() {
+    const items = currentTemplate.map(item => ({
+      item_code: item.code,
+      required: item.required,
+      result: checklistResults[item.code] ?? 'PASS',
+    }));
+
     await post(
       `/hearings/${hearingId}/readiness-submissions`,
       {
         location_code: `${persona.toUpperCase()}-ROOM-01`,
-        items: [
-          { item_code: 'OFFICER_READY', required: true, result: 'PASS' },
-          { item_code: 'FALLBACK_PROCEDURE', required: true, result: 'PASS' },
-        ],
+        items,
         technical_test: {
-          camera: 'PASS', microphone: 'PASS', audio: 'PASS',
-          primary_network: 'PASS', backup_network: 'PASS', provider_access: 'PASS',
+          camera: techResults.camera,
+          microphone: techResults.microphone,
+          audio: techResults.audio,
+          primary_network: techResults.primary_network,
+          backup_network: 'PASS',
+          provider_access: 'PASS',
         },
       },
       `Kesiapan ${ORG_LABEL[myOrgType ?? ''] ?? persona} berhasil disubmit.`,
     );
   }
 
-  const organizations = query.data?.gate.organizations ?? [];
+  const organizations = query.data?.gate?.organizations ?? [];
   const readyCount = (organizations || []).filter(o => o.status === 'READY').length;
   const total = organizations.length || 3;
-  const allReady = query.data?.gate.ready;
+  const allReady = query.data?.gate?.ready;
 
   return <>
     <PageHeader
@@ -145,6 +177,29 @@ export function ReadinessPage() {
             }
           </div>
 
+          {/* Form Checklist sesuai Template Persona */}
+          {myOrgType && (
+            <div className="border-t pt-4">
+              <h3 className="mb-3 font-semibold text-slate-800">Checklist Persyaratan</h3>
+              <div className="space-y-2">
+                {currentTemplate.map(item => (
+                  <label key={item.code} className="flex items-start gap-3 rounded-lg border bg-slate-50 p-3 text-sm cursor-pointer hover:bg-slate-100 transition">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4 w-4"
+                      checked={(checklistResults[item.code] ?? 'PASS') === 'PASS'}
+                      onChange={(e) => setChecklistResults(prev => ({ ...prev, [item.code]: e.target.checked ? 'PASS' : 'FAIL' }))}
+                    />
+                    <div>
+                      <span className="font-medium text-slate-700">{item.label}</span>
+                      {item.required && <span className="ml-1 text-red-500">*</span>}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Tombol aksi sesuai persona */}
           {myOrgType ? (
             <div className="space-y-2 border-t pt-4">
@@ -153,7 +208,7 @@ export function ReadinessPage() {
                   <p className="text-xs text-amber-700">
                     ⚠ Pemasyarakatan wajib menyelesaikan verifikasi identitas dan inspeksi ruangan sebelum submit kesiapan.
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-2">
                     <Button variant="outline" onClick={verifyIdentity}>Verifikasi Identitas Terdakwa</Button>
                     <Button variant="outline" onClick={inspectRoom}>Inspeksi Ruangan</Button>
                   </div>

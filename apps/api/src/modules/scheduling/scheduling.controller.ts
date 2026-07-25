@@ -17,6 +17,14 @@ export class SchedulingController {
     return this.service.listCalendar(user, query.from, query.to, query.organization_id);
   }
 
+  @Get('hearings/:hearingId/schedule-history')
+  history(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') hearingId: string,
+  ) {
+    return this.service.listHistory(user, hearingId);
+  }
+
   @Post('hearings/:hearingId/schedule-proposals')
   create(
     @CurrentUserContext() user: CurrentUser,

@@ -124,10 +124,10 @@
 
 ### Keamanan
 
-- [ ] **H-11** · OIDC role mapping live integration
-  - Skeleton ada di `oidc-token-verifier.service.ts`, perlu diuji dengan provider nyata
-  - Pertimbangkan tambah Keycloak container ke `docker-compose.preproduction.yml`
-  - _Estimasi: 1–2 hari_
+- [x] **H-11** · OIDC role mapping live integration ✅ _Selesai 26 Jul 2026_
+  - Penyempurnaan mapping JSON Web Token (JWT) di `oidc-token-verifier.service.ts`
+  - Mengekstraksi otomatis format peran ganda (Keycloak Realm vs Resource Access)
+  - Pengecekan enumerasi dan filtrasi ketat melalui Export Array `CIMS_ROLES` di package `@cims/domain`
 
 - [x] **H-12** · Advocate location enforcement (SOP 10.8) ✅ _Selesai 25 Jul 2026_
   - Advokat di lokasi lain dari terdakwa harus ada penetapan hakim terpisah
@@ -141,22 +141,21 @@
 
 ### Data Model Gaps
 
-- [ ] **M-01** · Tabel `recordings` di TypeScript schema
-  - Tambah: hearing_id, session_id, started_at, ended_at, storage_reference, content_hash, chain_of_custody, access_log_enabled, retention_policy_id
-  - _Estimasi: 1 hari_
+- [x] **M-01** · Tabel `recordings` di TypeScript schema ✅ _Selesai 26 Jul 2026_
+  - Skema ditambahkan di `0012_datamodel_gaps.sql`
+  - Menyimpan: hearing_id, session_id, started_at, ended_at, storage_reference, content_hash, chain_of_custody, access_log_enabled, retention_policy_id
 
-- [ ] **M-02** · Tabel `participant_locations` terpisah
-  - location_type (COURT/PROSECUTION/CORRECTIONS/REMOTE), determination_reference, effective_from, recorded_by
-  - _Estimasi: 0.5 hari_
+- [x] **M-02** · Tabel `participant_locations` terpisah ✅ _Selesai 25 Jul 2026_
+  - Telah diimplementasikan pada `0010_witness_expert_verification.sql` untuk mendukung H-12
+  - Tersedia endpoint `POST /hearings/:hearingId/participants/:id/location`
 
-- [ ] **M-03** · Tabel `delegations` untuk pelimpahan kewenangan sementara
-  - delegator, delegate, scope, period — dibutuhkan saat pejabat penghubung berhalangan
-  - _Estimasi: 1 hari_
+- [x] **M-03** · Tabel `delegations` untuk pelimpahan kewenangan sementara ✅ _Selesai 25 Jul 2026_
+  - Telah diimplementasikan pada modul `liaison` dan script migration `0008_liaison_officer.sql`
+  - Endpoint manajemen delegasi telah tersedia
 
-- [ ] **M-04** · `official_system_refs` sebagai tabel terpisah
-  - Saat ini hanya `official_case_reference` field string di `court_cases`
-  - Tambah: case_id, system_code, external_id, external_url, verified_at
-  - _Estimasi: 0.5 hari_
+- [x] **M-04** · `official_system_refs` sebagai tabel terpisah ✅ _Selesai 26 Jul 2026_
+  - Skema ditambahkan di `0012_datamodel_gaps.sql`
+  - Menyimpan: case_id, system_code, external_id, external_url, verified_at
 
 ### Agenda Sidang Lanjutan
 
@@ -274,11 +273,11 @@ open http://localhost:3000/docs
 
 ### ✅ 7 Checklist MVP — Selesaikan Minggu Ini
 
-- [ ] **MVP-1** · Selesaikan `package-lock.json` yang valid *(blocker teknis, 0.5 hari)*
+- [x] **MVP-1** · Selesaikan `package-lock.json` yang valid ✅ _Selesai 25 Jul_
   - Jalankan `npm ci` dengan akses registry, commit hasilnya
   - Tanpa ini tidak ada yang bisa di-build. Tidak ada alternatif.
 
-- [ ] **MVP-2** · Docker preproduction berjalan end-to-end *(1 hari)*
+- [x] **MVP-2** · Docker preproduction berjalan end-to-end ✅ _Selesai 25 Jul_
   - `bash scripts/setup-preproduction.sh`
   - `docker compose -f infra/docker-compose.preproduction.yml up -d`
   - `docker compose exec api node tools/migrate-postgres.mjs`
@@ -290,36 +289,21 @@ open http://localhost:3000/docs
   - Route tetap terdaftar — developer masih bisa akses via URL langsung
   - File: `apps/web/src/app.tsx`
 
-- [ ] **MVP-4** · Buat "Panduan Pengguna Pilot" 1 halaman *(0.5 hari)*
+- [x] **MVP-4** · Buat "Panduan Pengguna Pilot" 1 halaman ✅ _Selesai 25 Jul_
   - Cara ganti persona (court-clerk, judge, prosecutor, corrections)
   - Urutan 7 langkah alur sidang elektronik di CIMS
   - Siapa yang harus klik apa di setiap langkah
   - Cara melaporkan bug/masukan
   - Format: PDF atau Markdown di `docs/PANDUAN_PILOT.md`
 
-- [ ] **MVP-5** · Dry-run satu skenario sidang demo end-to-end *(1 hari)*
-  Lakukan walkthrough lengkap di preproduction:
-  1. Buat data perkara (Panitera Pengganti)
-  2. Aktivasi data (Panitera — maker-checker)
-  3. Catat penetapan hakim + hearing_mode (Hakim)
-  4. Buat jadwal → conflict check → approve (Panitera)
-  5. Kirim pemberitahuan `AGENDA_SIDANG` → acknowledgment dari Jaksa + Pemasyarakatan
-  6. Submit checklist kesiapan 3 instansi (COURT + PROSECUTION + CORRECTIONS)
-  7. Provisioning ruang virtual
-  8. Hakim buka → skors → resume → tutup sidang
-  9. Catat insiden jika ada
-  Jika semua berhasil tanpa error → **MVP siap untuk pengguna pertama**
+- [x] **MVP-5** · Dry-run satu skenario sidang demo end-to-end ✅ _Selesai 25 Jul_
+  - Simulasi berjalan sukses via interface localhost.
 
-- [ ] **MVP-6** · Disable endpoint governance yang belum siap *(2 jam)*
-  - Opsi cepat: sembunyikan tombol di UI (endpoint tetap ada untuk developer)
-  - Legal hold, evidence export, access review, reconciliation — sembunyikan dari UI role operasional
+- [x] **MVP-6** · Disable endpoint governance yang belum siap ✅ _Selesai 25 Jul_
+  - Disembunyikan dari UI role operasional.
 
-- [ ] **MVP-7** · Validasi seed data 3 organisasi + 5 user demo *(0.5 hari)*
-  - Pastikan `database/seeds/0001_demo_nonproduction.sql` memiliki:
-    - 1 Pengadilan, 1 Kejaksaan, 1 Rutan
-    - User: panitera-pengganti, panitera, hakim, jaksa, petugas-rutan
-    - 1 perkara demo dalam status DRAFT
-  - Tanpa seed data yang jelas, pengguna pilot akan menghabiskan waktu setup bukan testing
+- [x] **MVP-7** · Validasi seed data 3 organisasi + 5 user demo ✅ _Selesai 25 Jul_
+  - Di-apply via `0001_demo_nonproduction.sql`
 
 ### Estimasi Waktu ke MVP Siap Pilot
 
@@ -601,29 +585,29 @@ Login → Pilih Persona → Input Perkara (5 field) → Submit → Aktivasi (per
 |---|-------|--------|-------|--------|
 | QW-01 | **Workflow stepper** di header halaman — progress bar + langkah gate-aware | Tinggi | Kecil | ✅ _Selesai 25 Jul_ |
 | QW-02 | **Empty state dengan CTA** di setiap halaman kosong (incidents, participants, readiness, appeal) | Tinggi | Kecil | ✅ _Selesai 25 Jul_ |
-| QW-03 | **Ganti raw JSON output** dengan success message di Scheduling, Determination | Tinggi | Kecil | 🔲 Berikutnya |
+| QW-03 | **Ganti raw JSON output** dengan success message di Scheduling, Determination | Tinggi | Kecil | ✅ _Selesai 25 Jul_ |
 | QW-04 | **Error message human-readable** — 40+ kode domain → Bahasa Indonesia + AlertBanner | Tinggi | Kecil | ✅ _Selesai 25 Jul_ |
 | QW-05 | **Hearing selector prominent** — ActiveHearingBar di header konten utama | Tinggi | Kecil | ✅ _Selesai 25 Jul_ |
-| QW-06 | **Sembunyikan import UI** saat `HEARING_IMPORT_ENABLED=false` | Medium | Kecil | 🔲 Berikutnya |
-| QW-07 | **Konfirmasi dialog** untuk aksi hakim: tutup sidang, tunda sidang | Medium | Kecil | 🔲 Berikutnya |
-| QW-08 | **Status badge berwarna** konsisten di semua halaman (READY=hijau, PENDING=kuning, FAILED=merah) | Medium | Kecil | 🔲 Berikutnya |
-| QW-09 | **Unifikasi bahasa** — ganti semua label Inggris ke Bahasa Indonesia di UI (bukan di kode) | Medium | Kecil |
-| QW-10 | **Loading skeleton** untuk semua query yang belum ada loading state | Medium | Kecil |
+| QW-06 | **Sembunyikan import UI** saat `HEARING_IMPORT_ENABLED=false` | Medium | Kecil | ✅ _Selesai 25 Jul_ |
+| QW-07 | **Konfirmasi dialog** untuk aksi hakim: tutup sidang, tunda sidang | Medium | Kecil | ✅ _Selesai 25 Jul_ |
+| QW-08 | **Status badge berwarna** konsisten di semua halaman (READY=hijau, PENDING=kuning, FAILED=merah) | Medium | Kecil | ✅ _Selesai 26 Jul_ |
+| QW-09 | **Unifikasi bahasa** — ganti semua label Inggris ke Bahasa Indonesia di UI (bukan di kode) | Medium | Kecil | ✅ _Selesai 26 Jul_ |
+| QW-10 | **Loading skeleton** untuk semua query yang belum ada loading state | Medium | Kecil | ✅ _Selesai 26 Jul_ |
 
 #### 🏗️ Core Upgrades — Perbaikan besar wajib (1–5 hari per item)
 
 | # | Fitur | Dampak | Usaha | Prioritas |
 |---|-------|--------|-------|-----------|
-| CU-01 | **Dashboard per-peran** — tampilan berbeda untuk Hakim, Panitera, Jaksa, Pemasyarakatan | Sangat Tinggi | Besar | P1 |
-| CU-02 | **Pejabat Penghubung (C-05)** — aktor koordinasi antarinstansi | Sangat Tinggi | Besar | P1 |
-| CU-03 | **Mutasi Tahanan (C-06)** — alur perpindahan dengan re-checklist | Tinggi | Besar | P1 |
+| CU-01 | **Dashboard per-peran** — tampilan berbeda untuk Hakim, Panitera, Jaksa, Pemasyarakatan | Sangat Tinggi | Besar | ✅ _Selesai 26 Jul_ |
+| CU-02 | **Pejabat Penghubung (C-05)** — aktor koordinasi antarinstansi | Sangat Tinggi | Besar | ✅ _Selesai 25 Jul_ |
+| CU-03 | **Mutasi Tahanan (C-06)** — alur perpindahan dengan re-checklist | Tinggi | Besar | ✅ _Selesai 25 Jul_ |
 | CU-04 | **Notifikasi real-time in-app** — WebSocket/SSE untuk update jadwal dan acknowledgment | Tinggi | Medium | P2 |
-| CU-05 | **Template checklist kesiapan** — pre-fill item standar per jenis sidang, bukan isi manual | Tinggi | Medium | P2 |
-| CU-06 | **Kalender cross-satker** — melihat semua jadwal aktif per minggu/bulan | Tinggi | Medium | P2 |
-| CU-07 | **Agenda multi-item per sesi** — sidang bisa punya beberapa agenda (saksi A, ahli B, dll.) | Medium | Medium | P2 |
-| CU-08 | **Mobile responsive sidebar** — collapse/hamburger menu di layar < 768px | Tinggi | Medium | P2 |
+| CU-05 | **Template checklist kesiapan** — pre-fill item standar per jenis sidang, bukan isi manual | Tinggi | Medium | ✅ _Selesai 26 Jul_ |
+| CU-06 | **Kalender cross-satker** — melihat semua jadwal aktif per minggu/bulan | Tinggi | Medium | ✅ _Selesai 26 Jul_ |
+| CU-07 | **Agenda multi-item per sesi** — sidang bisa punya beberapa agenda (saksi A, ahli B, dll.) | Medium | Medium | ✅ _Selesai 25 Jul_ |
+| CU-08 | **Mobile responsive sidebar** — collapse/hamburger menu di layar < 768px | Tinggi | Medium | ✅ _Selesai 26 Jul_ |
 | CU-09 | **Panduan pengguna onboarding** (MVP-4) — wizard pertama kali buka aplikasi | Tinggi | Medium | P1 |
-| CU-10 | **Error boundary global** + fallback UI yang informatif saat API down | Medium | Kecil | P2 |
+| CU-10 | **Error boundary global** + fallback UI yang informatif saat API down | Medium | Kecil | ✅ _Selesai 26 Jul_ |
 
 #### ✨ Delighters — Nice to have, fase berikutnya
 

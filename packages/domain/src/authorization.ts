@@ -1,17 +1,20 @@
 
 import { DomainError } from './errors.js';
 
-export type CimsRole =
-  | 'COURT_CLERK'
-  | 'SUBSTITUTE_CLERK'
-  | 'JUDGE'
-  | 'PROSECUTOR'
-  | 'CORRECTIONS'
-  | 'IT_OPERATOR'
-  | 'SECURITY_OFFICER'
-  | 'AUDITOR'
-  | 'LIAISON_OFFICER'   // SOP Bagian 7 & 8 — Pejabat Penghubung lintas instansi
-  | 'SYSTEM_ADMIN';
+export const CIMS_ROLES = [
+  'COURT_CLERK',
+  'SUBSTITUTE_CLERK',
+  'JUDGE',
+  'PROSECUTOR',
+  'CORRECTIONS',
+  'IT_OPERATOR',
+  'SECURITY_OFFICER',
+  'AUDITOR',
+  'LIAISON_OFFICER',
+  'SYSTEM_ADMIN',
+] as const;
+
+export type CimsRole = typeof CIMS_ROLES[number];
 
 export interface AuthorizationSubject {
   userId: string;

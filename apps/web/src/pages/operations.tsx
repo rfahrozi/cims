@@ -21,7 +21,7 @@ export function OperationsPage() {
   const failed = Number(data?.outbox?.FAILED ?? 0);
   const dead = Number(data?.outbox?.DEAD_LETTER ?? 0);
   return <>
-    <PageHeader title="Production Operations" description="Persistence mode, transactional outbox, workflow gate, dan status migrasi PostgreSQL." />
+    <PageHeader title="Operasional Produksi" description="Persistence mode, transactional outbox, workflow gate, dan status migrasi PostgreSQL." />
     <div className="mb-5 flex justify-end"><Button variant="outline" onClick={() => query.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button></div>
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <Card><CardContent className="pt-6"><Database className="h-5 w-5 text-blue-700" /><div className="mt-3 text-xs text-slate-500">Persistence</div><div className="text-xl font-bold">{data?.persistence_mode ?? 'Loading'}</div></CardContent></Card>

@@ -1,18 +1,105 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Video, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
 import { PageHeader } from '@/components/page-header';
+import { AlertBanner } from '@/components/alert-banner';
+import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function VirtualSessionPage() {
   const { hearingId } = useActiveHearing();
-  const client = useQueryClient(); const [output, setOutput] = useState('');
-  const query = useQuery({ queryKey: ['virtual-session', hearingId], queryFn: () => api<Record<string, unknown> | null>(`/hearings/${hearingId}/virtual-session`) });
-  async function provision() { try { const data = await api(`/hearings/${hearingId}/virtual-session/provision`, { method: 'POST', body: JSON.stringify({ recording_policy: 'DISABLED' }) }); setOutput(JSON.stringify(data, null, 2)); await client.invalidateQueries({ queryKey: ['virtual-session', hearingId] }); } catch (error) { setOutput(String(error)); } }
-  const session = query.data as { state?: string; providerCode?: string; rooms?: Array<{ id: string; roomCode: string; recordingAllowed: boolean }> } | null | undefined;
-  return <><PageHeader title="Virtual Session Provisioning" description="Provider-neutral provisioning dengan gate determination, jadwal, notice, dan readiness." action={<Button onClick={provision}>Provision session</Button>} />
-    <div className="grid gap-5 xl:grid-cols-[1fr_1fr]"><Card><CardHeader><CardTitle>Session</CardTitle><CardDescription>Gunakan persona Operator TI atau Panitera.</CardDescription></CardHeader><CardContent className="space-y-4"><Badge variant={session?.state === 'READY' ? 'success' : 'warning'}>{session?.state ?? 'NOT PROVISIONED'}</Badge><div className="grid gap-3 sm:grid-cols-2">{session?.rooms?.map((room) => <div key={room.id} className="rounded-lg border p-4"><div className="font-semibold">{room.roomCode}</div><div className="text-xs text-slate-500">Recording: {room.recordingAllowed ? 'Allowed' : 'Disabled'}</div></div>)}</div></CardContent></Card><Card><CardHeader><CardTitle>Respons API</CardTitle></CardHeader><CardContent><pre className="min-h-96 overflow-auto rounded-lg bg-slate-950 p-4 text-xs text-blue-100">{output || JSON.stringify(query.data, null, 2)}</pre></CardContent></Card></div></>;
+  const client = useQueryClient();
+  const [error, setError] = useState<unknown>(null);
+  const [success, setSuccess] = useState('');
+
+  const query = useQuery({
+    queryKey: ['virtual-session', hearingId],
+    queryFn: () => api<Record<string, unknown> | null>(`/hearings/${hearingId}/virtual-session`),
+    enabled: Boolean(hearingId),
+  });
+
+  async function provision() {
+    setError(null); setSuccess('');
+    try {
+      await api(`/hearings/${hearingId}/virtual-session/provision`, {
+        method: 'POST',
+        body: JSON.stringify({ recording_policy: 'DISABLED' }),
+      });
+      setSuccess('Ruang virtual berhasil diprovisioning.');
+      await client.invalidateQueries({ queryKey: ['virtual-session', hearingId] });
+      await client.invalidateQueries({ queryKey: ['hearing-gate', hearingId] });
+    } catch (e) { setError(e); }
+  }
+
+  const session = query.data as {
+    state?: string; providerSessionReference?: string; providerCode?: string;
+    rooms?: Array<{ id: string; roomCode: string; providerRoomReference: string; recordingAllowed: boolean }>
+  } | null | undefined;
+
+  return <>
+    <PageHeader
+      title="Ruang Virtual"
+      description="Provider-neutral provisioning. Gate: determination, jadwal, notice, dan readiness."
+      action={<Button onClick={provision} disabled={session?.state === 'READY'}>Provision Ruang Virtual</Button>}
+    />
+
+    <AlertBanner message={error} onDismiss={() => setError(null)} className="mb-4" />
+    <AlertBanner variant="success" message={success} onDismiss={() => setSuccess('')} className="mb-4" />
+
+    <div className="grid gap-5">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Status Sesi Virtual</CardTitle>
+            <Badge variant={session?.state === 'READY' ? 'success' : 'warning'}>
+              {session?.state ?? 'NOT PROVISIONED'}
+            </Badge>
+          </div>
+          <CardDescription>Gunakan persona Operator TI atau Panitera untuk provisioning ruang.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {query.isLoading && <p className="text-sm text-slate-500">Memuat status sesi...</p>}
+
+          {!query.isLoading && (!session || !session.rooms || session.rooms.length === 0) && (
+            <EmptyState
+              icon={Video}
+              title="Ruang Virtual Belum Dibuat"
+              description="Pastikan semua gate sebelumnya (penetapan, jadwal, notifikasi, dan kesiapan instansi) telah terpenuhi sebelum membuat ruang sidang virtual."
+              action={{ label: 'Provision Ruang Virtual', onClick: provision }}
+            />
+          )}
+
+          {session?.rooms && session.rooms.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-800 border border-green-200">
+                <CheckCircle2 className="h-5 w-5" />
+                Sesi virtual berhasil dibuat via provider: <strong className="uppercase">{session.providerCode}</strong>
+                <span className="text-xs text-green-700 ml-2">(Ref: {session.providerSessionReference})</span>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                {(session.rooms || []).map((room) => (
+                  <div key={room.id} className="rounded-lg border p-4 bg-white shadow-sm">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="font-semibold text-slate-800">{room.roomCode}</div>
+                      <Badge variant={room.recordingAllowed ? 'destructive' : 'outline'}>
+                        {room.recordingAllowed ? 'RECORDING' : 'NO REC'}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-slate-500 font-mono bg-slate-50 p-1.5 rounded truncate">
+                      {room.providerRoomReference}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  </>;
 }

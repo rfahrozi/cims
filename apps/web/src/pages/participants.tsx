@@ -6,6 +6,7 @@ import { useActiveHearing } from '@/lib/hearing-context';
 import { errorMessage } from '@/lib/error-messages';
 import { PageHeader } from '@/components/page-header';
 import { EmptyState } from '@/components/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AlertBanner } from '@/components/alert-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -122,7 +123,7 @@ export function ParticipantsPage() {
     } catch (e) { setError(e); }
   }
 
-  const participants = query.data ?? [];
+  const participants = Array.isArray(query.data) ? query.data : [];
 
   return <>
     <PageHeader

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { PageHeader } from '@/components/page-header';
 import { BellRing, ShieldAlert } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type Gate = {
   next_gate: string;
@@ -59,8 +60,28 @@ export function DashboardPage() {
     refetchInterval: 30_000,
   });
 
+  const isCourt = ['court-clerk', 'substitute-clerk', 'judge'].includes(persona);
+  const isProsecution = persona === 'prosecutor';
+  const isCorrections = persona === 'corrections';
+
+  const roleName = {
+    'substitute-clerk': 'Panitera Pengganti',
+    'court-clerk': 'Panitera',
+    'judge': 'Majelis Hakim',
+    'prosecutor': 'Penuntut Umum',
+    'corrections': 'Petugas Pemasyarakatan',
+    'it-operator': 'Operator TI',
+    'auditor': 'Auditor',
+    'liaison-officer': 'Pejabat Penghubung',
+    'security-officer': 'Security Officer',
+    'system-admin': 'System Administrator',
+  }[persona] || persona;
+
   return <>
-    <PageHeader title="Dashboard" description="Ringkasan data awal persidangan dan workflow lintas instansi." />
+    <PageHeader
+      title={`Dashboard ${roleName}`}
+      description="Ringkasan tugas operasional persidangan elektronik hari ini berdasarkan peran dan kewenangan Anda."
+    />
 
     {/* SLA Report Banner */}
     {canSeeSla && Array.isArray(slaQuery.data) && slaQuery.data.length > 0 && (
@@ -93,7 +114,34 @@ export function DashboardPage() {
     )}
 
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {[['Backend', 'NestJS + Fastify'], ['Frontend', 'React + shadcn/ui'], ['Data awal', 'Manual oleh Panitera Pengganti'], ['Import DB', 'Fondasi tersedia, belum aktif']].map(([a, b]) => <Card key={a}><CardHeader className="pb-2"><CardDescription>{a}</CardDescription><CardTitle className="text-lg">{b}</CardTitle></CardHeader></Card>)}
+      {/* Cards yang spesifik per persona */}
+      {isCourt && (
+        <>
+          <Card><CardHeader className="pb-2"><CardDescription>Menunggu Review</CardDescription><CardTitle className="text-lg text-amber-700">{hearings.filter(h => h.intakeStatus === 'SUBMITTED').length} Perkara</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Penjadwalan Draf</CardDescription><CardTitle className="text-lg text-amber-700">{hearings.filter(h => !gate.data?.schedule).length} Perkara</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Tahanan</CardDescription><CardTitle className="text-lg text-blue-700">Dalam Rutan</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Status CIMS</CardDescription><CardTitle className="text-lg text-emerald-700">Active</CardTitle></CardHeader></Card>
+        </>
+      )}
+      {isProsecution && (
+        <>
+          <Card><CardHeader className="pb-2"><CardDescription>Perkara Aktif</CardDescription><CardTitle className="text-lg text-blue-700">{hearings.length} Total</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Tunggu Acknowledgment</CardDescription><CardTitle className="text-lg text-amber-700">Tenggat H-3</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Cek Kesiapan</CardDescription><CardTitle className="text-lg text-blue-700">Harus Submit</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Status Koneksi</CardDescription><CardTitle className="text-lg text-emerald-700">Online</CardTitle></CardHeader></Card>
+        </>
+      )}
+      {isCorrections && (
+        <>
+          <Card><CardHeader className="pb-2"><CardDescription>Perkara Aktif</CardDescription><CardTitle className="text-lg text-blue-700">{hearings.length} Total</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Identitas Belum Diverifikasi</CardDescription><CardTitle className="text-lg text-rose-700">1 Terdakwa</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Inspeksi Ruang</CardDescription><CardTitle className="text-lg text-emerald-700">Siap</CardTitle></CardHeader></Card>
+          <Card><CardHeader className="pb-2"><CardDescription>Konsultasi Privat</CardDescription><CardTitle className="text-lg text-blue-700">Lapas/Rutan</CardTitle></CardHeader></Card>
+        </>
+      )}
+      {(!isCourt && !isProsecution && !isCorrections) && (
+        [['Backend', 'NestJS + Fastify'], ['Frontend', 'React + shadcn/ui'], ['Data awal', 'Manual oleh Panitera Pengganti'], ['Import DB', 'Fondasi tersedia, belum aktif']].map(([a, b]) => <Card key={a}><CardHeader className="pb-2"><CardDescription>{a}</CardDescription><CardTitle className="text-lg">{b}</CardTitle></CardHeader></Card>)
+      )}
     </div>
 
     <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1fr]">
@@ -106,23 +154,34 @@ export function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Progress value={stages.length ? (completed / stages.length) * 100 : 0} />
-          <div className="grid gap-2 sm:grid-cols-2">
-            {gate.data && (Object.entries({
-              'Data Persidangan': gate.data.hearing_data,
-              'Penetapan Hakim': gate.data.determination,
-              'Jadwal Sidang': gate.data.schedule,
-              'Pemberitahuan': gate.data.notice?.ready ?? false,
-              'Kesiapan': gate.data.readiness?.ready ?? false,
-              'Ruang Virtual': gate.data.virtual_session,
-              'Sidang Selesai': gate.data.hearing_ended,
-            }) || []).map(([label, done]) => (
-              <div key={label} className="flex items-center justify-between rounded-lg border p-3">
-                <span className="text-sm">{label}</span>
-                <Badge variant={done ? 'success' : 'outline'}>{done ? 'PASS' : 'PENDING'}</Badge>
+          {gate.isLoading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <div className="grid gap-2 sm:grid-cols-2">
+                {[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <Progress value={stages.length ? (completed / stages.length) * 100 : 0} />
+              <div className="grid gap-2 sm:grid-cols-2">
+                {gate.data && (Object.entries({
+                  'Data Persidangan': gate.data.hearing_data,
+                  'Penetapan Hakim': gate.data.determination,
+                  'Jadwal Sidang': gate.data.schedule,
+                  'Pemberitahuan': gate.data.notice?.ready ?? false,
+                  'Kesiapan': gate.data.readiness?.ready ?? false,
+                  'Ruang Virtual': gate.data.virtual_session,
+                  'Sidang Selesai': gate.data.hearing_ended,
+                }) || []).map(([label, done]) => (
+                  <div key={label} className="flex items-center justify-between rounded-lg border p-3">
+                    <span className="text-sm">{label}</span>
+                    <Badge variant={done ? 'success' : 'outline'}>{done ? 'PASS' : 'PENDING'}</Badge>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 

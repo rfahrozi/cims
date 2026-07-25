@@ -17,6 +17,32 @@ export class SchedulingService {
     private readonly persistence: PersistenceModeService,
   ) {}
 
+  async listHistory(user: CurrentUser, hearingId: string) {
+    // Hak akses `participant.read` (atau sejenisnya) divalidasi lewat assignment check di layer service/repository.
+    await this.core.getHearing(hearingId, user);
+    const history = await this.core.scheduleHistory(hearingId, user);
+
+    return {
+      items: history.map(h => ({
+        id: h.id,
+        hearing_id: h.hearingId,
+        start_at: h.startAt,
+        end_at: h.endAt,
+        display_timezone: h.displayTimezone,
+        version: h.version,
+        status: h.status,
+        approval_reason: h.approvalReason,
+        approved_by: h.approvedBy,
+        approved_at: h.approvedAt,
+        resources: h.resources.map(r => ({
+          resource_type: r.resourceType,
+          resource_id: r.resourceId,
+          requirement: r.requirement,
+        })),
+      }))
+    };
+  }
+
   async create(user: CurrentUser, hearingId: string, dto: CreateProposalDto, correlationId?: string) {
     requireRoles(user, ['COURT_CLERK']);
     await this.core.getHearing(hearingId, user);
