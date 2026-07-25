@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: cims-api-config }
+data:
+  NODE_ENV: production
+  CIMS_PROCESS_ROLE: API
+  API_PORT: '3000'
+  AUTH_MODE: OIDC
+  OIDC_ISSUER: https://identity.example/realms/cims
+  OIDC_AUDIENCE: cims-api
+  WEB_ORIGINS: https://cims.example
+  PERSISTENCE_MODE: POSTGRES
+  DB_SSL: 'true'
+  OUTBOX_WORKER_ENABLED: 'false'
+  RETENTION_EXECUTION_ENABLED: 'false'
+  LEGAL_HOLD_MAKER_CHECKER: 'true'
+  EVIDENCE_STORAGE_MODE: HTTP
+  EVIDENCE_STORAGE_URL: https://evidence-storage.example
+  VIDEO_PROVIDER_MODE: HTTP
+  VIDEO_PROVIDER_URL: http://zoom-provider.video-provider.svc.cluster.local
+  SWAGGER_ENABLED: 'false'
+  TRUST_PROXY: 'true'
+  DB_POOL_MIN: '2'
+  DB_POOL_MAX: '30'
+  DB_CONNECTION_TIMEOUT_MS: '5000'
+  DB_STATEMENT_TIMEOUT_MS: '15000'
+  DB_QUERY_TIMEOUT_MS: '20000'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: cims-worker-config }
+data:
+  NODE_ENV: production
+  CIMS_PROCESS_ROLE: WORKER
+  PERSISTENCE_MODE: POSTGRES
+  DB_SSL: 'true'
+  OUTBOX_WORKER_ENABLED: 'true'
+  RETENTION_EXECUTION_ENABLED: 'false'
+  LEGAL_HOLD_MAKER_CHECKER: 'true'
+  EVIDENCE_STORAGE_MODE: HTTP
+  EVIDENCE_STORAGE_URL: https://evidence-storage.example
+  OUTBOX_POLL_INTERVAL_MS: '1000'
+  OUTBOX_BATCH_SIZE: '20'
+  OUTBOX_MAX_ATTEMPTS: '8'
+  NOTIFICATION_GATEWAY_MODE: HTTP
+  NOTIFICATION_GATEWAY_URL: https://notification-gateway.example
+  OFFICIAL_SYSTEM_GATEWAY_MODE: HTTP
+  OFFICIAL_SYSTEM_GATEWAY_URL: https://official-case-system.example
+  VIDEO_PROVIDER_MODE: HTTP
+  VIDEO_PROVIDER_URL: http://zoom-provider.video-provider.svc.cluster.local
+  DB_POOL_MIN: '1'
+  DB_POOL_MAX: '10'
+  DB_STATEMENT_TIMEOUT_MS: '30000'

@@ -1,0 +1,39 @@
+{
+  "release": "0.18.0",
+  "phase": "Manual Hearing Intake and Future Database Import Foundation Phase 5",
+  "status": "SOURCE_BASELINE_COMPLETE_RUNTIME_SIT_PENDING",
+  "manual_intake": {
+    "author": "SUBSTITUTE_CLERK",
+    "reviewer": "COURT_CLERK",
+    "maker_checker": "IMPLEMENTED",
+    "first_gate": "HEARING_DATA",
+    "persistence": "MEMORY_OR_POSTGRES",
+    "data_source": "MANUAL"
+  },
+  "future_import": {
+    "status": "DISABLED",
+    "adapter": "ABSTRACTION_PREPARED",
+    "source_access": "READ_ONLY_REQUIRED",
+    "staging_tables": "IMPLEMENTED",
+    "preview_and_approval": "PLANNED"
+  },
+  "frontend": {
+    "stack": "REACT_TYPESCRIPT_SHADCN_TAILWIND_RADIX",
+    "new_page": "hearing-intake",
+    "global_hearing_selector": "IMPLEMENTED"
+  },
+  "validation": {
+    "structure": "PASS_25_REQUIRED_FILES",
+    "typescript_syntax": "156_FILES_PASS",
+    "pure_domain_tests": "24_OF_24_PASS",
+    "contracts_build": "PASS",
+    "phase5_static_baseline": "PASS_17_REQUIRED_FILES",
+    "yaml_json_parse": "PASS_26_JSON_36_YAML",
+    "migration_dry_run": "PASS_4_MIGRATIONS",
+    "full_dependency_install": "NOT_RUN_REGISTRY_UNAVAILABLE",
+    "full_nestjs_build": "NOT_RUN_DEPENDENCIES_UNAVAILABLE",
+    "full_react_vite_build": "NOT_RUN_DEPENDENCIES_UNAVAILABLE",
+    "postgresql_phase5_smoke": "PREPARED_NOT_RUN_POSTGRESQL_UNAVAILABLE"
+  },
+  "production_ready": false
+}

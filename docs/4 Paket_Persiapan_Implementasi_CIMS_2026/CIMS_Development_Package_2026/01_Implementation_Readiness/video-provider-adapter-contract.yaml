@@ -1,0 +1,136 @@
+contract_version: 1.0.0
+name: CIMS Video Provider Adapter Contract
+purpose: >-
+  Kontrak provider-agnostic untuk provisioning, room, token, health, event, dan recording policy.
+  Adapter tidak boleh mengembalikan host secret kepada client biasa.
+operations:
+  create_session:
+    input:
+      correlation_id: uuid
+      idempotency_key: string
+      hearing_reference: string
+      start_at: datetime_utc
+      end_at: datetime_utc
+      recording_policy: DISABLED | JUDGE_CONTROLLED | REQUIRED_BY_POLICY
+    output:
+      provider_session_reference: string
+      state: PROVISIONING | READY
+  update_session:
+    input:
+      provider_session_reference: string
+      start_at: datetime_utc
+      end_at: datetime_utc
+    output:
+      state: READY | FAILED
+  cancel_session:
+    input:
+      provider_session_reference: string
+      reason: string
+    output:
+      state: CANCELLED
+  create_room:
+    input:
+      provider_session_reference: string
+      room_code: string
+      room_type: MAIN | WAITING | DEFENDANT | WITNESS | CONSULTATION | SUPPORT
+      recording_allowed: boolean
+    output:
+      provider_room_reference: string
+  issue_participant_access:
+    input:
+      provider_session_reference: string
+      provider_room_reference: string
+      participant_reference: string
+      role: string
+      expires_at: datetime_utc
+      permissions: [ADMIT, MUTE, UNMUTE, MOVE_ROOM, SCREEN_SHARE, RECORD, REMOVE]
+    output:
+      participant_join_url: secret_string
+      expires_at: datetime_utc
+    security:
+      - access is individual, role-bound, time-bound, and revocable
+      - host secret is never returned
+  revoke_participant_access:
+    input:
+      participant_access_reference: string
+      reason: string
+    output:
+      revoked: boolean
+  get_health:
+    output:
+      status: HEALTHY | DEGRADED | DOWN
+      checked_at: datetime_utc
+      details: object
+  get_session_state:
+    input:
+      provider_session_reference: string
+    output:
+      state: PROVISIONING | READY | STARTED | SUSPENDED | ENDED | FAILED | CANCELLED
+  recording_control:
+    input:
+      provider_session_reference: string
+      action: START | STOP
+      authorized_actor_reference: string
+      reason: string
+    output:
+      recording_reference: string | null
+      state: STARTED | STOPPED | DENIED
+webhooks:
+  headers:
+    X-Provider-Signature: required
+    X-Provider-Timestamp: required
+    X-Provider-Event-Id: required
+  requirements:
+    - signature validation
+    - timestamp freshness window
+    - replay detection by event id
+    - idempotent processing
+    - correlation id propagation
+  event_types:
+    - session.ready
+    - session.started
+    - session.suspended
+    - session.ended
+    - session.failed
+    - participant.joined
+    - participant.left
+    - participant.moved
+    - recording.started
+    - recording.stopped
+    - provider.degraded
+    - provider.recovered
+error_model:
+  fields: [code, message, provider_reference, retryable, correlation_id, details]
+  required_codes:
+    - AUTHENTICATION_FAILED
+    - RATE_LIMITED
+    - SESSION_NOT_FOUND
+    - ROOM_NOT_FOUND
+    - INVALID_STATE
+    - PROVIDER_UNAVAILABLE
+    - TIMEOUT
+    - DUPLICATE_REQUEST
+nonfunctional:
+  timeout_seconds:
+    create_session: 15
+    create_room: 10
+    issue_participant_access: 10
+    get_health: 5
+  retry:
+    allowed_for: [RATE_LIMITED, PROVIDER_UNAVAILABLE, TIMEOUT]
+    forbidden_for: [AUTHENTICATION_FAILED, INVALID_STATE]
+  secrets:
+    storage: approved_secret_manager
+    logging: prohibited
+    client_exposure: prohibited
+  observability:
+    required_fields: [correlation_id, operation, provider_code, latency_ms, result_code]
+    prohibited_fields: [host_secret, participant_join_url, access_token, refresh_token]
+acceptance_tests:
+  - idempotent create session
+  - invalid signature rejected
+  - replay webhook ignored and audited
+  - host secret absent from adapter response and log
+  - participant access revoked after reschedule
+  - consultation room recording denied
+  - provider outage returns retryable error and health DOWN

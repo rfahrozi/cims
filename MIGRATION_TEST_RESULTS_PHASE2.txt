@@ -1,0 +1,43 @@
+CIMS TYPESCRIPT + SHADCN/UI WORKFLOW MIGRATION 0.15.0
+Generated: 2026-07-25
+
+VALIDATION RESULTS
+- Repository structure check: PASS (14 required files)
+- Pure TypeScript domain compilation: PASS
+- Pure TypeScript workflow tests: PASS (8/8)
+- Shared contracts compilation: PASS
+- TypeScript and TSX syntax parse: PASS (88 files)
+- API semantic source check with external dependency shims: PASS
+- Web semantic source check with external dependency shims: PASS
+- JSON configuration validation: PASS (24 files)
+- YAML configuration and OpenAPI validation: PASS (20 files)
+- Relative import resolution check: PASS
+- Secret pattern scan: PASS
+- Workflow domain demo: PASS
+  * determination: APPROVED
+  * schedule: ACTIVE
+  * notice acknowledgment gate: READY
+  * Court, Prosecution, Corrections readiness: READY
+  * virtual provisioning authorization: ALLOWED
+  * hearing lifecycle final state: ENDED
+
+MIGRATED MODULES
+- Official notice
+- Simulated delivery evidence
+- Notice acknowledgment
+- Identity verification
+- Room inspection
+- Cross-institution readiness
+- Provider-neutral virtual session provisioning
+- Judge hearing lifecycle control
+- Expanded gate status and audit event endpoint
+- React shadcn/ui workflow pages
+
+LIMITATIONS
+- Full NestJS dependency build was not run because npm registry access timed out in the build environment.
+- Full React/Vite production build was not run for the same reason.
+- InMemoryStore remains the DEV repository adapter. PostgreSQL target DDL is included but not wired.
+- Delivery remains simulated. Real notification gateway SIT is pending.
+- Video provider defaults to MOCK. Live Zoom sandbox SIT remains pending.
+- The DEV persona header must not be enabled in production.
+- This release is not approved for real case data or production use.

@@ -1,0 +1,273 @@
+# =============================================================================
+# CIMS — Docker Compose Preproduction (Local)
+# =============================================================================
+# Digunakan untuk pengujian preproduction di lokal sebelum UAT lintas instansi.
+#
+# Perbedaan dari docker-compose.production-like.yml:
+#   - AUTH_MODE=DEV (tidak membutuhkan OIDC provider eksternal)
+#   - Semua port di-expose untuk debugging
+#   - Swagger UI aktif untuk eksplorasi API
+#   - NOTIFICATION/OFFICIAL_SYSTEM gateway mode MOCK
+#   - Evidence storage mode LOCAL (/tmp/cims-evidence)
+#   - DB SSL disabled (PostgreSQL lokal tanpa sertifikat)
+#   - Outbox worker aktif di service terpisah
+#
+# Prasyarat:
+#   1. Jalankan: bash scripts/setup-preproduction.sh
+#   2. Jalankan: npm ci && npm run build
+#
+# Penggunaan:
+#   docker compose -f infra/docker-compose.preproduction.yml build
+#   docker compose -f infra/docker-compose.preproduction.yml up -d
+#   docker compose -f infra/docker-compose.preproduction.yml exec api \
+#     node tools/migrate-postgres.mjs
+#
+# Akses:
+#   API + Swagger : http://localhost:3000/docs
+#   Web UI        : http://localhost:8080
+#   Zoom Provider : http://localhost:3010
+#   PostgreSQL    : localhost:5432 (user: cims, db: cims)
+# =============================================================================
+
+services:
+
+  # ── PostgreSQL 17 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: cims
+      POSTGRES_USER: cims
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - cims_pgdata_preproduction:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U cims -d cims']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - data
+
+  # ── API (NestJS + Fastify) ─────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: development
+      CIMS_PROCESS_ROLE: API
+      AUTH_MODE: DEV
+      PERSISTENCE_MODE: POSTGRES
+      DATABASE_URL_FILE: /run/secrets/database_url
+      DB_SSL: 'false'
+      DB_SSL_REJECT_UNAUTHORIZED: 'false'
+      DB_POOL_MIN: '1'
+      DB_POOL_MAX: '10'
+      DB_APPLICATION_NAME: cims-api-preproduction
+      OUTBOX_WORKER_ENABLED: 'false'
+      RETENTION_EXECUTION_ENABLED: 'false'
+      HEARING_IMPORT_ENABLED: 'false'
+      LEGAL_HOLD_MAKER_CHECKER: 'true'
+      SWAGGER_ENABLED: 'false'
+      TRUST_PROXY: 'false'
+      RATE_LIMIT_MAX: '1000'
+      RATE_LIMIT_WINDOW_MS: '60000'
+      WEB_ORIGINS: 'http://localhost:5173,http://localhost:8080'
+      # Auth (DEV mode — persona switcher via header)
+      OIDC_ISSUER: ''
+      OIDC_AUDIENCE: cims-api
+      OIDC_JWKS_URL: ''
+      # Secrets
+      TOKEN_PEPPER_FILE: /run/secrets/token_pepper
+      FIELD_ENCRYPTION_KEY_FILE: /run/secrets/field_encryption_key
+      AUDIT_HASH_KEY_FILE: /run/secrets/audit_hash_key
+      WEBHOOK_SHARED_SECRET_FILE: /run/secrets/webhook_shared_secret
+      # Gateways (MOCK)
+      NOTIFICATION_GATEWAY_MODE: MOCK
+      NOTIFICATION_GATEWAY_URL: ''
+      OFFICIAL_SYSTEM_GATEWAY_MODE: MOCK
+      OFFICIAL_SYSTEM_GATEWAY_URL: ''
+      # Video provider
+      VIDEO_PROVIDER_MODE: HTTP
+      VIDEO_PROVIDER_URL: http://zoom-provider:3010
+      VIDEO_PROVIDER_TIMEOUT_MS: '15000'
+      # Evidence storage (local filesystem)
+      EVIDENCE_STORAGE_MODE: LOCAL
+      EVIDENCE_LOCAL_DIR: /tmp/cims-evidence
+      EVIDENCE_STORAGE_API_KEY_FILE: /run/secrets/evidence_storage_api_key
+      # Circuit breaker
+      CIRCUIT_BREAKER_FAILURE_THRESHOLD: '5'
+      CIRCUIT_BREAKER_RESET_MS: '30000'
+    secrets:
+      - database_url
+      - token_pepper
+      - field_encryption_key
+      - audit_hash_key
+      - webhook_shared_secret
+      - evidence_storage_api_key
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - edge
+      - data
+      - provider
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  # ── Worker (Outbox processor) ──────────────────────────────────────────────
+  worker:
+    build:
+      context: ..
+      dockerfile: apps/worker.Dockerfile
+    environment:
+      NODE_ENV: development
+      CIMS_PROCESS_ROLE: WORKER
+      AUTH_MODE: DEV
+      PERSISTENCE_MODE: POSTGRES
+      DATABASE_URL_FILE: /run/secrets/database_url
+      DB_SSL: 'false'
+      DB_SSL_REJECT_UNAUTHORIZED: 'false'
+      DB_POOL_MIN: '1'
+      DB_POOL_MAX: '5'
+      DB_APPLICATION_NAME: cims-worker-preproduction
+      OUTBOX_WORKER_ENABLED: 'true'
+      OUTBOX_POLL_INTERVAL_MS: '2000'
+      OUTBOX_BATCH_SIZE: '10'
+      OUTBOX_MAX_ATTEMPTS: '5'
+      RETENTION_EXECUTION_ENABLED: 'false'
+      LEGAL_HOLD_MAKER_CHECKER: 'true'
+      # Secrets
+      TOKEN_PEPPER_FILE: /run/secrets/token_pepper
+      FIELD_ENCRYPTION_KEY_FILE: /run/secrets/field_encryption_key
+      AUDIT_HASH_KEY_FILE: /run/secrets/audit_hash_key
+      WEBHOOK_SHARED_SECRET_FILE: /run/secrets/webhook_shared_secret
+      # Gateways (MOCK — worker yang kirim notifikasi)
+      NOTIFICATION_GATEWAY_MODE: MOCK
+      NOTIFICATION_GATEWAY_URL: ''
+      NOTIFICATION_GATEWAY_API_KEY_FILE: /run/secrets/notification_gateway_api_key
+      NOTIFICATION_GATEWAY_TIMEOUT_MS: '10000'
+      OFFICIAL_SYSTEM_GATEWAY_MODE: MOCK
+      OFFICIAL_SYSTEM_GATEWAY_URL: ''
+      OFFICIAL_SYSTEM_GATEWAY_API_KEY_FILE: /run/secrets/official_system_gateway_api_key
+      OFFICIAL_SYSTEM_GATEWAY_TIMEOUT_MS: '10000'
+      # Video provider
+      VIDEO_PROVIDER_MODE: HTTP
+      VIDEO_PROVIDER_URL: http://zoom-provider:3010
+      VIDEO_PROVIDER_TIMEOUT_MS: '15000'
+      # Evidence storage
+      EVIDENCE_STORAGE_MODE: LOCAL
+      EVIDENCE_LOCAL_DIR: /tmp/cims-evidence
+      EVIDENCE_STORAGE_API_KEY_FILE: /run/secrets/evidence_storage_api_key
+    secrets:
+      - database_url
+      - token_pepper
+      - field_encryption_key
+      - audit_hash_key
+      - webhook_shared_secret
+      - notification_gateway_api_key
+      - official_system_gateway_api_key
+      - evidence_storage_api_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - data
+      - provider
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  # ── Web (React + Nginx) ────────────────────────────────────────────────────
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - edge
+    restart: unless-stopped
+
+  # ── Zoom Provider Adapter ──────────────────────────────────────────────────
+  zoom-provider:
+    build:
+      context: ..
+      dockerfile: services/zoom-provider/Dockerfile
+    environment:
+      NODE_ENV: development
+      DATABASE_URL_FILE: /run/secrets/database_url
+      ZOOM_ACCOUNT_ID_FILE: /run/secrets/zoom_account_id
+      ZOOM_CLIENT_ID_FILE: /run/secrets/zoom_client_id
+      ZOOM_CLIENT_SECRET_FILE: /run/secrets/zoom_client_secret
+      ZOOM_HOST_USER_ID_FILE: /run/secrets/zoom_host_user_id
+      ZOOM_API_TIMEOUT_MS: '15000'
+      ZOOM_DB_POOL_MAX: '3'
+      TRUST_PROXY: 'false'
+    secrets:
+      - database_url
+      - zoom_account_id
+      - zoom_client_id
+      - zoom_client_secret
+      - zoom_host_user_id
+    ports:
+      - "3010:3010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - data
+      - provider
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+# ── Secrets (dari file lokal di infra/secrets/) ──────────────────────────────
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  database_url:
+    file: ./secrets/database_url.txt
+  token_pepper:
+    file: ./secrets/token_pepper.txt
+  field_encryption_key:
+    file: ./secrets/field_encryption_key.txt
+  audit_hash_key:
+    file: ./secrets/audit_hash_key.txt
+  webhook_shared_secret:
+    file: ./secrets/webhook_shared_secret.txt
+  notification_gateway_api_key:
+    file: ./secrets/notification_gateway_api_key.txt
+  official_system_gateway_api_key:
+    file: ./secrets/official_system_gateway_api_key.txt
+  evidence_storage_api_key:
+    file: ./secrets/evidence_storage_api_key.txt
+  zoom_account_id:
+    file: ./secrets/zoom_account_id.txt
+  zoom_client_id:
+    file: ./secrets/zoom_client_id.txt
+  zoom_client_secret:
+    file: ./secrets/zoom_client_secret.txt
+  zoom_host_user_id:
+    file: ./secrets/zoom_host_user_id.txt
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  edge: {}
+  data:
+    internal: true
+  provider:
+    internal: true
+
+# ── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  cims_pgdata_preproduction:
+    name: cims_pgdata_preproduction

@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: CIMS Workflow Migration API
+  version: 0.15.0
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+  /hearings/{hearingId}/notices:
+    get:
+      summary: List official notices and gate status
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Notice list } }
+    post:
+      summary: Create an official notice
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Notice created }, '409': { description: Active schedule required } }
+  /notices/{noticeId}/send:
+    post:
+      summary: Send an official notice
+      parameters: [{ name: noticeId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Delivery attempts recorded } }
+  /notices/{noticeId}/acknowledge:
+    post:
+      summary: Acknowledge receipt
+      parameters: [{ name: noticeId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Acknowledgment recorded } }
+  /hearings/{hearingId}/identity-verifications:
+    post:
+      summary: Record participant identity verification
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Verification recorded } }
+  /hearings/{hearingId}/room-inspections:
+    post:
+      summary: Record room inspection
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Inspection recorded } }
+  /hearings/{hearingId}/readiness-submissions:
+    post:
+      summary: Submit organization readiness
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Readiness submitted }, '409': { description: Notice acknowledgment or verification required } }
+  /hearings/{hearingId}/readiness:
+    get:
+      summary: Read readiness gate
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Readiness status } }
+  /hearings/{hearingId}/virtual-session/provision:
+    post:
+      summary: Provision provider-neutral virtual hearing rooms
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Virtual session ready }, '409': { description: Compliance gate incomplete } }
+  /hearings/{hearingId}/runtime:
+    get:
+      summary: Get hearing runtime state
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Runtime status } }
+  /hearings/{hearingId}/start:
+    post:
+      summary: Start hearing
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Hearing started }, '403': { description: Judge role required } }
+  /hearings/{hearingId}/suspend:
+    post:
+      summary: Suspend hearing
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Hearing suspended } }
+  /hearings/{hearingId}/resume:
+    post:
+      summary: Resume hearing
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Hearing resumed } }
+  /hearings/{hearingId}/end:
+    post:
+      summary: End hearing
+      parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Hearing ended } }

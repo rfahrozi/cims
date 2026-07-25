@@ -1,0 +1,106 @@
+
+openapi: 3.1.0
+info:
+  title: CIMS Production API
+  version: 0.16.0
+  description: Production-hardening contract for participant access, attendance, consultation, incidents, and operations.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+paths:
+  /hearings/{hearingId}/participants:
+    get:
+      operationId: listParticipants
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Participant list with protected identity masking } }
+    post:
+      operationId: registerParticipant
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterParticipant' } } } }
+      responses: { '201': { description: Registered }, '403': { $ref: '#/components/responses/Forbidden' } }
+  /hearings/{hearingId}/participants/{participantId}/join-token:
+    post:
+      operationId: issueJoinToken
+      parameters: [{ $ref: '#/components/parameters/HearingId' }, { $ref: '#/components/parameters/ParticipantId' }]
+      responses: { '201': { description: Plaintext token returned once } }
+  /public/join-tokens/exchange:
+    post:
+      security: []
+      operationId: exchangeJoinToken
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [token], properties: { token: { type: string, minLength: 32 } } } } } }
+      responses: { '201': { description: Waiting-room session created }, '410': { description: Expired, consumed, or revoked token } }
+  /hearings/{hearingId}/participants/{participantId}/admit:
+    post:
+      operationId: admitParticipant
+      parameters: [{ $ref: '#/components/parameters/HearingId' }, { $ref: '#/components/parameters/ParticipantId' }]
+      responses: { '201': { description: Participant admitted } }
+  /hearings/{hearingId}/attendance:
+    get:
+      operationId: getAttendance
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Append-only attendance timeline } }
+  /hearings/{hearingId}/consultations:
+    post:
+      operationId: startPrivateConsultation
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Recording-disabled consultation started } }
+  /hearings/{hearingId}/consultations/current/end:
+    post:
+      operationId: endPrivateConsultation
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Consultation ended } }
+  /hearings/{hearingId}/incidents:
+    get:
+      operationId: listIncidents
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Incident timeline } }
+    post:
+      operationId: createIncident
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateIncident' } } } }
+      responses: { '201': { description: Incident created and automatic suspension evaluated } }
+  /incidents/{incidentId}/actions:
+    post:
+      operationId: transitionIncident
+      parameters: [{ name: incidentId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Incident state changed } }
+  /incidents/{incidentId}/notify:
+    post:
+      operationId: recordIncidentNotification
+      parameters: [{ name: incidentId, in: path, required: true, schema: { type: string } }]
+      responses: { '201': { description: Notification evidence recorded } }
+  /health/live:
+    get: { security: [], responses: { '200': { description: Process liveness } } }
+  /health/ready:
+    get: { security: [], responses: { '200': { description: Database and dependency readiness } } }
+  /metrics:
+    get: { security: [], responses: { '200': { description: Prometheus text metrics } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    HearingId: { name: hearingId, in: path, required: true, schema: { type: string } }
+    ParticipantId: { name: participantId, in: path, required: true, schema: { type: string } }
+  schemas:
+    RegisterParticipant:
+      type: object
+      required: [role, displayName, protectedIdentity]
+      properties:
+        role: { type: string, enum: [JUDGE, COURT_CLERK, PROSECUTOR, DEFENDANT, ADVOCATE, WITNESS, EXPERT, INTERPRETER, CORRECTIONS_OFFICER, IT_OPERATOR] }
+        displayName: { type: string }
+        alias: { type: string }
+        organizationId: { type: string }
+        contactEmail: { type: string, format: email }
+        protectedIdentity: { type: boolean }
+    CreateIncident:
+      type: object
+      required: [type, severity, title, description]
+      properties:
+        type: { type: string, enum: [TECHNICAL, CYBER, FORCE_MAJEURE] }
+        severity: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+        title: { type: string }
+        description: { type: string }
+        occurredAt: { type: string, format: date-time }
+  responses:
+    Forbidden: { description: RBAC or ABAC policy denied access }

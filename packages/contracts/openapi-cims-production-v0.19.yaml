@@ -1,0 +1,1380 @@
+openapi: 3.1.0
+info:
+  title: CIMS Production Governance and Evidence API
+  version: 0.19.0
+  description: Compliance-first orchestration API with manual hearing intake, PostgreSQL persistence, legal hold, evidence
+    export, retention preview, access review, and production readiness controls.
+servers:
+- url: /api/v1
+security:
+- bearerAuth: []
+tags:
+- name: hearing-import
+  description: Future read-only database import foundation
+- name: hearing-intake
+  description: Manual initial hearing data managed by Panitera Pengganti
+- name: hearings
+- name: determinations
+- name: scheduling
+- name: official-notices
+- name: readiness
+- name: virtual-sessions
+- name: hearing-control
+- name: participants
+- name: incidents
+- name: reconciliation
+- name: provider-webhooks
+- name: compliance
+- name: production-governance
+  description: Production readiness, legal hold, evidence, retention, and access review
+- name: evidence
+  description: Tamper-evident hearing evidence export
+paths:
+  /hearings:
+    get:
+      tags:
+      - hearings
+      operationId: listHearings
+      responses:
+        '200':
+          description: Hearings visible through RBAC
+          ABAC: null
+          and PostgreSQL RLS: null
+  /hearings/{hearingId}/gate-status:
+    get:
+      tags:
+      - hearings
+      operationId: getWorkflowGate
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Compliance gate status
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /hearings/{hearingId}/audit-events:
+    get:
+      tags:
+      - hearings
+      operationId: getAuditTimeline
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Append-only audit events and hash-chain integrity result
+  /electronic-hearing-requests:
+    post:
+      tags:
+      - determinations
+      operationId: createElectronicHearingRequest
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - hearing_id
+              - requested_mode
+              - reason
+              properties:
+                hearing_id:
+                  type: string
+                requested_mode:
+                  type: string
+                  enum:
+                  - ELECTRONIC
+                  - HYBRID
+                reason:
+                  type: string
+                  minLength: 10
+      responses:
+        '201':
+          description: Request created
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /judicial-determinations:
+    post:
+      tags:
+      - determinations
+      operationId: createJudicialDetermination
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - hearing_id
+              - decision
+              - official_reference
+              - reason
+              properties:
+                hearing_id:
+                  type: string
+                decision:
+                  type: string
+                  enum:
+                  - APPROVED
+                  - REJECTED
+                official_reference:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '201':
+          description: Versioned judicial determination created
+  /hearings/{hearingId}/schedule-proposals:
+    post:
+      tags:
+      - scheduling
+      operationId: createScheduleProposal
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleProposal'
+      responses:
+        '201':
+          description: Draft proposal created
+        '409':
+          description: Judicial determination required
+  /schedule-proposals/{proposalId}/conflicts:check:
+    post:
+      tags:
+      - scheduling
+      operationId: checkScheduleConflicts
+      parameters:
+      - $ref: '#/components/parameters/ProposalId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpectedVersion'
+      responses:
+        '201':
+          description: Conflict result persisted
+        '409':
+          $ref: '#/components/responses/ConcurrencyConflict'
+  /schedule-proposals/{proposalId}:approve:
+    post:
+      tags:
+      - scheduling
+      operationId: approveScheduleProposal
+      parameters:
+      - $ref: '#/components/parameters/ProposalId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/ExpectedVersion'
+              - type: object
+                required:
+                - reason
+                properties:
+                  reason:
+                    type: string
+      responses:
+        '201':
+          description: Single active schedule created
+        '409':
+          description: Conflict unresolved or stale row version
+  /hearings/{hearingId}/notices:
+    get:
+      tags:
+      - official-notices
+      operationId: listNotices
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Notices
+          recipients: null
+          and acknowledgment gate: null
+    post:
+      tags:
+      - official-notices
+      operationId: createOfficialNotice
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotice'
+      responses:
+        '201':
+          description: Notice and recipients created transactionally
+  /notices/{noticeId}/send:
+    post:
+      tags:
+      - official-notices
+      operationId: queueNoticeDelivery
+      parameters:
+      - $ref: '#/components/parameters/NoticeId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Traceparent'
+      responses:
+        '201':
+          description: Delivery events queued in transactional outbox
+  /notices/{noticeId}/acknowledge:
+    post:
+      tags:
+      - official-notices
+      operationId: acknowledgeNotice
+      parameters:
+      - $ref: '#/components/parameters/NoticeId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - recipient_id
+              - receipt_reference
+              properties:
+                recipient_id:
+                  type: string
+                receipt_reference:
+                  type: string
+                expected_row_version:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Immutable acknowledgment recorded
+  /hearings/{hearingId}/identity-verifications:
+    post:
+      tags:
+      - readiness
+      operationId: recordIdentityVerification
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Identity verification recorded
+  /hearings/{hearingId}/room-inspections:
+    post:
+      tags:
+      - readiness
+      operationId: recordRoomInspection
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Room inspection recorded
+  /hearings/{hearingId}/readiness-submissions:
+    post:
+      tags:
+      - readiness
+      operationId: submitReadiness
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Versioned readiness submitted
+        '409':
+          description: Verification or room inspection required
+  /hearings/{hearingId}/readiness:
+    get:
+      tags:
+      - readiness
+      operationId: getReadinessGate
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Latest readiness per required organization
+  /hearings/{hearingId}/virtual-session/provision:
+    post:
+      tags:
+      - virtual-sessions
+      operationId: provisionVirtualSession
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Traceparent'
+      responses:
+        '202':
+          description: Provisioning queued in transactional outbox
+        '409':
+          description: Determination
+          notice: null
+          readiness: null
+          or schedule gate failed: null
+  /hearings/{hearingId}/virtual-session:
+    get:
+      tags:
+      - virtual-sessions
+      operationId: getVirtualSession
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Virtual session and room state
+  /hearings/{hearingId}/runtime:
+    get:
+      tags:
+      - hearing-control
+      operationId: getHearingRuntime
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Durable hearing runtime state
+  /hearings/{hearingId}/start:
+    post:
+      tags:
+      - hearing-control
+      operationId: startHearing
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpectedVersion'
+      responses:
+        '201':
+          description: Hearing started
+  /hearings/{hearingId}/suspend:
+    post:
+      tags:
+      - hearing-control
+      operationId: suspendHearing
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Hearing suspended
+  /hearings/{hearingId}/resume:
+    post:
+      tags:
+      - hearing-control
+      operationId: resumeHearing
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Hearing resumed
+  /hearings/{hearingId}/end:
+    post:
+      tags:
+      - hearing-control
+      operationId: endHearing
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '201':
+          description: Hearing ended
+  /hearings/{hearingId}/participants:
+    get:
+      tags:
+      - participants
+      operationId: listParticipants
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Participant list with protected identity masking
+    post:
+      tags:
+      - participants
+      operationId: registerParticipant
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterParticipant'
+      responses:
+        '201':
+          description: Participant registered with encrypted sensitive fields
+  /hearings/{hearingId}/participants/{participantId}/join-token:
+    post:
+      tags:
+      - participants
+      operationId: issueJoinToken
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/ParticipantId'
+      responses:
+        '201':
+          description: Single-use plaintext token returned once
+  /public/join-tokens/exchange:
+    post:
+      tags:
+      - participants
+      security: []
+      operationId: exchangeJoinToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - token
+              properties:
+                token:
+                  type: string
+                  minLength: 32
+      responses:
+        '201':
+          description: Waiting-room session created
+        '410':
+          description: Expired
+          consumed: null
+          or revoked token: null
+  /hearings/{hearingId}/attendance:
+    get:
+      tags:
+      - participants
+      operationId: getAttendance
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Append-only attendance timeline
+  /hearings/{hearingId}/incidents:
+    get:
+      tags:
+      - incidents
+      operationId: listIncidents
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Incident timeline
+    post:
+      tags:
+      - incidents
+      operationId: createIncident
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIncident'
+      responses:
+        '201':
+          description: Incident created and automatic suspension evaluated
+  /hearings/{hearingId}/reconciliation-runs:
+    get:
+      tags:
+      - reconciliation
+      operationId: listReconciliationRuns
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Reconciliation history and mismatch counts
+    post:
+      tags:
+      - reconciliation
+      operationId: requestReconciliation
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Traceparent'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - source_system
+              properties:
+                source_system:
+                  type: string
+      responses:
+        '202':
+          description: Reconciliation queued
+  /reconciliation-runs/{runId}:
+    get:
+      tags:
+      - reconciliation
+      operationId: getReconciliationRun
+      parameters:
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Reconciliation run and field-level results
+  /provider-webhooks/{providerCode}:
+    post:
+      tags:
+      - provider-webhooks
+      security: []
+      operationId: ingestProviderWebhook
+      parameters:
+      - name: providerCode
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-cims-signature
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: x-cims-timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Signed event accepted or replay ignored
+        '401':
+          description: Signature or timestamp validation failed
+  /compliance-dashboard:
+    get:
+      tags:
+      - compliance
+      operationId: getComplianceDashboard
+      responses:
+        '200':
+          description: Workflow gates
+          persistence mode: null
+          migration posture: null
+          and outbox counts: null
+  /health/live:
+    get:
+      security: []
+      responses:
+        '200':
+          description: Process liveness
+  /health/ready:
+    get:
+      security: []
+      responses:
+        '200':
+          description: Persistence readiness
+  /metrics:
+    get:
+      security: []
+      responses:
+        '200':
+          description: Prometheus text metrics
+  /hearing-intake/reference-data:
+    get:
+      tags:
+      - hearing-intake
+      operationId: getHearingIntakeReferenceData
+      responses:
+        '200':
+          description: Organization and controlled-value reference data
+  /hearing-intake/manual:
+    get:
+      tags:
+      - hearing-intake
+      operationId: listManualHearingIntakes
+      parameters:
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/HearingIntakeStatus'
+      - name: q
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Accessible manual intake records
+    post:
+      tags:
+      - hearing-intake
+      operationId: createManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualHearingIntakeRequest'
+      responses:
+        '201':
+          description: Draft hearing intake created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManualHearingIntake'
+        '409':
+          description: Duplicate case and hearing sequence
+  /hearing-intake/manual/{hearingId}:
+    get:
+      tags:
+      - hearing-intake
+      operationId: getManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Manual hearing intake detail
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - hearing-intake
+      operationId: updateManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/ManualHearingIntakeRequest'
+              - type: object
+                required:
+                - expected_row_version
+                properties:
+                  expected_row_version:
+                    type: integer
+                    minimum: 1
+      responses:
+        '200':
+          description: Draft or returned intake updated
+        '409':
+          $ref: '#/components/responses/ConcurrencyConflict'
+  /hearing-intake/manual/{hearingId}/submit:
+    post:
+      tags:
+      - hearing-intake
+      operationId: submitManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          description: Intake submitted for review
+        '409':
+          description: Invalid lifecycle transition
+  /hearing-intake/manual/{hearingId}/activate:
+    post:
+      tags:
+      - hearing-intake
+      operationId: activateManualHearingIntake
+      description: Maker-checker action. The creator cannot activate the same record.
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          description: Intake activated and HEARING_DATA gate passed
+        '409':
+          description: Maker-checker or lifecycle violation
+  /hearing-intake/manual/{hearingId}/return:
+    post:
+      tags:
+      - hearing-intake
+      operationId: returnManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  minLength: 5
+                  maxLength: 1000
+      responses:
+        '201':
+          description: Intake returned for correction
+  /hearing-intake/manual/{hearingId}/reopen:
+    post:
+      tags:
+      - hearing-intake
+      operationId: reopenManualHearingIntake
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          description: Returned intake reopened as draft
+  /hearing-import/sources:
+    get:
+      tags:
+      - hearing-import
+      operationId: listHearingImportSources
+      responses:
+        '200':
+          description: Future import capability and source registry. Disabled by default.
+  /hearing-import/jobs:
+    post:
+      tags:
+      - hearing-import
+      operationId: requestHearingImportPreview
+      description: Reserved endpoint for a future read-only adapter. Returns not-enabled or not-configured until a source
+        adapter is approved.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - source_code
+              - case_number
+              properties:
+                source_code:
+                  type: string
+                case_number:
+                  type: string
+      responses:
+        '501':
+          description: Adapter not configured
+        '503':
+          description: Feature not enabled
+  /production-readiness:
+    get:
+      tags:
+      - production-governance
+      operationId: getProductionReadiness
+      responses:
+        '200':
+          description: Production readiness decision and dependency checks
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /hearings/{hearingId}/legal-holds:
+    get:
+      tags:
+      - production-governance
+      operationId: listLegalHolds
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Legal holds
+    post:
+      tags:
+      - production-governance
+      operationId: createLegalHold
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLegalHold'
+      responses:
+        '201':
+          description: Legal hold created
+        '409':
+          description: Duplicate active reference
+  /legal-holds/{id}/release:
+    post:
+      tags:
+      - production-governance
+      operationId: releaseLegalHold
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  minLength: 5
+      responses:
+        '200':
+          description: Legal hold released
+        '409':
+          description: Maker-checker violation
+  /retention/policies:
+    get:
+      tags:
+      - production-governance
+      operationId: listRetentionPolicies
+      responses:
+        '200':
+          description: Approved and draft retention policies
+  /hearings/{hearingId}/retention-preview:
+    post:
+      tags:
+      - production-governance
+      operationId: createRetentionPreview
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_code:
+                  type: string
+      responses:
+        '201':
+          description: Immutable retention preview
+  /hearings/{hearingId}/evidence-exports:
+    get:
+      tags:
+      - evidence
+      operationId: listEvidenceExports
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      responses:
+        '200':
+          description: Evidence export requests
+    post:
+      tags:
+      - evidence
+      operationId: createEvidenceExport
+      parameters:
+      - $ref: '#/components/parameters/HearingId'
+      - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - export_format
+              properties:
+                export_format:
+                  type: string
+                  enum:
+                  - JSON
+                  - ZIP_MANIFEST
+      responses:
+        '201':
+          description: Evidence export queued
+  /evidence-exports/{id}:
+    get:
+      tags:
+      - evidence
+      operationId: getEvidenceExport
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Export status, hashes, storage URI, and manifest items
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /access-reviews:
+    post:
+      tags:
+      - production-governance
+      operationId: createAccessReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccessReview'
+      responses:
+        '201':
+          description: Access review campaign created
+  /access-reviews/{id}:
+    get:
+      tags:
+      - production-governance
+      operationId: getAccessReview
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Campaign and review items
+  /access-reviews/{campaignId}/items/{itemId}/decision:
+    post:
+      tags:
+      - production-governance
+      operationId: decideAccessReviewItem
+      parameters:
+      - name: campaignId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - decision
+              - reason
+              properties:
+                decision:
+                  type: string
+                  enum:
+                  - KEEP
+                  - REVOKE
+                reason:
+                  type: string
+                  minLength: 3
+      responses:
+        '200':
+          description: Decision recorded and assignment revoked when requested
+        '409':
+          description: Self-approval forbidden
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    HearingId:
+      name: hearingId
+      in: path
+      required: true
+      schema:
+        type: string
+    ParticipantId:
+      name: participantId
+      in: path
+      required: true
+      schema:
+        type: string
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      schema:
+        type: string
+    NoticeId:
+      name: noticeId
+      in: path
+      required: true
+      schema:
+        type: string
+    CorrelationId:
+      name: x-correlation-id
+      in: header
+      required: false
+      schema:
+        type: string
+    Traceparent:
+      name: traceparent
+      in: header
+      required: false
+      schema:
+        type: string
+  schemas:
+    ExpectedVersion:
+      type: object
+      properties:
+        expected_row_version:
+          type: integer
+          minimum: 1
+    CreateScheduleProposal:
+      type: object
+      required:
+      - start_at
+      - end_at
+      - display_timezone
+      - resources
+      properties:
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        display_timezone:
+          type: string
+          example: Asia/Jakarta
+        resources:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+            - resource_type
+            - resource_id
+            - requirement
+            properties:
+              resource_type:
+                type: string
+                enum:
+                - JUDGE
+                - ROOM
+                - PROSECUTOR
+                - CORRECTIONS
+              resource_id:
+                type: string
+              requirement:
+                type: string
+                enum:
+                - REQUIRED
+                - PREFERRED
+    CreateNotice:
+      type: object
+      required:
+      - official_reference
+      - subject
+      - message
+      - recipients
+      properties:
+        official_reference:
+          type: string
+        subject:
+          type: string
+        message:
+          type: string
+        recipients:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+            - channel
+            - destination
+            - required_ack
+            properties:
+              recipient_user_id:
+                type: string
+              recipient_organization_id:
+                type: string
+              channel:
+                type: string
+                enum:
+                - EMAIL
+                - WHATSAPP
+                - SMS
+                - IN_APP
+              destination:
+                type: string
+              required_ack:
+                type: boolean
+    RegisterParticipant:
+      type: object
+      required:
+      - role
+      - displayName
+      - protectedIdentity
+      properties:
+        role:
+          type: string
+          enum:
+          - JUDGE
+          - COURT_CLERK
+          - PROSECUTOR
+          - DEFENDANT
+          - ADVOCATE
+          - WITNESS
+          - EXPERT
+          - INTERPRETER
+          - CORRECTIONS_OFFICER
+          - IT_OPERATOR
+        displayName:
+          type: string
+        alias:
+          type: string
+        organizationId:
+          type: string
+        contactEmail:
+          type: string
+          format: email
+        protectedIdentity:
+          type: boolean
+    CreateIncident:
+      type: object
+      required:
+      - type
+      - severity
+      - title
+      - description
+      properties:
+        type:
+          type: string
+          enum:
+          - TECHNICAL
+          - CYBER
+          - FORCE_MAJEURE
+        severity:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        title:
+          type: string
+        description:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            correlation_id:
+              type: string
+            details: {}
+    HearingIntakeStatus:
+      type: string
+      enum:
+      - DRAFT
+      - SUBMITTED
+      - ACTIVE
+      - RETURNED
+      - ARCHIVED
+    HearingDataSource:
+      type: string
+      enum:
+      - MANUAL
+      - EXTERNAL_DATABASE
+    InitialDefendant:
+      type: object
+      required:
+      - display_name
+      - protected_identity
+      - custody_status
+      properties:
+        display_name:
+          type: string
+          minLength: 2
+          maxLength: 200
+        alias:
+          type: string
+          maxLength: 100
+        protected_identity:
+          type: boolean
+        custody_status:
+          type: string
+          enum:
+          - DETAINED
+          - NOT_DETAINED
+          - UNKNOWN
+        detention_organization_id:
+          type: string
+    ManualHearingIntakeRequest:
+      type: object
+      required:
+      - case_number
+      - case_classification
+      - case_type_code
+      - case_title
+      - hearing_type
+      - hearing_sequence
+      - court_organization_id
+      - prosecution_organization_id
+      - defendant_custody_status
+      - defendants
+      properties:
+        case_number:
+          type: string
+          minLength: 3
+          maxLength: 150
+        official_case_reference:
+          type: string
+          maxLength: 200
+        case_classification:
+          type: string
+          enum:
+          - GENERAL_CRIMINAL
+          - SPECIAL_CRIMINAL
+        case_type_code:
+          type: string
+          minLength: 2
+          maxLength: 50
+        case_title:
+          type: string
+          minLength: 3
+          maxLength: 300
+        hearing_type:
+          type: string
+          minLength: 2
+          maxLength: 100
+        hearing_sequence:
+          type: integer
+          minimum: 1
+          maximum: 999
+        court_organization_id:
+          type: string
+        prosecution_organization_id:
+          type: string
+        corrections_organization_id:
+          type: string
+        defendant_custody_status:
+          type: string
+          enum:
+          - DETAINED
+          - NOT_DETAINED
+          - MIXED
+          - UNKNOWN
+        defendants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/InitialDefendant'
+        notes:
+          type: string
+          maxLength: 2000
+    ManualHearingIntake:
+      allOf:
+      - $ref: '#/components/schemas/ManualHearingIntakeRequest'
+      - type: object
+        required:
+        - id
+        - case_id
+        - intake_status
+        - data_source
+        - row_version
+        - created_by
+        - created_at
+        properties:
+          id:
+            type: string
+          case_id:
+            type: string
+          intake_status:
+            $ref: '#/components/schemas/HearingIntakeStatus'
+          data_source:
+            $ref: '#/components/schemas/HearingDataSource'
+          row_version:
+            type: integer
+          created_by:
+            type: string
+          created_at:
+            type: string
+            format: date-time
+          submitted_by:
+            type: string
+          submitted_at:
+            type: string
+            format: date-time
+          activated_by:
+            type: string
+          activated_at:
+            type: string
+            format: date-time
+          return_reason:
+            type: string
+    CreateLegalHold:
+      type: object
+      required:
+      - hold_type
+      - reason
+      - official_reference
+      properties:
+        hold_type:
+          type: string
+          enum:
+          - LITIGATION
+          - INVESTIGATION
+          - AUDIT
+          - COURT_ORDER
+          - OTHER
+        reason:
+          type: string
+          minLength: 5
+        official_reference:
+          type: string
+          minLength: 1
+    CreateAccessReview:
+      type: object
+      required:
+      - campaign_name
+      - due_at
+      anyOf:
+      - required:
+        - hearing_id
+      - required:
+        - scope_organization_id
+      properties:
+        campaign_name:
+          type: string
+          minLength: 4
+        hearing_id:
+          type: string
+        scope_organization_id:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+  responses:
+    Forbidden:
+      description: RBAC, ABAC, or PostgreSQL RLS denied access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Resource not found or not visible within the caller scope
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ConcurrencyConflict:
+      description: Optimistic concurrency conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'

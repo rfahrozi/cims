@@ -1,0 +1,205 @@
+CIMS v0.18.0 Production Phase 5 Validation
+Generated: 2026-07-25T04:34:25Z
+
+== Phase 5 baseline ==
+
+> cims-platform-ts@0.18.0 check:phase5
+> npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase5-baseline.mjs
+
+
+> cims-platform-ts@0.18.0 check:structure
+> node tools/check-structure.mjs
+
+PASS structure check: 25 required files present
+
+> cims-platform-ts@0.18.0 check:syntax
+> node tools/check-typescript-syntax.mjs
+
+PASS TypeScript syntax check: 156 TS/TSX files parsed
+
+> cims-platform-ts@0.18.0 test:domain
+> npm run build -w @cims/domain && node --test packages/domain/test/*.test.mjs
+
+
+> @cims/domain@0.18.0 build
+> tsc -p tsconfig.json
+
+TAP version 13
+# Subtest: determination hard gate rejects missing approval
+ok 1 - determination hard gate rejects missing approval
+  ---
+  duration_ms: 0.871968
+  type: 'test'
+  ...
+# Subtest: next gate follows compliance order
+ok 2 - next gate follows compliance order
+  ---
+  duration_ms: 0.189923
+  type: 'test'
+  ...
+# Subtest: conflict engine detects overlapping required room
+ok 3 - conflict engine detects overlapping required room
+  ---
+  duration_ms: 0.224644
+  type: 'test'
+  ...
+# Subtest: manual hearing intake accepts complete substitute-clerk input
+ok 4 - manual hearing intake accepts complete substitute-clerk input
+  ---
+  duration_ms: 0.789044
+  type: 'test'
+  ...
+# Subtest: detained defendant requires detention organization
+ok 5 - detained defendant requires detention organization
+  ---
+  duration_ms: 0.338424
+  type: 'test'
+  ...
+# Subtest: case number normalization produces stable duplicate key
+ok 6 - case number normalization produces stable duplicate key
+  ---
+  duration_ms: 0.190013
+  type: 'test'
+  ...
+# Subtest: manual intake uses maker checker lifecycle
+ok 7 - manual intake uses maker checker lifecycle
+  ---
+  duration_ms: 0.246817
+  type: 'test'
+  ...
+# Subtest: outbox backoff is bounded and increases
+ok 8 - outbox backoff is bounded and increases
+  ---
+  duration_ms: 0.624539
+  type: 'test'
+  ...
+# Subtest: snapshot comparison detects matches, mismatches, and missing values
+ok 9 - snapshot comparison detects matches, mismatches, and missing values
+  ---
+  duration_ms: 0.230653
+  type: 'test'
+  ...
+# Subtest: canonical JSON is stable across object key order
+ok 10 - canonical JSON is stable across object key order
+  ---
+  duration_ms: 0.176392
+  type: 'test'
+  ...
+# Subtest: optimistic concurrency rejects a stale version
+ok 11 - optimistic concurrency rejects a stale version
+  ---
+  duration_ms: 0.392374
+  type: 'test'
+  ...
+# Subtest: single-use join token accepts a matching unexpired token
+ok 12 - single-use join token accepts a matching unexpired token
+  ---
+  duration_ms: 0.708695
+  type: 'test'
+  ...
+# Subtest: single-use join token rejects a consumed token
+ok 13 - single-use join token rejects a consumed token
+  ---
+  duration_ms: 0.387036
+  type: 'test'
+  ...
+# Subtest: participant state requires waiting room before admission
+ok 14 - participant state requires waiting room before admission
+  ---
+  duration_ms: 0.232927
+  type: 'test'
+  ...
+# Subtest: consultation requires defendant and advocate
+ok 15 - consultation requires defendant and advocate
+  ---
+  duration_ms: 0.16802
+  type: 'test'
+  ...
+# Subtest: protected identity is masked for unauthorized viewer
+ok 16 - protected identity is masked for unauthorized viewer
+  ---
+  duration_ms: 0.11389
+  type: 'test'
+  ...
+# Subtest: cyber incident deadline is twenty four hours
+ok 17 - cyber incident deadline is twenty four hours
+  ---
+  duration_ms: 0.200298
+  type: 'test'
+  ...
+# Subtest: high cyber incident blocks hearing
+ok 18 - high cyber incident blocks hearing
+  ---
+  duration_ms: 0.199547
+  type: 'test'
+  ...
+# Subtest: ABAC rejects a user not assigned to the hearing
+ok 19 - ABAC rejects a user not assigned to the hearing
+  ---
+  duration_ms: 0.17464
+  type: 'test'
+  ...
+# Subtest: notice gate requires every required acknowledgment
+ok 20 - notice gate requires every required acknowledgment
+  ---
+  duration_ms: 0.704819
+  type: 'test'
+  ...
+# Subtest: readiness gate uses the latest version per organization type
+ok 21 - readiness gate uses the latest version per organization type
+  ---
+  duration_ms: 0.22116
+  type: 'test'
+  ...
+# Subtest: virtual provisioning rejects missing notice acknowledgment
+ok 22 - virtual provisioning rejects missing notice acknowledgment
+  ---
+  duration_ms: 0.396611
+  type: 'test'
+  ...
+# Subtest: hearing state machine permits suspend and resume
+ok 23 - hearing state machine permits suspend and resume
+  ---
+  duration_ms: 0.144976
+  type: 'test'
+  ...
+# Subtest: hearing state machine rejects start after end
+ok 24 - hearing state machine rejects start after end
+  ---
+  duration_ms: 0.150744
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 98.154163
+PASS production baseline check: 14 required files and 249 scanned files
+PASS Phase 5 baseline: 17 required files and 263 files scanned
+
+== Migration dry run ==
+
+> cims-platform-ts@0.18.0 db:migrate:dry-run
+> node tools/migrate-postgres.mjs --dry-run
+
+0001_phase2_workflow  8bcb8f718459445318c5c3150c882643ea74a3f6a17b81505322cebf76b4c605
+0002_phase3_production  5347252ba3774dfa21a16b3720f540b5f5bc39b9c55d3f41e4844ea25e35e71d
+0003_phase4_core_persistence  e766446dd30c0bc42caec6d4dc29024dcfe01f826b01bbf0ddca8bb2597bfe59
+0004_phase5_manual_hearing_intake  bd77b11019783fdcf3ada46a6a9fa38a84b06e069f8360b088ca0e9c4d9ad623
+
+== Shared contracts build ==
+
+> @cims/contracts@0.18.0 build
+> tsc -p tsconfig.json
+
+
+== Configuration parsing ==
+PASS JSON 26 and YAML 36 parsed
+
+== Known runtime validation gap ==
+Full NestJS and React framework build was not executed in this environment because workspace dependencies are not installed and registry access is unavailable.
+PostgreSQL Phase 5 smoke test was prepared but not executed because no PostgreSQL runtime is available.

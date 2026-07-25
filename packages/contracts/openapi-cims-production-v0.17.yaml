@@ -1,0 +1,457 @@
+openapi: 3.1.0
+info:
+  title: CIMS Production Persistence API
+  version: 0.17.0
+  description: >-
+    Compliance-first orchestration API with PostgreSQL persistence, row-level
+    authorization context, optimistic concurrency, transactional outbox,
+    provider webhooks, and official-system reconciliation.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: hearings
+  - name: determinations
+  - name: scheduling
+  - name: official-notices
+  - name: readiness
+  - name: virtual-sessions
+  - name: hearing-control
+  - name: participants
+  - name: incidents
+  - name: reconciliation
+  - name: provider-webhooks
+  - name: compliance
+paths:
+  /hearings:
+    get:
+      tags: [hearings]
+      operationId: listHearings
+      responses:
+        '200': { description: Hearings visible through RBAC, ABAC, and PostgreSQL RLS }
+  /hearings/{hearingId}/gate-status:
+    get:
+      tags: [hearings]
+      operationId: getWorkflowGate
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses:
+        '200': { description: Compliance gate status }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /hearings/{hearingId}/audit-events:
+    get:
+      tags: [hearings]
+      operationId: getAuditTimeline
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses:
+        '200': { description: Append-only audit events and hash-chain integrity result }
+  /electronic-hearing-requests:
+    post:
+      tags: [determinations]
+      operationId: createElectronicHearingRequest
+      parameters: [{ $ref: '#/components/parameters/CorrelationId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hearing_id, requested_mode, reason]
+              properties:
+                hearing_id: { type: string }
+                requested_mode: { type: string, enum: [ELECTRONIC, HYBRID] }
+                reason: { type: string, minLength: 10 }
+      responses:
+        '201': { description: Request created }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /judicial-determinations:
+    post:
+      tags: [determinations]
+      operationId: createJudicialDetermination
+      parameters: [{ $ref: '#/components/parameters/CorrelationId' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hearing_id, decision, official_reference, reason]
+              properties:
+                hearing_id: { type: string }
+                decision: { type: string, enum: [APPROVED, REJECTED] }
+                official_reference: { type: string }
+                reason: { type: string }
+      responses:
+        '201': { description: Versioned judicial determination created }
+  /hearings/{hearingId}/schedule-proposals:
+    post:
+      tags: [scheduling]
+      operationId: createScheduleProposal
+      parameters:
+        - { $ref: '#/components/parameters/HearingId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateScheduleProposal' }
+      responses:
+        '201': { description: Draft proposal created }
+        '409': { description: Judicial determination required }
+  /schedule-proposals/{proposalId}/conflicts:check:
+    post:
+      tags: [scheduling]
+      operationId: checkScheduleConflicts
+      parameters:
+        - { $ref: '#/components/parameters/ProposalId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpectedVersion' }
+      responses:
+        '201': { description: Conflict result persisted }
+        '409': { $ref: '#/components/responses/ConcurrencyConflict' }
+  /schedule-proposals/{proposalId}:approve:
+    post:
+      tags: [scheduling]
+      operationId: approveScheduleProposal
+      parameters:
+        - { $ref: '#/components/parameters/ProposalId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '#/components/schemas/ExpectedVersion' }
+                - type: object
+                  required: [reason]
+                  properties: { reason: { type: string } }
+      responses:
+        '201': { description: Single active schedule created }
+        '409': { description: Conflict unresolved or stale row version }
+  /hearings/{hearingId}/notices:
+    get:
+      tags: [official-notices]
+      operationId: listNotices
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses:
+        '200': { description: Notices, recipients, and acknowledgment gate }
+    post:
+      tags: [official-notices]
+      operationId: createOfficialNotice
+      parameters:
+        - { $ref: '#/components/parameters/HearingId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateNotice' }
+      responses:
+        '201': { description: Notice and recipients created transactionally }
+  /notices/{noticeId}/send:
+    post:
+      tags: [official-notices]
+      operationId: queueNoticeDelivery
+      parameters:
+        - { $ref: '#/components/parameters/NoticeId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+        - { $ref: '#/components/parameters/Traceparent' }
+      responses:
+        '201': { description: Delivery events queued in transactional outbox }
+  /notices/{noticeId}/acknowledge:
+    post:
+      tags: [official-notices]
+      operationId: acknowledgeNotice
+      parameters:
+        - { $ref: '#/components/parameters/NoticeId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recipient_id, receipt_reference]
+              properties:
+                recipient_id: { type: string }
+                receipt_reference: { type: string }
+                expected_row_version: { type: integer, minimum: 1 }
+      responses:
+        '201': { description: Immutable acknowledgment recorded }
+  /hearings/{hearingId}/identity-verifications:
+    post:
+      tags: [readiness]
+      operationId: recordIdentityVerification
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Identity verification recorded } }
+  /hearings/{hearingId}/room-inspections:
+    post:
+      tags: [readiness]
+      operationId: recordRoomInspection
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Room inspection recorded } }
+  /hearings/{hearingId}/readiness-submissions:
+    post:
+      tags: [readiness]
+      operationId: submitReadiness
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses:
+        '201': { description: Versioned readiness submitted }
+        '409': { description: Verification or room inspection required }
+  /hearings/{hearingId}/readiness:
+    get:
+      tags: [readiness]
+      operationId: getReadinessGate
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Latest readiness per required organization } }
+  /hearings/{hearingId}/virtual-session/provision:
+    post:
+      tags: [virtual-sessions]
+      operationId: provisionVirtualSession
+      parameters:
+        - { $ref: '#/components/parameters/HearingId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+        - { $ref: '#/components/parameters/Traceparent' }
+      responses:
+        '202': { description: Provisioning queued in transactional outbox }
+        '409': { description: Determination, notice, readiness, or schedule gate failed }
+  /hearings/{hearingId}/virtual-session:
+    get:
+      tags: [virtual-sessions]
+      operationId: getVirtualSession
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Virtual session and room state } }
+  /hearings/{hearingId}/runtime:
+    get:
+      tags: [hearing-control]
+      operationId: getHearingRuntime
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Durable hearing runtime state } }
+  /hearings/{hearingId}/start:
+    post:
+      tags: [hearing-control]
+      operationId: startHearing
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/ExpectedVersion' } } } }
+      responses: { '201': { description: Hearing started } }
+  /hearings/{hearingId}/suspend:
+    post:
+      tags: [hearing-control]
+      operationId: suspendHearing
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Hearing suspended } }
+  /hearings/{hearingId}/resume:
+    post:
+      tags: [hearing-control]
+      operationId: resumeHearing
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Hearing resumed } }
+  /hearings/{hearingId}/end:
+    post:
+      tags: [hearing-control]
+      operationId: endHearing
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '201': { description: Hearing ended } }
+  /hearings/{hearingId}/participants:
+    get:
+      tags: [participants]
+      operationId: listParticipants
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Participant list with protected identity masking } }
+    post:
+      tags: [participants]
+      operationId: registerParticipant
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RegisterParticipant' } } }
+      responses: { '201': { description: Participant registered with encrypted sensitive fields } }
+  /hearings/{hearingId}/participants/{participantId}/join-token:
+    post:
+      tags: [participants]
+      operationId: issueJoinToken
+      parameters:
+        - { $ref: '#/components/parameters/HearingId' }
+        - { $ref: '#/components/parameters/ParticipantId' }
+      responses: { '201': { description: Single-use plaintext token returned once } }
+  /public/join-tokens/exchange:
+    post:
+      tags: [participants]
+      security: []
+      operationId: exchangeJoinToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties: { token: { type: string, minLength: 32 } }
+      responses:
+        '201': { description: Waiting-room session created }
+        '410': { description: Expired, consumed, or revoked token }
+  /hearings/{hearingId}/attendance:
+    get:
+      tags: [participants]
+      operationId: getAttendance
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Append-only attendance timeline } }
+  /hearings/{hearingId}/incidents:
+    get:
+      tags: [incidents]
+      operationId: listIncidents
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Incident timeline } }
+    post:
+      tags: [incidents]
+      operationId: createIncident
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateIncident' } } }
+      responses: { '201': { description: Incident created and automatic suspension evaluated } }
+  /hearings/{hearingId}/reconciliation-runs:
+    get:
+      tags: [reconciliation]
+      operationId: listReconciliationRuns
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
+      responses: { '200': { description: Reconciliation history and mismatch counts } }
+    post:
+      tags: [reconciliation]
+      operationId: requestReconciliation
+      parameters:
+        - { $ref: '#/components/parameters/HearingId' }
+        - { $ref: '#/components/parameters/CorrelationId' }
+        - { $ref: '#/components/parameters/Traceparent' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [source_system]
+              properties: { source_system: { type: string } }
+      responses: { '202': { description: Reconciliation queued } }
+  /reconciliation-runs/{runId}:
+    get:
+      tags: [reconciliation]
+      operationId: getReconciliationRun
+      parameters: [{ name: runId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Reconciliation run and field-level results } }
+  /provider-webhooks/{providerCode}:
+    post:
+      tags: [provider-webhooks]
+      security: []
+      operationId: ingestProviderWebhook
+      parameters:
+        - { name: providerCode, in: path, required: true, schema: { type: string } }
+        - { name: x-cims-signature, in: header, required: true, schema: { type: string } }
+        - { name: x-cims-timestamp, in: header, required: true, schema: { type: string } }
+      responses:
+        '201': { description: Signed event accepted or replay ignored }
+        '401': { description: Signature or timestamp validation failed }
+  /compliance-dashboard:
+    get:
+      tags: [compliance]
+      operationId: getComplianceDashboard
+      responses: { '200': { description: Workflow gates, persistence mode, migration posture, and outbox counts } }
+  /health/live:
+    get: { security: [], responses: { '200': { description: Process liveness } } }
+  /health/ready:
+    get: { security: [], responses: { '200': { description: Persistence readiness } } }
+  /metrics:
+    get: { security: [], responses: { '200': { description: Prometheus text metrics } } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    HearingId: { name: hearingId, in: path, required: true, schema: { type: string } }
+    ParticipantId: { name: participantId, in: path, required: true, schema: { type: string } }
+    ProposalId: { name: proposalId, in: path, required: true, schema: { type: string } }
+    NoticeId: { name: noticeId, in: path, required: true, schema: { type: string } }
+    CorrelationId: { name: x-correlation-id, in: header, required: false, schema: { type: string } }
+    Traceparent: { name: traceparent, in: header, required: false, schema: { type: string } }
+  schemas:
+    ExpectedVersion:
+      type: object
+      properties: { expected_row_version: { type: integer, minimum: 1 } }
+    CreateScheduleProposal:
+      type: object
+      required: [start_at, end_at, display_timezone, resources]
+      properties:
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        display_timezone: { type: string, example: Asia/Jakarta }
+        resources:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [resource_type, resource_id, requirement]
+            properties:
+              resource_type: { type: string, enum: [JUDGE, ROOM, PROSECUTOR, CORRECTIONS] }
+              resource_id: { type: string }
+              requirement: { type: string, enum: [REQUIRED, PREFERRED] }
+    CreateNotice:
+      type: object
+      required: [official_reference, subject, message, recipients]
+      properties:
+        official_reference: { type: string }
+        subject: { type: string }
+        message: { type: string }
+        recipients:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [channel, destination, required_ack]
+            properties:
+              recipient_user_id: { type: string }
+              recipient_organization_id: { type: string }
+              channel: { type: string, enum: [EMAIL, WHATSAPP, SMS, IN_APP] }
+              destination: { type: string }
+              required_ack: { type: boolean }
+    RegisterParticipant:
+      type: object
+      required: [role, displayName, protectedIdentity]
+      properties:
+        role: { type: string, enum: [JUDGE, COURT_CLERK, PROSECUTOR, DEFENDANT, ADVOCATE, WITNESS, EXPERT, INTERPRETER, CORRECTIONS_OFFICER, IT_OPERATOR] }
+        displayName: { type: string }
+        alias: { type: string }
+        organizationId: { type: string }
+        contactEmail: { type: string, format: email }
+        protectedIdentity: { type: boolean }
+    CreateIncident:
+      type: object
+      required: [type, severity, title, description]
+      properties:
+        type: { type: string, enum: [TECHNICAL, CYBER, FORCE_MAJEURE] }
+        severity: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+        title: { type: string }
+        description: { type: string }
+        occurredAt: { type: string, format: date-time }
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            correlation_id: { type: string }
+            details: {}
+  responses:
+    Forbidden:
+      description: RBAC, ABAC, or PostgreSQL RLS denied access
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorEnvelope' } } }
+    NotFound:
+      description: Resource not found or not visible within the caller scope
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorEnvelope' } } }
+    ConcurrencyConflict:
+      description: Optimistic concurrency conflict
+      content: { application/json: { schema: { $ref: '#/components/schemas/ErrorEnvelope' } } }

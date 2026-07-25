@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: { name: cims-api, labels: { app: cims-api } }
+spec:
+  selector: { matchLabels: { app: cims-api } }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: { name: cims-production-alerts }
+spec:
+  groups:
+    - name: cims.api
+      rules:
+        - alert: CimsApiUnavailable
+          expr: sum(up{service="cims-api"}) < 2
+          for: 5m
+          labels: { severity: critical }
+          annotations: { summary: 'Fewer than two CIMS API targets are available' }
+        - alert: CimsOutboxFailures
+          expr: sum(rate(cims_outbox_events_failed_total[10m])) > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: 'CIMS outbox events are failing' }
+        - alert: CimsProviderWebhookFailures
+          expr: sum(rate(cims_provider_webhook_events_total{status!="PROCESSED"}[10m])) > 0
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: 'Provider webhook processing failures detected' }

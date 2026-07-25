@@ -1,0 +1,562 @@
+openapi: 3.1.0
+info:
+  title: CIMS Compliance MVP API
+  version: 1.0.0
+  description: >-
+    Baseline contract untuk determination, scheduling, notice, readiness, dan virtual hearing.
+    Semua keputusan substantif tetap dilakukan pengguna berwenang.
+servers:
+  - url: https://api-sit.cims.example.go.id/api/v1
+    description: SIT placeholder
+security:
+  - oauth2: [cims.read]
+tags:
+  - name: Determination
+  - name: Scheduling
+  - name: Notice
+  - name: Readiness
+  - name: VirtualHearing
+  - name: HearingControl
+  - name: ProviderEvents
+paths:
+  /electronic-hearing-requests:
+    post:
+      tags: [Determination]
+      operationId: createElectronicHearingRequest
+      security: [{oauth2: [determination.request]}]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ElectronicHearingRequestCreate'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/ElectronicHearingRequest'}}}}
+        '400': {$ref: '#/components/responses/ValidationError'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/DuplicateRequest'}
+  /judicial-determinations:
+    post:
+      tags: [Determination]
+      operationId: createJudicialDetermination
+      security: [{oauth2: [determination.write]}]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JudicialDeterminationCreate'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/JudicialDetermination'}}}}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/DuplicateRequest'}
+  /hearings/{hearingId}/availability:
+    get:
+      tags: [Scheduling]
+      operationId: getHearingAvailability
+      security: [{oauth2: [schedule.read]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - name: from
+          in: query
+          required: true
+          schema: {type: string, format: date-time}
+        - name: to
+          in: query
+          required: true
+          schema: {type: string, format: date-time}
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200': {description: Availability, content: {application/json: {schema: {$ref: '#/components/schemas/AvailabilityResult'}}}}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /hearings/{hearingId}/schedule-proposals:
+    post:
+      tags: [Scheduling]
+      operationId: createScheduleProposal
+      security: [{oauth2: [schedule.write]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ScheduleProposalCreate'}
+      responses:
+        '201': {description: Proposal created, content: {application/json: {schema: {$ref: '#/components/schemas/ScheduleProposal'}}}}
+        '409': {$ref: '#/components/responses/DeterminationRequired'}
+  /schedule-proposals/{proposalId}/conflicts:check:
+    post:
+      tags: [Scheduling]
+      operationId: checkScheduleConflicts
+      security: [{oauth2: [schedule.write]}]
+      parameters:
+        - $ref: '#/components/parameters/ProposalId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200': {description: Conflict result, content: {application/json: {schema: {$ref: '#/components/schemas/ConflictCheckResult'}}}}
+  /schedule-proposals/{proposalId}:approve:
+    post:
+      tags: [Scheduling]
+      operationId: approveScheduleProposal
+      security: [{oauth2: [schedule.approve]}]
+      parameters:
+        - $ref: '#/components/parameters/ProposalId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: {type: string, minLength: 3, maxLength: 1000}
+      responses:
+        '200': {description: Active schedule, content: {application/json: {schema: {$ref: '#/components/schemas/HearingSchedule'}}}}
+        '409': {$ref: '#/components/responses/ConflictUnresolved'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+  /hearings/{hearingId}/reschedules:
+    post:
+      tags: [Scheduling]
+      operationId: rescheduleHearing
+      security: [{oauth2: [schedule.approve]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RescheduleCreate'}
+      responses:
+        '201': {description: New schedule version, content: {application/json: {schema: {$ref: '#/components/schemas/HearingSchedule'}}}}
+        '409': {$ref: '#/components/responses/ScheduleNotActive'}
+  /hearings/{hearingId}/official-notices:
+    post:
+      tags: [Notice]
+      operationId: createOfficialNotice
+      security: [{oauth2: [notice.write]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/OfficialNoticeCreate'}
+      responses:
+        '201': {description: Notice created, content: {application/json: {schema: {$ref: '#/components/schemas/OfficialNotice'}}}}
+  /official-notices/{noticeId}/acknowledgments:
+    post:
+      tags: [Notice]
+      operationId: acknowledgeNotice
+      security: [{oauth2: [notice.ack]}]
+      parameters:
+        - $ref: '#/components/parameters/NoticeId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/AcknowledgmentCreate'}
+      responses:
+        '201': {description: Acknowledged, content: {application/json: {schema: {$ref: '#/components/schemas/Acknowledgment'}}}}
+  /hearings/{hearingId}/readiness:
+    put:
+      tags: [Readiness]
+      operationId: upsertReadiness
+      security: [{oauth2: [readiness.write]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ReadinessSubmission'}
+      responses:
+        '200': {description: Readiness updated, content: {application/json: {schema: {$ref: '#/components/schemas/ReadinessResult'}}}}
+  /hearings/{hearingId}/virtual-sessions:
+    post:
+      tags: [VirtualHearing]
+      operationId: createVirtualSession
+      security: [{oauth2: [virtual.write]}]
+      parameters:
+        - $ref: '#/components/parameters/HearingId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/VirtualSessionCreate'}
+      responses:
+        '201': {description: Session record created, content: {application/json: {schema: {$ref: '#/components/schemas/VirtualSession'}}}}
+        '409': {$ref: '#/components/responses/DeterminationRequired'}
+  /virtual-sessions/{sessionId}:provision:
+    post:
+      tags: [VirtualHearing]
+      operationId: provisionVirtualSession
+      security: [{oauth2: [virtual.provision]}]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200': {description: Provisioned, content: {application/json: {schema: {$ref: '#/components/schemas/VirtualSession'}}}}
+        '409': {$ref: '#/components/responses/ScheduleNotActive'}
+        '503': {$ref: '#/components/responses/ProviderUnavailable'}
+  /virtual-sessions/{sessionId}/join-tokens:
+    post:
+      tags: [VirtualHearing]
+      operationId: issueJoinToken
+      security: [{oauth2: [virtual.token.issue]}]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/JoinTokenCreate'}
+      responses:
+        '201': {description: Token issued, content: {application/json: {schema: {$ref: '#/components/schemas/JoinTokenResponse'}}}}
+  /virtual-sessions/{sessionId}:{action}:
+    post:
+      tags: [HearingControl]
+      operationId: controlVirtualSession
+      security: [{oauth2: [hearing.control]}]
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - name: action
+          in: path
+          required: true
+          schema: {type: string, enum: [start, suspend, resume, end]}
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: {type: string, maxLength: 1000}
+      responses:
+        '200': {description: State updated, content: {application/json: {schema: {$ref: '#/components/schemas/VirtualSession'}}}}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '409': {$ref: '#/components/responses/ReadinessIncomplete'}
+  /provider-events/{provider}:
+    post:
+      tags: [ProviderEvents]
+      operationId: receiveProviderEvent
+      security: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema: {type: string, maxLength: 64}
+        - name: X-Provider-Signature
+          in: header
+          required: true
+          schema: {type: string}
+        - name: X-Provider-Timestamp
+          in: header
+          required: true
+          schema: {type: string}
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '202': {description: Accepted}
+        '401': {description: Invalid signature or timestamp}
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://identity.example.go.id/oauth2/token
+          scopes:
+            cims.read: Read basic CIMS data
+            determination.request: Create electronic hearing request
+            determination.write: Record judicial determination
+            schedule.read: Read schedule and availability
+            schedule.write: Create schedule proposal
+            schedule.approve: Approve or reschedule
+            notice.write: Create official notice
+            notice.ack: Acknowledge notice
+            readiness.write: Submit readiness
+            virtual.write: Create virtual session record
+            virtual.provision: Provision provider session
+            virtual.token.issue: Issue participant token
+            hearing.control: Start, suspend, resume, or end hearing
+  parameters:
+    HearingId: {name: hearingId, in: path, required: true, schema: {type: string, format: uuid}}
+    ProposalId: {name: proposalId, in: path, required: true, schema: {type: string, format: uuid}}
+    NoticeId: {name: noticeId, in: path, required: true, schema: {type: string, format: uuid}}
+    SessionId: {name: sessionId, in: path, required: true, schema: {type: string, format: uuid}}
+    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
+    CorrelationId: {name: X-Correlation-ID, in: header, required: false, schema: {type: string, format: uuid}}
+  schemas:
+    ElectronicHearingRequestCreate:
+      type: object
+      required: [case_reference_id, requested_mode, reason]
+      properties:
+        case_reference_id: {type: string, format: uuid}
+        requested_mode: {type: string, enum: [ELECTRONIC, HYBRID]}
+        reason: {type: string, minLength: 10, maxLength: 4000}
+        evidence_references: {type: array, items: {type: string}}
+    ElectronicHearingRequest:
+      allOf:
+        - $ref: '#/components/schemas/ElectronicHearingRequestCreate'
+        - type: object
+          required: [id, status, created_at]
+          properties:
+            id: {type: string, format: uuid}
+            status: {type: string, enum: [SUBMITTED, UNDER_REVIEW, DECIDED, WITHDRAWN]}
+            created_at: {type: string, format: date-time}
+    JudicialDeterminationCreate:
+      type: object
+      required: [hearing_id, decision, mode, effective_at, official_reference, document_hash]
+      properties:
+        hearing_id: {type: string, format: uuid}
+        decision: {type: string, enum: [APPROVED, REJECTED]}
+        mode: {type: string, enum: [IN_PERSON, ELECTRONIC, HYBRID]}
+        reason: {type: string, maxLength: 4000}
+        effective_at: {type: string, format: date-time}
+        official_reference: {type: string, maxLength: 255}
+        document_hash: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+    JudicialDetermination:
+      allOf:
+        - $ref: '#/components/schemas/JudicialDeterminationCreate'
+        - type: object
+          required: [id, version, created_at]
+          properties:
+            id: {type: string, format: uuid}
+            version: {type: integer, minimum: 1}
+            created_at: {type: string, format: date-time}
+    AvailabilityResult:
+      type: object
+      required: [hearing_id, resources, generated_at]
+      properties:
+        hearing_id: {type: string, format: uuid}
+        resources: {type: array, items: {$ref: '#/components/schemas/ResourceAvailability'}}
+        generated_at: {type: string, format: date-time}
+    ResourceAvailability:
+      type: object
+      required: [resource_type, resource_id, status]
+      properties:
+        resource_type: {type: string}
+        resource_id: {type: string}
+        status: {type: string, enum: [AVAILABLE, UNAVAILABLE, UNKNOWN]}
+        reasons: {type: array, items: {type: string}}
+    ScheduleProposalCreate:
+      type: object
+      required: [start_at, end_at, display_timezone, resources]
+      properties:
+        start_at: {type: string, format: date-time}
+        end_at: {type: string, format: date-time}
+        display_timezone: {type: string, example: Asia/Jakarta}
+        resources: {type: array, items: {$ref: '#/components/schemas/ScheduleResource'}}
+        notes: {type: string, maxLength: 2000}
+    ScheduleResource:
+      type: object
+      required: [resource_type, resource_id, requirement]
+      properties:
+        resource_type: {type: string}
+        resource_id: {type: string}
+        requirement: {type: string, enum: [REQUIRED, PREFERRED]}
+    ScheduleProposal:
+      allOf:
+        - $ref: '#/components/schemas/ScheduleProposalCreate'
+        - type: object
+          required: [id, hearing_id, status, version]
+          properties:
+            id: {type: string, format: uuid}
+            hearing_id: {type: string, format: uuid}
+            status: {type: string, enum: [DRAFT, CHECKED, APPROVED, REJECTED, EXPIRED]}
+            version: {type: integer}
+    ConflictCheckResult:
+      type: object
+      required: [proposal_id, status, conflicts]
+      properties:
+        proposal_id: {type: string, format: uuid}
+        status: {type: string, enum: [CLEAR, WARNING, BLOCKED]}
+        conflicts: {type: array, items: {$ref: '#/components/schemas/ScheduleConflict'}}
+    ScheduleConflict:
+      type: object
+      required: [rule_code, severity, message]
+      properties:
+        rule_code: {type: string}
+        severity: {type: string, enum: [INFO, WARNING, REQUIRED]}
+        resource_type: {type: string}
+        resource_id: {type: string}
+        message: {type: string}
+        resolution_options: {type: array, items: {type: string}}
+    HearingSchedule:
+      type: object
+      required: [id, hearing_id, version, status, start_at, end_at]
+      properties:
+        id: {type: string, format: uuid}
+        hearing_id: {type: string, format: uuid}
+        version: {type: integer}
+        status: {type: string, enum: [ACTIVE, SUPERSEDED, CANCELLED]}
+        start_at: {type: string, format: date-time}
+        end_at: {type: string, format: date-time}
+        display_timezone: {type: string}
+    RescheduleCreate:
+      type: object
+      required: [new_start_at, new_end_at, reason, basis_reference]
+      properties:
+        new_start_at: {type: string, format: date-time}
+        new_end_at: {type: string, format: date-time}
+        display_timezone: {type: string}
+        reason: {type: string, minLength: 3, maxLength: 2000}
+        basis_reference: {type: string, maxLength: 255}
+    OfficialNoticeCreate:
+      type: object
+      required: [notice_type, sender_organization_id, recipient_chain, document_reference]
+      properties:
+        notice_type: {type: string, enum: [HEARING_SCHEDULE, RESCHEDULE, APPEAL_READING, OTHER]}
+        sender_organization_id: {type: string, format: uuid}
+        recipient_chain: {type: array, items: {$ref: '#/components/schemas/NoticeRecipient'}}
+        document_reference: {type: string, maxLength: 255}
+        message: {type: string, maxLength: 4000}
+    NoticeRecipient:
+      type: object
+      required: [recipient_type, recipient_reference, sequence]
+      properties:
+        recipient_type: {type: string, enum: [ORGANIZATION, USER, PARTY]}
+        recipient_reference: {type: string}
+        sequence: {type: integer, minimum: 1}
+        official_channel: {type: string}
+    OfficialNotice:
+      allOf:
+        - $ref: '#/components/schemas/OfficialNoticeCreate'
+        - type: object
+          required: [id, status, created_at]
+          properties:
+            id: {type: string, format: uuid}
+            status: {type: string, enum: [DRAFT, SENT, PARTIALLY_ACKNOWLEDGED, ACKNOWLEDGED, FAILED, ESCALATED]}
+            created_at: {type: string, format: date-time}
+    AcknowledgmentCreate:
+      type: object
+      required: [method]
+      properties:
+        method: {type: string, enum: [SYSTEM, ELECTRONIC_SIGNATURE, MANUAL_VERIFIED]}
+        proof_reference: {type: string}
+        note: {type: string, maxLength: 1000}
+    Acknowledgment:
+      allOf:
+        - $ref: '#/components/schemas/AcknowledgmentCreate'
+        - type: object
+          required: [id, acknowledged_at, acknowledged_by]
+          properties:
+            id: {type: string, format: uuid}
+            acknowledged_at: {type: string, format: date-time}
+            acknowledged_by: {type: string, format: uuid}
+    ReadinessSubmission:
+      type: object
+      required: [organization_id, location_id, items]
+      properties:
+        organization_id: {type: string, format: uuid}
+        location_id: {type: string, format: uuid}
+        items: {type: array, items: {$ref: '#/components/schemas/ReadinessItem'}}
+        technical_test: {$ref: '#/components/schemas/TechnicalTest'}
+    ReadinessItem:
+      type: object
+      required: [code, mandatory, result]
+      properties:
+        code: {type: string}
+        mandatory: {type: boolean}
+        result: {type: string, enum: [PASS, FAIL, NOT_APPLICABLE]}
+        evidence_reference: {type: string}
+        note: {type: string}
+    TechnicalTest:
+      type: object
+      properties:
+        latency_ms: {type: number, minimum: 0}
+        jitter_ms: {type: number, minimum: 0}
+        packet_loss_percent: {type: number, minimum: 0, maximum: 100}
+        download_mbps: {type: number, minimum: 0}
+        upload_mbps: {type: number, minimum: 0}
+        audio_result: {type: string, enum: [PASS, FAIL]}
+        video_result: {type: string, enum: [PASS, FAIL]}
+        provider_access_result: {type: string, enum: [PASS, FAIL]}
+    ReadinessResult:
+      type: object
+      required: [hearing_id, status, mandatory_passed]
+      properties:
+        hearing_id: {type: string, format: uuid}
+        status: {type: string, enum: [INCOMPLETE, FAILED, PASSED]}
+        mandatory_passed: {type: boolean}
+        blockers: {type: array, items: {type: string}}
+    VirtualSessionCreate:
+      type: object
+      required: [provider_code, room_template_code]
+      properties:
+        provider_code: {type: string, maxLength: 64}
+        room_template_code: {type: string, maxLength: 64}
+        recording_policy: {type: string, enum: [DISABLED, JUDGE_CONTROLLED, REQUIRED_BY_POLICY]}
+    VirtualSession:
+      type: object
+      required: [id, hearing_id, provider_code, state]
+      properties:
+        id: {type: string, format: uuid}
+        hearing_id: {type: string, format: uuid}
+        provider_code: {type: string}
+        provider_session_reference: {type: string}
+        state: {type: string, enum: [PROVISIONING, READY, STARTED, SUSPENDED, ENDED, FAILED, CANCELLED]}
+        health_status: {type: string, enum: [UNKNOWN, HEALTHY, DEGRADED, DOWN]}
+    JoinTokenCreate:
+      type: object
+      required: [participant_reference, role, room_code, expires_at]
+      properties:
+        participant_reference: {type: string}
+        role: {type: string, enum: [JUDGE, CLERK, PROSECUTOR, CORRECTIONS, ADVOCATE, DEFENDANT, WITNESS, EXPERT, INTERPRETER, IT_SUPPORT]}
+        room_code: {type: string}
+        expires_at: {type: string, format: date-time}
+    JoinTokenResponse:
+      type: object
+      required: [join_url, expires_at]
+      properties:
+        join_url: {type: string, format: uri}
+        expires_at: {type: string, format: date-time}
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, correlation_id]
+          properties:
+            code: {type: string}
+            message: {type: string}
+            correlation_id: {type: string, format: uuid}
+            details: {type: object, additionalProperties: true}
+  responses:
+    ValidationError: {description: Validation error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    Forbidden: {description: Forbidden scope, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    DuplicateRequest: {description: Duplicate request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    DeterminationRequired: {description: Determination required, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    ScheduleNotActive: {description: Active schedule required, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    ConflictUnresolved: {description: Required conflict unresolved, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    ReadinessIncomplete: {description: Readiness incomplete, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}
+    ProviderUnavailable: {description: Provider unavailable, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorEnvelope'}}}}

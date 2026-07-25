@@ -1,0 +1,34 @@
+CIMS v0.19.0 Production Governance and Evidence Phase 6
+Validation date: 2026-07-25
+
+PASS  Repository structure: 25 required baseline files present
+PASS  TypeScript and TSX syntax: 166 files parsed
+PASS  Pure domain compilation
+PASS  Pure domain tests: 30/30
+PASS  Production baseline scan: 14 required files, 271 files scanned
+PASS  Phase 6 baseline scan: 24 required files, 301 files scanned
+PASS  Migration dry-run: 5 ordered migrations with SHA-256 checksums
+PASS  JSON parse: 28 files
+PASS  YAML and OpenAPI parse: 40 files
+PASS  Release manifest: 424 files hashed
+PASS  Retention execution safety: disabled in example production configuration
+PASS  Database lifecycle guards: legal hold, access-review decision, and evidence-export transitions prepared
+PASS  Database grants: API, worker, and auditor governance-table permissions prepared
+PASS  Manual hearing intake remains the primary intake path
+PASS  Future database import remains disabled
+
+NOT RUN  PostgreSQL Phase 6 smoke test because PostgreSQL runtime is unavailable
+NOT RUN  Kubernetes rollout and policy test because Kubernetes is unavailable
+NOT RUN  Docker image build because Docker is unavailable
+NOT RUN  OIDC, KMS/HSM, Zoom sandbox, notification gateway, official-system, and evidence-storage SIT
+NOT RUN  Load, soak, penetration, failover, backup, restore, and cross-institution operational UAT
+
+BLOCKED  Official package-lock generation. npm package-lock-only installation timed out because registry access was unavailable.
+BLOCKED  Full NestJS and React production build. The local source validation reached the Zoom provider build and stopped because the NestJS CLI dependency is not installed.
+
+Release gate:
+- Source and domain validation: GO
+- Official CI and PostgreSQL SIT: CONDITIONAL GO
+- Limited nonproduction pilot: NO-GO until runtime gates and formal sign-off
+- Future database import: NO-GO and disabled
+- Production and real case data: NO-GO

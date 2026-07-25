@@ -1,0 +1,48 @@
+{
+  "name": "cims-platform-ts",
+  "version": "0.19.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run build -w @cims/domain && npm run start:dev -w @cims/api",
+    "dev:web": "npm run dev -w @cims/web",
+    "dev:zoom": "npm run start:dev -w @cims/zoom-provider",
+    "build:packages": "npm run build -w @cims/domain && npm run build -w @cims/contracts",
+    "build:services": "npm run build -w @cims/zoom-provider",
+    "build:apps": "npm run build -w @cims/api && npm run build -w @cims/web",
+    "build": "npm run build:packages && npm run build:services && npm run build:apps",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "test": "npm run test:domain && npm run test -ws --if-present",
+    "test:domain": "npm run build -w @cims/domain && node --test packages/domain/test/*.test.mjs",
+    "check:structure": "node tools/check-structure.mjs",
+    "test:workflow": "npm run build -w @cims/domain && node --test packages/domain/test/*.test.mjs",
+    "check:syntax": "node tools/check-typescript-syntax.mjs",
+    "check:phase2": "npm run check:structure && npm run check:syntax && npm run test:workflow",
+    "check:production": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs",
+    "test:production-domain": "npm run build -w @cims/domain && node --test packages/domain/test/*.test.mjs",
+    "db:migrate:print": "node tools/print-migrations.mjs",
+    "release:manifest": "node tools/release-manifest.mjs",
+    "check:phase4": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase4-baseline.mjs",
+    "db:migrate": "node tools/migrate-postgres.mjs",
+    "db:migrate:dry-run": "node tools/migrate-postgres.mjs --dry-run",
+    "db:migrate:status": "node tools/migration-status.mjs",
+    "release:phase4": "npm run check:phase4 && npm run release:manifest",
+    "dev:worker": "npm run build -w @cims/domain && npm run start:worker:dev -w @cims/api",
+    "test:postgres:phase4": "node tools/postgres-phase4-smoke.mjs",
+    "check:phase5": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase5-baseline.mjs",
+    "release:phase5": "npm run check:phase5 && npm run db:migrate:dry-run && npm run release:manifest",
+    "test:postgres:phase5": "node tools/postgres-phase5-smoke.mjs",
+    "check:phase6": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase6-baseline.mjs",
+    "release:phase6": "npm run check:phase6 && npm run db:migrate:dry-run && npm run release:manifest",
+    "test:governance-domain": "npm run build -w @cims/domain && node --test packages/domain/test/governance.test.mjs",
+    "test:postgres:phase6": "node tools/postgres-phase6-smoke.mjs",
+    "verify:evidence": "node tools/verify-evidence-package.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

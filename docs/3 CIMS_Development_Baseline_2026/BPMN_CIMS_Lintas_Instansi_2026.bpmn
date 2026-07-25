@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CIMS" targetNamespace="http://cims.go.id/bpmn">
+  <bpmn:process id="Process_CIMS_Electronic_Hearing" name="Persidangan Pidana Elektronik Lintas Instansi" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_1" name="Pengadilan">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Determination</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Determination</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Conventional</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Approve</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Notice</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Ready</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Hearing</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_1</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_2" name="Kejaksaan">
+        <bpmn:flowNodeRef>Task_ProsecutorAck</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_3" name="Pemasyarakatan">
+        <bpmn:flowNodeRef>Task_Corrections</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Readiness</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_4" name="Advokat dan Pihak Lain">
+        <bpmn:flowNodeRef>Task_Advocate</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_5" name="CIMS dan Tim TI">
+        <bpmn:flowNodeRef>Task_Case</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Schedule</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Room</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Ack</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Escalate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Log</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Mulai">
+      <bpmn:outgoing>F1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_Case" name="Sinkronisasi referensi perkara">
+      <bpmn:incoming>F1</bpmn:incoming>
+      <bpmn:outgoing>F2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Request" name="Catat permohonan atau keadaan tertentu">
+      <bpmn:incoming>F2</bpmn:incoming>
+      <bpmn:outgoing>F3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Determination" name="Terbitkan penetapan hakim">
+      <bpmn:incoming>F3</bpmn:incoming>
+      <bpmn:outgoing>F4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Determination" name="Elektronik disetujui?">
+      <bpmn:incoming>F4</bpmn:incoming>
+      <bpmn:outgoing>F5</bpmn:outgoing>
+      <bpmn:outgoing>F6</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Conventional" name="Proses non-elektronik">
+      <bpmn:incoming>F5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_Schedule" name="Usulan jadwal dan cek konflik">
+      <bpmn:incoming>F6</bpmn:incoming>
+      <bpmn:outgoing>F7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Approve" name="Sahkan jadwal">
+      <bpmn:incoming>F7</bpmn:incoming>
+      <bpmn:outgoing>F8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="Task_Room" name="Provision ruang virtual">
+      <bpmn:incoming>F8</bpmn:incoming>
+      <bpmn:outgoing>F9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Task_Notice" name="Kirim pemberitahuan resmi">
+      <bpmn:incoming>F9</bpmn:incoming>
+      <bpmn:outgoing>F10</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="Task_ProsecutorAck" name="Ack dan teruskan">
+      <bpmn:incoming>F10</bpmn:incoming>
+      <bpmn:outgoing>F11</bpmn:outgoing>
+      <bpmn:outgoing>F12</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:task id="Task_Corrections" name="Beritahukan terdakwa">
+      <bpmn:incoming>F11</bpmn:incoming>
+      <bpmn:outgoing>F13</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:receiveTask id="Task_Advocate" name="Terima dan ack">
+      <bpmn:incoming>F12</bpmn:incoming>
+      <bpmn:outgoing>F14</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="Gateway_Ack" name="Ack minimum lengkap?">
+      <bpmn:incoming>F13</bpmn:incoming>
+      <bpmn:incoming>F14</bpmn:incoming>
+      <bpmn:incoming>F16</bpmn:incoming>
+      <bpmn:outgoing>F15</bpmn:outgoing>
+      <bpmn:outgoing>F17</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_Escalate" name="Eskalasi dan kanal alternatif">
+      <bpmn:incoming>F15</bpmn:incoming>
+      <bpmn:outgoing>F16</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Readiness" name="Checklist dan uji teknis">
+      <bpmn:incoming>F17</bpmn:incoming>
+      <bpmn:incoming>F19</bpmn:incoming>
+      <bpmn:outgoing>F18</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Ready" name="Siap?">
+      <bpmn:incoming>F18</bpmn:incoming>
+      <bpmn:outgoing>F19</bpmn:outgoing>
+      <bpmn:outgoing>F20</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Hearing" name="Hakim membuka sidang">
+      <bpmn:incoming>F20</bpmn:incoming>
+      <bpmn:outgoing>F21</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_Log" name="Kehadiran, event log, audit">
+      <bpmn:incoming>F21</bpmn:incoming>
+      <bpmn:outgoing>F22</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_1" name="Selesai">
+      <bpmn:incoming>F22</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F1" sourceRef="StartEvent_1" targetRef="Task_Case" />
+    <bpmn:sequenceFlow id="F2" sourceRef="Task_Case" targetRef="Task_Request" />
+    <bpmn:sequenceFlow id="F3" sourceRef="Task_Request" targetRef="Task_Determination" />
+    <bpmn:sequenceFlow id="F4" sourceRef="Task_Determination" targetRef="Gateway_Determination" />
+    <bpmn:sequenceFlow id="F5" sourceRef="Gateway_Determination" targetRef="End_Conventional" name="Tidak" />
+    <bpmn:sequenceFlow id="F6" sourceRef="Gateway_Determination" targetRef="Task_Schedule" name="Ya" />
+    <bpmn:sequenceFlow id="F7" sourceRef="Task_Schedule" targetRef="Task_Approve" />
+    <bpmn:sequenceFlow id="F8" sourceRef="Task_Approve" targetRef="Task_Room" />
+    <bpmn:sequenceFlow id="F9" sourceRef="Task_Room" targetRef="Task_Notice" />
+    <bpmn:sequenceFlow id="F10" sourceRef="Task_Notice" targetRef="Task_ProsecutorAck" />
+    <bpmn:sequenceFlow id="F11" sourceRef="Task_ProsecutorAck" targetRef="Task_Corrections" />
+    <bpmn:sequenceFlow id="F12" sourceRef="Task_ProsecutorAck" targetRef="Task_Advocate" />
+    <bpmn:sequenceFlow id="F13" sourceRef="Task_Corrections" targetRef="Gateway_Ack" />
+    <bpmn:sequenceFlow id="F14" sourceRef="Task_Advocate" targetRef="Gateway_Ack" />
+    <bpmn:sequenceFlow id="F15" sourceRef="Gateway_Ack" targetRef="Task_Escalate" name="Belum" />
+    <bpmn:sequenceFlow id="F16" sourceRef="Task_Escalate" targetRef="Gateway_Ack" name="Ulang" />
+    <bpmn:sequenceFlow id="F17" sourceRef="Gateway_Ack" targetRef="Task_Readiness" name="Ya" />
+    <bpmn:sequenceFlow id="F18" sourceRef="Task_Readiness" targetRef="Gateway_Ready" />
+    <bpmn:sequenceFlow id="F19" sourceRef="Gateway_Ready" targetRef="Task_Readiness" name="Belum" />
+    <bpmn:sequenceFlow id="F20" sourceRef="Gateway_Ready" targetRef="Task_Hearing" name="Ya" />
+    <bpmn:sequenceFlow id="F21" sourceRef="Task_Hearing" targetRef="Task_Log" />
+    <bpmn:sequenceFlow id="F22" sourceRef="Task_Log" targetRef="EndEvent_1" />
+  </bpmn:process>
+</bpmn:definitions>

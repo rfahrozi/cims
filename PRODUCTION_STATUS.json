@@ -1,0 +1,62 @@
+{
+  "version": "0.19.0",
+  "phase": "Production Governance and Evidence Phase 6",
+  "implemented": [
+    "Manual initial hearing intake by the Substitute Clerk remains the primary data source",
+    "Court Clerk maker-checker review and activation remains mandatory",
+    "Production readiness assessment with GO, CONDITIONAL_GO, and NO_GO decisions",
+    "HTTP 503 readiness behavior for blocking production checks",
+    "Legal hold create, list, and maker-checker release workflow",
+    "Retention policy and retention preview without automated deletion",
+    "Evidence export queue, worker processing, SHA-256 object hash, and deterministic manifest",
+    "Access review campaigns with KEEP and REVOKE decisions and self-approval prevention",
+    "Production readiness snapshots",
+    "Circuit breakers for notification, official-system, video-provider, and evidence-storage integrations",
+    "PostgreSQL RLS, immutable records, and governance persistence migration",
+    "React and shadcn/ui production governance workspace",
+    "Restricted Kubernetes namespace example, resource quota, limit range, and separated production secrets",
+    "One-way database lifecycle guards for legal holds, access review decisions, and evidence export status",
+    "Database role grants extended for API, worker, and auditor governance access"
+  ],
+  "future_database_import": {
+    "enabled": false,
+    "adapter": "DISABLED",
+    "operating_mode": "READ_ONLY_WHEN_FUTURE_APPROVAL_EXISTS"
+  },
+  "retention": {
+    "execution_enabled": false,
+    "preview_available": true,
+    "legal_hold_blocks_disposition": true
+  },
+  "validation": {
+    "repository_structure": "PASS_25_REQUIRED_FILES",
+    "typescript_syntax": "PASS_166_FILES",
+    "pure_domain_tests": "PASS_30_OF_30",
+    "production_baseline": "PASS",
+    "phase6_static_baseline": "PASS_24_REQUIRED_FILES",
+    "yaml_json_openapi": "PASS_28_JSON_40_YAML",
+    "migration_dry_run": "PASS_5_MIGRATIONS",
+    "release_manifest": "PASS_424_FILES_HASHED",
+    "official_package_lock": "BLOCKED_REGISTRY_TIMEOUT",
+    "full_nestjs_react_zoom_build": "BLOCKED_DEPENDENCIES_UNAVAILABLE",
+    "postgresql_phase6_smoke": "PREPARED_NOT_RUN",
+    "runtime_integrations": "NOT_RUN"
+  },
+  "production_blockers": [
+    "Generate, review, and commit the official package-lock.json through trusted CI",
+    "Run the full NestJS, React/Vite, contracts, domain, and Zoom-provider build",
+    "Apply all migrations to PostgreSQL 17 and run RLS, immutability, legal-hold, evidence-export, and access-review smoke tests",
+    "Validate OIDC role mapping, KMS or HSM secrets, field encryption, and key rotation",
+    "Connect Zoom sandbox, notification gateway, official-system sandbox, and evidence object storage",
+    "Run load, soak, penetration, failover, backup, restore, and disaster recovery rehearsal",
+    "Complete operational UAT and formal sign-off by the Court, Prosecution, Corrections, Security, Privacy, Infrastructure, and authorized officials"
+  ],
+  "release_decision": {
+    "source_and_domain_validation": "GO",
+    "official_ci_and_postgresql_sit": "CONDITIONAL_GO",
+    "limited_nonproduction_pilot": "NO_GO_UNTIL_RUNTIME_GATES",
+    "future_database_import": "NO_GO_DISABLED",
+    "production_and_real_case_data": "NO_GO"
+  },
+  "production_ready": false
+}

@@ -1,0 +1,63 @@
+name: production-ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: cims_test
+          POSTGRES_USER: cims
+          POSTGRES_PASSWORD: cims
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cims -d cims_test"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://cims:cims@localhost:5432/cims_test
+      PERSISTENCE_MODE: POSTGRES
+      NODE_ENV: test
+      AUDIT_HASH_KEY: ci-audit-key-with-sufficient-length
+      TOKEN_PEPPER: ci-token-pepper-with-sufficient-length
+      FIELD_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      WEBHOOK_SHARED_SECRET: ci-webhook-shared-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "::warning::package-lock.json is not present. Falling back to npm install. Production release remains blocked until a reviewed lockfile is committed."
+            npm install --no-audit --no-fund
+          fi
+      - run: npm run check:phase6
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Apply checksum-verified migrations
+        run: npm run db:migrate
+      - name: Verify migration idempotency
+        run: npm run db:migrate
+      - name: PostgreSQL Phase 4 smoke test
+        run: npm run test:postgres:phase4
+      - name: PostgreSQL Phase 5 hearing intake smoke test
+        run: npm run test:postgres:phase5
+      - name: PostgreSQL Phase 6 governance smoke test
+        run: npm run test:postgres:phase6
+      - run: npm audit --audit-level=high
+      - run: npm run release:manifest
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-manifest
+          path: RELEASE_MANIFEST_SHA256.txt

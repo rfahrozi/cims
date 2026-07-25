@@ -1,0 +1,99 @@
+openapi: 3.1.0
+info:
+  title: CIMS Zoom Provider Adapter
+  version: 0.13.0
+  description: Zoom REST implementation of the provider-neutral CIMS video contract.
+servers:
+  - url: http://localhost:4200
+paths:
+  /health:
+    get:
+      summary: OAuth and capability health
+      responses:
+        '200': {description: Healthy}
+        '503': {description: Missing credentials or Zoom unavailable}
+  /sessions:
+    post:
+      summary: Create a scheduled Zoom meeting
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [hearing_reference, start_at, end_at]
+              properties:
+                hearing_reference: {type: string}
+                start_at: {type: string, format: date-time}
+                end_at: {type: string, format: date-time}
+                recording_policy: {type: string, enum: [DISABLED, COURT_CONTROLLED]}
+      responses:
+        '201': {description: Meeting created}
+  /sessions/{sessionRef}/rooms:
+    post:
+      summary: Create a logical CIMS room and Zoom breakout preassignment target
+      parameters:
+        - in: path
+          name: sessionRef
+          required: true
+          schema: {type: string}
+      responses:
+        '201': {description: Logical room created}
+  /sessions/{sessionRef}/access:
+    post:
+      summary: Register a participant and return a unique Zoom join URL
+      parameters:
+        - in: path
+          name: sessionRef
+          required: true
+          schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participant_reference, participant_email, participant_name, role, room_reference, expires_at]
+              properties:
+                participant_reference: {type: string}
+                participant_email: {type: string, format: email}
+                participant_name: {type: string}
+                role: {type: string}
+                room_reference: {type: string}
+                expires_at: {type: string, format: date-time}
+      responses:
+        '201': {description: Unique registrant access created}
+        '400': {description: Email or request invalid}
+  /access/{accessRef}/move:
+    post:
+      summary: Update pre-meeting breakout assignment
+      description: Live Waiting Room admission and live breakout movement return CAPABILITY_NOT_SUPPORTED.
+      parameters:
+        - in: path
+          name: accessRef
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: Preassignment updated}
+        '409': {description: Manual host action required}
+  /access/{accessRef}/revoke:
+    post:
+      summary: Cancel Zoom registrant access
+      parameters:
+        - in: path
+          name: accessRef
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: Access revoked}
+  /webhooks/zoom:
+    post:
+      summary: Zoom URL validation and signed event endpoint
+      responses:
+        '200': {description: Accepted or validation challenge answered}
+        '401': {description: Signature invalid}

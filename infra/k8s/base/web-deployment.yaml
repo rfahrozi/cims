@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: cims-web, labels: { app: cims-web } }
+spec:
+  replicas: 2
+  strategy: { type: RollingUpdate, rollingUpdate: { maxUnavailable: 0, maxSurge: 1 } }
+  selector: { matchLabels: { app: cims-web } }
+  template:
+    metadata: { labels: { app: cims-web } }
+    spec:
+      serviceAccountName: cims-web
+      automountServiceAccountToken: false
+      securityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: web
+          image: registry.example/cims/web:0.19.0
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 10, failureThreshold: 3 }
+          livenessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 20, failureThreshold: 3 }
+          resources: { requests: { cpu: 50m, memory: 64Mi }, limits: { cpu: 300m, memory: 192Mi } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          volumeMounts: [{ name: tmp, mountPath: /tmp }]
+      volumes: [{ name: tmp, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: cims-web }
+spec: { selector: { app: cims-web }, ports: [{ name: http, port: 80, targetPort: http }] }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: cims-web-pdb }
+spec: { minAvailable: 1, selector: { matchLabels: { app: cims-web } } }
