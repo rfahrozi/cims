@@ -155,6 +155,23 @@ export class SchedulingService {
     };
   }
 
+  async listCalendar(user: CurrentUser, from: string, to: string, organizationId?: string) {
+    // Audit dan read permissions diperiksa melalui transactionAs di repository (RBAC via assignment)
+    const schedules = await this.core.listCalendar(user, from, to, organizationId);
+    return schedules.map(s => ({
+      id: s.id,
+      hearing_id: s.hearingId,
+      case_number: s.caseNumber,
+      case_title: s.caseTitle,
+      hearing_type: s.hearingType,
+      start_at: s.startAt,
+      end_at: s.endAt,
+      display_timezone: s.displayTimezone,
+      status: s.status,
+      resources: s.resources,
+    }));
+  }
+
   private publicProposal(proposal: Awaited<ReturnType<CoreWorkflowRepository['createProposal']>>) {
     return {
       id: proposal.id,

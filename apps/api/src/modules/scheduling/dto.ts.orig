@@ -28,8 +28,3 @@ export class ApproveProposalDto {
   @IsOptional() @IsInt() @Min(1) expected_row_version?: number;
 }
 
-export class CalendarQueryDto {
-  @IsISO8601() from!: string;
-  @IsISO8601() to!: string;
-  @IsOptional() @IsString() organization_id?: string;
-}

@@ -26,10 +26,13 @@ import { GovernancePage } from '@/pages/governance';
 import { ZoomPage } from '@/pages/zoom';
 import { MigrationPage } from '@/pages/migration';
 
+import { CalendarPage } from '@/pages/calendar';
+
 // ── Menu utama — ditampilkan ke semua pengguna operasional ──────────────────
 // Urutan mengikuti alur kerja sidang elektronik (SOP 10.1 s/d 10.15)
 const nav = [
   ['/dashboard',        'Dashboard',              LayoutDashboard],
+  ['/calendar',         'Kalender Lintas Instansi', CalendarDays], // H-04
   ['/hearing-intake',   'Data Persidangan',       FilePenLine],
   ['/determination',    'Penetapan Hakim',        Scale],
   ['/scheduling',       'Jadwal Sidang',          CalendarDays],
@@ -80,6 +83,7 @@ export default function App() {
       <Routes>
         {/* ── Alur utama sidang elektronik ── */}
         <Route path="/dashboard"       element={<DashboardPage />} />
+        <Route path="/calendar"        element={<CalendarPage />} />
         <Route path="/hearing-intake"  element={<HearingIntakePage />} />
         <Route path="/determination"   element={<DeterminationPage />} />
         <Route path="/scheduling"      element={<SchedulingPage />} />

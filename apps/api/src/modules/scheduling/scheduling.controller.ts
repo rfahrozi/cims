@@ -1,13 +1,21 @@
-import { Body, Controller, Headers, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUserContext, type CurrentUser } from '../../common/current-user.decorator.js';
-import { ApproveProposalDto, CheckProposalDto, CreateProposalDto } from './dto.js';
+import { ApproveProposalDto, CalendarQueryDto, CheckProposalDto, CreateProposalDto } from './dto.js';
 import { SchedulingService } from './scheduling.service.js';
 
 @ApiTags('scheduling')
 @Controller()
 export class SchedulingController {
   constructor(private readonly service: SchedulingService) {}
+
+  @Get('calendar')
+  calendar(
+    @CurrentUserContext() user: CurrentUser,
+    @Query() query: CalendarQueryDto,
+  ) {
+    return this.service.listCalendar(user, query.from, query.to, query.organization_id);
+  }
 
   @Post('hearings/:hearingId/schedule-proposals')
   create(

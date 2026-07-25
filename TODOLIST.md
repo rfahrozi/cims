@@ -83,10 +83,10 @@
   - Tabel `hearing_agenda_items` (hearing_id, sequence, item_type, dll.) di `0011_hearing_agenda_items.sql`
   - DTO `SaveAgendaDto` dan Endpoint `/hearings/:id/agenda`
 
-- [ ] **H-04** · Kalender multi-hearing cross-satker
-  - Tambah `GET /calendar?from=&to=&organization_id=` — semua jadwal aktif dalam rentang waktu
-  - Tambah halaman kalender di frontend (weekly/monthly view)
-  - _Estimasi: 2 hari_
+- [x] **H-04** · Kalender multi-hearing cross-satker ✅ _Selesai 26 Jul 2026_
+  - Tambah endpoint `GET /calendar?from=&to=&organization_id=`
+  - Dukungan filter RBAC
+  - Halaman kalender interaktif di frontend (CalendarPage)
 
 ### Saksi, Ahli, Penerjemah (SOP 10.9)
 
@@ -129,10 +129,11 @@
   - Pertimbangkan tambah Keycloak container ke `docker-compose.preproduction.yml`
   - _Estimasi: 1–2 hari_
 
-- [ ] **H-12** · Advocate location enforcement (SOP 10.8)
+- [x] **H-12** · Advocate location enforcement (SOP 10.8) ✅ _Selesai 25 Jul 2026_
   - Advokat di lokasi lain dari terdakwa harus ada penetapan hakim terpisah
-  - Tambah `location_basis_determination_id` di `participant_locations`
-  - _Estimasi: 0.5 hari_
+  - Tambah fungsi `assertAdvocateLocation` di domain `participants.ts`
+  - Validasi saat memanggil endpoint `POST /hearings/:hearingId/participants/:id/location`
+  - Form khusus di UI `participants.tsx` untuk mengisi Lokasi Advokat dan Referensi Penetapan Hakim
 
 ---
 

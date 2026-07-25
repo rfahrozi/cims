@@ -700,6 +700,85 @@ export class CoreWorkflowRepository {
     };
   }
 
+  async listCalendar(
+    user: CurrentUser,
+    from: string,
+    to: string,
+    organizationId?: string,
+  ): Promise<Array<ScheduleRecord & { caseNumber: string; hearingType: string; caseTitle?: string }>> {
+    if (!this.mode.postgres) {
+      // Memory mock — kembalikan semua jadwal aktif
+      const schedules = this.memory.schedules.filter(s => s.status === 'ACTIVE' && s.startAt >= from && s.startAt <= to);
+      return schedules.map(s => {
+        const hearing = this.memory.hearings.find(h => h.id === s.hearingId);
+        return {
+          ...s,
+          displayTimezone: (s as Partial<ScheduleRecord>).displayTimezone ?? 'Asia/Jakarta',
+          approvalReason: (s as Partial<ScheduleRecord>).approvalReason ?? 'mock',
+          approvedBy: (s as Partial<ScheduleRecord>).approvedBy ?? 'mock',
+          approvedAt: (s as Partial<ScheduleRecord>).approvedAt ?? new Date().toISOString(),
+          rowVersion: 1,
+          caseNumber: hearing?.caseNumber ?? 'Unknown',
+          hearingType: hearing?.type ?? 'Unknown',
+          caseTitle: hearing?.caseTitle,
+        };
+      });
+    }
+    return this.pg.transactionAs(user, async (client) => {
+      // H-04: Query join jadwal aktif dengan hearings dan assignment
+      // Memfilter berdasarkan rentang waktu, dan memverifikasi akses (RBAC/Assignment)
+      const params: unknown[] = [from, to];
+      let orgFilter = '';
+      if (organizationId) {
+        params.push(organizationId);
+        orgFilter = `and exists(select 1 from hearing_assignments ha where ha.hearing_id=s.hearing_id and ha.organization_id=$3 and ha.active=true)`;
+      }
+
+      // Filter hak akses: SYSTEM_ADMIN bisa semua, lainnya hanya yg di-assign
+      let accessFilter = '';
+      if (!user.roles.includes('SYSTEM_ADMIN')) {
+        params.push(user.organizationIds);
+        accessFilter = `and exists(select 1 from hearing_assignments ha2 where ha2.hearing_id=s.hearing_id and ha2.organization_id = any($${params.length}))`;
+      }
+
+      const result = await client.query(
+        `select s.id, s.hearing_id, s.start_at::text, s.end_at::text, s.display_timezone,
+                s.version, s.status, s.approval_reason, s.approved_by, s.approved_at::text, s.row_version,
+                h.case_number, h.hearing_type, c.case_title
+           from hearing_schedules s
+           join hearings h on h.id = s.hearing_id
+      left join court_cases c on c.id = h.case_id
+          where s.status = 'ACTIVE'
+            and s.start_at >= $1::timestamptz
+            and s.start_at <= $2::timestamptz
+            ${orgFilter}
+            ${accessFilter}
+          order by s.start_at asc`,
+        params,
+      );
+
+      return Promise.all(result.rows.map(async row => {
+        // Fetch resources for each schedule (n+1 tapi jumlah record dibatasi by daterange)
+        const resourceRows = await client.query(
+          `select resource_type,resource_id,requirement from hearing_schedule_resources where schedule_id=$1`,
+          [row.id],
+        );
+        const resources = resourceRows.rows.map(r => ({
+          resourceType: String(r.resource_type) as ScheduleResource['resourceType'],
+          resourceId: String(r.resource_id),
+          requirement: String(r.requirement) as ScheduleResource['requirement'],
+        }));
+
+        return {
+          ...this.mapSchedule(row, resources),
+          caseNumber: String(row.case_number),
+          hearingType: String(row.hearing_type),
+          caseTitle: row.case_title ? String(row.case_title) : undefined,
+        };
+      }));
+    });
+  }
+
   async getAgendaItems(hearingId: string, user: CurrentUser): Promise<HearingAgendaItemRecord[]> {
     if (!this.mode.postgres) {
       return this.memory.hearingAgendaItems.filter((i) => i.hearingId === hearingId).sort((a, b) => a.sequenceNumber - b.sequenceNumber);
