@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
-import { CIMS_ROLES, type CimsRole } from '@cims/domain';
+import { CIMS_ROLES, MFA_REQUIRED_ROLES, type CimsRole } from '@cims/domain';
 import type { CurrentUser } from './current-user.decorator.js';
 
 @Injectable()
@@ -109,6 +109,25 @@ export class OidcTokenVerifierService {
       throw new UnauthorizedException(
         'Missing organization_ids claim. Cannot establish data boundary.'
       );
+
+    // H-11 / Sprint 11: MFA validation via ACR/AMR claims
+    const hasMfaRole = roles.some((role) => MFA_REQUIRED_ROLES.includes(role));
+    if (hasMfaRole) {
+      // Keycloak AMR usually array like ['pwd', 'otp'] or ['pwd', 'mfa']
+      const amr = payload.amr as unknown;
+      const amrArray = Array.isArray(amr) ? amr.map(String) : [];
+      // Keycloak ACR is typically '1' (password), '2' (MFA), etc
+      const acr = payload.acr ? String(payload.acr).toLowerCase() : '';
+
+      const mfaViaAmr = amrArray.includes('otp') || amrArray.includes('mfa');
+      const mfaViaAcr = acr === '2' || acr === 'mfa';
+
+      if (!mfaViaAmr && !mfaViaAcr) {
+        throw new UnauthorizedException(
+          'MFA_REQUIRED: Multi-Factor Authentication is strictly required for your role. Your token lacks MFA claims (acr/amr).'
+        );
+      }
+    }
 
     return {
       id: payload.sub,

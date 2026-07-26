@@ -11,10 +11,7 @@ describe('InfrastructureModule', () => {
     process.env.PERSISTENCE_MODE = 'MEMORY';
 
     const testingModule = await Test.createTestingModule({
-      imports: [
-        EventEmitterModule.forRoot(),
-        InfrastructureModule
-      ]
+      imports: [EventEmitterModule.forRoot(), InfrastructureModule]
     })
       .overrideProvider(ConfigService)
       .useValue({

@@ -10,7 +10,7 @@ export interface ReconciliationRunRecord {
   id: string;
   hearingId: string;
   sourceSystem: string;
-  status: 'REQUESTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  status: 'REQUESTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'RESOLVED';
   requestedBy: string;
   requestedAt: string;
   startedAt?: string;
@@ -112,6 +112,22 @@ export class ReconciliationRepository {
       return item;
     }
     return this.pg.transactionAs(user, (client) => this.getWithClient(id, client));
+  }
+
+  async resolve(id: string, user: CurrentUser): Promise<void> {
+    if (!this.mode.postgres) {
+      const item = this.memory.get(id);
+      if (!item) throw new NotFoundException('Reconciliation run not found');
+      item.status = 'RESOLVED';
+      return;
+    }
+    await this.pg.transactionAs(user, async (client) => {
+      const result = await client.query(
+        `update reconciliation_runs set status='RESOLVED' where id=$1 returning id`,
+        [id]
+      );
+      if (result.rowCount === 0) throw new NotFoundException('Reconciliation run not found');
+    });
   }
 
   async claimForProcessing(

@@ -28,6 +28,16 @@ type Participant = {
   role: string;
   state: string;
   protectedIdentity: boolean;
+  agendaItemId?: string;
+};
+
+type AgendaItem = {
+  id: string;
+  sequenceNumber: number;
+  itemType: string;
+  itemDescription: string;
+  estimatedDurationMinutes: number;
+  status: string;
 };
 
 const ROLE_LABEL: Record<string, string> = {
@@ -63,6 +73,7 @@ export function ParticipantsPage() {
   const [token, setToken] = useState('');
   const [error, setError] = useState<unknown>(null);
   const [success, setSuccess] = useState('');
+  const [agendaItemId, setAgendaItemId] = useState('NONE');
 
   // H-12: Location state untuk advokat / pihak lain
   const [locationType, setLocationType] = useState('COURT');
@@ -72,6 +83,12 @@ export function ParticipantsPage() {
   const query = useQuery({
     queryKey: ['participants', hearingId],
     queryFn: () => api<Participant[]>(`/hearings/${hearingId}/participants`),
+    enabled: Boolean(hearingId)
+  });
+
+  const agendaQuery = useQuery({
+    queryKey: ['hearing-agenda', hearingId],
+    queryFn: () => api<AgendaItem[]>(`/hearings/${hearingId}/agenda`),
     enabled: Boolean(hearingId)
   });
 
@@ -102,7 +119,8 @@ export function ParticipantsPage() {
           displayName: displayName.trim(),
           role,
           protectedIdentity,
-          alias: protectedIdentity ? alias.trim() : undefined
+          alias: protectedIdentity ? alias.trim() : undefined,
+          agenda_item_id: agendaItemId !== 'NONE' ? agendaItemId : undefined
         })
       });
 
@@ -238,6 +256,31 @@ export function ParticipantsPage() {
               )}
             </div>
 
+            {/* M-06: Form Pengaitan Agenda Item untuk WITNESS dan EXPERT */}
+            {(role === 'WITNESS' || role === 'EXPERT') && (
+              <div className="space-y-2 rounded-lg border border-purple-100 bg-purple-50/50 p-3">
+                <Label className="text-xs text-purple-900">Kaitkan ke Agenda (M-06)</Label>
+                <Select value={agendaItemId} onValueChange={setAgendaItemId}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NONE">— Berlaku Umum / Seluruh Agenda —</SelectItem>
+                    {agendaQuery.data?.map((agenda) => (
+                      <SelectItem key={agenda.id} value={agenda.id}>
+                        {agenda.sequenceNumber}. {agenda.itemType} (
+                        {agenda.estimatedDurationMinutes} mnt)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-purple-700 leading-tight">
+                  Tautkan peserta ke agenda sidang spesifik. Berguna untuk manajemen antrian
+                  multi-agenda.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-3 rounded-lg border border-blue-100 bg-blue-50/50 p-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-blue-900">Lokasi Fisik Peserta (SOP 10.8)</Label>
@@ -339,7 +382,16 @@ export function ParticipantsPage() {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-slate-500">{ROLE_LABEL[p.role] ?? p.role}</div>
+                    <div className="text-xs text-slate-500">
+                      {ROLE_LABEL[p.role] ?? p.role}
+                      {p.agendaItemId && (
+                        <span className="ml-2 px-1.5 py-0.5 rounded border border-purple-200 bg-purple-50 text-purple-700 font-medium">
+                          Agenda{' '}
+                          {agendaQuery.data?.find((a) => a.id === p.agendaItemId)?.sequenceNumber ??
+                            'Spesifik'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <Badge variant={STATE_VARIANT[p.state] ?? 'outline'}>{p.state}</Badge>
                 </div>

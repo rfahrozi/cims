@@ -12,13 +12,23 @@ export class PgPoolService implements OnApplicationShutdown {
     const url = secretValue(config, 'DATABASE_URL');
     this.pool = new Pool({
       connectionString: url,
-      max: Number(config && config.get ? config.get<string>('DB_POOL_MAX') ?? 20 : 20),
-      min: Number(config && config.get ? config.get<string>('DB_POOL_MIN') ?? 0 : 0),
-      idleTimeoutMillis: Number(config && config.get ? config.get<string>('DB_IDLE_TIMEOUT_MS') ?? 30_000 : 30_000),
-      connectionTimeoutMillis: Number(config && config.get ? config.get<string>('DB_CONNECTION_TIMEOUT_MS') ?? 5_000 : 5_000),
-      statement_timeout: Number(config && config.get ? config.get<string>('DB_STATEMENT_TIMEOUT_MS') ?? 15_000 : 15_000),
-      query_timeout: Number(config && config.get ? config.get<string>('DB_QUERY_TIMEOUT_MS') ?? 20_000 : 20_000),
-      application_name: (config && config.get ? config.get<string>('DB_APPLICATION_NAME') : undefined) ?? 'cims-api',
+      max: Number(config && config.get ? (config.get<string>('DB_POOL_MAX') ?? 20) : 20),
+      min: Number(config && config.get ? (config.get<string>('DB_POOL_MIN') ?? 0) : 0),
+      idleTimeoutMillis: Number(
+        config && config.get ? (config.get<string>('DB_IDLE_TIMEOUT_MS') ?? 30_000) : 30_000
+      ),
+      connectionTimeoutMillis: Number(
+        config && config.get ? (config.get<string>('DB_CONNECTION_TIMEOUT_MS') ?? 5_000) : 5_000
+      ),
+      statement_timeout: Number(
+        config && config.get ? (config.get<string>('DB_STATEMENT_TIMEOUT_MS') ?? 15_000) : 15_000
+      ),
+      query_timeout: Number(
+        config && config.get ? (config.get<string>('DB_QUERY_TIMEOUT_MS') ?? 20_000) : 20_000
+      ),
+      application_name:
+        (config && config.get ? config.get<string>('DB_APPLICATION_NAME') : undefined) ??
+        'cims-api',
       ssl:
         (config && config.get ? config.get<string>('DB_SSL') : undefined) === 'true'
           ? { rejectUnauthorized: config.get<string>('DB_SSL_REJECT_UNAUTHORIZED') !== 'false' }

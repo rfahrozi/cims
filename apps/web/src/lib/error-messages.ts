@@ -18,6 +18,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     'Layanan video konferensi sedang tidak tersedia. Hubungi Tim TI untuk pemulihan.',
 
   // ── Auth & akses ─────────────────────────────────────────────────────────
+  MFA_REQUIRED:
+    'Sistem menolak akses karena peran Anda mewajibkan Multi-Factor Authentication (MFA). Harap login ulang dengan opsi keamanan tambahan (OTP/Authenticator).',
   FORBIDDEN:
     'Aksi ini tidak diizinkan untuk peran Anda saat ini. Pastikan persona/peran yang aktif sudah sesuai.',
   UNAUTHORIZED: 'Sesi Anda telah habis. Silakan masuk kembali.',
@@ -39,6 +41,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   CONFLICT_UNRESOLVED:
     'Terdapat konflik jadwal yang belum diselesaikan. Ubah waktu atau resource sebelum menyetujui jadwal.',
   INVALID_HEARING_TRANSITION: 'Aksi tidak dapat dilakukan pada status sidang saat ini.',
+  DOCUMENTATION_ALREADY_FLAGGED: 'Sidang ini sudah ditandai sebagai dokumentasi tertunda.',
+  DOCUMENTATION_NOT_PENDING: 'Sidang tidak sedang dalam status dokumentasi tertunda.',
 
   // ── Peserta & sesi ───────────────────────────────────────────────────────
   INVALID_PARTICIPANT_TRANSITION: 'Perubahan status peserta tidak diizinkan dari status saat ini.',

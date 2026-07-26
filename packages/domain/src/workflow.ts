@@ -112,10 +112,13 @@ export function transitionHearing(
     READY: { START: 'STARTED', POSTPONE: 'POSTPONED' },
     STARTED: { SUSPEND: 'SUSPENDED', END: 'ENDED', POSTPONE: 'POSTPONED' },
     SUSPENDED: { RESUME: 'STARTED', END: 'ENDED', POSTPONE: 'POSTPONED' },
-    ENDED: {},
-    POSTPONED: {}
+    ENDED: { FLAG_DOCUMENTATION: 'DOCUMENTATION_PENDING' },
+    POSTPONED: {},
+    // Dari DOCUMENTATION_PENDING: bisa diselesaikan (kembali ke ENDED/final)
+    // atau di-flag ulang jika ada kelengkapan tambahan
+    DOCUMENTATION_PENDING: { COMPLETE_DOCUMENTATION: 'ENDED' }
   };
-  const next = transitions[current][action];
+  const next = transitions[current]?.[action];
   if (!next) {
     throw new DomainError(
       'INVALID_HEARING_TRANSITION',

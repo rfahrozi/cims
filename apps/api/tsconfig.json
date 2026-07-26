@@ -6,7 +6,7 @@
     "declaration": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "rootDir": "./src",
     "incremental": true,
     "strict": true,
     "experimentalDecorators": true,

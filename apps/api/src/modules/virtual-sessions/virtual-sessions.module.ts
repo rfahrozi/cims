@@ -9,7 +9,14 @@ import { VirtualSessionsController } from './virtual-sessions.controller.js';
 import { VirtualSessionsService } from './virtual-sessions.service.js';
 
 @Module({
-  imports: [PersistenceModule, ObservabilityModule, IntegrationModule, HearingsModule, NoticesModule, ReadinessModule],
+  imports: [
+    PersistenceModule,
+    ObservabilityModule,
+    IntegrationModule,
+    HearingsModule,
+    NoticesModule,
+    ReadinessModule
+  ],
   controllers: [VirtualSessionsController],
   providers: [VirtualSessionsService],
   exports: [VirtualSessionsService]

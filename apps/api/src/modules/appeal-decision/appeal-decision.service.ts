@@ -204,12 +204,10 @@ export class AppealDecisionService {
   ) {
     // Semua peran yang terlibat dalam rantai pemberitahuan bisa mengupdate status
     requireRoles(user, ['COURT_CLERK', 'PROSECUTOR', 'CORRECTIONS', 'SUBSTITUTE_CLERK']);
-    const steps = await this.repository.listNoticeSteps(
-      // Cari reading_id dari step — buat query sederhana via getById nanti di postgres
-      stepId,
-      user
-    );
-    // Dalam memory mode, stepId digunakan sebagai readingId — pakai updateNoticeStep langsung
+
+    // Ambil step terlebih dahulu untuk mendapatkan readingId yang benar
+    const existingStep = await this.repository.getNoticeStepById(stepId, user);
+
     const step = await this.repository.updateNoticeStep(
       stepId,
       dto.status,
@@ -217,16 +215,21 @@ export class AppealDecisionService {
       user
     );
 
-    await this.audit.record(
-      'APPEAL_NOTICE_STEP_UPDATED',
-      'APPEAL_NOTICE_STEP',
-      stepId,
-      user,
+    await this.audit.append(
       {
-        status: dto.status,
-        receipt_reference: dto.receipt_reference
+        eventType: 'APPEAL_NOTICE_STEP_ACKNOWLEDGED',
+        objectType: 'APPEAL_NOTICE_STEP',
+        objectId: existingStep.readingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          step_id: stepId,
+          status: dto.status,
+          receipt_reference: dto.receipt_reference
+        }
       },
-      correlationId
+      user
     );
 
     return step;

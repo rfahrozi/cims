@@ -58,6 +58,7 @@ export class ParticipantsService {
         displayName: dto.displayName,
         alias: dto.alias,
         protectedIdentity: dto.protectedIdentity,
+        agendaItemId: dto.agendaItemId,
         contactEmail: dto.contactEmail,
         createdBy: user.id
       },

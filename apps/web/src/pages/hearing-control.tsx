@@ -1,9 +1,8 @@
 import { useState, type ChangeEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Gavel, AlertTriangle } from 'lucide-react';
+import { FileCheck2, FileWarning, Gavel, AlertTriangle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
-import { errorMessage } from '@/lib/error-messages';
 import { PageHeader } from '@/components/page-header';
 import { AlertBanner } from '@/components/alert-banner';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 type RuntimeEvent = { id: string; eventType: string; occurredAt: string; reason?: string };
 type RuntimeState = { state: string; events: RuntimeEvent[] };
@@ -45,7 +45,18 @@ const STATE_VARIANT: Record<string, 'success' | 'warning' | 'destructive' | 'out
   SUSPENDED: 'warning',
   NOT_READY: 'outline',
   ENDED: 'outline',
-  POSTPONED: 'destructive'
+  POSTPONED: 'destructive',
+  DOCUMENTATION_PENDING: 'warning'
+};
+
+const STATE_LABEL: Record<string, string> = {
+  NOT_READY: 'Belum Siap',
+  READY: 'Siap',
+  STARTED: 'Berlangsung',
+  SUSPENDED: 'Diskors',
+  ENDED: 'Selesai',
+  POSTPONED: 'Ditunda',
+  DOCUMENTATION_PENDING: 'Dokumentasi Tertunda'
 };
 
 const EVENT_LABEL: Record<string, string> = {
@@ -53,7 +64,9 @@ const EVENT_LABEL: Record<string, string> = {
   HEARING_SUSPENDED: 'Sidang diskors',
   HEARING_RESUMED: 'Sidang dilanjutkan',
   HEARING_ENDED: 'Sidang ditutup',
-  HEARING_POSTPONED: 'Sidang ditunda'
+  HEARING_POSTPONED: 'Sidang ditunda',
+  HEARING_DOCUMENTATION_FLAGGED: 'Dokumentasi ditandai tertunda',
+  HEARING_DOCUMENTATION_COMPLETED: 'Dokumentasi dinyatakan lengkap'
 };
 
 export function HearingControlPage() {
@@ -61,9 +74,11 @@ export function HearingControlPage() {
   const client = useQueryClient();
 
   const [reason, setReason] = useState('');
+  const [docNote, setDocNote] = useState('');
   const [error, setError] = useState<unknown>(null);
   const [success, setSuccess] = useState('');
   const [pending, setPending] = useState<keyof typeof CONFIRM_ACTIONS | null>(null);
+  const [showFlagDialog, setShowFlagDialog] = useState(false);
 
   const query = useQuery({
     queryKey: ['runtime', hearingId],
@@ -89,7 +104,8 @@ export function HearingControlPage() {
         start: 'Sidang berhasil dibuka.',
         suspend: 'Sidang berhasil diskors. Peserta dialihkan ke ruang tunggu.',
         resume: 'Sidang berhasil dilanjutkan.',
-        end: 'Sidang berhasil ditutup.'
+        end: 'Sidang berhasil ditutup.',
+        'complete-documentation': 'Dokumentasi sidang dinyatakan lengkap.'
       };
       setSuccess(labels[name] ?? `Aksi ${name} berhasil.`);
       setReason('');
@@ -98,6 +114,27 @@ export function HearingControlPage() {
       setError(e);
     } finally {
       setPending(null);
+    }
+  }
+
+  async function doFlagDocumentation() {
+    if (!docNote.trim() || docNote.trim().length < 5) {
+      setError(new Error('Catatan dokumentasi tertunda wajib diisi minimal 5 karakter.'));
+      return;
+    }
+    setError(null);
+    setSuccess('');
+    try {
+      await api(`/hearings/${hearingId}/flag-documentation`, {
+        method: 'POST',
+        body: JSON.stringify({ note: docNote.trim() })
+      });
+      setSuccess('Sidang ditandai sebagai dokumentasi tertunda.');
+      setDocNote('');
+      setShowFlagDialog(false);
+      await refresh();
+    } catch (e) {
+      setError(e);
     }
   }
 
@@ -115,6 +152,7 @@ export function HearingControlPage() {
   }
 
   const confirmData = pending ? CONFIRM_ACTIONS[pending] : null;
+  const isDocPending = state === 'DOCUMENTATION_PENDING';
 
   return (
     <>
@@ -131,13 +169,38 @@ export function HearingControlPage() {
         className="mb-4"
       />
 
+      {/* Banner khusus DOCUMENTATION_PENDING */}
+      {isDocPending && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+          <FileWarning className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+          <div className="flex-1">
+            <p className="font-semibold text-amber-800">Dokumentasi Sidang Belum Lengkap</p>
+            <p className="mt-0.5 text-sm text-amber-700">
+              Sidang ini sedang dalam status dokumentasi tertunda. Lengkapi semua dokumen
+              pasca-sidang yang diperlukan, kemudian klik "Selesaikan Dokumentasi" untuk menutup
+              proses.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            className="flex-shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
+            onClick={() => directAction('complete-documentation')}
+          >
+            <FileCheck2 className="mr-1.5 h-4 w-4" />
+            Selesaikan Dokumentasi
+          </Button>
+        </div>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         {/* ── Panel kontrol ── */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Status Sidang</CardTitle>
-              <Badge variant={STATE_VARIANT[state] ?? 'outline'}>{state}</Badge>
+              <Badge variant={STATE_VARIANT[state] ?? 'outline'}>
+                {STATE_LABEL[state] ?? state}
+              </Badge>
             </div>
             <CardDescription>
               Gunakan persona Hakim untuk mengoperasikan kontrol sidang.
@@ -186,6 +249,29 @@ export function HearingControlPage() {
               >
                 Tutup Sidang
               </Button>
+
+              {/* Tombol dokumentasi — muncul hanya saat ENDED */}
+              {state === 'ENDED' && (
+                <Button
+                  variant="outline"
+                  className="col-span-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                  onClick={() => setShowFlagDialog(true)}
+                >
+                  <FileWarning className="mr-2 h-4 w-4" />
+                  Tandai Dokumentasi Tertunda
+                </Button>
+              )}
+              {/* Tombol selesaikan dokumentasi — muncul saat DOCUMENTATION_PENDING */}
+              {isDocPending && (
+                <Button
+                  variant="outline"
+                  className="col-span-2 border-green-300 text-green-700 hover:bg-green-50"
+                  onClick={() => directAction('complete-documentation')}
+                >
+                  <FileCheck2 className="mr-2 h-4 w-4" />
+                  Selesaikan Dokumentasi
+                </Button>
+              )}
             </div>
 
             {/* Panduan state */}
@@ -197,8 +283,11 @@ export function HearingControlPage() {
                 '🟢 Sidang berlangsung. Hakim dapat menskors atau menutup sidang.'}
               {state === 'SUSPENDED' &&
                 '⏸ Sidang sedang diskors. Hakim dapat melanjutkan atau menutup.'}
-              {state === 'ENDED' && '✅ Sidang telah ditutup. Selesaikan dokumentasi pasca-sidang.'}
+              {state === 'ENDED' &&
+                '✅ Sidang telah ditutup. Jika masih ada dokumen yang perlu dilengkapi, gunakan tombol "Tandai Dokumentasi Tertunda".'}
               {state === 'POSTPONED' && '📅 Sidang ditunda. Buat jadwal baru untuk melanjutkan.'}
+              {isDocPending &&
+                '🟡 Dokumentasi belum lengkap. Selesaikan semua kelengkapan administrasi pasca-sidang.'}
             </div>
           </CardContent>
         </Card>
@@ -270,6 +359,54 @@ export function HearingControlPage() {
                 Ya, {confirmData?.label}
               </Button>
               <Button variant="outline" className="flex-1" onClick={() => setPending(null)}>
+                Batal
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: Tandai Dokumentasi Tertunda */}
+      <Dialog open={showFlagDialog} onOpenChange={setShowFlagDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileWarning className="h-5 w-5 text-amber-500" />
+              Tandai Dokumentasi Tertunda
+            </DialogTitle>
+            <DialogDescription className="pt-1 leading-relaxed">
+              Tandai bahwa sidang ini memiliki dokumen pasca-sidang yang belum dilengkapi. Status
+              akan berubah ke <strong>Dokumentasi Tertunda</strong> dan perlu diselesaikan oleh
+              panitera sebelum proses perkara dapat dinyatakan tuntas.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="doc-note">
+                Catatan — dokumen apa yang masih perlu dilengkapi?{' '}
+                <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="doc-note"
+                value={docNote}
+                onChange={(e) => setDocNote(e.target.value)}
+                placeholder="Contoh: Berita acara sidang belum ditandatangani, petikan putusan belum diunggah ke sistem"
+                rows={3}
+                autoFocus
+              />
+              <p className="text-xs text-slate-400">Minimal 5 karakter.</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                onClick={doFlagDocumentation}
+                disabled={docNote.trim().length < 5}
+              >
+                <FileWarning className="mr-2 h-4 w-4" />
+                Tandai sebagai Tertunda
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowFlagDialog(false)}>
                 Batal
               </Button>
             </div>

@@ -31,7 +31,9 @@ function assertHttpsOrigins(origins: string[]): void {
       origin.includes('127.0.0.1') ||
       origin.includes('0.0.0.0')
     ) {
-      throw new Error(`Production WEB_ORIGINS must not point to localhost. Invalid origin: ${origin}`);
+      throw new Error(
+        `Production WEB_ORIGINS must not point to localhost. Invalid origin: ${origin}`
+      );
     }
   }
 }
@@ -50,10 +52,7 @@ function assertBase64Key32Bytes(key: string, value: string): void {
   }
 }
 
-export function enforceRuntimeSecurityPolicy(
-  env: RuntimeEnv,
-  resolveSecret: SecretResolver
-): void {
+export function enforceRuntimeSecurityPolicy(env: RuntimeEnv, resolveSecret: SecretResolver): void {
   if (env.AUTH_MODE === 'OIDC') {
     if (!env.OIDC_ISSUER || !env.OIDC_JWKS_URL) {
       throw new Error('AUTH_MODE=OIDC requires OIDC_ISSUER and OIDC_JWKS_URL.');

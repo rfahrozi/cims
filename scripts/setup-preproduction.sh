@@ -128,6 +128,27 @@ write_secret "zoom_host_user_id.txt" \
   "${ZOOM_HOST_USER_ID:-dummy-zoom-host-user-preproduction}" \
   "Zoom host user email atau ID"
 
+# ── Brevo Notification (email) + WhatsApp (stub) ─────────────────────────────
+# Isi BREVO_API_KEY dengan API key dari https://app.brevo.com/settings/keys/api
+# Jika kosong/dummy, email akan di-stub (tidak dikirim, hanya dicatat di log)
+write_secret "brevo_api_key.txt" \
+  "${BREVO_API_KEY:-PLACEHOLDER_BREVO_API_KEY_ISI_DENGAN_KEY_NYATA}" \
+  "Brevo API key untuk pengiriman email transaksional"
+
+# WhatsApp API key — stub mode aktif, isi saat provider siap
+write_secret "whatsapp_api_key.txt" \
+  "${WHATSAPP_API_KEY:-stub-whatsapp-api-key-preproduction}" \
+  "WhatsApp API key (STUB mode — belum aktif)"
+
+# ── S3 Object Storage (MinIO) ────────────────────────────────────────────────
+write_secret "s3_access_key.txt" \
+  "cims-admin-$(rand_hex 4)" \
+  "Access Key untuk MinIO S3 Object Storage"
+
+write_secret "s3_secret_key.txt" \
+  "$(rand_hex 16)" \
+  "Secret Key untuk MinIO S3 Object Storage"
+
 echo ""
 echo -e "${GREEN}✅ Setup secrets selesai!${NC}"
 echo ""
@@ -140,6 +161,9 @@ echo "  2. npm run build"
 echo "  3. docker compose -f infra/docker-compose.preproduction.yml build"
 echo "  4. docker compose -f infra/docker-compose.preproduction.yml up -d"
 echo "  5. docker compose -f infra/docker-compose.preproduction.yml exec api node tools/migrate-postgres.mjs"
+echo ""
+echo -e "${YELLOW}💡 Tip: Untuk email nyata via Brevo, set BREVO_API_KEY sebelum menjalankan script:${NC}"
+echo "   BREVO_API_KEY=xkeysib-xxx... bash scripts/setup-preproduction.sh"
 echo ""
 echo -e "${YELLOW}💡 Tip: Jika memiliki kredensial Zoom nyata, set env var sebelum menjalankan script:${NC}"
 echo "   ZOOM_ACCOUNT_ID=xxx ZOOM_CLIENT_ID=yyy ZOOM_CLIENT_SECRET=zzz ZOOM_HOST_USER_ID=uuu \\"

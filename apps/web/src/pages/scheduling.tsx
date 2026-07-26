@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarCheck, CalendarX2, CheckCircle2, ListTodo, Plus, Trash2 } from 'lucide-react';
+import {
+  CalendarCheck,
+  CalendarX2,
+  CheckCircle2,
+  Clock,
+  History,
+  ListTodo,
+  Plus,
+  Trash2
+} from 'lucide-react';
 import { api } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
 import { PageHeader } from '@/components/page-header';
@@ -40,6 +49,19 @@ type AgendaItem = {
   itemDescription: string;
   estimatedDurationMinutes: number;
   status: string;
+};
+type ScheduleHistoryItem = {
+  id: string;
+  version: number;
+  status: 'ACTIVE' | 'SUPERSEDED';
+  start_at: string;
+  end_at: string;
+  display_timezone: string;
+  approval_reason?: string;
+  change_reason?: string;
+  approved_by?: string;
+  approved_at?: string;
+  created_at: string;
 };
 
 const CONFLICT_VARIANT: Record<string, 'success' | 'warning' | 'destructive'> = {
@@ -87,6 +109,12 @@ export function SchedulingPage() {
   const agendaQuery = useQuery({
     queryKey: ['hearing-agenda', hearingId],
     queryFn: () => api<AgendaItem[]>(`/hearings/${hearingId}/agenda`),
+    enabled: Boolean(hearingId)
+  });
+
+  const historyQuery = useQuery({
+    queryKey: ['schedule-history', hearingId],
+    queryFn: () => api<ScheduleHistoryItem[]>(`/hearings/${hearingId}/schedule-history`),
     enabled: Boolean(hearingId)
   });
 
@@ -216,6 +244,15 @@ export function SchedulingPage() {
           <TabsTrigger value="agenda">
             <ListTodo className="mr-2 h-4 w-4" />
             Rincian Agenda (H-03)
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            <History className="mr-2 h-4 w-4" />
+            Riwayat Perubahan
+            {(historyQuery.data?.filter((h) => h.status === 'SUPERSEDED').length ?? 0) > 0 && (
+              <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-700">
+                {historyQuery.data!.filter((h) => h.status === 'SUPERSEDED').length}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -579,6 +616,108 @@ export function SchedulingPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* ── Tab Riwayat Perubahan Jadwal (M-05) ── */}
+        <TabsContent value="history">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-slate-500" />
+                <CardTitle>Riwayat Perubahan Jadwal</CardTitle>
+              </div>
+              <CardDescription>
+                Semua versi jadwal — aktif dan yang telah digantikan (SUPERSEDED). Setiap perubahan
+                jadwal wajib menyimpan alasan perubahan sesuai SOP.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {historyQuery.isLoading && (
+                <p className="text-sm text-slate-400">Memuat riwayat jadwal...</p>
+              )}
+              {!historyQuery.isLoading && (historyQuery.data ?? []).length === 0 && (
+                <EmptyState
+                  icon={History}
+                  title="Belum ada riwayat jadwal"
+                  description="Riwayat akan muncul setelah proposal jadwal pertama disetujui."
+                />
+              )}
+              <div className="space-y-3">
+                {(historyQuery.data ?? []).map((item) => (
+                  <div
+                    key={item.id}
+                    className={`rounded-lg border p-4 ${
+                      item.status === 'ACTIVE'
+                        ? 'border-green-200 bg-green-50'
+                        : 'border-slate-200 bg-slate-50 opacity-80'
+                    }`}
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={item.status === 'ACTIVE' ? 'success' : 'outline'}>
+                          {item.status === 'ACTIVE' ? '✓ Aktif' : 'Digantikan'}
+                        </Badge>
+                        <span className="text-xs font-mono text-slate-500">v{item.version}</span>
+                      </div>
+                      <span className="text-xs text-slate-400">
+                        {item.approved_at
+                          ? new Date(item.approved_at).toLocaleString('id-ID', {
+                              timeZone: item.display_timezone ?? 'Asia/Jakarta',
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : '—'}
+                      </span>
+                    </div>
+
+                    <div className="grid gap-1 text-sm sm:grid-cols-2">
+                      <div>
+                        <span className="text-xs text-slate-500">Mulai sidang</span>
+                        <p className="font-medium text-slate-800">
+                          {new Date(item.start_at).toLocaleString('id-ID', {
+                            timeZone: item.display_timezone ?? 'Asia/Jakarta',
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-slate-500">Selesai</span>
+                        <p className="font-medium text-slate-800">
+                          {new Date(item.end_at).toLocaleString('id-ID', {
+                            timeZone: item.display_timezone ?? 'Asia/Jakarta',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}{' '}
+                          WIB
+                        </p>
+                      </div>
+                    </div>
+
+                    {item.change_reason && (
+                      <div className="mt-2 rounded bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                        <span className="font-semibold">Alasan perubahan: </span>
+                        {item.change_reason}
+                      </div>
+                    )}
+                    {item.approval_reason && (
+                      <div className="mt-1 text-xs text-slate-500">
+                        <span className="font-semibold">Catatan persetujuan: </span>
+                        {item.approval_reason}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </>

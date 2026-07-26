@@ -15,6 +15,13 @@ export const CIMS_ROLES = [
 
 export type CimsRole = (typeof CIMS_ROLES)[number];
 
+export const MFA_REQUIRED_ROLES: readonly CimsRole[] = [
+  'SYSTEM_ADMIN',
+  'SECURITY_OFFICER',
+  'JUDGE',
+  'IT_OPERATOR'
+];
+
 export interface AuthorizationSubject {
   userId: string;
   roles: readonly CimsRole[];

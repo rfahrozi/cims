@@ -25,7 +25,13 @@ export class CimsAuthGuard implements CanActivate {
       .getRequest<{ headers: Record<string, string | string[] | undefined>; user?: unknown }>();
     if (mode === 'DEV') return true;
     const raw = request.headers.authorization;
-    const value = Array.isArray(raw) ? raw[0] : raw;
+    let value = Array.isArray(raw) ? raw[0] : raw;
+
+    // Untuk endpoint SSE atau yang hanya bisa mengirim via query params
+    if (!value && (request as any).query?.token) {
+      value = `Bearer ${(request as any).query.token}`;
+    }
+
     if (!value?.startsWith('Bearer ')) throw new UnauthorizedException('Bearer token is required.');
     request.user = await this.verifier.verify(value.slice(7));
     return true;

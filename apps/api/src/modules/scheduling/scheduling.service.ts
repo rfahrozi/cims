@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   assertConflictsResolved,
   DomainError,
@@ -19,7 +20,8 @@ export class SchedulingService {
     private readonly core: CoreWorkflowRepository,
     private readonly audit: AuditService,
     private readonly outbox: OutboxService,
-    private readonly persistence: PersistenceModeService
+    private readonly persistence: PersistenceModeService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async listHistory(user: CurrentUser, hearingId: string) {
@@ -223,6 +225,15 @@ export class SchedulingService {
         { correlationId }
       );
     }
+
+    // M-08/CU-04: Broadcast UI event untuk SSE (update real-time ke klien lain)
+    this.eventEmitter.emit('ui.event', {
+      type: 'SCHEDULE_CHANGED',
+      hearingId: schedule.hearingId,
+      scheduleId: schedule.id,
+      actorOrganizationId: user.organizationId,
+      timestamp: new Date().toISOString()
+    });
 
     return {
       id: schedule.id,

@@ -54,4 +54,29 @@ export class ReconciliationService {
     requirePermission(user, 'audit.read');
     return this.repository.get(id, user);
   }
+
+  async resolve(user: CurrentUser, id: string, correlationId?: string) {
+    requirePermission(user, 'audit.write'); // Hanya role yg boleh modif (misal: court-clerk)
+    const run = await this.repository.get(id, user);
+    await this.core.getHearing(run.hearingId, user);
+
+    // Terapkan resolusi
+    await this.repository.resolve(id, user);
+
+    // Audit Log
+    await this.audit.append(
+      {
+        eventType: 'RECONCILIATION_RESOLVED',
+        objectType: 'HEARING',
+        objectId: run.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: { reconciliation_run_id: run.id, source_system: run.sourceSystem }
+      },
+      user
+    );
+
+    return { id, status: 'RESOLVED' };
+  }
 }

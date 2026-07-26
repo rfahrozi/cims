@@ -14,6 +14,7 @@ import {
   UsersRound,
   Video,
   BookOpen,
+  RefreshCw,
   Menu,
   X
 } from 'lucide-react';
@@ -42,10 +43,14 @@ import { OperationsPage } from '@/pages/operations';
 import { GovernancePage } from '@/pages/governance';
 import { ZoomPage } from '@/pages/zoom';
 import { MigrationPage } from '@/pages/migration';
+import { AdminConfigPage } from '@/pages/admin-config'; // GAP-01 — Admin console
+import { AuditLogPage } from '@/pages/audit-log'; // GAP-07 — Audit Log Viewer
 
 import { CalendarPage } from '@/pages/calendar';
 
 import { ErrorBoundary } from '@/components/error-boundary';
+import { OnboardingWizard } from '@/components/onboarding-wizard'; // GAP-08 Onboarding Wizard
+import { useAppNotifications } from '@/lib/use-app-notifications'; // M-08/CU-04 Realtime SSE
 
 // ── Menu utama — ditampilkan ke semua pengguna operasional ──────────────────
 // Urutan mengikuti alur kerja sidang elektronik (SOP 10.1 s/d 10.15)
@@ -63,13 +68,12 @@ const nav = [
   ['/attendance', 'Kehadiran', UserRoundCheck],
   ['/consultation', 'Konsultasi Privat', ShieldCheck],
   ['/incidents', 'Insiden', ShieldAlert],
-  ['/appeal-decision', 'Putusan Banding', BookOpen]
+  ['/appeal-decision', 'Putusan Banding', BookOpen],
+  ['/reconciliation', 'Rekonsiliasi (SIPP)', RefreshCw] // EPIC-01
 ] as const;
 
 // ── Menu admin/teknis — DISEMBUNYIKAN dari sidebar MVP ─────────────────────
 // Masih bisa diakses via URL langsung oleh developer/admin.
-// Aktifkan kembali dengan memindahkan ke array `nav` di atas.
-// - /reconciliation  : Rekonsiliasi dengan sistem resmi (MOCK, belum live)
 // - /operations      : Outbox dan migration posture (hanya relevan untuk tim teknis)
 // - /governance      : Legal hold, retention, evidence export (post-MVP)
 // - /zoom            : Zoom admin panel langsung (bypass gate, hanya untuk dev)
@@ -78,8 +82,14 @@ const nav = [
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // M-08/CU-04: Mengaktifkan kapabilitas Realtime SSE
+  useAppNotifications();
+
   return (
     <div className="min-h-screen bg-[#f4f7fb] md:grid md:grid-cols-[280px_1fr]">
+      {/* ── GAP-08 Onboarding Wizard Global ── */}
+      <OnboardingWizard />
+
       {/* ── CU-08: Overlay backdrop untuk mobile ── */}
       {mobileMenuOpen && (
         <div
@@ -188,6 +198,8 @@ export default function App() {
             <Route path="/governance" element={<GovernancePage />} />
             <Route path="/zoom" element={<ZoomPage />} />
             <Route path="/migration" element={<MigrationPage />} />
+            <Route path="/admin" element={<AdminConfigPage />} />
+            <Route path="/audit" element={<AuditLogPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </ErrorBoundary>

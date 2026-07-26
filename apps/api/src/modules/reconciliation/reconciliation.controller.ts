@@ -29,4 +29,13 @@ export class ReconciliationController {
   get(@CurrentUserContext() user: CurrentUser, @Param('id') id: string) {
     return this.service.get(user, id);
   }
+
+  @Post('reconciliation-runs/:id/resolve')
+  resolve(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('id') id: string,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.resolve(user, id, correlationId);
+  }
 }

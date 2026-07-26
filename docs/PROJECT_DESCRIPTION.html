@@ -40,7 +40,7 @@
       }
 
       .container {
-        max-w-width: 1200px;
+        max-width: 1200px;
         margin: 0 auto;
         background-color: white;
         border-radius: 12px;
@@ -56,14 +56,12 @@
         padding: 40px 40px 30px;
         position: relative;
       }
-
       header h1 {
         font-size: 2.5rem;
         font-weight: 900;
         margin-bottom: 10px;
         letter-spacing: -0.5px;
       }
-
       header p {
         font-size: 1.1rem;
         color: #bfdbfe;
@@ -83,6 +81,18 @@
         letter-spacing: 0.5px;
       }
 
+      .updated-badge {
+        position: absolute;
+        top: 80px;
+        right: 40px;
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #bfdbfe;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
       .content {
         padding: 40px;
       }
@@ -95,11 +105,9 @@
         padding-bottom: 10px;
         border-bottom: 2px solid var(--surface-alt);
       }
-
       h2:first-child {
         margin-top: 0;
       }
-
       h3 {
         color: var(--primary-light);
         font-size: 1.25rem;
@@ -110,7 +118,6 @@
       p {
         margin-bottom: 16px;
       }
-
       ul,
       ol {
         margin-bottom: 16px;
@@ -137,7 +144,6 @@
         border-radius: 8px;
         padding: 20px;
       }
-
       .card h4 {
         color: var(--primary);
         margin-bottom: 12px;
@@ -146,7 +152,6 @@
         align-items: center;
         gap: 8px;
       }
-
       .card h4::before {
         content: '';
         display: block;
@@ -155,15 +160,19 @@
         border-radius: 50%;
         background-color: var(--secondary);
       }
+      .card.new {
+        border-left: 3px solid var(--success);
+      }
+      .card.new h4::before {
+        background-color: var(--success);
+      }
 
-      /* Workflow styling */
       .workflow {
         display: flex;
         flex-direction: column;
         gap: 16px;
         margin-top: 30px;
       }
-
       .workflow-step {
         display: flex;
         background: white;
@@ -172,7 +181,6 @@
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       }
-
       .workflow-number {
         background-color: var(--primary);
         color: white;
@@ -184,23 +192,25 @@
         width: 60px;
         flex-shrink: 0;
       }
-
       .workflow-content {
         padding: 20px;
         flex-grow: 1;
       }
-
       .workflow-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 8px;
       }
-
       .workflow-title {
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--primary);
+      }
+      .workflow-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 12px;
       }
 
       .badge {
@@ -211,8 +221,8 @@
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
+        margin-left: 4px;
       }
-
       .badge-actor {
         background-color: #e0e7ff;
         color: #1e40af;
@@ -228,11 +238,10 @@
         color: #475569;
         border: 1px solid #e2e8f0;
       }
-
-      .workflow-desc {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-        margin-bottom: 12px;
+      .badge-new {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
       }
 
       .checklist {
@@ -241,32 +250,27 @@
         border-radius: 6px;
         font-size: 0.9rem;
       }
-
       .checklist ul {
         margin-bottom: 0;
       }
 
-      /* Architecture table */
       table {
         width: 100%;
         border-collapse: collapse;
         margin: 24px 0;
         font-size: 0.95rem;
       }
-
       th,
       td {
         padding: 12px 16px;
         text-align: left;
         border-bottom: 1px solid var(--border);
       }
-
       th {
         background-color: var(--surface-alt);
         color: var(--primary);
         font-weight: 600;
       }
-
       tr:nth-child(even) {
         background-color: var(--surface);
       }
@@ -286,16 +290,118 @@
         border-radius: 0 8px 8px 0;
         margin: 24px 0;
       }
-
       .highlight-box strong {
         color: #b45309;
+      }
+
+      .info-box {
+        background-color: #eff6ff;
+        border-left: 4px solid var(--secondary);
+        padding: 16px;
+        border-radius: 0 8px 8px 0;
+        margin: 24px 0;
+      }
+      .info-box strong {
+        color: #1e40af;
+      }
+
+      .success-box {
+        background-color: #f0fdf4;
+        border-left: 4px solid var(--success);
+        padding: 16px;
+        border-radius: 0 8px 8px 0;
+        margin: 24px 0;
+      }
+      .success-box strong {
+        color: #166534;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 20px 0;
+      }
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid;
+      }
+      .chip-ok {
+        background: #d1fae5;
+        color: #065f46;
+        border-color: #6ee7b7;
+      }
+      .chip-warn {
+        background: #fef9c3;
+        color: #854d0e;
+        border-color: #fde68a;
+      }
+      .chip-err {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #fecaca;
+      }
+
+      .arch-table td code {
+        background: #f1f5f9;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+
+      .new-tag {
+        display: inline-block;
+        background: var(--success);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 3px;
+        vertical-align: middle;
+        margin-left: 6px;
+        letter-spacing: 0.5px;
+      }
+
+      @media (max-width: 768px) {
+        header {
+          padding: 30px 20px;
+        }
+        header h1 {
+          font-size: 1.8rem;
+        }
+        .version-badge {
+          position: static;
+          margin-bottom: 10px;
+          display: inline-block;
+        }
+        .updated-badge {
+          display: none;
+        }
+        .content {
+          padding: 20px;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .workflow-number {
+          width: 44px;
+          font-size: 1.1rem;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
       <header>
-        <div class="version-badge">v0.20.0 MVP (Preproduction)</div>
+        <div class="version-badge">v0.20.0 — Preproduction</div>
+        <div class="updated-badge">Diperbarui: 26 Juli 2026</div>
         <h1>CIMS</h1>
         <p>
           Court Intelligence Management System &mdash; Sistem Koordinasi Persidangan Pidana
@@ -304,7 +410,9 @@
       </header>
 
       <div class="content">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
         <h2>1. Ringkasan Eksekutif</h2>
+
         <p>
           CIMS tidak dirancang untuk menggantikan Sistem Informasi Penelusuran Perkara (SIPP) atau
           e-Berpadu yang merupakan register resmi perkara. CIMS bertindak murni sebagai
@@ -328,7 +436,20 @@
           analitik makro ke fase selanjutnya.
         </div>
 
-        <h2>2. Arsitektur Inti & Teknologi</h2>
+        <h3>Status Kesiapan Terkini (26 Juli 2026)</h3>
+        <div class="status-row">
+          <span class="status-chip chip-ok">✅ Docker Preproduction Lokal — Siap</span>
+          <span class="status-chip chip-ok">✅ Alur 7 Langkah Inti — 100% Selesai</span>
+          <span class="status-chip chip-ok">✅ Brevo Email Adapter — Aktif</span>
+          <span class="status-chip chip-ok">✅ Admin Console — Tersedia</span>
+          <span class="status-chip chip-warn">⚠️ UAT Lintas Instansi — Menunggu Sprint 11–15</span>
+          <span class="status-chip chip-warn">⚠️ MFA Production — Belum dikerjakan</span>
+          <span class="status-chip chip-err">⛔ OIDC Production — Belum dikonfigurasi</span>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>2. Arsitektur Inti &amp; Teknologi</h2>
+
         <div class="grid-3">
           <div class="card">
             <h4>Domain-Driven Design</h4>
@@ -349,8 +470,8 @@
           <div class="card">
             <h4>Immutable Audit Trail</h4>
             <p>
-              Setiap kejadian penting dicatat di database dengan skema <em>append-only</em>.
-              Menggunakan teknik mirip blockchain (<em>HMAC Chaining</em>), data log memiliki
+              Setiap kejadian penting dicatat dengan skema <em>append-only</em>. Menggunakan teknik
+              mirip blockchain (<em>HMAC Chaining</em>), data log memiliki
               <code>event_hash</code> yang bertautan sehingga tidak dapat dimanipulasi dari belakang
               layar.
             </p>
@@ -358,13 +479,13 @@
           <div class="card">
             <h4>Transactional Outbox</h4>
             <p>
-              Pengiriman pemberitahuan resmi dan rekonsiliasi data disimpan di antrian database
-              (Outbox) sebelum dikirim. Ini memastikan keandalan (<em>resiliency</em>) jika sistem
-              notifikasi eksternal sedang <em>down</em>.
+              Pengiriman pemberitahuan resmi disimpan di antrian database (Outbox) sebelum dikirim.
+              Ini memastikan keandalan (<em>resiliency</em>) jika sistem notifikasi eksternal sedang
+              <em>down</em>. Worker memproses antrian secara async dengan exponential backoff.
             </p>
           </div>
           <div class="card">
-            <h4>RBAC & ABAC Security</h4>
+            <h4>RBAC &amp; ABAC Security</h4>
             <p>
               Akses diatur bukan hanya berdasarkan peran (Hakim, Jaksa, dll), melainkan juga batasan
               organisasi dan penugasan sidang (<em>Attribute-Based Access Control</em>). Panitera
@@ -379,9 +500,96 @@
               atau layanan on-premise mandiri tanpa merombak CIMS.
             </p>
           </div>
+          <div class="card new">
+            <h4>Notification Templates <span class="new-tag">BARU</span></h4>
+            <p>
+              Template teks pemberitahuan (subjek + isi) per jenis notifikasi dan channel tersimpan
+              di database dan dapat diubah Admin tanpa deploy ulang. Mendukung placeholder dinamis:
+              <code>{recipient_name}</code>, <code>{case_number}</code>,
+              <code>{scheduled_at}</code>, dan lainnya.
+            </p>
+          </div>
+          <div class="card new">
+            <h4>Multi-Channel Delivery <span class="new-tag">BARU</span></h4>
+            <p>
+              Pengiriman notifikasi kini melalui adapter <strong>Brevo</strong> (email
+              transaksional) sebagai layanan mandiri. Channel <strong>WhatsApp</strong> disiapkan
+              jalurnya (stub mode) — tinggal isi konfigurasi provider saat siap tanpa ubah kode
+              inti.
+            </p>
+          </div>
+          <div class="card new">
+            <h4>SLA Config dari Database <span class="new-tag">BARU</span></h4>
+            <p>
+              Batas waktu acknowledgment (<em>ack_deadline</em>) dan jadwal reminder otomatis per
+              jenis pemberitahuan tersimpan di tabel <code>sla_configs</code> — dapat diubah Admin
+              tanpa deploy ulang. Default: AGENDA_SIDANG = 48 jam, PERUBAHAN_JADWAL = 24 jam, dst.
+            </p>
+          </div>
         </div>
 
-        <h2>3. Alur SOP Persidangan Elektronik (SOP 10.1 – 10.15)</h2>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>3. Tumpukan Teknologi &amp; Struktur Layanan</h2>
+
+        <table class="arch-table">
+          <thead>
+            <tr>
+              <th>Komponen</th>
+              <th>Teknologi</th>
+              <th>Peran</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>API Backend</strong></td>
+              <td>NestJS 11 + Fastify, TypeScript</td>
+              <td>Orkestrasi alur sidang, hard gate, state machine, RBAC/ABAC</td>
+            </tr>
+            <tr>
+              <td><strong>Worker</strong></td>
+              <td>NestJS (proses terpisah), Outbox Pattern</td>
+              <td>Pengiriman notifikasi async, provisioning ruang virtual, rekonsiliasi</td>
+            </tr>
+            <tr>
+              <td><strong>Frontend</strong></td>
+              <td>React 18 + Vite, Tailwind CSS, shadcn/ui</td>
+              <td>Antarmuka operasional multi-peran, workflow stepper, mobile responsive</td>
+            </tr>
+            <tr>
+              <td><strong>Domain Package</strong></td>
+              <td><code>@cims/domain</code> — pure TypeScript</td>
+              <td>State machine, hard gate logic, SOP rules, zero external dependency</td>
+            </tr>
+            <tr>
+              <td><strong>Database</strong></td>
+              <td>PostgreSQL 17, 14 migration files</td>
+              <td>Persistent store + audit log + outbox queue</td>
+            </tr>
+            <tr>
+              <td><strong>Zoom Provider</strong></td>
+              <td>NestJS adapter service (port 3010)</td>
+              <td>Membuat meeting Zoom via Server-to-Server OAuth, idempotency</td>
+            </tr>
+            <tr>
+              <td><strong>Brevo Notification</strong> <span class="new-tag">BARU</span></td>
+              <td>NestJS adapter service (port 3020)</td>
+              <td>Pengiriman email via Brevo API; stub WhatsApp/SMS/IN_APP siap disambung</td>
+            </tr>
+            <tr>
+              <td><strong>Secrets</strong></td>
+              <td>Docker Secrets (file-based)</td>
+              <td>15 secret files termasuk Brevo API key dan WhatsApp API key</td>
+            </tr>
+            <tr>
+              <td><strong>Auth (Preproduction)</strong></td>
+              <td>DEV mode — persona switcher header</td>
+              <td>Simulasi 10 role tanpa OIDC server; production butuh Keycloak</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>4. Alur SOP Persidangan Elektronik (SOP 10.1 – 10.15)</h2>
         <p>
           Berikut adalah representasi visual diagram interaktif dan detail dari 7 langkah utama
           (Alur Utama) pada sistem CIMS yang diwajibkan oleh Standar Operasional Prosedur 2026:
@@ -397,16 +605,17 @@
             ACTIVE_INTAKE : Panitera (Checker) SUBMITTED --> DRAFT : Revisi } C1 --> S1 S1 --> S2 :
             Hard Gate S2 --> S3 : Jika APPROVED state "Otorisasi Sidang" as C2 { S2 --> REJECTED :
             Hakim Menolak } S3 --> S4 state "Koordinasi Multi-Instansi" as C3 { S4 --> SENT_NOTICE :
-            Outbox Worker SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan ACKNOWLEDGED --> S5 :
-            Hard Gate state "Kesiapan" as Readiness { VERIFY_ID --> ROOM_INSPECT : Rutan (Terdakwa)
-            ROOM_INSPECT --> SUBMIT_RUTAN SUBMIT_JAKSA SUBMIT_PENGADILAN } } S5 --> S6 : Hard Gate
-            state "Virtual Session" as C4 { S6 --> PROVISIONING : IT Operator PROVISIONING --> READY
-            : Zoom / WebEx Adapter } S6 --> S7 : Hard Gate state "Sidang Berlangsung" as C5 { S7 -->
-            STARTED : Hakim STARTED --> SUSPENDED : Skors SUSPENDED --> STARTED : Lanjut STARTED -->
-            ENDED : Hakim Tutup STARTED --> POSTPONED : Ditunda } C5 --> S8 S8 --> [*] note right of
-            C3 : Jika terjadi Mutasi Tahanan,\nalur akan terputus & dikembalikan ke\nChecklist
-            Kesiapan Rutan tujuan. note right of C5 : Segala Insiden CRITICAL/HIGH\nakan otomatis
-            men-trigger\nstatus SUSPENDED.
+            Outbox Worker → Brevo/WA SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan ACKNOWLEDGED
+            --> S5 : Hard Gate state "Kesiapan" as Readiness { VERIFY_ID --> ROOM_INSPECT : Rutan
+            (Terdakwa) ROOM_INSPECT --> SUBMIT_RUTAN SUBMIT_JAKSA SUBMIT_PENGADILAN } } S5 --> S6 :
+            Hard Gate state "Virtual Session" as C4 { S6 --> PROVISIONING : IT Operator PROVISIONING
+            --> READY : Zoom / WebEx Adapter } S6 --> S7 : Hard Gate state "Sidang Berlangsung" as
+            C5 { S7 --> STARTED : Hakim STARTED --> SUSPENDED : Skors SUSPENDED --> STARTED : Lanjut
+            STARTED --> ENDED : Hakim Tutup ENDED --> DOCUMENTATION_PENDING : Flag Dok. Tertunda
+            DOCUMENTATION_PENDING --> ENDED : Selesai Dok. STARTED --> POSTPONED : Ditunda } C5 -->
+            S8 S8 --> [*] note right of C3 : Jika terjadi Mutasi Tahanan,\nalur akan terputus &
+            dikembalikan ke\nChecklist Kesiapan Rutan tujuan. note right of C5 : Segala Insiden
+            CRITICAL/HIGH\nakan otomatis men-trigger\nstatus SUSPENDED.
           </div>
         </div>
 
@@ -451,7 +660,8 @@
               </div>
               <div class="checklist">
                 <strong>Data Tersimpan:</strong> Keputusan (APPROVED/REJECTED), Nomor Penetapan
-                Resmi, Mode Persidangan (LANGSUNG / ELEKTRONIK / HYBRID), dan Alasan.
+                Resmi, Mode Persidangan (<strong>LANGSUNG / ELEKTRONIK / HYBRID</strong>), dan
+                Alasan.
               </div>
             </div>
           </div>
@@ -461,22 +671,23 @@
             <div class="workflow-number">3</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Penjadwalan & Agenda Sidang (SOP 10.3)</div>
+                <div class="workflow-title">Penjadwalan &amp; Agenda Sidang (SOP 10.3)</div>
                 <div>
                   <span class="badge badge-actor">Panitera</span>
                   <span class="badge badge-system">Conflict Check Engine</span>
                 </div>
               </div>
               <div class="workflow-desc">
-                Panitera menyusun jadwal dan rincian agenda (multi-item: misal Pembacaan Dakwaan +
+                Panitera menyusun jadwal dan rincian agenda multi-item (misal: Pembacaan Dakwaan +
                 Pemeriksaan Saksi). Sistem CIMS otomatis memvalidasi konflik resource (Hakim,
-                Ruangan) sebelum disetujui.
+                Ruangan) sebelum disetujui. Tab <em>Riwayat Perubahan Jadwal</em> menampilkan semua
+                versi jadwal yang pernah aktif beserta alasan perubahannya.
               </div>
               <div class="checklist">
                 <strong>SOP 10.3 (Perubahan Jadwal):</strong> Bila jadwal yang sudah
-                <code>ACTIVE</code> dibatalkan/ditimpa jadwal baru (<code>SUPERSEDED</code>), wajib
-                menyertakan alasan (<em>change_reason</em>) dan memicu otomatis pengiriman
-                pemberitahuan ulang ke seluruh pihak.
+                <code>ACTIVE</code> ditimpa jadwal baru (<code>SUPERSEDED</code>), wajib menyertakan
+                alasan (<em>change_reason</em>) dan memicu otomatis pengiriman pemberitahuan ulang
+                ke seluruh pihak via Outbox Worker.
               </div>
             </div>
           </div>
@@ -486,15 +697,18 @@
             <div class="workflow-number">4</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Pemberitahuan & Tanda Terima (SOP 10.5)</div>
+                <div class="workflow-title">Pemberitahuan &amp; Tanda Terima (SOP 10.5)</div>
                 <div>
                   <span class="badge badge-actor">Liaison Officer</span>
                   <span class="badge badge-actor">Semua Instansi</span>
+                  <span class="badge badge-new">Brevo</span>
                 </div>
               </div>
               <div class="workflow-desc">
-                Pengadilan mengirimkan pemberitahuan resmi (Surat Panggilan / Penetapan Jadwal) ke
-                Kejaksaan dan Pemasyarakatan melalui sistem (In-App atau Email/WA).
+                Pengadilan mengirimkan pemberitahuan resmi ke Kejaksaan dan Pemasyarakatan.
+                Pengiriman dilakukan via <strong>Brevo Transactional Email</strong> atau channel
+                WhatsApp/SMS/IN_APP. Template teks diambil otomatis dari database berdasarkan jenis
+                pemberitahuan dan channel — tidak perlu mengisi manual setiap saat.
               </div>
               <div class="checklist">
                 <ul>
@@ -504,7 +718,12 @@
                   </li>
                   <li>
                     <strong>SLA Monitoring:</strong> Dashboard CIMS menampilkan peringatan merah
-                    jika terdapat pemberitahuan yang melewati tenggat waktu (Overdue).
+                    jika terdapat pemberitahuan yang melewati tenggat waktu (Overdue). SLA per jenis
+                    pemberitahuan dapat dikonfigurasi Admin di halaman <code>/admin</code>.
+                  </li>
+                  <li>
+                    <strong>Rantai Pemberitahuan Putusan Banding:</strong> PT → Kejaksaan → Rutan →
+                    Terdakwa menggunakan 4 langkah ACK yang berbeda (SOP 10.15).
                   </li>
                 </ul>
               </div>
@@ -516,7 +735,9 @@
             <div class="workflow-number">5</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Kesiapan Instansi & Ceklis (SOP 10.6 & 10.7)</div>
+                <div class="workflow-title">
+                  Kesiapan Instansi &amp; Ceklis (SOP 10.6 &amp; 10.7)
+                </div>
                 <div>
                   <span class="badge badge-actor">Semua Instansi</span>
                   <span class="badge badge-gate">Hard Gate</span>
@@ -530,7 +751,8 @@
               <div class="checklist">
                 <strong>SOP 10.7 (Rutan):</strong> Pemasyarakatan secara khusus wajib melakukan
                 Verifikasi Identitas Terdakwa dan Inspeksi Sterilitas Ruangan Konsultasi sebelum
-                bisa mensubmit formulir kesiapan.
+                bisa mensubmit formulir kesiapan. Jika terdakwa dipindah (Mutasi Tahanan), kesiapan
+                dibatalkan dan wajib diisi ulang di Rutan tujuan.
               </div>
             </div>
           </div>
@@ -540,7 +762,7 @@
             <div class="workflow-number">6</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Registrasi Peserta & Ruang Virtual</div>
+                <div class="workflow-title">Registrasi Peserta &amp; Ruang Virtual</div>
                 <div>
                   <span class="badge badge-actor">Panitera</span>
                   <span class="badge badge-actor">Operator TI</span>
@@ -549,14 +771,15 @@
               <div class="workflow-desc">
                 Pembuatan <em>Join Token</em> satu kali pakai (Expired dalam 15 menit) untuk
                 Terdakwa, Saksi, dan Advokat. Di saat yang sama, Operator TI melakukan
-                "Provisioning" ruangan (seperti Zoom).
+                "Provisioning" ruangan (seperti Zoom) melalui adapter video provider.
               </div>
               <div class="checklist">
                 <ul>
                   <li>
                     <strong>SOP 10.9 (Saksi Rentan):</strong> CIMS secara otomatis mengaktifkan
-                    status "Identitas Dilindungi" dan *Auto-Masking Name* (Alias) bagi peran Saksi,
-                    Ahli, dan Penerjemah.
+                    status "Identitas Dilindungi" dan <em>Auto-Masking Name</em> (Alias) bagi peran
+                    Saksi, Ahli, dan Penerjemah. Verifikasi per-individu untuk tiap
+                    saksi/ahli/penerjemah.
                   </li>
                   <li>
                     <strong>SOP 10.8 (Lokasi Advokat):</strong> Jika advokat berada terpisah dari
@@ -573,7 +796,7 @@
             <div class="workflow-number">7</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Kontrol Sidang & Pelaksanaan (SOP 10.10)</div>
+                <div class="workflow-title">Kontrol Sidang &amp; Pelaksanaan (SOP 10.10)</div>
                 <div>
                   <span class="badge badge-actor">Hakim</span>
                   <span class="badge badge-system">CIMS Core</span>
@@ -581,28 +804,44 @@
               </div>
               <div class="workflow-desc">
                 Hanya persona <strong>Hakim</strong> yang memiliki akses untuk mengubah status mesin
-                sidang: Buka Sidang (START), Skors Sementara (SUSPEND), Lanjutkan (RESUME), atau
-                Tutup Sidang (END).
+                sidang. Setiap aksi destruktif (Tutup Sidang, Skors Sidang) memerlukan Dialog
+                Konfirmasi eksplisit untuk mencegah kesalahan. Timeline kejadian tercatat
+                append-only.
               </div>
               <div class="checklist">
-                <strong>Konsultasi Privat (SOP 10.8):</strong> Jika Terdakwa dan Advokat meminta
-                konsultasi tertutup, sistem mencatat waktu dimulainya diskusi dan memiliki sensor
-                (Webhook Alert) untuk mencegah/melarang segala bentuk *Recording* pada sesi
-                tersebut.
+                <ul>
+                  <li>
+                    <strong>State Machine Sidang:</strong>
+                    <code>READY</code> → <code>STARTED</code> → <code>SUSPENDED</code> /
+                    <code>ENDED</code> / <code>POSTPONED</code>
+                  </li>
+                  <li>
+                    <strong>Dokumentasi Tertunda (BARU):</strong> Setelah sidang <code>ENDED</code>,
+                    Panitera dapat menandai status <code>DOCUMENTATION_PENDING</code> jika masih ada
+                    dokumen pasca-sidang yang belum dilengkapi, kemudian selesaikan dengan
+                    <code>COMPLETE_DOCUMENTATION</code>.
+                  </li>
+                  <li>
+                    <strong>Konsultasi Privat (SOP 10.8):</strong> Sistem memiliki sensor (Webhook
+                    Alert) untuk mencegah/melarang segala bentuk Recording pada sesi konsultasi
+                    tertutup Terdakwa–Advokat.
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
 
-        <h2>4. Skenario Khusus (Edge Cases) & Tindakan Administratif Lanjutan</h2>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>5. Skenario Khusus (Edge Cases) &amp; Tindakan Administratif Lanjutan</h2>
 
         <h3>A. Penanganan Insiden (SOP 10.11, 10.12, 10.13)</h3>
         <p>
           CIMS mengakomodasi pencatatan tiga domain insiden yang mungkin menggagalkan jalannya
           sidang: <strong>Gangguan Teknis</strong>, <strong>Insiden Siber</strong> (wajib lapor 1x24
           jam), dan <strong>Keadaan Kahar / Force Majeure</strong> (wajib lapor 3x24 jam). Insiden
-          yang bersifat `CRITICAL` atau `HIGH` akan secara otomatis menskors sidang (SUSPEND) di
-          dalam sistem.
+          yang bersifat <code>CRITICAL</code> atau <code>HIGH</code> akan secara otomatis menskors
+          sidang (SUSPEND) di dalam sistem.
         </p>
 
         <h3>B. Mutasi dan Perpindahan Tahanan (SOP 10.14)</h3>
@@ -613,18 +852,86 @@
           re-inspeksi ruangan, dan re-verifikasi identitas di Lapas tujuan baru.
         </p>
 
-        <h3>C. Pembacaan Putusan Tingkat Banding (SOP 10.15)</h3>
+        <h3>C. Pembacaan Putusan Tingkat Banding (SOP 10.15) — Berlaku 1 Agustus 2026</h3>
         <p>
-          Ini adalah modul spesifik yang berlaku 1 Agustus 2026. Alurnya meliputi: Pengadilan Tinggi
-          menetapkan jadwal &rarr; Rantai Pemberitahuan Khusus (PT ke Kejaksaan ke Rutan ke
-          Terdakwa) &rarr; Rekam Kehadiran Para Pihak &rarr;
-          <strong>Publikasi Petikan Putusan</strong> (kepatuhan dihitung harus hari yang
-          sama/Same-day compliant) &rarr; Transmisi Berkas ke PT Tingkat 1 (maks. 7 Hari).
+          Modul spesifik untuk pengelolaan putusan banding. Alurnya meliputi: Pengadilan Tinggi
+          menetapkan jadwal &rarr; Rantai Pemberitahuan Khusus 4 langkah (PT ke Kejaksaan ke Rutan
+          ke Terdakwa) dengan ACK per-langkah &rarr; Rekam Kehadiran Para Pihak
+          (langsung/elektronik) &rarr; <strong>Publikasi Petikan Putusan</strong> (kepatuhan
+          Same-day Compliant dihitung otomatis) &rarr; Transmisi Berkas ke PT Tingkat 1 (maks. 7
+          Hari, kepatuhan terlacak).
         </p>
 
-        <h2>5. Pengalaman Pengguna (Frontend React)</h2>
+        <h3>D. Pejabat Penghubung (Liaison Officer)</h3>
         <p>
-          Dibangun menggunakan <em>React</em> dan <em>Vite</em>, antarmuka CIMS berfokus pada
+          Peran khusus yang bertugas memantau alur lintas instansi, menindaklanjuti acknowledgment
+          yang terlambat, dan membuat eskalasi formal. Pejabat Penghubung dapat mendelegasikan
+          kewenangan sementara dan melihat laporan overdue acknowledgment secara lintas instansi.
+        </p>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>6. Infrastruktur Notifikasi <span class="new-tag">DIPERBARUI</span></h2>
+
+        <div class="info-box">
+          <strong>Arsitektur Pengiriman Notifikasi:</strong> Semua notifikasi berjalan secara
+          asinkron melalui pola Transactional Outbox. API menyimpan event ke tabel
+          <code>outbox_events</code>, Worker mengambil batch dan mengirim via gateway yang sesuai.
+          Ini memastikan tidak ada notifikasi yang hilang meski sistem eksternal sementara down.
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Provider</th>
+              <th>Keterangan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>EMAIL</code></td>
+              <td>✅ Aktif</td>
+              <td>Brevo Transactional Email API</td>
+              <td>Isi <code>brevo_api_key.txt</code> untuk mengaktifkan pengiriman nyata</td>
+            </tr>
+            <tr>
+              <td><code>WHATSAPP</code></td>
+              <td>🔄 Stub</td>
+              <td>—</td>
+              <td>
+                Jalur HTTP disiapkan; set <code>WHATSAPP_PROVIDER_MODE=HTTP</code> saat provider
+                siap
+              </td>
+            </tr>
+            <tr>
+              <td><code>SMS</code></td>
+              <td>🔄 Stub</td>
+              <td>—</td>
+              <td>Log dan return DELIVERED; sambung provider nanti</td>
+            </tr>
+            <tr>
+              <td><code>IN_APP</code></td>
+              <td>🔄 Stub</td>
+              <td>—</td>
+              <td>Notifikasi in-app real-time (WebSocket/SSE) direncanakan di fase berikutnya</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Template teks untuk setiap kombinasi jenis pemberitahuan × channel tersimpan di tabel
+          <code>notification_templates</code>. Jika panitera tidak mengisi subjek/isi saat membuat
+          notice, sistem otomatis mengambil template dari database dan mengisi placeholder secara
+          dinamis. Admin dapat mengubah template kapan saja melalui halaman <code>/admin</code>
+          tanpa perlu deployment ulang.
+        </p>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>7. Pengalaman Pengguna (Frontend React)</h2>
+
+        <p>
+          Dibangun menggunakan <em>React 18</em> dan <em>Vite</em>, antarmuka CIMS berfokus pada
           ketegasan fungsional bagi Pejabat Hukum:
         </p>
         <ul>
@@ -634,26 +941,166 @@
             tenggat waktu Acknowledgment, Rutan melihat peringatan verifikasi Terdakwa.
           </li>
           <li>
-            <strong>Workflow Stepper:</strong> Terdapat <em>Progress Bar</em> adaptif di *header*
+            <strong>Kalender Lintas Instansi:</strong> Tampilan kalender interaktif menampilkan
+            seluruh jadwal aktif lintas satuan kerja dengan filter RBAC. Status sidang dibedakan
+            dengan warna (draft, terkonfirmasi, berlangsung, selesai).
+          </li>
+          <li>
+            <strong>Workflow Stepper:</strong> Terdapat <em>Progress Bar</em> adaptif di header
             halaman yang otomatis membaca API "Gate" dan memberikan indikator centang hijau untuk
             langkah yang telah dilalui.
           </li>
           <li>
-            <strong>Pencegahan Kesalahan (Error Boundary & Dialog):</strong> Aksi merusak (seperti
-            Tutup Sidang) harus melalui Dialog Konfirmasi merah. Jika koneksi API gagal, UI akan
-            menampilkan Alert Banner berbahasa Indonesia yang jelas alih-alih melempar teks
-            <em>JSON</em> mentah.
+            <strong>Riwayat Perubahan Jadwal:</strong> Tab khusus menampilkan semua versi jadwal
+            (ACTIVE dan SUPERSEDED) dengan alasan perubahan — langsung dari endpoint
+            <code>GET /hearings/:id/schedule-history</code>.
           </li>
           <li>
-            <strong>Mobile Responsive:</strong> Navigasi dapat diakses menggunakan *Hamburger Menu*
-            saat diakses melalui *Tablet* dari dalam ruang Rutan yang terbatas.
+            <strong>Dokumentasi Tertunda:</strong> Tombol "Tandai Dokumentasi Tertunda" muncul
+            setelah sidang ENDED, beserta dialog yang meminta catatan kelengkapan apa yang masih
+            dibutuhkan. Badge oranye dan banner peringatan mengkomunikasikan status ini kepada semua
+            pihak.
+          </li>
+          <li>
+            <strong>Admin Console</strong> (<code>/admin</code>): Halaman khusus SYSTEM_ADMIN untuk
+            mengedit template notifikasi dan konfigurasi SLA secara inline — tanpa deploy.
+          </li>
+          <li>
+            <strong>Pencegahan Kesalahan (Error Boundary &amp; Dialog):</strong> Aksi merusak
+            (seperti Tutup Sidang, Skors Sidang) harus melalui Dialog Konfirmasi eksplisit. Jika
+            koneksi API gagal, UI menampilkan Alert Banner berbahasa Indonesia yang jelas.
+          </li>
+          <li>
+            <strong>Mobile Responsive:</strong> Navigasi dapat diakses menggunakan Hamburger Menu
+            saat diakses melalui Tablet dari dalam ruang Rutan yang terbatas.
           </li>
         </ul>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>8. Peran Pengguna &amp; Kewenangan</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Peran</th>
+              <th>Kode</th>
+              <th>Kewenangan Utama</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Panitera</td>
+              <td><code>COURT_CLERK</code></td>
+              <td>Kelola perkara, jadwal, notifikasi, readiness, dokumentasi</td>
+            </tr>
+            <tr>
+              <td>Panitera Pengganti</td>
+              <td><code>SUBSTITUTE_CLERK</code></td>
+              <td>Input data perkara (Maker), bantu pemberitahuan</td>
+            </tr>
+            <tr>
+              <td>Hakim</td>
+              <td><code>JUDGE</code></td>
+              <td>Penetapan, kontrol sidang (START/SUSPEND/RESUME/END), dokumentasi</td>
+            </tr>
+            <tr>
+              <td>Penuntut Umum</td>
+              <td><code>PROSECUTOR</code></td>
+              <td>Acknowledgment, ikut sidang, laporan kendala</td>
+            </tr>
+            <tr>
+              <td>Petugas Pemasyarakatan</td>
+              <td><code>CORRECTIONS</code></td>
+              <td>Acknowledgment, checklist lokasi, verifikasi terdakwa</td>
+            </tr>
+            <tr>
+              <td>Operator IT</td>
+              <td><code>IT_OPERATOR</code></td>
+              <td>Provisioning ruang virtual, incident teknis</td>
+            </tr>
+            <tr>
+              <td>Pejabat Penghubung</td>
+              <td><code>LIAISON_OFFICER</code></td>
+              <td>Koordinasi lintas instansi, follow-up ACK, eskalasi, delegasi</td>
+            </tr>
+            <tr>
+              <td>Auditor</td>
+              <td><code>AUDITOR</code></td>
+              <td>Lihat laporan SLA, audit log, compliance dashboard</td>
+            </tr>
+            <tr>
+              <td>Petugas Keamanan</td>
+              <td><code>SECURITY_OFFICER</code></td>
+              <td>Review event keamanan, insiden siber</td>
+            </tr>
+            <tr>
+              <td>Admin Sistem</td>
+              <td><code>SYSTEM_ADMIN</code></td>
+              <td>Kelola akun, konfigurasi, template notifikasi, SLA config</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>9. Roadmap Fase Selanjutnya</h2>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>Sprint 11–12 — Security &amp; Reporting</h4>
+            <ul>
+              <li>MFA via Keycloak untuk role sensitif</li>
+              <li>OIDC production integration (AUTH_MODE=OIDC)</li>
+              <li>Export laporan periodik (CSV/PDF)</li>
+              <li>Field encryption key rotation (M-09)</li>
+              <li>DLP dasar — rate limiting per endpoint sensitif (M-10)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Sprint 13–14 — UAT &amp; Hardening</h4>
+            <ul>
+              <li>SIT end-to-end seluruh workflow</li>
+              <li>UAT lintas peran (Hakim, Panitera, Jaksa, Pemasyarakatan)</li>
+              <li>Portal per instansi — dashboard khusus (M-07)</li>
+              <li>Notifikasi push in-app reminder H-7, H-1, H-30min (M-08)</li>
+              <li>Defect burn down &amp; controlled limitation register</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Sprint 15–16 — Release v1.0</h4>
+            <ul>
+              <li>Release Candidate + go-live checklist</li>
+              <li>Operational runbook &amp; admin guide final</li>
+              <li>Training material lintas instansi</li>
+              <li>Hypercare 2 minggu pasca go-live</li>
+              <li>Improvement backlog pasca v1.0</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Fase Berikutnya (Post v1.0)</h4>
+            <ul>
+              <li>WhatsApp provider sambung ke platform nyata (360dialog/Twilio)</li>
+              <li>Integrasi live SIPP / e-Berpadu (reconciliation)</li>
+              <li>Analytics dashboard — tren kepatuhan bulanan</li>
+              <li>AI features (draft notifikasi, prediksi konflik) — governance dulu</li>
+              <li>Notifikasi in-app WebSocket/SSE real-time</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="success-box" style="margin-top: 30px">
+          <strong>Keputusan Go/No-Go (26 Juli 2026):</strong><br />
+          ✅ <strong>GO</strong> untuk pilot internal Docker lokal (AUTH_MODE=DEV, data demo)<br />
+          ⚠️ <strong>CONDITIONAL GO</strong> untuk pilot lintas instansi — setelah Sprint 11
+          selesai<br />
+          ⛔ <strong>NO-GO</strong> untuk Production v1.0 — menunggu MFA, OIDC, SIT, dan UAT formal
+        </div>
       </div>
+      <!-- /content -->
 
       <div class="footer">
-        CIMS v0.20.0 MVP &mdash; Dokumen Arsitektur & Operasional (Generated 2026) <br />
-        Implementasi Penuh Kepatuhan SOP CIMS/PPE/001/2026.
+        CIMS v0.20.0 &mdash; Dokumen Arsitektur &amp; Operasional &mdash; Diperbarui 26 Juli 2026<br />
+        Implementasi Kepatuhan SOP/CIMS/PPE/001/2026 &bull; 14 Database Migrations &bull; 16
+        Notification Templates &bull; 10 Roles
       </div>
     </div>
   </body>

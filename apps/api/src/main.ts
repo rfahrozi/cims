@@ -54,7 +54,22 @@ async function bootstrap(): Promise<void> {
     ]
   });
 
-  await app.register(helmet, { contentSecurityPolicy: false });
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline untuk Swagger UI
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"], // Mencegah clickjacking
+        upgradeInsecureRequests: env.NODE_ENV === 'production' ? [] : null
+      }
+    },
+    crossOriginEmbedderPolicy: false // Perlu false agar Swagger UI berfungsi normal
+  });
   await app.register(rateLimit, {
     max: env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_WINDOW_MS
@@ -85,6 +100,24 @@ async function bootstrap(): Promise<void> {
   }
 
   app.enableShutdownHooks();
+
+  // M-10 DLP: Peringatkan jika METRICS_BEARER_TOKEN tidak dikonfigurasi
+  if (!process.env['METRICS_BEARER_TOKEN']?.trim()) {
+    const logger = app.get(StructuredLogger);
+    if (env.NODE_ENV === 'production') {
+      logger.error(
+        'METRICS_BEARER_TOKEN is not set — /metrics endpoint is BLOCKED in production.',
+        '',
+        'Bootstrap'
+      );
+    } else {
+      logger.warn(
+        'METRICS_BEARER_TOKEN not set — /metrics is open (dev only). Set token for staging/prod.',
+        'Bootstrap'
+      );
+    }
+  }
+
   await app.listen(env.API_PORT, '0.0.0.0');
 }
 void bootstrap();

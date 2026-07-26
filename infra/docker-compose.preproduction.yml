@@ -23,10 +23,11 @@
 #     node tools/migrate-postgres.mjs
 #
 # Akses:
-#   API + Swagger : http://localhost:3000/docs
-#   Web UI        : http://localhost:8080
-#   Zoom Provider : http://localhost:3010
-#   PostgreSQL    : localhost:5432 (user: cims, db: cims)
+#   API + Swagger      : http://localhost:3000/docs
+#   Web UI             : http://localhost:8080
+#   Zoom Provider      : http://localhost:3010
+#   Brevo Notification : http://localhost:3020/health
+#   PostgreSQL         : localhost:5432 (user: cims, db: cims)
 # =============================================================================
 
 services:
@@ -72,7 +73,7 @@ services:
       RETENTION_EXECUTION_ENABLED: 'false'
       HEARING_IMPORT_ENABLED: 'false'
       LEGAL_HOLD_MAKER_CHECKER: 'true'
-      SWAGGER_ENABLED: 'false'
+      SWAGGER_ENABLED: 'true'
       TRUST_PROXY: 'false'
       RATE_LIMIT_MAX: '1000'
       RATE_LIMIT_WINDOW_MS: '60000'
@@ -84,24 +85,35 @@ services:
       # Secrets
       TOKEN_PEPPER_FILE: /run/secrets/token_pepper
       FIELD_ENCRYPTION_KEY_FILE: /run/secrets/field_encryption_key
+      # Key rotation: tambahkan V2 saat ingin melakukan rotasi kunci
+      # FIELD_ENCRYPTION_KEY_V2_FILE: /run/secrets/field_encryption_key_v2
+      # FIELD_ENCRYPTION_KEY_V3_FILE: /run/secrets/field_encryption_key_v3
       AUDIT_HASH_KEY_FILE: /run/secrets/audit_hash_key
       WEBHOOK_SHARED_SECRET_FILE: /run/secrets/webhook_shared_secret
-      # Gateways (MOCK)
-      NOTIFICATION_GATEWAY_MODE: MOCK
-      NOTIFICATION_GATEWAY_URL: ''
+      # Gateways — Brevo notification service (HTTP) + official system (MOCK)
+      NOTIFICATION_GATEWAY_MODE: HTTP
+      NOTIFICATION_GATEWAY_URL: 'http://brevo-notification:3020'
       OFFICIAL_SYSTEM_GATEWAY_MODE: MOCK
       OFFICIAL_SYSTEM_GATEWAY_URL: ''
       # Video provider
       VIDEO_PROVIDER_MODE: HTTP
       VIDEO_PROVIDER_URL: http://zoom-provider:3010
       VIDEO_PROVIDER_TIMEOUT_MS: '15000'
-      # Evidence storage (local filesystem)
-      EVIDENCE_STORAGE_MODE: LOCAL
-      EVIDENCE_LOCAL_DIR: /tmp/cims-evidence
+      # Evidence storage (S3 via MinIO)
+      EVIDENCE_STORAGE_MODE: S3
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: ap-southeast-1
+      S3_BUCKET: cims-evidence
+      S3_ACCESS_KEY_FILE: /run/secrets/s3_access_key
+      S3_SECRET_KEY_FILE: /run/secrets/s3_secret_key
       EVIDENCE_STORAGE_API_KEY_FILE: /run/secrets/evidence_storage_api_key
       # Circuit breaker
       CIRCUIT_BREAKER_FAILURE_THRESHOLD: '5'
       CIRCUIT_BREAKER_RESET_MS: '30000'
+      # M-10 Security: Metrics endpoint protection (Prometheus scrape token)
+      # Kosongkan untuk dev/preproduction lokal (endpoint tetap terbuka tapi dicatat di log)
+      # Isi dengan token acak untuk staging: openssl rand -hex 32
+      METRICS_BEARER_TOKEN: ''
     secrets:
       - database_url
       - token_pepper
@@ -149,9 +161,9 @@ services:
       FIELD_ENCRYPTION_KEY_FILE: /run/secrets/field_encryption_key
       AUDIT_HASH_KEY_FILE: /run/secrets/audit_hash_key
       WEBHOOK_SHARED_SECRET_FILE: /run/secrets/webhook_shared_secret
-      # Gateways (MOCK — worker yang kirim notifikasi)
-      NOTIFICATION_GATEWAY_MODE: MOCK
-      NOTIFICATION_GATEWAY_URL: ''
+      # Gateways — Worker mengirim ke brevo-notification (HTTP) saat outbox diproses
+      NOTIFICATION_GATEWAY_MODE: HTTP
+      NOTIFICATION_GATEWAY_URL: 'http://brevo-notification:3020'
       NOTIFICATION_GATEWAY_API_KEY_FILE: /run/secrets/notification_gateway_api_key
       NOTIFICATION_GATEWAY_TIMEOUT_MS: '10000'
       OFFICIAL_SYSTEM_GATEWAY_MODE: MOCK
@@ -162,9 +174,13 @@ services:
       VIDEO_PROVIDER_MODE: HTTP
       VIDEO_PROVIDER_URL: http://zoom-provider:3010
       VIDEO_PROVIDER_TIMEOUT_MS: '15000'
-      # Evidence storage
-      EVIDENCE_STORAGE_MODE: LOCAL
-      EVIDENCE_LOCAL_DIR: /tmp/cims-evidence
+      # Evidence storage (S3 via MinIO)
+      EVIDENCE_STORAGE_MODE: S3
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: ap-southeast-1
+      S3_BUCKET: cims-evidence
+      S3_ACCESS_KEY_FILE: /run/secrets/s3_access_key
+      S3_SECRET_KEY_FILE: /run/secrets/s3_secret_key
       EVIDENCE_STORAGE_API_KEY_FILE: /run/secrets/evidence_storage_api_key
     secrets:
       - database_url
@@ -175,6 +191,8 @@ services:
       - notification_gateway_api_key
       - official_system_gateway_api_key
       - evidence_storage_api_key
+      - s3_access_key
+      - s3_secret_key
     depends_on:
       postgres:
         condition: service_healthy
@@ -229,6 +247,77 @@ services:
       - /tmp
     restart: unless-stopped
 
+  # ── Brevo Notification Adapter ────────────────────────────────────────────
+  # Menerima request dari NotificationGateway (HTTP mode) dan mengirim via Brevo API.
+  # Channel EMAIL: kirim via Brevo Transactional Email API.
+  # Channel WHATSAPP/SMS/IN_APP: STUB mode (log + return DELIVERED, siap disambung provider nyata).
+  brevo-notification:
+    build:
+      context: ..
+      dockerfile: services/brevo-notification/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: '3020'
+      TRUST_PROXY: 'false'
+      # Brevo API — isi BREVO_API_KEY dengan API key nyata dari https://app.brevo.com
+      # Jika kosong, email akan di-stub (log saja)
+      BREVO_API_KEY_FILE: /run/secrets/brevo_api_key
+      BREVO_SENDER_EMAIL: noreply@cims-preproduction.local
+      BREVO_SENDER_NAME: CIMS Preproduction
+      BREVO_TIMEOUT_MS: '10000'
+      # WhatsApp — STUB mode (siapkan jalur, sambung provider nanti)
+      WHATSAPP_PROVIDER_MODE: STUB
+      WHATSAPP_API_URL: ''
+      WHATSAPP_API_KEY_FILE: /run/secrets/whatsapp_api_key
+    secrets:
+      - brevo_api_key
+      - whatsapp_api_key
+    ports:
+      - '3020:3020'
+    networks:
+      - provider
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  # ── MinIO S3 Object Storage ───────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER_FILE: /run/secrets/s3_access_key
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/s3_secret_key
+    secrets:
+      - s3_access_key
+      - s3_secret_key
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - cims_minio_data_preproduction:/data
+    networks:
+      - provider
+    restart: unless-stopped
+
+  # Otomatis membuat bucket cims-evidence saat MinIO start
+  minio-create-bucket:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    secrets:
+      - s3_access_key
+      - s3_secret_key
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set cims http://minio:9000 $$(cat /run/secrets/s3_access_key) $$(cat /run/secrets/s3_secret_key);
+      mc mb cims/cims-evidence --ignore-existing;
+      mc anonymous set public cims/cims-evidence;
+      exit 0;
+      "
+    networks:
+      - provider
+
 # ── Secrets (dari file lokal di infra/secrets/) ──────────────────────────────
 secrets:
   postgres_password:
@@ -257,6 +346,14 @@ secrets:
     file: ./secrets/zoom_client_secret.txt
   zoom_host_user_id:
     file: ./secrets/zoom_host_user_id.txt
+  brevo_api_key:
+    file: ./secrets/brevo_api_key.txt
+  whatsapp_api_key:
+    file: ./secrets/whatsapp_api_key.txt
+  s3_access_key:
+    file: ./secrets/s3_access_key.txt
+  s3_secret_key:
+    file: ./secrets/s3_secret_key.txt
 
 # ── Networks ─────────────────────────────────────────────────────────────────
 networks:
@@ -270,3 +367,5 @@ networks:
 volumes:
   cims_pgdata_preproduction:
     name: cims_pgdata_preproduction
+  cims_minio_data_preproduction:
+    name: cims_minio_data_preproduction

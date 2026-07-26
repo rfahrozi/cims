@@ -5,6 +5,7 @@ import { IdempotencyService } from './persistence/database/idempotency.service.j
 import { OutboxService } from './persistence/database/outbox.service.js';
 import { PersistenceModeService } from './persistence/database/persistence-mode.service.js';
 import { PgPoolService } from './persistence/database/pg-pool.service.js';
+import { AdminConfigRepository } from './persistence/repositories/admin-config.repository.js';
 import { CoreWorkflowRepository } from './persistence/repositories/core-workflow.repository.js';
 import { GovernanceRepository } from './persistence/repositories/governance.repository.js';
 import { HearingControlRepository } from './persistence/repositories/hearing-control.repository.js';
@@ -22,6 +23,7 @@ const providers = [
   DatabaseHealthService,
   IdempotencyService,
   OutboxService,
+  AdminConfigRepository,
   CoreWorkflowRepository,
   GovernanceRepository,
   HearingControlRepository,
@@ -43,6 +45,7 @@ const providers = [
     PgPoolService,
     OutboxService,
     IdempotencyService,
+    AdminConfigRepository,
     CoreWorkflowRepository,
     GovernanceRepository,
     HearingControlRepository,

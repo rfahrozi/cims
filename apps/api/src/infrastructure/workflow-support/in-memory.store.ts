@@ -284,6 +284,7 @@ export interface ParticipantRecord {
   displayName: string;
   alias?: string;
   protectedIdentity: boolean;
+  agendaItemId?: string; // (M-06) Penautan ke urutan kegiatan sidang tertentu
   state: string;
   contactEmailEncrypted?: string;
   createdBy: string;

@@ -338,6 +338,28 @@ export class AppealDecisionRepository {
     });
   }
 
+  async getNoticeStepById(stepId: string, user: CurrentUser): Promise<AppealNoticeStep> {
+    if (!this.mode.postgres) {
+      const s = this.memStore().noticeSteps.find((x) => x.id === stepId);
+      if (!s) throw new DomainError('APPEAL_NOTICE_STEP_NOT_FOUND', 'Notice step not found.', 404);
+      return s;
+    }
+    return this.pg.transactionAs(user, async (client) => {
+      const row = (
+        await client.query(
+          `select id,reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
+                channel,official_reference,status,sent_at::text,delivered_at::text,
+                acknowledged_at::text,receipt_reference,created_by,created_at::text
+           from appeal_notice_steps where id=$1`,
+          [stepId]
+        )
+      ).rows[0];
+      if (!row)
+        throw new DomainError('APPEAL_NOTICE_STEP_NOT_FOUND', 'Notice step not found.', 404);
+      return this.mapNoticeStep(row);
+    });
+  }
+
   async listNoticeSteps(readingId: string, user: CurrentUser): Promise<AppealNoticeStep[]> {
     if (!this.mode.postgres)
       return this.memStore().noticeSteps.filter((s) => s.readingId === readingId);

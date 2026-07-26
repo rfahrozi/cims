@@ -1,6 +1,17 @@
-import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Headers,
+  Param,
+  Post,
+  Query,
+  UseGuards
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUserContext, type CurrentUser } from '../../common/current-user.decorator.js';
+import { SensitiveRateGuard, SensitiveEndpoint } from '../../common/sensitive-rate.guard.js';
 import { AcknowledgeNoticeDto, CreateNoticeDto } from './dto.js';
 import { NoticesService } from './notices.service.js';
 
@@ -46,11 +57,50 @@ export class NoticesController {
 
   /**
    * H-10: SLA Report — daftar acknowledgment yang melewati deadline.
-   * GET /api/v1/notices/sla-report?hearing_id=xxx (hearing_id opsional — jika kosong, semua hearing)
-   * SOP 11: persentase acknowledgment tepat waktu harus termonitor.
+   * M-10 DLP: Dibatasi 20 request/menit per IP (endpoint menghasilkan data bulk agregat).
+   * GET /api/v1/notices/sla-report?hearing_id=xxx (hearing_id opsional)
    */
   @Get('notices/sla-report')
+  @UseGuards(SensitiveRateGuard)
+  @SensitiveEndpoint({ maxPerMinute: 20, label: 'notices/sla-report' })
   slaReport(@CurrentUserContext() user: CurrentUser, @Query('hearing_id') hearingId?: string) {
     return this.service.slaReport(user, hearingId);
+  }
+
+  /**
+   * GAP-04: Export Laporan Periodik
+   * Mengekspor data SLA Report ke format CSV untuk kebutuhan audit/rekonsiliasi.
+   * Dibatasi 5 request/menit untuk mencegah mass eksport.
+   */
+  @Get('notices/sla-report/export')
+  @UseGuards(SensitiveRateGuard)
+  @SensitiveEndpoint({ maxPerMinute: 5, label: 'notices/sla-report/export' })
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename="sla-overdue-report.csv"')
+  async exportSlaReport(
+    @CurrentUserContext() user: CurrentUser,
+    @Query('hearing_id') hearingId?: string
+  ) {
+    const data = await this.service.slaReport(user, hearingId);
+
+    // Header CSV
+    let csv =
+      'Hearing ID,Notice ID,Tipe Pemberitahuan,Penerima,Channel,Batas Waktu ACK,Keterlambatan (Menit)\n';
+
+    // Baris CSV
+    for (const item of data) {
+      const row = [
+        item.hearingId,
+        item.noticeId,
+        item.noticeType,
+        `"${item.recipientName.replace(/"/g, '""')}"`, // escape quotes
+        item.channel,
+        item.ackDeadline,
+        item.overdueMinutes
+      ];
+      csv += row.join(',') + '\n';
+    }
+
+    return csv;
   }
 }

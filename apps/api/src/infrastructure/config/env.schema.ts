@@ -128,12 +128,14 @@ export function validateEnvOrThrow(raw: NodeJS.ProcessEnv): RuntimeEnv {
     TRUST_PROXY: readBoolean(raw, 'TRUST_PROXY', false),
     SWAGGER_ENABLED: readBoolean(raw, 'SWAGGER_ENABLED', true),
 
-    NOTIFICATION_GATEWAY_MODE:
-      (readOptional(raw, 'NOTIFICATION_GATEWAY_MODE') ?? 'MOCK').toUpperCase(),
+    NOTIFICATION_GATEWAY_MODE: (
+      readOptional(raw, 'NOTIFICATION_GATEWAY_MODE') ?? 'MOCK'
+    ).toUpperCase(),
     NOTIFICATION_GATEWAY_URL: readOptional(raw, 'NOTIFICATION_GATEWAY_URL'),
 
-    OFFICIAL_SYSTEM_GATEWAY_MODE:
-      (readOptional(raw, 'OFFICIAL_SYSTEM_GATEWAY_MODE') ?? 'MOCK').toUpperCase(),
+    OFFICIAL_SYSTEM_GATEWAY_MODE: (
+      readOptional(raw, 'OFFICIAL_SYSTEM_GATEWAY_MODE') ?? 'MOCK'
+    ).toUpperCase(),
     OFFICIAL_SYSTEM_GATEWAY_URL: readOptional(raw, 'OFFICIAL_SYSTEM_GATEWAY_URL'),
 
     VIDEO_PROVIDER_MODE: (readOptional(raw, 'VIDEO_PROVIDER_MODE') ?? 'MOCK').toUpperCase(),

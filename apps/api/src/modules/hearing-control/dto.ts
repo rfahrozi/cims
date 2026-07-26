@@ -9,3 +9,8 @@ export class SuspendHearingDto {
   @IsString() @MinLength(5) reason!: string;
   @IsOptional() @IsInt() @Min(1) expected_row_version?: number;
 }
+
+export class FlagDocumentationDto {
+  @IsString() @MinLength(5) note!: string;
+  @IsOptional() @IsInt() @Min(1) expected_row_version?: number;
+}

@@ -19,6 +19,7 @@ export interface ParticipantCreateInput {
   alias?: string;
   protectedIdentity: boolean;
   contactEmail?: string;
+  agendaItemId?: string;
   createdBy: string;
 }
 @Injectable()
@@ -31,14 +32,16 @@ export class ParticipantsRepository {
     private readonly crypto: FieldCryptoService
   ) {
     this.postgres =
-      ((config && config.get ? config.get<string>('PERSISTENCE_MODE') : undefined) ?? 'MEMORY').toUpperCase() === 'POSTGRES';
+      (
+        (config && config.get ? config.get<string>('PERSISTENCE_MODE') : undefined) ?? 'MEMORY'
+      ).toUpperCase() === 'POSTGRES';
   }
   async list(hearingId: string, user: CurrentUser): Promise<ParticipantRecord[]> {
     if (!this.postgres) return this.memory.participants.filter((x) => x.hearingId === hearingId);
     return this.pg.transactionAs(user, async (client) =>
       (
         await client.query(
-          `select id::text,hearing_id,organization_id,role,display_name_encrypted,alias,protected_identity,state,contact_email_encrypted,created_by,created_at::text from hearing_participants where hearing_id=$1 and deleted_at is null order by created_at,id`,
+          `select id::text,hearing_id,organization_id,role,display_name_encrypted,alias,protected_identity,agenda_item_id,state,contact_email_encrypted,created_by,created_at::text from hearing_participants where hearing_id=$1 and deleted_at is null order by created_at,id`,
           [hearingId]
         )
       ).rows.map((r: any) => ({
@@ -49,6 +52,7 @@ export class ParticipantsRepository {
         displayName: this.crypto.decrypt(r.display_name_encrypted) ?? '',
         alias: r.alias ?? undefined,
         protectedIdentity: r.protected_identity,
+        agendaItemId: r.agenda_item_id ?? undefined,
         state: r.state,
         contactEmailEncrypted: r.contact_email_encrypted ? '[ENCRYPTED]' : undefined,
         createdBy: r.created_by,
@@ -73,7 +77,7 @@ export class ParticipantsRepository {
     return this.pg.transactionAs(user, async (client) => {
       const rows = (
         await client.query(
-          `insert into hearing_participants(hearing_id,organization_id,role,display_name_encrypted,display_name_search_hash,alias,protected_identity,contact_email_encrypted,state,created_by) values($1,$2,$3,$4,$5,$6,$7,$8,'REGISTERED',$9) returning id::text,created_at::text`,
+          `insert into hearing_participants(hearing_id,organization_id,role,display_name_encrypted,display_name_search_hash,alias,protected_identity,agenda_item_id,contact_email_encrypted,state,created_by) values($1,$2,$3,$4,$5,$6,$7,$8,$9,'REGISTERED',$10) returning id::text,created_at::text`,
           [
             input.hearingId,
             input.organizationId ?? null,
@@ -82,6 +86,7 @@ export class ParticipantsRepository {
             this.crypto.searchHash(input.displayName),
             input.alias ?? null,
             input.protectedIdentity,
+            input.agendaItemId ?? null,
             this.crypto.encrypt(input.contactEmail),
             input.createdBy
           ]

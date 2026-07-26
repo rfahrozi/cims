@@ -7,7 +7,11 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
   constructor(private readonly config: ConfigService) {}
 
   onApplicationBootstrap(): void {
-    if (((this.config && this.config.get ? this.config.get<string>('NODE_ENV') : undefined) ?? 'development') !== 'production') return;
+    if (
+      ((this.config && this.config.get ? this.config.get<string>('NODE_ENV') : undefined) ??
+        'development') !== 'production'
+    )
+      return;
     const role = (this.config.get<string>('CIMS_PROCESS_ROLE') ?? 'API').toUpperCase();
     this.assertEqual('PERSISTENCE_MODE', 'POSTGRES');
     this.requireSecret('DATABASE_URL', 12);

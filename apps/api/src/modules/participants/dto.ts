@@ -31,6 +31,7 @@ export class RegisterParticipantDto {
   @IsOptional() @IsString() organizationId?: string;
   @IsOptional() @IsEmail() contactEmail?: string;
   @IsBoolean() protectedIdentity = false;
+  @IsOptional() @IsString() agendaItemId?: string; // M-06: Penautan opsional ke item agenda
 }
 
 export class IssueJoinTokenDto {

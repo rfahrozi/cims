@@ -1,106 +1,243 @@
-# CIMS (Court Intelligence Management System)
+# CIMS — Court Intelligence Management System
 
-**Versi:** v0.20.0 MVP (Preproduction Baseline)
+**Versi:** v0.20.0 · Preproduction · Diperbarui: 26 Juli 2026
 
-Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan) yang mengedepankan **Compliance-First Architecture**. Sistem ini tidak menggantikan register resmi perkara (SIPP / e-Berpadu), melainkan bertindak sebagai **lapisan orkestrasi dan koordinasi** untuk operasional sidang virtual.
+Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan) yang mengedepankan **Compliance-First Architecture**. CIMS tidak menggantikan register resmi perkara (SIPP / e-Berpadu), melainkan bertindak sebagai **lapisan orkestrasi, notifikasi, readiness, monitoring, dan audit** untuk operasional sidang virtual.
 
 Sistem ini didesain 100% mematuhi **SOP/CIMS/PPE/001/2026**.
 
-## ⚖️ Prinsip Dasar & Arsitektur
+---
 
-- **Domain-Driven Design (DDD):** Aturan hukum dan _gate_ alur kerja diisolasi di `packages/domain`, terpisah dari implementasi _framework_.
-- **Compliance & Hard Gates:** Penyediaan ruang virtual Zoom **TIDAK MUNGKIN** dilakukan jika Penetapan Hakim (`APPROVED`), Jadwal, Bukti Pemberitahuan, dan Ceklist Kesiapan dari ketiga instansi belum terpenuhi.
-- **Immutable Audit Trail:** Setiap aksi dicatat menggunakan rantai HMAC (_blockchain-lite_) yang tidak dapat diubah oleh _sysadmin_ sekalipun, memastikan akuntabilitas (M-13).
-- **Transactional Outbox:** Menjamin notifikasi (Email, WA, dll) dan sinkronisasi lintas-sistem selalu terkirim, tahan terhadap _downtime_ pihak ketiga.
-- **Role-Based & Attribute-Based Access Control (RBAC & ABAC):** Keamanan otorisasi ketat hingga ke tingkat perkara. Hak akses dibatasi per pengadilan, kejaksaan, dan rutan.
-- **Provider-Agnostic Video:** Arsitektur modular yang memfasilitasi penggantian Zoom dengan WebEx atau provider mandiri pengadilan.
+## ⚖️ Prinsip Arsitektur
 
-## 🚀 Fitur Utama (v0.20.0 MVP)
+| Pilar                               | Deskripsi                                                                                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Domain-Driven Design**            | Semua aturan hukum dan gate alur kerja diisolasi di `packages/domain` — pure TypeScript, tanpa dependency framework, testable tanpa database         |
+| **Hard Gates**                      | Ruang virtual **tidak bisa dibuat** sebelum Penetapan Hakim `APPROVED`, jadwal aktif, ACK pemberitahuan, dan checklist kesiapan 3 instansi terpenuhi |
+| **Immutable Audit Trail**           | Setiap aksi dicatat dengan rantai HMAC (_blockchain-lite_) menggunakan `pg_advisory_xact_lock` — tidak dapat dimanipulasi                            |
+| **Transactional Outbox**            | Semua pengiriman notifikasi dan provisioning ruang virtual melalui antrian database — resilien terhadap downtime sistem eksternal                    |
+| **RBAC + ABAC**                     | Akses dibatasi per peran, per organisasi, dan per penugasan sidang — Panitera A tidak bisa melihat sidang B                                          |
+| **Provider-Agnostic Video**         | Adapter pattern — bisa ganti Zoom ke WebEx tanpa merombak kode inti                                                                                  |
+| **Field Encryption + Key Rotation** | AES-256-GCM dengan versioning kunci (V1→V2→V3) — rotasi kunci tanpa downtime, backward-compatible                                                    |
 
-- **Alur 7-Langkah Sidang Elektronik:** Data Perkara → Penetapan Hakim → Jadwal → Pemberitahuan Ber-SLA → Kesiapan Instansi → Ruang Virtual → Kontrol Sidang.
-- **Dashboard Per-Peran:** UI/UX khusus untuk Hakim, Panitera, Penuntut Umum, dan Petugas Pemasyarakatan dengan _Empty States_ & panduan (Agile/Lean UX).
-- **Modul Putusan Banding (SOP 10.15):** Eksekusi pembacaan putusan di Pengadilan Tinggi, publikasi _same-day_, dan transmisi berkas 7-hari.
-- **Pejabat Penghubung / Liaison Officer (SOP 7 & 8):** Manajemen pendelegasian, komunikasi, dan eskalasi hambatan persidangan.
-- **Mutasi Tahanan & Perlindungan Saksi (SOP 10.14 & 10.9):** Integrasi alur pengalihan akses lokasi terdakwa, serta _auto-masking_ identitas untuk advokat/saksi rentan.
-- **Konsultasi Privat (SOP 10.8):** Enforced _No-Recording Policy_ dan pemisahan _Breakout Room_ otomatis.
+---
+
+## ✅ Status Kesiapan (26 Juli 2026)
+
+| Dimensi                        | Status              | Catatan                                                                              |
+| ------------------------------ | ------------------- | ------------------------------------------------------------------------------------ |
+| Alur 7 langkah inti            | ✅ **100% Selesai** | Intake → Penetapan → Jadwal → Notifikasi → Kesiapan → Ruang Virtual → Kontrol Sidang |
+| Docker Preproduction           | ✅ **Siap**         | `docker compose up` berjalan end-to-end                                              |
+| Putusan Banding (SOP 10.15)    | ✅ **Selesai**      | Deadline 1 Agustus 2026 terpenuhi                                                    |
+| Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                  |
+| Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan                                                |
+| Notification Template          | ✅ **Selesai**      | 16 template default per jenis × channel, editable admin                              |
+| Brevo Email Adapter            | ✅ **Aktif**        | Channel EMAIL via Brevo API; WhatsApp/SMS stub siap                                  |
+| SLA Config dari DB             | ✅ **Selesai**      | `sla_configs` table, configurable tanpa deploy                                       |
+| Admin Console (`/admin`)       | ✅ **Selesai**      | Edit template & SLA inline, role SYSTEM_ADMIN                                        |
+| Dashboard Per-Instansi         | ✅ **Selesai**      | Widget berbeda per Pengadilan / Kejaksaan / Rutan                                    |
+| DOCUMENTATION_PENDING State    | ✅ **Selesai**      | Flag dokumen tertunda pasca sidang                                                   |
+| Key Rotation Enkripsi          | ✅ **Selesai**      | Multi-key versioning V1/V2/V3                                                        |
+| DLP Per-Endpoint               | ✅ **Selesai**      | `SensitiveRateGuard`, /metrics token, CSP aktif                                      |
+| MFA Production                 | ⚠️ **Belum**        | Membutuhkan Keycloak production — Sprint 11                                          |
+| OIDC Production                | ⚠️ **Belum**        | `AUTH_MODE=DEV` untuk preproduction lokal                                            |
+| UAT Lintas Instansi            | ⚠️ **Belum**        | Dijadwalkan Sprint 13–14                                                             |
+
+---
+
+## 🗂️ Struktur Monorepo
+
+```
+cims-platform-ts/
+├── apps/
+│   ├── api/                      # Backend NestJS + Fastify (@cims/api)
+│   └── web/                      # Frontend React + Vite (@cims/web)
+├── services/
+│   ├── zoom-provider/            # Adapter Zoom video (port 3010)
+│   └── brevo-notification/       # Adapter Brevo email + WhatsApp stub (port 3020)
+├── packages/
+│   ├── domain/                   # @cims/domain — pure TypeScript, zero deps
+│   └── contracts/                # @cims/contracts — shared DTOs
+├── database/
+│   └── typescript-migrations/    # 14 migration SQL (0001–0014)
+│       └── 0014_notification_templates_sla.sql  ← terbaru
+├── infra/
+│   ├── docker-compose.yml                   # Dev lokal
+│   ├── docker-compose.preproduction.yml     # Preproduction (5 services)
+│   ├── docker-compose.production-like.yml  # Production-like (OIDC, TLS)
+│   └── secrets/                             # 15 secret files (gitignored)
+└── scripts/
+    └── setup-preproduction.sh               # Auto-generate semua secrets
+```
 
 ---
 
 ## 🛠️ Stack Teknologi
 
-- **Backend:** Node.js (v22), NestJS, Fastify, TypeScript.
-- **Frontend:** React, Vite, Tailwind CSS v4, Radix UI, shadcn/ui.
-- **Database:** PostgreSQL 17 (dengan Row-Level Security).
-- **Identity:** OIDC / Keycloak (dengan fallback Header HTTP via `AUTH_MODE=DEV`).
-- **Monorepo:** npm workspaces (`apps/api`, `apps/web`, `services/zoom-provider`, `packages/domain`).
+| Layer               | Teknologi                                                              |
+| ------------------- | ---------------------------------------------------------------------- |
+| **Backend**         | Node.js ≥22, NestJS 11, Fastify, TypeScript                            |
+| **Frontend**        | React 18, Vite, Tailwind CSS v4, shadcn/ui, Radix UI                   |
+| **Database**        | PostgreSQL 17, 14 migration files                                      |
+| **Auth**            | OIDC / Keycloak (`AUTH_MODE=OIDC`) · DEV mode header (`AUTH_MODE=DEV`) |
+| **Enkripsi**        | AES-256-GCM field encryption + multi-key versioning                    |
+| **Notifikasi**      | Brevo Transactional Email · WhatsApp stub (HTTP-ready)                 |
+| **Video**           | Zoom Server-to-Server OAuth · Mock adapter untuk dev                   |
+| **Package Manager** | npm workspaces, npm@10.9.0                                             |
 
 ---
 
-## 🐳 Menjalankan Local Preproduction (Docker)
+## 🐳 Menjalankan Preproduction (Docker)
 
-Semua layanan dapat dijalankan dalam _Local Docker_ yang meniru lingkungan _Production_.
-
-### 1. Inisialisasi Secrets Lokal
-
-Jalankan skrip berikut untuk membuat kredensial, enkripsi kunci, dan parameter keamanan ke direktori `infra/secrets`. Direktori ini dikecualikan dari _git_.
+### 1. Inisialisasi Secrets
 
 ```bash
+# Generate semua 15 secret file (password, key enkripsi, API keys)
 bash scripts/setup-preproduction.sh
+
+# Untuk email nyata via Brevo, sertakan API key:
+BREVO_API_KEY=xkeysib-xxx... bash scripts/setup-preproduction.sh
 ```
 
-### 2. Jalankan Container
-
-Sistem di-_build_ dengan mode _Multi-stage_ yang menghasilkan _image_ `alpine` berukuran sangat kecil tanpa menyertakan `node_modules` _development_.
+### 2. Build & Jalankan
 
 ```bash
-# Pastikan dependency tervalidasi bersih
 npm ci
 npm run build
 
-# Bangun container & jalankan (API, Web Nginx, Worker, Zoom-Provider, PostgreSQL)
+# Build + jalankan: API, Worker, Web, Zoom Provider, Brevo Notification, PostgreSQL
 docker compose -f infra/docker-compose.preproduction.yml up --build -d
 ```
 
-### 3. Migrasi Schema & Seeding Data
-
-Suntikkan tabel-tabel PostgreSQL dan masukkan data percobaan (_3 organisasi, 3 perkara demo_).
+### 3. Migrasi Database
 
 ```bash
-docker compose -f infra/docker-compose.preproduction.yml exec api node tools/migrate-postgres.mjs
+docker compose -f infra/docker-compose.preproduction.yml exec api \
+  node tools/migrate-postgres.mjs
 ```
 
 ### 4. Akses Aplikasi
 
-- **Frontend Web UI:** [http://localhost:8080](http://localhost:8080)
-- **API & Swagger UI:** [http://localhost:3000/docs](http://localhost:3000/docs)
+| Layanan                | URL                                     |
+| ---------------------- | --------------------------------------- |
+| **Web UI**             | http://localhost:8080                   |
+| **API + Swagger**      | http://localhost:3000/docs              |
+| **Zoom Provider**      | http://localhost:3010/health            |
+| **Brevo Notification** | http://localhost:3020/health            |
+| **PostgreSQL**         | `localhost:5435` (user: cims, db: cims) |
 
-_(Tip: Gunakan **Persona Switcher** di sidebar kiri bawah UI Web untuk mensimulasikan login sebagai Panitera, Hakim, atau Jaksa)._
+> **Tip:** Gunakan **Persona Switcher** di sidebar kiri bawah untuk simulasi login sebagai Panitera, Hakim, Jaksa, atau Petugas Pemasyarakatan.
+
+### 5. Validasi Health
+
+```bash
+curl http://localhost:3000/health/live   # → {"status":"UP"}
+curl http://localhost:3000/health/ready  # → {"status":"UP","decision":"GO",...}
+```
 
 ---
 
-## 🧪 Validasi Kepatuhan & Pengujian
-
-Sebelum merilis _Pull Request_ atau _Deploy_ ke _Production_, selalu jalankan _test suite_ yang memvalidasi _Domain Logic_ (_Gate_, _Conflict Detection_, HMAC).
+## 🧪 Development & Testing
 
 ```bash
-# Uji Test Driven Development pada rule hukum
+# Test domain logic (gate, conflict detection, state machine, HMAC)
 npm run test:domain
 
-# Typechecking seluruh Monorepo
+# TypeScript typecheck seluruh monorepo
 npm run typecheck
 
-# Cek kelayakan Production Baseline (SOP Compliance Checker)
+# Lint + format
+npm run lint
+npm run format
+
+# SOP compliance checker (production baseline)
 npm run check:phase6
+
+# Dev mode (hot reload)
+npm run dev:api    # API backend
+npm run dev:web    # Frontend
+npm run dev:worker # Outbox worker
 ```
 
-## ⚠️ Transisi Menuju Production
+---
 
-Lingkungan _Production_ dan _Real Case Data_ **TIDAK DIIZINKAN** (_NO-GO_) hingga:
+## 🔒 Keamanan
 
-1. Skema peran OIDC (`OIDC_ISSUER`) dan _Role Mapping_ (`CIMS_ROLES`) dikonfigurasi melalui Identity Provider eksternal.
-2. _Secret Keys_ KMS/HSM (Vault) menggantikan file teks lokal `/run/secrets`.
-3. Koneksi API ke _Gateway Notifikasi Resmi_ (SIPP/e-Berpadu) tersedia dan SSL dipaksakan `DB_SSL=true`.
-4. Uji Coba Lintas Instansi (UAT) selesai diotorisasi oleh pejabat _Liaison_.
+### Field Encryption Key Rotation
 
---
-🤖 _Dibangun & diaudit secara kolaboratif menggunakan metodologi Lean MVP._
+CIMS mendukung rotasi kunci enkripsi tanpa downtime:
+
+```bash
+# Generate kunci baru
+openssl rand -base64 32
+
+# Tambahkan ke infra/secrets/field_encryption_key_v2.txt
+# Aktifkan di docker-compose (FIELD_ENCRYPTION_KEY_V2_FILE)
+# Restart → enkripsi baru pakai V2, data V1 lama tetap bisa didekripsi
+```
+
+### 10 Roles CIMS
+
+| Kode               | Nama                   | Instansi        |
+| ------------------ | ---------------------- | --------------- |
+| `COURT_CLERK`      | Panitera               | Pengadilan      |
+| `SUBSTITUTE_CLERK` | Panitera Pengganti     | Pengadilan      |
+| `JUDGE`            | Hakim                  | Pengadilan      |
+| `PROSECUTOR`       | Penuntut Umum          | Kejaksaan       |
+| `CORRECTIONS`      | Petugas Pemasyarakatan | Lapas/Rutan     |
+| `IT_OPERATOR`      | Operator TI            | Tim Teknis      |
+| `LIAISON_OFFICER`  | Pejabat Penghubung     | Lintas Instansi |
+| `AUDITOR`          | Auditor                | Pengawasan      |
+| `SECURITY_OFFICER` | Petugas Keamanan       | Keamanan        |
+| `SYSTEM_ADMIN`     | Administrator Sistem   | Sistem          |
+
+### DLP & Rate Limiting
+
+- **Rate limit global:** dikonfigurasi via `RATE_LIMIT_MAX` + `RATE_LIMIT_WINDOW_MS`
+- **`SensitiveRateGuard`:** rate limit per-IP ketat untuk endpoint agregat sensitif (SLA report, compliance dashboard, admin config)
+- **`/metrics` endpoint:** dilindungi `METRICS_BEARER_TOKEN` — blokir otomatis di production tanpa token
+
+---
+
+## 📧 Notification Channels
+
+| Channel    | Status   | Keterangan                                                             |
+| ---------- | -------- | ---------------------------------------------------------------------- |
+| `EMAIL`    | ✅ Aktif | Brevo Transactional API — isi `brevo_api_key.txt`                      |
+| `WHATSAPP` | 🔄 Stub  | Jalur HTTP siap — set `WHATSAPP_PROVIDER_MODE=HTTP` saat provider siap |
+| `SMS`      | 🔄 Stub  | Log + return DELIVERED                                                 |
+| `IN_APP`   | 🔄 Stub  | WebSocket/SSE direncanakan fase berikutnya                             |
+
+Template teks per jenis × channel tersimpan di tabel `notification_templates` — dapat diubah admin di `/admin` tanpa deploy ulang.
+
+---
+
+## ⚠️ Syarat Sebelum Production (NO-GO Checklist)
+
+Production **TIDAK DIIZINKAN** sebelum semua item berikut terpenuhi:
+
+- [ ] `OIDC_ISSUER` + Keycloak production dikonfigurasi (`AUTH_MODE=OIDC`)
+- [ ] MFA aktif untuk semua role internal utama (melalui Keycloak)
+- [ ] `DB_SSL=true` dengan sertifikat TLS yang valid
+- [ ] Secret files diganti dengan secret manager (Vault / AWS Secrets Manager / GCP)
+- [ ] `METRICS_BEARER_TOKEN` dikonfigurasi untuk endpoint Prometheus
+- [ ] `BREVO_API_KEY` production diisi (bukan placeholder)
+- [ ] UAT lintas instansi selesai diotorisasi oleh Pejabat Liaison
+- [ ] Controlled Limitation Register ditandatangani oleh steering committee
+- [ ] `SWAGGER_ENABLED=false` di production
+
+---
+
+## 🗓️ Roadmap
+
+| Sprint           | Fokus                                             | Target                 |
+| ---------------- | ------------------------------------------------- | ---------------------- |
+| ~~Sprint 1–10~~  | Alur inti, notifikasi, video, keamanan, modul SOP | ✅ Selesai             |
+| **Sprint 11**    | MFA Keycloak, OIDC production, export laporan     | Agustus 2026           |
+| **Sprint 12**    | Portal per-instansi lanjutan, notif in-app SSE    | Agustus 2026           |
+| **Sprint 13–14** | SIT end-to-end, UAT lintas instansi               | Agustus–September 2026 |
+| **Sprint 15–16** | Release Candidate v1.0, hypercare                 | September–Oktober 2026 |
+
+---
+
+🤖 _Dibangun dengan metodologi Lean MVP · Compliance-First · SOP/CIMS/PPE/001/2026_

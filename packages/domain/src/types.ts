@@ -131,8 +131,16 @@ export type HearingRuntimeState =
   | 'STARTED'
   | 'SUSPENDED'
   | 'ENDED'
-  | 'POSTPONED';
-export type HearingAction = 'START' | 'SUSPEND' | 'RESUME' | 'END' | 'POSTPONE';
+  | 'POSTPONED'
+  | 'DOCUMENTATION_PENDING';
+export type HearingAction =
+  | 'START'
+  | 'SUSPEND'
+  | 'RESUME'
+  | 'END'
+  | 'POSTPONE'
+  | 'FLAG_DOCUMENTATION'
+  | 'COMPLETE_DOCUMENTATION';
 
 export type AgendaItemStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED';
 

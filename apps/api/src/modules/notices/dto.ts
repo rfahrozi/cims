@@ -28,8 +28,17 @@ export class CreateNoticeDto {
    * PERMOHONAN_ELEKTRONIK, PEMBERITAHUAN_GANGGUAN, PEMBERITAHUAN_UMUM
    */
   @IsEnum(NOTICE_TYPES) notice_type!: NoticeType;
-  @IsString() @MinLength(3) subject!: string;
-  @IsString() @MinLength(10) message!: string;
+  /**
+   * Subjek pemberitahuan. Jika tidak diisi, akan diambil dari template default
+   * berdasarkan notice_type dan channel penerima pertama.
+   */
+  @IsOptional() @IsString() @MinLength(3) subject?: string;
+  /**
+   * Isi pemberitahuan. Jika tidak diisi, akan diambil dari template default.
+   * Template mendukung placeholder: {recipient_name}, {case_number}, {scheduled_at},
+   * {start_time}, {hearing_mode}, {change_reason}, {official_reference}
+   */
+  @IsOptional() @IsString() @MinLength(10) message?: string;
   @IsString() official_reference!: string;
   @IsArray()
   @ValidateNested({ each: true })

@@ -81,7 +81,7 @@ export class HearingControlRepository {
           `select exists(select 1 from virtual_sessions where hearing_id=$1 and state='READY') as ready`,
           [hearingId]
         );
-        state = Boolean(ready.rows[0]?.ready) ? 'READY' : 'NOT_READY';
+        state = ready.rows[0]?.ready ? 'READY' : 'NOT_READY';
       }
       return {
         hearing_id: hearingId,
@@ -293,20 +293,33 @@ export class HearingControlRepository {
       runtime.endedBy = userId;
       runtime.endedAt = at;
     }
+    if ((action as string) === 'FLAG_DOCUMENTATION') {
+      (runtime as any)['documentationFlaggedBy'] = userId;
+      (runtime as any)['documentationFlaggedAt'] = at;
+      (runtime as any)['documentationFlaggedNote'] = reason;
+    }
+    if ((action as string) === 'COMPLETE_DOCUMENTATION') {
+      (runtime as any)['documentationCompletedBy'] = userId;
+      (runtime as any)['documentationCompletedAt'] = at;
+    }
   }
 
   private eventType(action: HearingAction): string {
-    if (action === 'RESUME') return 'RESUMED';
-    if (action === 'SUSPEND') return 'SUSPENDED';
-    if (action === 'START') return 'STARTED';
-    if (action === 'END') return 'ENDED';
-    return 'POSTPONED';
+    if (action === 'RESUME') return 'HEARING_RESUMED';
+    if (action === 'SUSPEND') return 'HEARING_SUSPENDED';
+    if (action === 'START') return 'HEARING_STARTED';
+    if (action === 'END') return 'HEARING_ENDED';
+    if ((action as string) === 'FLAG_DOCUMENTATION') return 'HEARING_DOCUMENTATION_FLAGGED';
+    if ((action as string) === 'COMPLETE_DOCUMENTATION') return 'HEARING_DOCUMENTATION_COMPLETED';
+    return 'HEARING_POSTPONED';
   }
 
   private hearingState(action: HearingAction): string {
     if (action === 'START' || action === 'RESUME') return 'IN_SESSION';
     if (action === 'SUSPEND') return 'SUSPENDED';
     if (action === 'END') return 'COMPLETED';
+    if ((action as string) === 'FLAG_DOCUMENTATION') return 'DOCUMENTATION_PENDING';
+    if ((action as string) === 'COMPLETE_DOCUMENTATION') return 'COMPLETED';
     return 'POSTPONED';
   }
 }
