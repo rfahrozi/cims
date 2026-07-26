@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { InfrastructureModule } from './infrastructure/infrastructure.module.js';
+import { SecurityModule } from './infrastructure/security.module.js';
 import { CimsAuthGuard } from './common/auth.guard.js';
 import { PolicyGuard } from './common/policy.guard.js';
 import { OidcTokenVerifierService } from './common/oidc-token-verifier.service.js';
@@ -32,6 +33,7 @@ import { CustodyModule } from './modules/custody/custody.module.js';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     InfrastructureModule,
+    SecurityModule, // explicitly imported for PolicyGuard
     HealthModule,
     AuthModule,
     HearingIntakeModule,

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { InfrastructureModule } from '../../infrastructure/infrastructure.module.js';
+import { ObservabilityModule } from '../../infrastructure/observability.module.js';
+import { PersistenceModule } from '../../infrastructure/persistence.module.js';
+import { WorkflowSupportModule } from '../../infrastructure/workflow-support.module.js';
 import { CustodyController } from './custody.controller.js';
 import { CustodyService } from './custody.service.js';
 
 @Module({
-  imports: [InfrastructureModule],
+  imports: [PersistenceModule, ObservabilityModule, WorkflowSupportModule],
   controllers: [CustodyController],
   providers: [CustodyService],
   exports: [CustodyService]
