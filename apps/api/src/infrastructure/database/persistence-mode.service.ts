@@ -7,7 +7,7 @@ export class PersistenceModeService {
 
   constructor(config: ConfigService) {
     this.mode =
-      (config.get<string>('PERSISTENCE_MODE') ?? 'MEMORY').toUpperCase() === 'POSTGRES'
+      ((config && config.get<string>('PERSISTENCE_MODE')) ?? 'MEMORY').toUpperCase() === 'POSTGRES'
         ? 'POSTGRES'
         : 'MEMORY';
   }

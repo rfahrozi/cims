@@ -14,7 +14,7 @@ export class IncidentsRepository {
     private readonly crypto: FieldCryptoService
   ) {
     this.postgres =
-      (config.get<string>('PERSISTENCE_MODE') ?? 'MEMORY').toUpperCase() === 'POSTGRES';
+      ((config && config.get ? config.get<string>('PERSISTENCE_MODE') : undefined) ?? 'MEMORY').toUpperCase() === 'POSTGRES';
   }
   async list(hearingId: string, user: CurrentUser): Promise<any[]> {
     if (!this.postgres)

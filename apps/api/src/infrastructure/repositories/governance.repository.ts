@@ -121,7 +121,7 @@ export class GovernanceRepository {
     private readonly outbox: OutboxService,
     private readonly evidenceStorage: EvidenceStorageGateway
   ) {
-    this.makerChecker = config.get<string>('LEGAL_HOLD_MAKER_CHECKER') !== 'false';
+    this.makerChecker = config && config.get ? config.get<string>('LEGAL_HOLD_MAKER_CHECKER') !== 'false' : true;
   }
 
   async listLegalHolds(hearingId: string, user: CurrentUser): Promise<LegalHoldRecord[]> {

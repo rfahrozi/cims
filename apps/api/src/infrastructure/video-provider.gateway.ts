@@ -11,13 +11,13 @@ export class VideoProviderGateway {
     private readonly config: ConfigService,
     private readonly circuitBreaker: CircuitBreakerService
   ) {
-    this.timeoutMs = Number(config.get<string>('VIDEO_PROVIDER_TIMEOUT_MS') ?? 15_000);
+    this.timeoutMs = Number((config && config.get ? config.get<string>('VIDEO_PROVIDER_TIMEOUT_MS') : undefined) ?? 15_000);
   }
 
   capability(): { mode: 'MOCK' | 'HTTP'; configured: boolean } {
     return {
       mode: this.mode,
-      configured: this.mode === 'MOCK' || Boolean(this.config.get<string>('VIDEO_PROVIDER_URL'))
+      configured: this.mode === 'MOCK' || Boolean(this.config && this.config.get ? this.config.get<string>('VIDEO_PROVIDER_URL') : undefined)
     };
   }
 
@@ -94,10 +94,10 @@ export class VideoProviderGateway {
   }
 
   private get mode(): 'MOCK' | 'HTTP' {
-    return this.config.get<string>('VIDEO_PROVIDER_MODE', 'MOCK') === 'HTTP' ? 'HTTP' : 'MOCK';
+    return (this.config && this.config.get ? this.config.get<string>('VIDEO_PROVIDER_MODE', 'MOCK') : 'MOCK') === 'HTTP' ? 'HTTP' : 'MOCK';
   }
   private baseUrl(): string {
-    return this.config.get('VIDEO_PROVIDER_URL', 'http://localhost:3010');
+    return (this.config && this.config.get ? this.config.get('VIDEO_PROVIDER_URL', 'http://localhost:3010') : 'http://localhost:3010');
   }
   private headers(correlationId?: string): Record<string, string> {
     return correlationId ? { 'x-correlation-id': correlationId } : {};

@@ -39,10 +39,10 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     private readonly metrics: MetricsService,
     private readonly governance: GovernanceRepository
   ) {
-    this.enabled = config.get<string>('OUTBOX_WORKER_ENABLED') !== 'false';
-    this.intervalMs = Number(config.get<string>('OUTBOX_POLL_INTERVAL_MS') ?? 1000);
-    this.batchSize = Number(config.get<string>('OUTBOX_BATCH_SIZE') ?? 20);
-    this.maxAttempts = Number(config.get<string>('OUTBOX_MAX_ATTEMPTS') ?? 8);
+    this.enabled = (config && config.get ? config.get<string>('OUTBOX_WORKER_ENABLED') : undefined) !== 'false';
+    this.intervalMs = Number((config && config.get ? config.get<string>('OUTBOX_POLL_INTERVAL_MS') : undefined) ?? 1000);
+    this.batchSize = Number((config && config.get ? config.get<string>('OUTBOX_BATCH_SIZE') : undefined) ?? 20);
+    this.maxAttempts = Number((config && config.get ? config.get<string>('OUTBOX_MAX_ATTEMPTS') : undefined) ?? 8);
   }
 
   onApplicationBootstrap(): void {

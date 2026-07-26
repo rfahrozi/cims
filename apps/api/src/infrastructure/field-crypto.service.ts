@@ -8,7 +8,7 @@ export class FieldCryptoService {
   private readonly key: Buffer;
   constructor(config: ConfigService) {
     const raw = secretValue(config, 'FIELD_ENCRYPTION_KEY') ?? '';
-    const environment = config.get<string>('NODE_ENV') ?? 'development';
+    const environment = (config && config.get ? config.get<string>('NODE_ENV') : undefined) ?? 'development';
     const decoded = raw ? Buffer.from(raw, 'base64') : Buffer.alloc(0);
     if (environment === 'production' && decoded.length !== 32)
       throw new Error('FIELD_ENCRYPTION_KEY must be a 32-byte base64 key in production.');

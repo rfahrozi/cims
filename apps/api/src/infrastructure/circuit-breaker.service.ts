@@ -15,8 +15,8 @@ export class CircuitBreakerService {
   private readonly resetMs: number;
 
   constructor(config: ConfigService) {
-    this.threshold = Number(config.get<string>('CIRCUIT_BREAKER_FAILURE_THRESHOLD') ?? 5);
-    this.resetMs = Number(config.get<string>('CIRCUIT_BREAKER_RESET_MS') ?? 30_000);
+    this.threshold = Number((config && config.get ? config.get<string>('CIRCUIT_BREAKER_FAILURE_THRESHOLD') : undefined) ?? 5);
+    this.resetMs = Number((config && config.get ? config.get<string>('CIRCUIT_BREAKER_RESET_MS') : undefined) ?? 30_000);
   }
 
   async execute<T>(dependency: string, operation: () => Promise<T>): Promise<T> {
