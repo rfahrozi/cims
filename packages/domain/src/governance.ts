@@ -35,40 +35,75 @@ export function productionGateDecision(checks: readonly ReadinessCheck[]): Produ
 
 export function retentionEligibility(input: RetentionEligibilityInput): RetentionEligibilityResult {
   if (!input.closedAt) {
-    return { status: 'NOT_CLOSED', eligibleForReview: false, activeLegalHoldCount: input.activeLegalHoldCount };
+    return {
+      status: 'NOT_CLOSED',
+      eligibleForReview: false,
+      activeLegalHoldCount: input.activeLegalHoldCount
+    };
   }
   if (!Number.isInteger(input.retentionDays) || Number(input.retentionDays) <= 0) {
-    return { status: 'POLICY_NOT_CONFIGURED', eligibleForReview: false, activeLegalHoldCount: input.activeLegalHoldCount };
+    return {
+      status: 'POLICY_NOT_CONFIGURED',
+      eligibleForReview: false,
+      activeLegalHoldCount: input.activeLegalHoldCount
+    };
   }
   const closedAt = new Date(input.closedAt);
-  if (Number.isNaN(closedAt.getTime())) throw new DomainError('INVALID_CLOSED_AT', 'The closure timestamp is invalid.', 400);
+  if (Number.isNaN(closedAt.getTime()))
+    throw new DomainError('INVALID_CLOSED_AT', 'The closure timestamp is invalid.', 400);
   const due = new Date(closedAt.getTime() + Number(input.retentionDays) * 86_400_000);
   const dueAt = due.toISOString();
   if (input.activeLegalHoldCount > 0) {
-    return { status: 'ON_HOLD', eligibleForReview: false, dueAt, activeLegalHoldCount: input.activeLegalHoldCount };
+    return {
+      status: 'ON_HOLD',
+      eligibleForReview: false,
+      dueAt,
+      activeLegalHoldCount: input.activeLegalHoldCount
+    };
   }
   const now = new Date(input.now ?? new Date().toISOString());
-  if (Number.isNaN(now.getTime())) throw new DomainError('INVALID_NOW', 'The evaluation timestamp is invalid.', 400);
+  if (Number.isNaN(now.getTime()))
+    throw new DomainError('INVALID_NOW', 'The evaluation timestamp is invalid.', 400);
   if (now.getTime() < due.getTime()) {
     return { status: 'NOT_DUE', eligibleForReview: false, dueAt, activeLegalHoldCount: 0 };
   }
   return { status: 'DUE_FOR_REVIEW', eligibleForReview: true, dueAt, activeLegalHoldCount: 0 };
 }
 
-export function assertLegalHoldReleaseAllowed(createdBy: string, actorUserId: string, makerChecker = true): void {
+export function assertLegalHoldReleaseAllowed(
+  createdBy: string,
+  actorUserId: string,
+  makerChecker = true
+): void {
   if (makerChecker && createdBy === actorUserId) {
-    throw new DomainError('LEGAL_HOLD_MAKER_CHECKER_REQUIRED', 'The user who created a legal hold cannot release the same hold.', 409);
+    throw new DomainError(
+      'LEGAL_HOLD_MAKER_CHECKER_REQUIRED',
+      'The user who created a legal hold cannot release the same hold.',
+      409
+    );
   }
 }
 
 export function accessReviewStatus(decision: AccessReviewDecision): AccessReviewItemStatus {
   if (decision === 'KEEP') return 'KEPT';
   if (decision === 'REVOKE') return 'REVOKED';
-  throw new DomainError('INVALID_ACCESS_REVIEW_DECISION', 'Unsupported access review decision.', 400, { decision });
+  throw new DomainError(
+    'INVALID_ACCESS_REVIEW_DECISION',
+    'Unsupported access review decision.',
+    400,
+    { decision }
+  );
 }
 
-export function assertAccessReviewDecisionAllowed(subjectUserId: string, reviewerUserId: string): void {
+export function assertAccessReviewDecisionAllowed(
+  subjectUserId: string,
+  reviewerUserId: string
+): void {
   if (subjectUserId === reviewerUserId) {
-    throw new DomainError('ACCESS_REVIEW_SELF_APPROVAL_FORBIDDEN', 'A user cannot approve or revoke their own access.', 409);
+    throw new DomainError(
+      'ACCESS_REVIEW_SELF_APPROVAL_FORBIDDEN',
+      'A user cannot approve or revoke their own access.',
+      409
+    );
   }
 }

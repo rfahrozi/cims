@@ -1,18 +1,34 @@
 import { FileText, ChevronDown } from 'lucide-react';
 import { useActiveHearing } from '@/lib/hearing-context';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 const STATE_LABEL: Record<string, string> = {
-  DRAFT: 'Draf', COORDINATION: 'Koordinasi', IN_PROGRESS: 'Berlangsung',
-  READY: 'Siap', COMPLETED: 'Selesai', SUSPENDED: 'Diskors',
-  POSTPONED: 'Ditunda', CLOSED: 'Ditutup',
+  DRAFT: 'Draf',
+  COORDINATION: 'Koordinasi',
+  IN_PROGRESS: 'Berlangsung',
+  READY: 'Siap',
+  COMPLETED: 'Selesai',
+  SUSPENDED: 'Diskors',
+  POSTPONED: 'Ditunda',
+  CLOSED: 'Ditutup'
 };
 
 const STATE_VARIANT: Record<string, 'success' | 'warning' | 'outline' | 'destructive'> = {
-  IN_PROGRESS: 'success', READY: 'success',
-  SUSPENDED: 'warning', DRAFT: 'outline', COORDINATION: 'warning',
-  POSTPONED: 'destructive', COMPLETED: 'outline', CLOSED: 'outline',
+  IN_PROGRESS: 'success',
+  READY: 'success',
+  SUSPENDED: 'warning',
+  DRAFT: 'outline',
+  COORDINATION: 'warning',
+  POSTPONED: 'destructive',
+  COMPLETED: 'outline',
+  CLOSED: 'outline'
 };
 
 /**
@@ -32,7 +48,11 @@ export function ActiveHearingBar() {
 
       {/* ── Selector ── */}
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <Select value={hearingId} onValueChange={setHearingId} disabled={loading || hearings.length === 0}>
+        <Select
+          value={hearingId}
+          onValueChange={setHearingId}
+          disabled={loading || hearings.length === 0}
+        >
           <SelectTrigger className="h-8 min-w-55 max-w-sm border-slate-200 bg-slate-50 text-sm font-medium text-slate-800">
             <SelectValue placeholder="Pilih perkara…" />
             <ChevronDown className="ml-1 h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -44,7 +64,9 @@ export function ActiveHearingBar() {
             {(hearings || []).map((item) => (
               <SelectItem key={item.id} value={item.id}>
                 <span className="font-medium">{item.caseNumber}</span>
-                <span className="ml-2 text-xs text-slate-400">#{item.hearingSequence ?? 1} · {item.type}</span>
+                <span className="ml-2 text-xs text-slate-400">
+                  #{item.hearingSequence ?? 1} · {item.type}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
@@ -65,9 +87,7 @@ export function ActiveHearingBar() {
         )}
 
         {!hearing && !loading && (
-          <span className="text-xs text-amber-600">
-            ⚠️ Pilih perkara untuk mulai bekerja
-          </span>
+          <span className="text-xs text-amber-600">⚠️ Pilih perkara untuk mulai bekerja</span>
         )}
       </div>
     </div>

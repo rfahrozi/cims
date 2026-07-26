@@ -23,10 +23,21 @@ export interface NotificationDeliveryResult {
 
 @Injectable()
 export class NotificationGateway {
-  constructor(private readonly config: ConfigService, private readonly circuitBreaker: CircuitBreakerService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly circuitBreaker: CircuitBreakerService
+  ) {}
 
   capability(): { mode: 'MOCK' | 'HTTP'; configured: boolean } {
-    return { mode: this.mode, configured: this.mode === 'MOCK' || Boolean(this.config.get<string>('NOTIFICATION_GATEWAY_URL') && secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')) };
+    return {
+      mode: this.mode,
+      configured:
+        this.mode === 'MOCK' ||
+        Boolean(
+          this.config.get<string>('NOTIFICATION_GATEWAY_URL') &&
+            secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')
+        )
+    };
   }
 
   async send(input: NotificationDeliveryRequest): Promise<NotificationDeliveryResult> {
@@ -35,31 +46,74 @@ export class NotificationGateway {
       return {
         status: shouldFail ? 'FAILED' : 'DELIVERED',
         providerReference: shouldFail ? undefined : `MOCK-NOTICE-${randomUUID()}`,
-        evidence: { mode: 'MOCK', channel: input.channel, destination_masked: this.mask(input.destination), official_reference: input.officialReference },
-        errorCode: shouldFail ? 'MOCK_DELIVERY_FAILURE' : undefined,
+        evidence: {
+          mode: 'MOCK',
+          channel: input.channel,
+          destination_masked: this.mask(input.destination),
+          official_reference: input.officialReference
+        },
+        errorCode: shouldFail ? 'MOCK_DELIVERY_FAILURE' : undefined
       };
     }
     const baseUrl = this.config.get<string>('NOTIFICATION_GATEWAY_URL');
-    if (!baseUrl) throw new DomainError('NOTIFICATION_GATEWAY_CONFIG_INVALID', 'NOTIFICATION_GATEWAY_URL is required in HTTP mode.', 500);
+    if (!baseUrl)
+      throw new DomainError(
+        'NOTIFICATION_GATEWAY_CONFIG_INVALID',
+        'NOTIFICATION_GATEWAY_URL is required in HTTP mode.',
+        500
+      );
     return this.circuitBreaker.execute('notification-gateway', async () => {
       const response = await fetch(`${baseUrl.replace(/\/$/, '')}/deliveries`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
           ...(input.correlationId ? { 'x-correlation-id': input.correlationId } : {}),
-          ...(secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY') ? { authorization: `Bearer ${secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')}` } : {}),
+          ...(secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')
+            ? {
+                authorization: `Bearer ${secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')}`
+              }
+            : {})
         },
-        body: JSON.stringify({ channel: input.channel, destination: input.destination, subject: input.subject, message: input.message, official_reference: input.officialReference }),
-        signal: AbortSignal.timeout(Number(this.config.get<string>('NOTIFICATION_GATEWAY_TIMEOUT_MS') ?? 10_000)),
+        body: JSON.stringify({
+          channel: input.channel,
+          destination: input.destination,
+          subject: input.subject,
+          message: input.message,
+          official_reference: input.officialReference
+        }),
+        signal: AbortSignal.timeout(
+          Number(this.config.get<string>('NOTIFICATION_GATEWAY_TIMEOUT_MS') ?? 10_000)
+        )
       });
       const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
       if (!response.ok) {
-        return { status: 'FAILED', evidence: { http_status: response.status, destination_masked: this.mask(input.destination) }, errorCode: String(body.error_code ?? 'NOTIFICATION_GATEWAY_ERROR') };
+        return {
+          status: 'FAILED',
+          evidence: {
+            http_status: response.status,
+            destination_masked: this.mask(input.destination)
+          },
+          errorCode: String(body.error_code ?? 'NOTIFICATION_GATEWAY_ERROR')
+        };
       }
-      return { status: 'DELIVERED', providerReference: String(body.provider_reference ?? body.id ?? randomUUID()), evidence: { http_status: response.status, destination_masked: this.mask(input.destination), receipt_hash: body.receipt_hash ?? null } };
+      return {
+        status: 'DELIVERED',
+        providerReference: String(body.provider_reference ?? body.id ?? randomUUID()),
+        evidence: {
+          http_status: response.status,
+          destination_masked: this.mask(input.destination),
+          receipt_hash: body.receipt_hash ?? null
+        }
+      };
     });
   }
 
-  private get mode(): 'MOCK' | 'HTTP' { return (this.config.get<string>('NOTIFICATION_GATEWAY_MODE') ?? 'MOCK').toUpperCase() === 'HTTP' ? 'HTTP' : 'MOCK'; }
-  private mask(value: string): string { return value.length <= 4 ? '****' : `${value.slice(0, 2)}***${value.slice(-2)}`; }
+  private get mode(): 'MOCK' | 'HTTP' {
+    return (this.config.get<string>('NOTIFICATION_GATEWAY_MODE') ?? 'MOCK').toUpperCase() === 'HTTP'
+      ? 'HTTP'
+      : 'MOCK';
+  }
+  private mask(value: string): string {
+    return value.length <= 4 ? '****' : `${value.slice(0, 2)}***${value.slice(-2)}`;
+  }
 }

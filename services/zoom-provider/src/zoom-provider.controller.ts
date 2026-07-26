@@ -20,7 +20,7 @@ export class ZoomProviderController {
   @HttpCode(201)
   createSession(
     @Body() body: CreateSessionInput,
-    @Headers('idempotency-key') idempotencyKey?: string,
+    @Headers('idempotency-key') idempotencyKey?: string
   ) {
     return this.service.createSession(body, idempotencyKey ?? '');
   }

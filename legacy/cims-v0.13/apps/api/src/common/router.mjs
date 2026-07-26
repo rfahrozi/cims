@@ -14,7 +14,14 @@ export class Router {
       names.push(match[1]);
       return `([^/]+)${escapeRegex(match[2])}`;
     });
-    this.#routes.push({method: method.toUpperCase(), path, regex: new RegExp(`^${segments.join('/')}$`), names, handler, options});
+    this.#routes.push({
+      method: method.toUpperCase(),
+      path,
+      regex: new RegExp(`^${segments.join('/')}$`),
+      names,
+      handler,
+      options
+    });
   }
 
   match(method, pathname) {
@@ -23,8 +30,10 @@ export class Router {
       const match = pathname.match(route.regex);
       if (!match) continue;
       const params = {};
-      route.names.forEach((name, index) => { params[name] = decodeURIComponent(match[index + 1]); });
-      return {...route, params};
+      route.names.forEach((name, index) => {
+        params[name] = decodeURIComponent(match[index + 1]);
+      });
+      return { ...route, params };
     }
     return undefined;
   }

@@ -28,15 +28,34 @@ const required = [
   'tests/integration/security-hardening.test.mjs',
   'tools/performance-smoke-0-12.mjs',
   'tools/dr-recovery-test-0-12.mjs',
-  'tools/pilot-uat-0-12.mjs',
+  'tools/pilot-uat-0-12.mjs'
 ];
 const missing = required.filter((file) => !fs.existsSync(file));
-if (missing.length) { console.error('Missing required files:', missing); process.exit(1); }
-const files=[];
-function walk(directory){for(const item of fs.readdirSync(directory,{withFileTypes:true})){const full=path.join(directory,item.name);if(item.isDirectory()&&!['node_modules','.git','var'].includes(item.name))walk(full);else if(item.isFile()&&full.endsWith('.mjs'))files.push(full);}}
-for(const directory of ['apps','services','tests','tools'])if(fs.existsSync(directory))walk(directory);
-for(const file of files)execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
-const prohibited=[];
-for(const file of files){const text=fs.readFileSync(file,'utf8');if(/console\.log\([^\n]*(join_token|participant_join_url|host_secret)/i.test(text))prohibited.push(file);}
-if(prohibited.length){console.error('Potential secret logging found:',prohibited);process.exit(1);}
-console.log(`PASS repository check: ${required.length} required files, ${files.length} JavaScript modules, and no obvious secret logging.`);
+if (missing.length) {
+  console.error('Missing required files:', missing);
+  process.exit(1);
+}
+const files = [];
+function walk(directory) {
+  for (const item of fs.readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, item.name);
+    if (item.isDirectory() && !['node_modules', '.git', 'var'].includes(item.name)) walk(full);
+    else if (item.isFile() && full.endsWith('.mjs')) files.push(full);
+  }
+}
+for (const directory of ['apps', 'services', 'tests', 'tools'])
+  if (fs.existsSync(directory)) walk(directory);
+for (const file of files) execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
+const prohibited = [];
+for (const file of files) {
+  const text = fs.readFileSync(file, 'utf8');
+  if (/console\.log\([^\n]*(join_token|participant_join_url|host_secret)/i.test(text))
+    prohibited.push(file);
+}
+if (prohibited.length) {
+  console.error('Potential secret logging found:', prohibited);
+  process.exit(1);
+}
+console.log(
+  `PASS repository check: ${required.length} required files, ${files.length} JavaScript modules, and no obvious secret logging.`
+);

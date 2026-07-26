@@ -1,1 +1,14 @@
-{"compilerOptions":{"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022","outDir":"dist","strict":true,"experimentalDecorators":true,"emitDecoratorMetadata":true,"useDefineForClassFields":false,"skipLibCheck":true},"include":["src/**/*.ts"]}
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "outDir": "dist",
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"]
+}

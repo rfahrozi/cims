@@ -1,4 +1,3 @@
-
 import { DomainError } from './errors.js';
 
 export type ParticipantRole =
@@ -32,21 +31,38 @@ export interface ParticipantAccessTokenState {
   revokedAt?: string;
 }
 
-export type ParticipantAction = 'ISSUE_TOKEN' | 'ENTER_WAITING' | 'ADMIT' | 'LEAVE' | 'REMOVE' | 'REVOKE';
+export type ParticipantAction =
+  | 'ISSUE_TOKEN'
+  | 'ENTER_WAITING'
+  | 'ADMIT'
+  | 'LEAVE'
+  | 'REMOVE'
+  | 'REVOKE';
 
-export function transitionParticipant(current: ParticipantState, action: ParticipantAction): ParticipantState {
-  const transitions: Record<ParticipantState, Partial<Record<ParticipantAction, ParticipantState>>> = {
+export function transitionParticipant(
+  current: ParticipantState,
+  action: ParticipantAction
+): ParticipantState {
+  const transitions: Record<
+    ParticipantState,
+    Partial<Record<ParticipantAction, ParticipantState>>
+  > = {
     REGISTERED: { ISSUE_TOKEN: 'TOKEN_ISSUED', REVOKE: 'REVOKED' },
     TOKEN_ISSUED: { ENTER_WAITING: 'WAITING', REVOKE: 'REVOKED' },
     WAITING: { ADMIT: 'ADMITTED', REMOVE: 'REMOVED', REVOKE: 'REVOKED' },
     ADMITTED: { LEAVE: 'LEFT', REMOVE: 'REMOVED', REVOKE: 'REVOKED' },
     LEFT: { ISSUE_TOKEN: 'TOKEN_ISSUED', REVOKE: 'REVOKED' },
     REMOVED: { ISSUE_TOKEN: 'TOKEN_ISSUED', REVOKE: 'REVOKED' },
-    REVOKED: {},
+    REVOKED: {}
   };
   const next = transitions[current][action];
   if (!next) {
-    throw new DomainError('INVALID_PARTICIPANT_TRANSITION', `Participant cannot perform ${action} from ${current}.`, 409, { current, action });
+    throw new DomainError(
+      'INVALID_PARTICIPANT_TRANSITION',
+      `Participant cannot perform ${action} from ${current}.`,
+      409,
+      { current, action }
+    );
   }
   return next;
 }
@@ -54,19 +70,28 @@ export function transitionParticipant(current: ParticipantState, action: Partici
 export function assertJoinTokenUsable(
   token: ParticipantAccessTokenState,
   presentedHash: string,
-  now = new Date(),
+  now = new Date()
 ): void {
-  if (token.revokedAt) throw new DomainError('JOIN_TOKEN_REVOKED', 'The join token has been revoked.', 410);
-  if (token.consumedAt) throw new DomainError('JOIN_TOKEN_CONSUMED', 'The join token has already been consumed.', 410);
-  if (Date.parse(token.expiresAt) <= now.getTime()) throw new DomainError('JOIN_TOKEN_EXPIRED', 'The join token has expired.', 410);
-  if (token.tokenHash !== presentedHash) throw new DomainError('JOIN_TOKEN_INVALID', 'The join token is invalid.', 401);
+  if (token.revokedAt)
+    throw new DomainError('JOIN_TOKEN_REVOKED', 'The join token has been revoked.', 410);
+  if (token.consumedAt)
+    throw new DomainError('JOIN_TOKEN_CONSUMED', 'The join token has already been consumed.', 410);
+  if (Date.parse(token.expiresAt) <= now.getTime())
+    throw new DomainError('JOIN_TOKEN_EXPIRED', 'The join token has expired.', 410);
+  if (token.tokenHash !== presentedHash)
+    throw new DomainError('JOIN_TOKEN_INVALID', 'The join token is invalid.', 401);
 }
 
 export function assertConsultationParticipants(roles: readonly ParticipantRole[]): void {
   const hasDefendant = roles.includes('DEFENDANT');
   const hasAdvocate = roles.includes('ADVOCATE');
   if (!hasDefendant || !hasAdvocate) {
-    throw new DomainError('CONSULTATION_PARTICIPANTS_REQUIRED', 'Private consultation requires a defendant and an advocate.', 409, { roles });
+    throw new DomainError(
+      'CONSULTATION_PARTICIPANTS_REQUIRED',
+      'Private consultation requires a defendant and an advocate.',
+      409,
+      { roles }
+    );
   }
 }
 
@@ -78,14 +103,14 @@ export function assertConsultationParticipants(roles: readonly ParticipantRole[]
 export function assertAdvocateLocation(
   advocateLocationType: string,
   defendantLocationType: string,
-  determinationReference?: string,
+  determinationReference?: string
 ): void {
   if (advocateLocationType !== defendantLocationType) {
     if (!determinationReference || determinationReference.trim().length < 3) {
       throw new DomainError(
         'ADVOCATE_LOCATION_DETERMINATION_REQUIRED',
         'Penempatan advokat di lokasi yang berbeda dengan terdakwa wajib memiliki dasar penetapan hakim (SOP 10.8).',
-        409,
+        409
       );
     }
   }
@@ -135,7 +160,11 @@ export function publicParticipantName(input: {
  * Tentukan protection level yang direkomendasikan berdasarkan role dan konteks.
  * Digunakan sebagai panduan — keputusan akhir tetap pada hakim.
  */
-export function recommendedProtectionLevel(role: ParticipantRole, isMinor = false, isViolenceVictim = false): ProtectionLevel {
+export function recommendedProtectionLevel(
+  role: ParticipantRole,
+  isMinor = false,
+  isViolenceVictim = false
+): ProtectionLevel {
   if (isMinor || isViolenceVictim) return 'FULL_PROTECTION';
   if (VULNERABLE_ROLES.includes(role)) return 'ALIAS_ONLY';
   return 'NONE';

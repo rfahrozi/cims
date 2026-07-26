@@ -15,22 +15,42 @@ export class HearingControlController {
   }
 
   @Post('start')
-  start(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: HearingActionDto, @Headers('x-correlation-id') correlationId?: string) {
+  start(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: HearingActionDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.start(user, id, dto, correlationId);
   }
 
   @Post('suspend')
-  suspend(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: SuspendHearingDto, @Headers('x-correlation-id') correlationId?: string) {
+  suspend(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: SuspendHearingDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.suspend(user, id, dto, correlationId);
   }
 
   @Post('resume')
-  resume(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: HearingActionDto, @Headers('x-correlation-id') correlationId?: string) {
+  resume(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: HearingActionDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.resume(user, id, dto, correlationId);
   }
 
   @Post('end')
-  end(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: HearingActionDto, @Headers('x-correlation-id') correlationId?: string) {
+  end(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: HearingActionDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.end(user, id, dto, correlationId);
   }
 }

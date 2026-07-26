@@ -30,7 +30,6 @@
 # =============================================================================
 
 services:
-
   # ── PostgreSQL 17 ──────────────────────────────────────────────────────────
   postgres:
     image: postgres:17-alpine
@@ -41,7 +40,7 @@ services:
     secrets:
       - postgres_password
     ports:
-      - "5435:5432"
+      - '5435:5432'
     volumes:
       - cims_pgdata_preproduction:/var/lib/postgresql/data
     healthcheck:
@@ -111,7 +110,7 @@ services:
       - webhook_shared_secret
       - evidence_storage_api_key
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -192,7 +191,7 @@ services:
       context: ..
       dockerfile: apps/web/Dockerfile
     ports:
-      - "8080:8080"
+      - '8080:8080'
     networks:
       - edge
     restart: unless-stopped
@@ -219,7 +218,7 @@ services:
       - zoom_client_secret
       - zoom_host_user_id
     ports:
-      - "3010:3010"
+      - '3010:3010'
     depends_on:
       postgres:
         condition: service_healthy

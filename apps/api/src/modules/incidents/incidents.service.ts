@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DomainError, incidentBlocksHearing, incidentNotificationDeadline, transitionIncident } from '@cims/domain';
+import {
+  DomainError,
+  incidentBlocksHearing,
+  incidentNotificationDeadline,
+  transitionIncident
+} from '@cims/domain';
 import { requirePermission } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import { AuditService } from '../../infrastructure/audit.service.js';
@@ -12,7 +17,7 @@ export class IncidentsService {
   constructor(
     private readonly repository: IncidentsRepository,
     private readonly hearingControl: HearingControlRepository,
-    private readonly audit: AuditService,
+    private readonly audit: AuditService
   ) {}
 
   async list(hearingId: string, user: CurrentUser) {
@@ -24,19 +29,22 @@ export class IncidentsService {
     requirePermission(user, 'incident.write', hearingId);
     const occurredAt = dto.occurredAt ?? new Date().toISOString();
     const now = new Date().toISOString();
-    const incident = await this.repository.create({
-      hearingId,
-      type: dto.type,
-      severity: dto.severity,
-      status: 'OPEN',
-      title: dto.title,
-      description: dto.description,
-      occurredAt,
-      notificationDeadline: incidentNotificationDeadline(dto.type, occurredAt),
-      reportedBy: user.id,
-      createdAt: now,
-      updatedAt: now,
-    }, user);
+    const incident = await this.repository.create(
+      {
+        hearingId,
+        type: dto.type,
+        severity: dto.severity,
+        status: 'OPEN',
+        title: dto.title,
+        description: dto.description,
+        occurredAt,
+        notificationDeadline: incidentNotificationDeadline(dto.type, occurredAt),
+        reportedBy: user.id,
+        createdAt: now,
+        updatedAt: now
+      },
+      user
+    );
     if (incidentBlocksHearing(dto.type, dto.severity)) {
       const runtime = await this.hearingControl.status(hearingId, user);
       if (runtime.state === 'STARTED') {
@@ -45,7 +53,7 @@ export class IncidentsService {
           'SUSPEND',
           `Automatic suspension due to ${dto.type} ${dto.severity} incident`,
           this.systemUser(hearingId),
-          runtime.runtime?.rowVersion,
+          runtime.runtime?.rowVersion
         );
       }
     }
@@ -53,7 +61,7 @@ export class IncidentsService {
       hearingId,
       type: dto.type,
       severity: dto.severity,
-      notificationDeadline: incident.notificationDeadline,
+      notificationDeadline: incident.notificationDeadline
     });
     return incident;
   }
@@ -64,8 +72,16 @@ export class IncidentsService {
     const status = transitionIncident(incident.status as never, dto.action);
     const at = new Date().toISOString();
     await this.repository.transition(incidentId, status, dto.action, dto.notes, at, user);
-    await this.audit.record('INCIDENT_STATE_CHANGED', 'INCIDENT', incidentId, user, { action: dto.action, status });
-    return { ...incident, status, updatedAt: at, resolution: dto.action === 'RESOLVE' ? dto.notes : incident.resolution };
+    await this.audit.record('INCIDENT_STATE_CHANGED', 'INCIDENT', incidentId, user, {
+      action: dto.action,
+      status
+    });
+    return {
+      ...incident,
+      status,
+      updatedAt: at,
+      resolution: dto.action === 'RESOLVE' ? dto.notes : incident.resolution
+    };
   }
 
   async notify(incidentId: string, reference: string, user: CurrentUser) {
@@ -73,7 +89,10 @@ export class IncidentsService {
     requirePermission(user, 'incident.write', incident.hearingId);
     const at = new Date().toISOString();
     await this.repository.notify(incidentId, reference, at, user);
-    await this.audit.record('INCIDENT_NOTIFICATION_RECORDED', 'INCIDENT', incidentId, user, { reference, notifiedAt: at });
+    await this.audit.record('INCIDENT_NOTIFICATION_RECORDED', 'INCIDENT', incidentId, user, {
+      reference,
+      notifiedAt: at
+    });
     return { ...incident, notifiedAt: at, notificationReference: reference, updatedAt: at };
   }
 
@@ -98,7 +117,7 @@ export class IncidentsService {
       organizationIds: [],
       permissions: ['*'],
       hearingAssignments: [hearingId],
-      authSource: 'DEV',
+      authSource: 'DEV'
     };
   }
 }

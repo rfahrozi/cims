@@ -7,7 +7,7 @@ import type {
   RecordCustodyTransferDto,
   SendTransferNotificationDto,
   TransferAccessDto,
-  UpdateChecklistStatusDto,
+  UpdateChecklistStatusDto
 } from './dto.js';
 
 @ApiTags('custody')
@@ -20,8 +20,10 @@ export class CustodyController {
   record(
     @Body() dto: RecordCustodyTransferDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
-  ) { return this.service.record(user, dto, correlationId); }
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.record(user, dto, correlationId);
+  }
 
   /** GET /api/v1/custody-transfers/hearings/:hearingId — Riwayat mutasi per perkara */
   @Get('hearings/:hearingId')
@@ -35,8 +37,10 @@ export class CustodyController {
     @Param('id') id: string,
     @Body() dto: SendTransferNotificationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
-  ) { return this.service.sendNotification(user, id, dto, correlationId); }
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.sendNotification(user, id, dto, correlationId);
+  }
 
   /** GET /api/v1/custody-transfers/:id/notifications — Daftar notifikasi */
   @Get(':id/notifications')
@@ -50,8 +54,10 @@ export class CustodyController {
     @Param('notifId') notifId: string,
     @Body() dto: AcknowledgeTransferNotificationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
-  ) { return this.service.acknowledgeNotification(notifId, dto, user, correlationId); }
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.acknowledgeNotification(notifId, dto, user, correlationId);
+  }
 
   /** POST /api/v1/custody-transfers/:id/transfer-access — Alihkan akses CIMS (SOP 10.14 poin 3) */
   @Post(':id/transfer-access')
@@ -59,8 +65,10 @@ export class CustodyController {
     @Param('id') id: string,
     @Body() dto: TransferAccessDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
-  ) { return this.service.transferAccess(user, id, dto, correlationId); }
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.transferAccess(user, id, dto, correlationId);
+  }
 
   /** POST /api/v1/custody-transfers/:id/checklist — Update status re-checklist lokasi baru (SOP 10.14 poin 4) */
   @Post(':id/checklist')
@@ -68,6 +76,8 @@ export class CustodyController {
     @Param('id') id: string,
     @Body() dto: UpdateChecklistStatusDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
-  ) { return this.service.updateChecklistStatus(user, id, dto, correlationId); }
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
+    return this.service.updateChecklistStatus(user, id, dto, correlationId);
+  }
 }

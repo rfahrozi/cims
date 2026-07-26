@@ -26,19 +26,23 @@ export class AuditService {
     config: ConfigService,
     private readonly mode: PersistenceModeService,
     private readonly memory: InMemoryStore,
-    private readonly pg: PgPoolService,
+    private readonly pg: PgPoolService
   ) {
-    this.hashKey = secretValue(config, 'AUDIT_HASH_KEY') ?? 'development-audit-key-not-for-production';
+    this.hashKey =
+      secretValue(config, 'AUDIT_HASH_KEY') ?? 'development-audit-key-not-for-production';
   }
 
   async append(input: AuditAppendInput, user?: CurrentUser): Promise<Record<string, unknown>> {
     if (!this.mode.postgres) {
       const event = {
         id: this.memory.id(),
-        sequence: this.memory.auditEvents.filter((item) => item.objectType === input.objectType && item.objectId === input.objectId).length + 1,
+        sequence:
+          this.memory.auditEvents.filter(
+            (item) => item.objectType === input.objectType && item.objectId === input.objectId
+          ).length + 1,
         occurredAt: new Date().toISOString(),
         payload: input.payload ?? {},
-        ...input,
+        ...input
       };
       this.memory.auditEvents.push(event);
       return event;
@@ -46,16 +50,20 @@ export class AuditService {
 
     const actor = user ?? this.systemContext(input);
     return this.pg.transactionAs(actor, async (client) => {
-      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [`audit:${input.objectType}:${input.objectId}`]);
+      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
+        `audit:${input.objectType}:${input.objectId}`
+      ]);
       const previous = await client.query(
         `select sequence,event_hash
            from audit_events
           where object_type=$1 and object_id=$2
           order by sequence desc limit 1`,
-        [input.objectType, input.objectId],
+        [input.objectType, input.objectId]
       );
       const sequence = Number(previous.rows[0]?.sequence ?? 0) + 1;
-      const previousHash = previous.rows[0]?.event_hash ? String(previous.rows[0].event_hash) : undefined;
+      const previousHash = previous.rows[0]?.event_hash
+        ? String(previous.rows[0].event_hash)
+        : undefined;
       const occurredAt = new Date().toISOString();
       const payload = input.payload ?? {};
       const eventHash = this.hash({
@@ -68,7 +76,7 @@ export class AuditService {
         correlationId: input.correlationId ?? null,
         payload,
         previousHash: previousHash ?? null,
-        occurredAt,
+        occurredAt
       });
       const result = await client.query(
         `insert into audit_events(
@@ -88,8 +96,8 @@ export class AuditService {
           JSON.stringify(payload),
           previousHash ?? null,
           eventHash,
-          occurredAt,
-        ],
+          occurredAt
+        ]
       );
       return result.rows[0] as Record<string, unknown>;
     });
@@ -101,22 +109,31 @@ export class AuditService {
     objectId: string,
     user: CurrentUser,
     payload: unknown = {},
-    correlationId?: string,
+    correlationId?: string
   ): Promise<Record<string, unknown>> {
-    return this.append({
-      eventType,
-      objectType,
-      objectId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload,
-    }, user);
+    return this.append(
+      {
+        eventType,
+        objectType,
+        objectId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload
+      },
+      user
+    );
   }
 
-  async list(user: CurrentUser, objectId?: string, objectType = 'HEARING'): Promise<Record<string, unknown>[]> {
+  async list(
+    user: CurrentUser,
+    objectId?: string,
+    objectType = 'HEARING'
+  ): Promise<Record<string, unknown>[]> {
     if (!this.mode.postgres) {
-      return this.memory.auditEvents.filter((item) => !objectId || item.objectId === objectId).map((item) => ({ ...item } as Record<string, unknown>));
+      return this.memory.auditEvents
+        .filter((item) => !objectId || item.objectId === objectId)
+        .map((item) => ({ ...item }) as Record<string, unknown>);
     }
     return this.pg.transactionAs(user, async (client) => {
       const result = await client.query(
@@ -126,13 +143,17 @@ export class AuditService {
           where ($1::text is null or object_id=$1)
             and ($2::text is null or object_type=$2)
           order by object_type,object_id,sequence`,
-        [objectId ?? null, objectType ?? null],
+        [objectId ?? null, objectType ?? null]
       );
       return result.rows as Record<string, unknown>[];
     });
   }
 
-  async verifyChain(user: CurrentUser, objectType: string, objectId: string): Promise<{ valid: boolean; checked: number; failureAt?: number }> {
+  async verifyChain(
+    user: CurrentUser,
+    objectType: string,
+    objectId: string
+  ): Promise<{ valid: boolean; checked: number; failureAt?: number }> {
     const events = await this.list(user, objectId, objectType);
     let previousHash: string | undefined;
     for (const [index, row] of events.entries()) {
@@ -147,11 +168,13 @@ export class AuditService {
         correlationId: row.correlation_id ?? null,
         payload: row.payload ?? {},
         previousHash: previousHash ?? null,
-        occurredAt: String(row.occurred_at),
+        occurredAt: String(row.occurred_at)
       });
       const stored = String(row.event_hash ?? '');
       const samePrevious = String(row.previous_hash ?? '') === String(previousHash ?? '');
-      const sameHash = stored.length === expected.length && timingSafeEqual(Buffer.from(stored), Buffer.from(expected));
+      const sameHash =
+        stored.length === expected.length &&
+        timingSafeEqual(Buffer.from(stored), Buffer.from(expected));
       if (!samePrevious || !sameHash) return { valid: false, checked: index, failureAt: sequence };
       previousHash = stored;
     }
@@ -161,7 +184,6 @@ export class AuditService {
   private hash(value: Record<string, unknown>): string {
     return createHmac('sha256', this.hashKey).update(canonicalJson(value)).digest('hex');
   }
-
 
   private systemContext(input: AuditAppendInput): CurrentUser {
     return {
@@ -173,7 +195,7 @@ export class AuditService {
       organizationIds: input.actorOrganizationId ? [input.actorOrganizationId] : [],
       permissions: ['*'],
       hearingAssignments: input.objectType === 'HEARING' ? [input.objectId] : [],
-      authSource: 'DEV',
+      authSource: 'DEV'
     };
   }
 }

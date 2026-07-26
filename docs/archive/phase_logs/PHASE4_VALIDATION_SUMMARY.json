@@ -4,7 +4,7 @@
   "executed": {
     "structure": "PASS",
     "typescript_syntax_files": 145,
-    "domain_tests": {"passed": 20, "total": 20},
+    "domain_tests": { "passed": 20, "total": 20 },
     "production_baseline": "PASS",
     "phase4_baseline": "PASS",
     "yaml_json": "PASS",

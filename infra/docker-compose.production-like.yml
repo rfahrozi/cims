@@ -7,7 +7,8 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     secrets: [postgres_password]
     volumes: [cims_pgdata:/var/lib/postgresql/data]
-    healthcheck: { test: [CMD-SHELL, 'pg_isready -U cims -d cims'], interval: 10s, timeout: 5s, retries: 10 }
+    healthcheck:
+      { test: [CMD-SHELL, 'pg_isready -U cims -d cims'], interval: 10s, timeout: 5s, retries: 10 }
     networks: [data]
     security_opt: [no-new-privileges:true]
 
@@ -38,7 +39,15 @@ services:
       VIDEO_PROVIDER_URL: http://zoom-provider:3010
       SWAGGER_ENABLED: 'false'
       TRUST_PROXY: 'true'
-    secrets: [database_url, token_pepper, field_encryption_key, audit_hash_key, webhook_shared_secret, evidence_storage_api_key]
+    secrets:
+      [
+        database_url,
+        token_pepper,
+        field_encryption_key,
+        audit_hash_key,
+        webhook_shared_secret,
+        evidence_storage_api_key
+      ]
     depends_on: { postgres: { condition: service_healthy } }
     networks: [edge, data, provider]
     read_only: true
@@ -70,7 +79,16 @@ services:
       OFFICIAL_SYSTEM_GATEWAY_URL: ${OFFICIAL_SYSTEM_GATEWAY_URL:-}
       VIDEO_PROVIDER_MODE: HTTP
       VIDEO_PROVIDER_URL: http://zoom-provider:3010
-    secrets: [database_url, token_pepper, field_encryption_key, audit_hash_key, notification_gateway_api_key, official_system_gateway_api_key, evidence_storage_api_key]
+    secrets:
+      [
+        database_url,
+        token_pepper,
+        field_encryption_key,
+        audit_hash_key,
+        notification_gateway_api_key,
+        official_system_gateway_api_key,
+        evidence_storage_api_key
+      ]
     depends_on: { postgres: { condition: service_healthy } }
     networks: [edge, data, provider]
     read_only: true

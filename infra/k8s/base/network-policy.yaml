@@ -51,7 +51,13 @@ spec:
   podSelector: { matchLabels: { app: zoom-provider } }
   policyTypes: [Ingress, Egress]
   ingress:
-    - from: [{ namespaceSelector: { matchLabels: { name: cims } }, podSelector: { matchLabels: { app: cims-worker } } }]
+    - from:
+        [
+          {
+            namespaceSelector: { matchLabels: { name: cims } },
+            podSelector: { matchLabels: { app: cims-worker } }
+          }
+        ]
       ports: [{ protocol: TCP, port: 3010 }]
   egress:
     - to: [{ namespaceSelector: { matchLabels: { name: database } } }]

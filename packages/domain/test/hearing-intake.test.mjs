@@ -5,7 +5,7 @@ import {
   normalizeCaseNumber,
   normalizedDuplicateKey,
   transitionHearingIntake,
-  validateManualHearingIntake,
+  validateManualHearingIntake
 } from '../dist/index.js';
 
 const valid = {
@@ -20,7 +20,14 @@ const valid = {
   prosecutionOrganizationId: 'prosecution-demo',
   correctionsOrganizationId: 'corrections-demo',
   defendantCustodyStatus: 'DETAINED',
-  defendants: [{ displayName: 'Terdakwa A', protectedIdentity: false, custodyStatus: 'DETAINED', detentionOrganizationId: 'corrections-demo' }],
+  defendants: [
+    {
+      displayName: 'Terdakwa A',
+      protectedIdentity: false,
+      custodyStatus: 'DETAINED',
+      detentionOrganizationId: 'corrections-demo'
+    }
+  ]
 };
 
 test('manual hearing intake accepts complete substitute-clerk input', () => {
@@ -28,14 +35,25 @@ test('manual hearing intake accepts complete substitute-clerk input', () => {
 });
 
 test('detained defendant requires detention organization', () => {
-  assert.throws(() => validateManualHearingIntake({ ...valid, correctionsOrganizationId: undefined }), /belum lengkap/i);
+  assert.throws(
+    () => validateManualHearingIntake({ ...valid, correctionsOrganizationId: undefined }),
+    /belum lengkap/i
+  );
 });
 
 test('case number normalization produces stable duplicate key', () => {
   assert.equal(normalizeCaseNumber(' 123/pid.sus/2026/pn demo '), '123/PID.SUS/2026/PN DEMO');
   assert.equal(
-    normalizedDuplicateKey({ courtOrganizationId: 'court-demo', caseNumber: '123/pid.sus/2026/pn demo', hearingSequence: 2 }),
-    normalizedDuplicateKey({ courtOrganizationId: 'court-demo', caseNumber: ' 123/PID.SUS/2026/PN DEMO ', hearingSequence: 2 }),
+    normalizedDuplicateKey({
+      courtOrganizationId: 'court-demo',
+      caseNumber: '123/pid.sus/2026/pn demo',
+      hearingSequence: 2
+    }),
+    normalizedDuplicateKey({
+      courtOrganizationId: 'court-demo',
+      caseNumber: ' 123/PID.SUS/2026/PN DEMO ',
+      hearingSequence: 2
+    })
   );
 });
 

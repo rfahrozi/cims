@@ -23,9 +23,11 @@ export class OutboxService {
     aggregateType: string,
     aggregateId: string,
     payload: unknown,
-    metadata: { correlationId?: string; traceparent?: string } = {},
+    metadata: { correlationId?: string; traceparent?: string } = {}
   ): Promise<string> {
-    return this.pg.transaction(async (client) => this.enqueueWithClient(client, eventType, aggregateType, aggregateId, payload, metadata));
+    return this.pg.transaction(async (client) =>
+      this.enqueueWithClient(client, eventType, aggregateType, aggregateId, payload, metadata)
+    );
   }
 
   async enqueueWithClient(
@@ -34,13 +36,20 @@ export class OutboxService {
     aggregateType: string,
     aggregateId: string,
     payload: unknown,
-    metadata: { correlationId?: string; traceparent?: string } = {},
+    metadata: { correlationId?: string; traceparent?: string } = {}
   ): Promise<string> {
     const result = await client.query(
       `insert into outbox_events(event_type,aggregate_type,aggregate_id,payload,correlation_id,traceparent)
        values ($1,$2,$3,$4::jsonb,$5,$6)
        returning id::text`,
-      [eventType, aggregateType, aggregateId, JSON.stringify(payload), metadata.correlationId ?? null, metadata.traceparent ?? null],
+      [
+        eventType,
+        aggregateType,
+        aggregateId,
+        JSON.stringify(payload),
+        metadata.correlationId ?? null,
+        metadata.traceparent ?? null
+      ]
     );
     return String(result.rows[0].id);
   }
@@ -63,7 +72,7 @@ export class OutboxService {
            from candidates c
           where o.id=c.id
          returning o.id::text,o.event_type,o.aggregate_type,o.aggregate_id,o.payload,o.correlation_id,o.traceparent,o.attempt_count`,
-        [workerId, limit],
+        [workerId, limit]
       );
       return result.rows.map((row) => ({
         id: String(row.id),
@@ -73,7 +82,7 @@ export class OutboxService {
         payload: (row.payload ?? {}) as Record<string, unknown>,
         correlationId: row.correlation_id ? String(row.correlation_id) : undefined,
         traceparent: row.traceparent ? String(row.traceparent) : undefined,
-        attemptCount: Number(row.attempt_count),
+        attemptCount: Number(row.attempt_count)
       }));
     });
   }
@@ -83,11 +92,16 @@ export class OutboxService {
       `update outbox_events
           set status='PUBLISHED', published_at=now(), locked_at=null, locked_by=null, last_error=null
         where id=$1`,
-      [id],
+      [id]
     );
   }
 
-  async markFailed(id: string, error: string, attemptCount: number, maxAttempts: number): Promise<void> {
+  async markFailed(
+    id: string,
+    error: string,
+    attemptCount: number,
+    maxAttempts: number
+  ): Promise<void> {
     const deadLetter = attemptCount >= maxAttempts;
     const delaySeconds = computeOutboxBackoffSeconds(attemptCount);
     await this.pg.query(
@@ -99,13 +113,13 @@ export class OutboxService {
               locked_by=null,
               last_error=$4
         where id=$1`,
-      [id, deadLetter ? 'DEAD_LETTER' : 'FAILED', delaySeconds, error.slice(0, 2000)],
+      [id, deadLetter ? 'DEAD_LETTER' : 'FAILED', delaySeconds, error.slice(0, 2000)]
     );
   }
 
   async status(): Promise<Record<string, number>> {
     const rows = await this.pg.query<{ status: string; count: string }>(
-      `select status,count(*)::text as count from outbox_events group by status order by status`,
+      `select status,count(*)::text as count from outbox_events group by status order by status`
     );
     return Object.fromEntries(rows.map((row) => [row.status, Number(row.count)]));
   }

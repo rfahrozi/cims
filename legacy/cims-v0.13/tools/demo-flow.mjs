@@ -13,7 +13,7 @@ const config = loadConfig({
   tokenSecret: 'demo-secret-that-is-long-enough-for-hmac',
   fixedOtp: '123456',
   exposeDevelopmentOtp: true,
-  allowedOrigins: [],
+  allowedOrigins: []
 });
 const app = createCimsApplication(config);
 const server = app.createServer();
@@ -27,37 +27,69 @@ async function call(pathname, options = {}) {
   return body;
 }
 async function login(email, password) {
-  const challenge = await call('/auth/login', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({email, password})});
-  const result = await call('/auth/verify-otp', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({challenge_id: challenge.challenge_id, otp: '123456'})});
+  const challenge = await call('/auth/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const result = await call('/auth/verify-otp', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ challenge_id: challenge.challenge_id, otp: '123456' })
+  });
   return result.access_token;
 }
-const headers = (token, key) => ({authorization: `Bearer ${token}`, 'content-type': 'application/json', ...(key ? {'idempotency-key': key} : {})});
+const headers = (token, key) => ({
+  authorization: `Bearer ${token}`,
+  'content-type': 'application/json',
+  ...(key ? { 'idempotency-key': key } : {})
+});
 
 try {
   const judge = await login('judge@cims.local', 'Judge123!');
   const clerk = await login('clerk@cims.local', 'Clerk123!');
   const determination = await call('/judicial-determinations', {
-    method: 'POST', headers: headers(judge, 'demo-determination-0001'), body: JSON.stringify({
-      hearing_id: DEMO.hearings.primary, decision: 'APPROVED', mode: 'ELECTRONIC',
-      reason: 'Synthetic demo determination.', effective_at: new Date().toISOString(),
-      official_reference: 'PEN-DEMO-001', document_hash: createHash('sha256').update('demo-document').digest('hex'),
-    }),
+    method: 'POST',
+    headers: headers(judge, 'demo-determination-0001'),
+    body: JSON.stringify({
+      hearing_id: DEMO.hearings.primary,
+      decision: 'APPROVED',
+      mode: 'ELECTRONIC',
+      reason: 'Synthetic demo determination.',
+      effective_at: new Date().toISOString(),
+      official_reference: 'PEN-DEMO-001',
+      document_hash: createHash('sha256').update('demo-document').digest('hex')
+    })
   });
   const proposal = await call(`/hearings/${DEMO.hearings.primary}/schedule-proposals`, {
-    method: 'POST', headers: headers(clerk, 'demo-proposal-00000001'), body: JSON.stringify({
-      start_at: '2026-08-12T04:00:00.000Z', end_at: '2026-08-12T05:00:00.000Z', display_timezone: 'Asia/Jakarta',
+    method: 'POST',
+    headers: headers(clerk, 'demo-proposal-00000001'),
+    body: JSON.stringify({
+      start_at: '2026-08-12T04:00:00.000Z',
+      end_at: '2026-08-12T05:00:00.000Z',
+      display_timezone: 'Asia/Jakarta',
       resources: [
-        {resource_type: 'ROOM', resource_id: 'ROOM-B', requirement: 'REQUIRED'},
-        {resource_type: 'JUDGE', resource_id: DEMO.users.judge, requirement: 'REQUIRED'},
-      ],
-    }),
+        { resource_type: 'ROOM', resource_id: 'ROOM-B', requirement: 'REQUIRED' },
+        { resource_type: 'JUDGE', resource_id: DEMO.users.judge, requirement: 'REQUIRED' }
+      ]
+    })
   });
-  const conflicts = await call(`/schedule-proposals/${proposal.id}/conflicts:check`, {method: 'POST', headers: headers(clerk, 'demo-conflict-check-0001'), body: '{}'});
-  const schedule = await call(`/schedule-proposals/${proposal.id}:approve`, {method: 'POST', headers: headers(judge, 'demo-approve-000000001'), body: JSON.stringify({reason: 'Demo conflict check is clear.'})});
-  const gate = await call(`/hearings/${DEMO.hearings.primary}/gate-status`, {headers: headers(clerk)});
-  console.log(JSON.stringify({determination, proposal, conflicts, schedule, gate}, null, 2));
+  const conflicts = await call(`/schedule-proposals/${proposal.id}/conflicts:check`, {
+    method: 'POST',
+    headers: headers(clerk, 'demo-conflict-check-0001'),
+    body: '{}'
+  });
+  const schedule = await call(`/schedule-proposals/${proposal.id}:approve`, {
+    method: 'POST',
+    headers: headers(judge, 'demo-approve-000000001'),
+    body: JSON.stringify({ reason: 'Demo conflict check is clear.' })
+  });
+  const gate = await call(`/hearings/${DEMO.hearings.primary}/gate-status`, {
+    headers: headers(clerk)
+  });
+  console.log(JSON.stringify({ determination, proposal, conflicts, schedule, gate }, null, 2));
 } finally {
   await new Promise((resolve) => server.close(resolve));
   app.close();
-  fs.rmSync(directory, {recursive: true, force: true});
+  fs.rmSync(directory, { recursive: true, force: true });
 }

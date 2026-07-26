@@ -1,54 +1,721 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CIMS UI Workflow Prototype</title>
-<style>
-:root{--navy:#0b2a4a;--blue:#1677ff;--gold:#c9a227;--bg:#f5f7fb;--card:#fff;--text:#1f2937;--muted:#64748b;--ok:#166534;--warn:#b45309;--bad:#b91c1c;--line:#dbe5ef}
-*{box-sizing:border-box} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial;color:var(--text);background:var(--bg)}
-button,input,select,textarea{font:inherit} button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{background:var(--navy);color:#fff;padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-weight:800;letter-spacing:.4px;font-size:20px}.sub{font-size:12px;color:#cbd5e1;margin:4px 0 22px}.nav button{display:flex;width:100%;border:0;background:transparent;color:#dbeafe;padding:11px 12px;border-radius:10px;text-align:left;margin:3px 0;gap:10px}.nav button.active,.nav button:hover{background:#153b63;color:#fff}.main{padding:22px 26px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}.top h1{margin:0;color:var(--navy);font-size:24px}.role{display:flex;align-items:center;gap:8px}.role select{padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff}.notice{background:#fff7d6;border:1px solid #ecd78d;color:#6b5200;padding:10px 12px;border-radius:10px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 4px 14px rgba(15,23,42,.04)}.kpi .label{font-size:12px;color:var(--muted)}.kpi .value{font-size:22px;font-weight:800;color:var(--navy);margin-top:5px}.section{display:none}.section.active{display:block}.section h2{color:var(--navy);font-size:20px;margin:18px 0 12px}.two{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.field{margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700}.primary{background:var(--blue);color:#fff}.secondary{background:#e8f1ff;color:#0d56bd}.danger{background:#fee2e2;color:var(--bad)}.ghost{background:#eef2f7;color:#334155}.btn:disabled{opacity:.45;cursor:not-allowed}.badge{display:inline-flex;padding:4px 9px;border-radius:999px;font-size:12px;font-weight:800}.pending{background:#fef3c7;color:#92400e}.valid{background:#dcfce7;color:#166534}.blocked{background:#fee2e2;color:#991b1b}.active-b{background:#dbeafe;color:#1d4ed8}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}.table th{color:#475569;background:#f8fafc}.timeline{list-style:none;padding:0;margin:0}.timeline li{padding:9px 0 9px 18px;border-left:2px solid #dbeafe;position:relative;font-size:13px}.timeline li:before{content:"";width:8px;height:8px;background:var(--blue);border-radius:50%;position:absolute;left:-5px;top:14px}.stepper{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.step{padding:8px 11px;border-radius:9px;background:#e2e8f0;font-size:12px;font-weight:800}.step.done{background:#dcfce7;color:#166534}.step.current{background:#dbeafe;color:#1d4ed8}.lock{border:1px dashed #f59e0b;background:#fff7ed;padding:13px;border-radius:10px;color:#9a3412}.room{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{height:125px;background:#102f50;color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;position:relative}.tile small{position:absolute;bottom:8px;left:10px;color:#dbeafe}.footer-note{color:var(--muted);font-size:12px;margin-top:16px}.sr{position:absolute;left:-9999px}
-@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:static}.nav{display:flex;overflow:auto}.nav button{min-width:170px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.room{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="app">
-<aside class="side"><div class="brand">CIMS</div><div class="sub">Compliance-first workflow prototype</div><nav class="nav" id="nav">
-<button data-screen="dashboard" class="active">01 Dashboard</button><button data-screen="determination">02 Determination Gate</button><button data-screen="scheduling">03 Scheduling</button><button data-screen="notice">04 Notice & Readiness</button><button data-screen="virtual">05 Virtual Room</button><button data-screen="audit">06 Audit</button>
-</nav></aside>
-<main class="main"><div class="top"><div><h1 id="title">Dashboard</h1><div style="color:#64748b;font-size:13px">Perkara sintetis: 123/Pid.Sus/2026/PN Demo</div></div><div class="role"><label for="role">Persona</label><select id="role"><option>Panitera</option><option>Hakim</option><option>Jaksa</option><option>Pemasyarakatan</option><option>Operator TI</option></select><button class="btn ghost" id="reset">Reset Demo</button></div></div>
-<div class="notice">Prototype untuk validasi alur dan acceptance criteria. Tidak menggunakan data perkara nyata dan tidak membentuk dokumen hukum resmi.</div>
-<section id="dashboard" class="section active"><div class="grid"><div class="card kpi"><div class="label">Determination</div><div class="value" id="kpiDet">PENDING</div></div><div class="card kpi"><div class="label">Schedule</div><div class="value" id="kpiSch">LOCKED</div></div><div class="card kpi"><div class="label">Notice</div><div class="value">NOT STARTED</div></div><div class="card kpi"><div class="label">Virtual Session</div><div class="value">NOT PROVISIONED</div></div></div>
-<div class="two"><div class="card"><h2>Workflow status</h2><div class="stepper"><div class="step current" id="stDet">Determination</div><div class="step" id="stSch">Schedule</div><div class="step">Notice</div><div class="step">Readiness</div><div class="step">Virtual Room</div></div><div id="nextAction" class="lock">Scheduling terkunci sampai penetapan hakim valid.</div></div><div class="card"><h2>Latest audit events</h2><ul class="timeline" id="dashAudit"></ul></div></div></section>
-<section id="determination" class="section"><div class="two"><div class="card"><h2>Record Judicial Determination</h2><div class="field"><label>Referensi penetapan</label><input id="detRef" value="PEN-EL/001/2026" /></div><div class="field"><label>Hakim berwenang</label><input id="detJudge" value="Hakim Demo" /></div><div class="field"><label>Ruang lingkup</label><select id="detScope"><option>Persidangan elektronik untuk hearing ini</option><option>Pembacaan putusan secara elektronik</option></select></div><div class="field"><label>Alasan</label><textarea id="detReason">Keadaan tertentu berdasarkan penilaian hakim dan kesiapan para pihak.</textarea></div><div class="actions"><button class="btn primary" id="validateDet">Record VALID Determination</button><button class="btn danger" id="revokeDet">Revoke</button></div></div><div class="card"><h2>Hard gate</h2><p>Status: <span class="badge pending" id="detBadge">PENDING</span></p><table class="table"><tr><th>Rule</th><th>Result</th></tr><tr><td>Official reference</td><td id="rRef">Pending</td></tr><tr><td>Authorized judge</td><td id="rJudge">Pending</td></tr><tr><td>Scope matches hearing</td><td id="rScope">Pending</td></tr><tr><td>Audit event</td><td id="rAudit">Pending</td></tr></table><p class="footer-note">Tidak ada tombol bypass. Revocation akan mengunci scheduling kembali.</p></div></div></section>
-<section id="scheduling" class="section"><div id="scheduleLock" class="lock">Determination belum valid. Schedule proposal tidak dapat dibuat.</div><div class="two" id="scheduleBody"><div class="card"><h2>Schedule Proposal</h2><div class="field"><label>Tanggal</label><input type="date" id="schDate" value="2026-08-12" /></div><div class="field"><label>Waktu</label><input type="time" id="schTime" value="09:00" /></div><div class="field"><label>Timezone</label><select id="timezone"><option>Asia/Jakarta</option><option>Asia/Makassar</option><option>Asia/Jayapura</option></select></div><div class="field"><label>Ruang Pengadilan</label><select id="room"><option>Ruang A</option><option>Ruang B</option></select></div><div class="field"><label>Lokasi terdakwa</label><select><option>Rutan Demo</option><option>Lapas Demo</option></select></div><div class="actions"><button class="btn secondary" id="checkConflict">Check Conflict</button><button class="btn primary" id="approveSchedule" disabled>Approve Schedule</button></div></div><div class="card"><h2>Conflict result</h2><div id="conflictBox" class="lock">Belum diperiksa.</div><table class="table" style="margin-top:10px"><thead><tr><th>Constraint</th><th>Severity</th><th>Status</th></tr></thead><tbody id="conflictRows"></tbody></table><p>Status schedule: <span class="badge blocked" id="schBadge">DRAFT</span></p></div></div></section>
-<section id="notice" class="section"><div class="card"><h2>Future workflow: Notice and Readiness</h2><div class="stepper"><div class="step done">Schedule ACTIVE</div><div class="step current">Official Notice</div><div class="step">Acknowledgment</div><div class="step">Readiness</div><div class="step">Technical Test</div></div><p>Modul ini berada pada Sprint 5-6. Prototype menunjukkan dependency terhadap schedule ACTIVE dan bukti penerimaan. Reminder biasa tidak dianggap sebagai pemberitahuan resmi.</p><button class="btn secondary" disabled>Create Official Notice (Future Sprint)</button></div></section>
-<section id="virtual" class="section"><div class="card"><h2>Future workflow: Virtual Room</h2><div id="virtualLock" class="lock">Virtual session belum dapat diprovisioning. Memerlukan determination VALID, schedule ACTIVE, notice/readiness, dan provider adapter.</div><div class="room" style="margin-top:14px"><div class="tile">Main Room<small>Hakim - Panitera - Penuntut Umum</small></div><div class="tile">Defendant Room<small>Terdakwa - Advokat</small></div><div class="tile">Waiting Room<small>Controlled admission</small></div></div></div></section>
-<section id="audit" class="section"><div class="card"><h2>Append-only Audit Timeline</h2><table class="table"><thead><tr><th>Time</th><th>Actor</th><th>Event</th><th>Correlation ID</th></tr></thead><tbody id="auditTable"></tbody></table></div></section>
-</main></div>
-<script>
-const state={determination:false,schedule:false,conflictChecked:false,audit:[]};
-const $=id=>document.getElementById(id); const now=()=>new Date().toLocaleTimeString('id-ID');
-function event(name){state.audit.unshift({time:now(),actor:$('role').value,event:name,corr:'corr-'+Math.random().toString(16).slice(2,10)});render();}
-function render(){
- $('kpiDet').textContent=state.determination?'VALID':'PENDING'; $('kpiSch').textContent=state.schedule?'ACTIVE':(state.determination?'DRAFT':'LOCKED');
- $('detBadge').textContent=state.determination?'VALID':'PENDING'; $('detBadge').className='badge '+(state.determination?'valid':'pending');
- ['rRef','rJudge','rScope','rAudit'].forEach(id=>$(id).textContent=state.determination?'Pass':'Pending');
- $('scheduleLock').style.display=state.determination?'none':'block'; $('scheduleBody').style.opacity=state.determination?'1':'.42'; $('scheduleBody').style.pointerEvents=state.determination?'auto':'none';
- $('stDet').className='step '+(state.determination?'done':'current'); $('stSch').className='step '+(state.schedule?'done':state.determination?'current':'');
- $('nextAction').textContent=state.schedule?'Schedule ACTIVE. Tahap berikutnya adalah official notice dan readiness.':state.determination?'Determination valid. Buat proposal, periksa conflict, lalu approval oleh actor berwenang.':'Scheduling terkunci sampai penetapan hakim valid.';
- $('schBadge').textContent=state.schedule?'ACTIVE':(state.conflictChecked?'CLEAR':'DRAFT'); $('schBadge').className='badge '+(state.schedule?'active-b':state.conflictChecked?'valid':'blocked');
- $('virtualLock').textContent=state.schedule?'Schedule telah aktif. Provisioning tetap menunggu notice/readiness dan Sprint 7 provider adapter.':'Virtual session belum dapat diprovisioning. Memerlukan determination VALID, schedule ACTIVE, notice/readiness, dan provider adapter.';
- $('dashAudit').innerHTML=state.audit.slice(0,5).map(x=>`<li><b>${x.event}</b><br><span style="color:#64748b">${x.time} - ${x.actor}</span></li>`).join('')||'<li>Belum ada event.</li>';
- $('auditTable').innerHTML=state.audit.map(x=>`<tr><td>${x.time}</td><td>${x.actor}</td><td>${x.event}</td><td>${x.corr}</td></tr>`).join('')||'<tr><td colspan="4">Belum ada event.</td></tr>';
-}
-$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$(b.dataset.screen).classList.add('active');$('title').textContent=b.textContent.replace(/^\d+\s/,'');});
-$('validateDet').onclick=()=>{if(!$('detRef').value.trim()||!$('detJudge').value.trim()){alert('Referensi dan hakim wajib diisi.');return}state.determination=true;state.schedule=false;state.conflictChecked=false;event('JUDICIAL_DETERMINATION_RECORDED');};
-$('revokeDet').onclick=()=>{state.determination=false;state.schedule=false;state.conflictChecked=false;event('JUDICIAL_DETERMINATION_REVOKED');};
-$('checkConflict').onclick=()=>{state.conflictChecked=true;const conflict=$('room').value==='Ruang A'&&$('schTime').value==='09:00';$('conflictRows').innerHTML=conflict?'<tr><td>Ruang A telah digunakan</td><td>REQUIRED</td><td>UNRESOLVED</td></tr>':'<tr><td>Hakim, ruang, jaksa, dan lokasi</td><td>REQUIRED</td><td>CLEAR</td></tr>';$('conflictBox').textContent=conflict?'Required conflict ditemukan. Ubah ruang atau waktu.':'Tidak ada required conflict.';$('conflictBox').style.background=conflict?'#fee2e2':'#dcfce7';$('conflictBox').style.color=conflict?'#991b1b':'#166534';$('approveSchedule').disabled=conflict;event(conflict?'SCHEDULE_CONFLICT_FOUND':'SCHEDULE_CONFLICT_CLEAR');};
-$('approveSchedule').onclick=()=>{if(!state.determination||!state.conflictChecked)return;state.schedule=true;event('SCHEDULE_VERSION_1_ACTIVATED');};
-$('room').onchange=()=>{state.conflictChecked=false;$('approveSchedule').disabled=true;$('conflictRows').innerHTML='';$('conflictBox').textContent='Perubahan input memerlukan conflict check ulang.';};
-$('schTime').onchange=$('room').onchange;
-$('reset').onclick=()=>{state.determination=false;state.schedule=false;state.conflictChecked=false;state.audit=[];$('conflictRows').innerHTML='';$('approveSchedule').disabled=true;$('conflictBox').textContent='Belum diperiksa.';$('conflictBox').style.background='';$('conflictBox').style.color='';render();};
-event('DEMO_SESSION_STARTED');
-</script></body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CIMS UI Workflow Prototype</title>
+    <style>
+      :root {
+        --navy: #0b2a4a;
+        --blue: #1677ff;
+        --gold: #c9a227;
+        --bg: #f5f7fb;
+        --card: #fff;
+        --text: #1f2937;
+        --muted: #64748b;
+        --ok: #166534;
+        --warn: #b45309;
+        --bad: #b91c1c;
+        --line: #dbe5ef;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Arial;
+        color: var(--text);
+        background: var(--bg);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 260px 1fr;
+      }
+      .side {
+        background: var(--navy);
+        color: #fff;
+        padding: 22px 16px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+      .brand {
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        font-size: 20px;
+      }
+      .sub {
+        font-size: 12px;
+        color: #cbd5e1;
+        margin: 4px 0 22px;
+      }
+      .nav button {
+        display: flex;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: #dbeafe;
+        padding: 11px 12px;
+        border-radius: 10px;
+        text-align: left;
+        margin: 3px 0;
+        gap: 10px;
+      }
+      .nav button.active,
+      .nav button:hover {
+        background: #153b63;
+        color: #fff;
+      }
+      .main {
+        padding: 22px 26px 60px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .top h1 {
+        margin: 0;
+        color: var(--navy);
+        font-size: 24px;
+      }
+      .role {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .role select {
+        padding: 9px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+      .notice {
+        background: #fff7d6;
+        border: 1px solid #ecd78d;
+        color: #6b5200;
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+      }
+      .kpi .label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .kpi .value {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--navy);
+        margin-top: 5px;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .section h2 {
+        color: var(--navy);
+        font-size: 20px;
+        margin: 18px 0 12px;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 14px;
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .btn {
+        border: 0;
+        border-radius: 9px;
+        padding: 10px 14px;
+        font-weight: 700;
+      }
+      .primary {
+        background: var(--blue);
+        color: #fff;
+      }
+      .secondary {
+        background: #e8f1ff;
+        color: #0d56bd;
+      }
+      .danger {
+        background: #fee2e2;
+        color: var(--bad);
+      }
+      .ghost {
+        background: #eef2f7;
+        color: #334155;
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .badge {
+        display: inline-flex;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .valid {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .blocked {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .active-b {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .table th,
+      .table td {
+        padding: 10px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        font-size: 13px;
+      }
+      .table th {
+        color: #475569;
+        background: #f8fafc;
+      }
+      .timeline {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .timeline li {
+        padding: 9px 0 9px 18px;
+        border-left: 2px solid #dbeafe;
+        position: relative;
+        font-size: 13px;
+      }
+      .timeline li:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        background: var(--blue);
+        border-radius: 50%;
+        position: absolute;
+        left: -5px;
+        top: 14px;
+      }
+      .stepper {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .step {
+        padding: 8px 11px;
+        border-radius: 9px;
+        background: #e2e8f0;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .step.done {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .step.current {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .lock {
+        border: 1px dashed #f59e0b;
+        background: #fff7ed;
+        padding: 13px;
+        border-radius: 10px;
+        color: #9a3412;
+      }
+      .room {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .tile {
+        height: 125px;
+        background: #102f50;
+        color: #fff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .tile small {
+        position: absolute;
+        bottom: 8px;
+        left: 10px;
+        color: #dbeafe;
+      }
+      .footer-note {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 16px;
+      }
+      .sr {
+        position: absolute;
+        left: -9999px;
+      }
+      @media (max-width: 900px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          height: auto;
+          position: static;
+        }
+        .nav {
+          display: flex;
+          overflow: auto;
+        }
+        .nav button {
+          min-width: 170px;
+        }
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .two {
+          grid-template-columns: 1fr;
+        }
+        .room {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand">CIMS</div>
+        <div class="sub">Compliance-first workflow prototype</div>
+        <nav class="nav" id="nav">
+          <button data-screen="dashboard" class="active">01 Dashboard</button
+          ><button data-screen="determination">02 Determination Gate</button
+          ><button data-screen="scheduling">03 Scheduling</button
+          ><button data-screen="notice">04 Notice & Readiness</button
+          ><button data-screen="virtual">05 Virtual Room</button
+          ><button data-screen="audit">06 Audit</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="top">
+          <div>
+            <h1 id="title">Dashboard</h1>
+            <div style="color: #64748b; font-size: 13px">
+              Perkara sintetis: 123/Pid.Sus/2026/PN Demo
+            </div>
+          </div>
+          <div class="role">
+            <label for="role">Persona</label
+            ><select id="role">
+              <option>Panitera</option>
+              <option>Hakim</option>
+              <option>Jaksa</option>
+              <option>Pemasyarakatan</option>
+              <option>Operator TI</option></select
+            ><button class="btn ghost" id="reset">Reset Demo</button>
+          </div>
+        </div>
+        <div class="notice">
+          Prototype untuk validasi alur dan acceptance criteria. Tidak menggunakan data perkara
+          nyata dan tidak membentuk dokumen hukum resmi.
+        </div>
+        <section id="dashboard" class="section active">
+          <div class="grid">
+            <div class="card kpi">
+              <div class="label">Determination</div>
+              <div class="value" id="kpiDet">PENDING</div>
+            </div>
+            <div class="card kpi">
+              <div class="label">Schedule</div>
+              <div class="value" id="kpiSch">LOCKED</div>
+            </div>
+            <div class="card kpi">
+              <div class="label">Notice</div>
+              <div class="value">NOT STARTED</div>
+            </div>
+            <div class="card kpi">
+              <div class="label">Virtual Session</div>
+              <div class="value">NOT PROVISIONED</div>
+            </div>
+          </div>
+          <div class="two">
+            <div class="card">
+              <h2>Workflow status</h2>
+              <div class="stepper">
+                <div class="step current" id="stDet">Determination</div>
+                <div class="step" id="stSch">Schedule</div>
+                <div class="step">Notice</div>
+                <div class="step">Readiness</div>
+                <div class="step">Virtual Room</div>
+              </div>
+              <div id="nextAction" class="lock">
+                Scheduling terkunci sampai penetapan hakim valid.
+              </div>
+            </div>
+            <div class="card">
+              <h2>Latest audit events</h2>
+              <ul class="timeline" id="dashAudit"></ul>
+            </div>
+          </div>
+        </section>
+        <section id="determination" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Record Judicial Determination</h2>
+              <div class="field">
+                <label>Referensi penetapan</label><input id="detRef" value="PEN-EL/001/2026" />
+              </div>
+              <div class="field">
+                <label>Hakim berwenang</label><input id="detJudge" value="Hakim Demo" />
+              </div>
+              <div class="field">
+                <label>Ruang lingkup</label
+                ><select id="detScope">
+                  <option>Persidangan elektronik untuk hearing ini</option>
+                  <option>Pembacaan putusan secara elektronik</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Alasan</label
+                ><textarea id="detReason">
+Keadaan tertentu berdasarkan penilaian hakim dan kesiapan para pihak.</textarea
+                >
+              </div>
+              <div class="actions">
+                <button class="btn primary" id="validateDet">Record VALID Determination</button
+                ><button class="btn danger" id="revokeDet">Revoke</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Hard gate</h2>
+              <p>Status: <span class="badge pending" id="detBadge">PENDING</span></p>
+              <table class="table">
+                <tr>
+                  <th>Rule</th>
+                  <th>Result</th>
+                </tr>
+                <tr>
+                  <td>Official reference</td>
+                  <td id="rRef">Pending</td>
+                </tr>
+                <tr>
+                  <td>Authorized judge</td>
+                  <td id="rJudge">Pending</td>
+                </tr>
+                <tr>
+                  <td>Scope matches hearing</td>
+                  <td id="rScope">Pending</td>
+                </tr>
+                <tr>
+                  <td>Audit event</td>
+                  <td id="rAudit">Pending</td>
+                </tr>
+              </table>
+              <p class="footer-note">
+                Tidak ada tombol bypass. Revocation akan mengunci scheduling kembali.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section id="scheduling" class="section">
+          <div id="scheduleLock" class="lock">
+            Determination belum valid. Schedule proposal tidak dapat dibuat.
+          </div>
+          <div class="two" id="scheduleBody">
+            <div class="card">
+              <h2>Schedule Proposal</h2>
+              <div class="field">
+                <label>Tanggal</label><input type="date" id="schDate" value="2026-08-12" />
+              </div>
+              <div class="field">
+                <label>Waktu</label><input type="time" id="schTime" value="09:00" />
+              </div>
+              <div class="field">
+                <label>Timezone</label
+                ><select id="timezone">
+                  <option>Asia/Jakarta</option>
+                  <option>Asia/Makassar</option>
+                  <option>Asia/Jayapura</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Ruang Pengadilan</label
+                ><select id="room">
+                  <option>Ruang A</option>
+                  <option>Ruang B</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Lokasi terdakwa</label
+                ><select>
+                  <option>Rutan Demo</option>
+                  <option>Lapas Demo</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button class="btn secondary" id="checkConflict">Check Conflict</button
+                ><button class="btn primary" id="approveSchedule" disabled>Approve Schedule</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Conflict result</h2>
+              <div id="conflictBox" class="lock">Belum diperiksa.</div>
+              <table class="table" style="margin-top: 10px">
+                <thead>
+                  <tr>
+                    <th>Constraint</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="conflictRows"></tbody>
+              </table>
+              <p>Status schedule: <span class="badge blocked" id="schBadge">DRAFT</span></p>
+            </div>
+          </div>
+        </section>
+        <section id="notice" class="section">
+          <div class="card">
+            <h2>Future workflow: Notice and Readiness</h2>
+            <div class="stepper">
+              <div class="step done">Schedule ACTIVE</div>
+              <div class="step current">Official Notice</div>
+              <div class="step">Acknowledgment</div>
+              <div class="step">Readiness</div>
+              <div class="step">Technical Test</div>
+            </div>
+            <p>
+              Modul ini berada pada Sprint 5-6. Prototype menunjukkan dependency terhadap schedule
+              ACTIVE dan bukti penerimaan. Reminder biasa tidak dianggap sebagai pemberitahuan
+              resmi.
+            </p>
+            <button class="btn secondary" disabled>Create Official Notice (Future Sprint)</button>
+          </div>
+        </section>
+        <section id="virtual" class="section">
+          <div class="card">
+            <h2>Future workflow: Virtual Room</h2>
+            <div id="virtualLock" class="lock">
+              Virtual session belum dapat diprovisioning. Memerlukan determination VALID, schedule
+              ACTIVE, notice/readiness, dan provider adapter.
+            </div>
+            <div class="room" style="margin-top: 14px">
+              <div class="tile">Main Room<small>Hakim - Panitera - Penuntut Umum</small></div>
+              <div class="tile">Defendant Room<small>Terdakwa - Advokat</small></div>
+              <div class="tile">Waiting Room<small>Controlled admission</small></div>
+            </div>
+          </div>
+        </section>
+        <section id="audit" class="section">
+          <div class="card">
+            <h2>Append-only Audit Timeline</h2>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Event</th>
+                  <th>Correlation ID</th>
+                </tr>
+              </thead>
+              <tbody id="auditTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      const state = { determination: false, schedule: false, conflictChecked: false, audit: [] };
+      const $ = (id) => document.getElementById(id);
+      const now = () => new Date().toLocaleTimeString('id-ID');
+      function event(name) {
+        state.audit.unshift({
+          time: now(),
+          actor: $('role').value,
+          event: name,
+          corr: 'corr-' + Math.random().toString(16).slice(2, 10)
+        });
+        render();
+      }
+      function render() {
+        $('kpiDet').textContent = state.determination ? 'VALID' : 'PENDING';
+        $('kpiSch').textContent = state.schedule
+          ? 'ACTIVE'
+          : state.determination
+            ? 'DRAFT'
+            : 'LOCKED';
+        $('detBadge').textContent = state.determination ? 'VALID' : 'PENDING';
+        $('detBadge').className = 'badge ' + (state.determination ? 'valid' : 'pending');
+        ['rRef', 'rJudge', 'rScope', 'rAudit'].forEach(
+          (id) => ($(id).textContent = state.determination ? 'Pass' : 'Pending')
+        );
+        $('scheduleLock').style.display = state.determination ? 'none' : 'block';
+        $('scheduleBody').style.opacity = state.determination ? '1' : '.42';
+        $('scheduleBody').style.pointerEvents = state.determination ? 'auto' : 'none';
+        $('stDet').className = 'step ' + (state.determination ? 'done' : 'current');
+        $('stSch').className =
+          'step ' + (state.schedule ? 'done' : state.determination ? 'current' : '');
+        $('nextAction').textContent = state.schedule
+          ? 'Schedule ACTIVE. Tahap berikutnya adalah official notice dan readiness.'
+          : state.determination
+            ? 'Determination valid. Buat proposal, periksa conflict, lalu approval oleh actor berwenang.'
+            : 'Scheduling terkunci sampai penetapan hakim valid.';
+        $('schBadge').textContent = state.schedule
+          ? 'ACTIVE'
+          : state.conflictChecked
+            ? 'CLEAR'
+            : 'DRAFT';
+        $('schBadge').className =
+          'badge ' + (state.schedule ? 'active-b' : state.conflictChecked ? 'valid' : 'blocked');
+        $('virtualLock').textContent = state.schedule
+          ? 'Schedule telah aktif. Provisioning tetap menunggu notice/readiness dan Sprint 7 provider adapter.'
+          : 'Virtual session belum dapat diprovisioning. Memerlukan determination VALID, schedule ACTIVE, notice/readiness, dan provider adapter.';
+        $('dashAudit').innerHTML =
+          state.audit
+            .slice(0, 5)
+            .map(
+              (x) =>
+                `<li><b>${x.event}</b><br><span style="color:#64748b">${x.time} - ${x.actor}</span></li>`
+            )
+            .join('') || '<li>Belum ada event.</li>';
+        $('auditTable').innerHTML =
+          state.audit
+            .map(
+              (x) =>
+                `<tr><td>${x.time}</td><td>${x.actor}</td><td>${x.event}</td><td>${x.corr}</td></tr>`
+            )
+            .join('') || '<tr><td colspan="4">Belum ada event.</td></tr>';
+      }
+      $('nav').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        document.querySelectorAll('.nav button').forEach((x) => x.classList.remove('active'));
+        b.classList.add('active');
+        document.querySelectorAll('.section').forEach((x) => x.classList.remove('active'));
+        $(b.dataset.screen).classList.add('active');
+        $('title').textContent = b.textContent.replace(/^\d+\s/, '');
+      });
+      $('validateDet').onclick = () => {
+        if (!$('detRef').value.trim() || !$('detJudge').value.trim()) {
+          alert('Referensi dan hakim wajib diisi.');
+          return;
+        }
+        state.determination = true;
+        state.schedule = false;
+        state.conflictChecked = false;
+        event('JUDICIAL_DETERMINATION_RECORDED');
+      };
+      $('revokeDet').onclick = () => {
+        state.determination = false;
+        state.schedule = false;
+        state.conflictChecked = false;
+        event('JUDICIAL_DETERMINATION_REVOKED');
+      };
+      $('checkConflict').onclick = () => {
+        state.conflictChecked = true;
+        const conflict = $('room').value === 'Ruang A' && $('schTime').value === '09:00';
+        $('conflictRows').innerHTML = conflict
+          ? '<tr><td>Ruang A telah digunakan</td><td>REQUIRED</td><td>UNRESOLVED</td></tr>'
+          : '<tr><td>Hakim, ruang, jaksa, dan lokasi</td><td>REQUIRED</td><td>CLEAR</td></tr>';
+        $('conflictBox').textContent = conflict
+          ? 'Required conflict ditemukan. Ubah ruang atau waktu.'
+          : 'Tidak ada required conflict.';
+        $('conflictBox').style.background = conflict ? '#fee2e2' : '#dcfce7';
+        $('conflictBox').style.color = conflict ? '#991b1b' : '#166534';
+        $('approveSchedule').disabled = conflict;
+        event(conflict ? 'SCHEDULE_CONFLICT_FOUND' : 'SCHEDULE_CONFLICT_CLEAR');
+      };
+      $('approveSchedule').onclick = () => {
+        if (!state.determination || !state.conflictChecked) return;
+        state.schedule = true;
+        event('SCHEDULE_VERSION_1_ACTIVATED');
+      };
+      $('room').onchange = () => {
+        state.conflictChecked = false;
+        $('approveSchedule').disabled = true;
+        $('conflictRows').innerHTML = '';
+        $('conflictBox').textContent = 'Perubahan input memerlukan conflict check ulang.';
+      };
+      $('schTime').onchange = $('room').onchange;
+      $('reset').onclick = () => {
+        state.determination = false;
+        state.schedule = false;
+        state.conflictChecked = false;
+        state.audit = [];
+        $('conflictRows').innerHTML = '';
+        $('approveSchedule').disabled = true;
+        $('conflictBox').textContent = 'Belum diperiksa.';
+        $('conflictBox').style.background = '';
+        $('conflictBox').style.color = '';
+        render();
+      };
+      event('DEMO_SESSION_STARTED');
+    </script>
+  </body>
+</html>

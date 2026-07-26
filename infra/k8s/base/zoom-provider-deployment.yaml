@@ -30,11 +30,18 @@ spec:
           envFrom:
             - { configMapRef: { name: cims-zoom-provider-config } }
             - { secretRef: { name: cims-zoom-provider-secrets } }
-          readinessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 15, failureThreshold: 3 }
+          readinessProbe:
+            { httpGet: { path: /health, port: http }, periodSeconds: 15, failureThreshold: 3 }
           livenessProbe: { tcpSocket: { port: http }, periodSeconds: 20, failureThreshold: 3 }
           startupProbe: { tcpSocket: { port: http }, periodSeconds: 5, failureThreshold: 30 }
-          resources: { requests: { cpu: 100m, memory: 192Mi }, limits: { cpu: 750m, memory: 512Mi } }
-          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+          resources:
+            { requests: { cpu: 100m, memory: 192Mi }, limits: { cpu: 750m, memory: 512Mi } }
+          securityContext:
+            {
+              allowPrivilegeEscalation: false,
+              readOnlyRootFilesystem: true,
+              capabilities: { drop: [ALL] }
+            }
           volumeMounts: [{ name: tmp, mountPath: /tmp }]
       volumes: [{ name: tmp, emptyDir: {} }]
 ---

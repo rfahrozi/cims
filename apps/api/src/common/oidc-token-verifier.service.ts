@@ -1,4 +1,3 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
@@ -19,13 +18,21 @@ export class OidcTokenVerifierService {
     // Prefix untuk menyingkirkan "cims-" apabila IAM provider memberikan format seperti "cims-court-clerk"
     this.clientRolePrefix = this.config.get<string>('OIDC_ROLE_PREFIX') || '';
 
-    const jwksUrl = this.config.get<string>('OIDC_JWKS_URL') || (this.issuer ? `${this.issuer.replace(/\/$/, '')}/protocol/openid-connect/certs` : 'http://invalid.local/jwks');
+    const jwksUrl =
+      this.config.get<string>('OIDC_JWKS_URL') ||
+      (this.issuer
+        ? `${this.issuer.replace(/\/$/, '')}/protocol/openid-connect/certs`
+        : 'http://invalid.local/jwks');
     this.jwks = createRemoteJWKSet(new URL(jwksUrl));
   }
 
   async verify(token: string): Promise<CurrentUser> {
-    if (!this.issuer || !this.audience) throw new UnauthorizedException('OIDC configuration is incomplete.');
-    const { payload } = await jwtVerify(token, this.jwks, { issuer: this.issuer, audience: this.audience });
+    if (!this.issuer || !this.audience)
+      throw new UnauthorizedException('OIDC configuration is incomplete.');
+    const { payload } = await jwtVerify(token, this.jwks, {
+      issuer: this.issuer,
+      audience: this.audience
+    });
     return this.mapClaims(payload);
   }
 
@@ -34,14 +41,19 @@ export class OidcTokenVerifierService {
     const customRoles = Array.isArray(payload.roles) ? payload.roles : [];
 
     // 2. Ekstrak Keycloak Realm Roles (jika ada)
-    const realmRoles = typeof payload.realm_access === 'object' && payload.realm_access && 'roles' in payload.realm_access && Array.isArray((payload.realm_access as { roles?: unknown }).roles)
-      ? (payload.realm_access as { roles: unknown[] }).roles
-      : [];
+    const realmRoles =
+      typeof payload.realm_access === 'object' &&
+      payload.realm_access &&
+      'roles' in payload.realm_access &&
+      Array.isArray((payload.realm_access as { roles?: unknown }).roles)
+        ? (payload.realm_access as { roles: unknown[] }).roles
+        : [];
 
     // 3. Ekstrak Client-Specific Roles dari Resource Access (Format default Keycloak)
     let clientRoles: unknown[] = [];
     if (
-      typeof payload.resource_access === 'object' && payload.resource_access &&
+      typeof payload.resource_access === 'object' &&
+      payload.resource_access &&
       this.audience in payload.resource_access
     ) {
       const resource = (payload.resource_access as Record<string, any>)[this.audience];
@@ -51,36 +63,52 @@ export class OidcTokenVerifierService {
     }
 
     // Gabungkan semua _strings_ menjadi set deduplikasi
-    const rawRoles = Array.from(new Set(
-      [...customRoles, ...realmRoles, ...clientRoles]
-        .filter(item => typeof item === 'string')
-        .map(roleStr => String(roleStr))
-    ));
+    const rawRoles = Array.from(
+      new Set(
+        [...customRoles, ...realmRoles, ...clientRoles]
+          .filter((item) => typeof item === 'string')
+          .map((roleStr) => String(roleStr))
+      )
+    );
 
     // Validasi dan Filter Roles yang Valid terhadap CimsRole Enum
     const validCimsRoles = rawRoles
-      .map(r => {
-         let normalized = r.toUpperCase();
-         // Hapus prefix jika ada (contoh: CIMS_COURT_CLERK menjadi COURT_CLERK)
-         if (this.clientRolePrefix && normalized.startsWith(this.clientRolePrefix.toUpperCase())) {
-           normalized = normalized.slice(this.clientRolePrefix.length).replace(/^_/, '');
-         }
-         // Konversi strip (-) menjadi garis bawah (_) jika dikirim dengan hyphen dari IAM
-         normalized = normalized.replace(/-/g, '_');
-         return normalized;
+      .map((r) => {
+        let normalized = r.toUpperCase();
+        // Hapus prefix jika ada (contoh: CIMS_COURT_CLERK menjadi COURT_CLERK)
+        if (this.clientRolePrefix && normalized.startsWith(this.clientRolePrefix.toUpperCase())) {
+          normalized = normalized.slice(this.clientRolePrefix.length).replace(/^_/, '');
+        }
+        // Konversi strip (-) menjadi garis bawah (_) jika dikirim dengan hyphen dari IAM
+        normalized = normalized.replace(/-/g, '_');
+        return normalized;
       })
-      .filter((normalized): normalized is CimsRole => (CIMS_ROLES as readonly string[]).includes(normalized));
+      .filter((normalized): normalized is CimsRole =>
+        (CIMS_ROLES as readonly string[]).includes(normalized)
+      );
 
     // Hilangkan Duplikat Final
     const roles = Array.from(new Set(validCimsRoles));
 
-    const organizationIds = Array.isArray(payload.organization_ids) ? payload.organization_ids.filter((item): item is string => typeof item === 'string') : [];
-    const permissions = Array.isArray(payload.permissions) ? payload.permissions.filter((item): item is string => typeof item === 'string') : [];
-    const hearingAssignments = Array.isArray(payload.hearing_assignments) ? payload.hearing_assignments.filter((item): item is string => typeof item === 'string') : [];
+    const organizationIds = Array.isArray(payload.organization_ids)
+      ? payload.organization_ids.filter((item): item is string => typeof item === 'string')
+      : [];
+    const permissions = Array.isArray(payload.permissions)
+      ? payload.permissions.filter((item): item is string => typeof item === 'string')
+      : [];
+    const hearingAssignments = Array.isArray(payload.hearing_assignments)
+      ? payload.hearing_assignments.filter((item): item is string => typeof item === 'string')
+      : [];
 
     if (!payload.sub) throw new UnauthorizedException('Missing subject (sub) claim.');
-    if (roles.length === 0) throw new UnauthorizedException('No valid CIMS roles found in token. Please check Identity Provider mapping.');
-    if (organizationIds.length === 0) throw new UnauthorizedException('Missing organization_ids claim. Cannot establish data boundary.');
+    if (roles.length === 0)
+      throw new UnauthorizedException(
+        'No valid CIMS roles found in token. Please check Identity Provider mapping.'
+      );
+    if (organizationIds.length === 0)
+      throw new UnauthorizedException(
+        'Missing organization_ids claim. Cannot establish data boundary.'
+      );
 
     return {
       id: payload.sub,
@@ -92,7 +120,7 @@ export class OidcTokenVerifierService {
       organizationIds,
       permissions,
       hearingAssignments,
-      authSource: 'OIDC',
+      authSource: 'OIDC'
     };
   }
 }

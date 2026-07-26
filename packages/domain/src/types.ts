@@ -65,12 +65,12 @@ export type NoticeChannel = 'EMAIL' | 'WHATSAPP' | 'SMS' | 'IN_APP';
  * Digunakan untuk membedakan rantai pemberitahuan dan kewajiban acknowledgment.
  */
 export type NoticeType =
-  | 'AGENDA_SIDANG'              // Pemberitahuan jadwal dan agenda sidang
-  | 'PERUBAHAN_JADWAL'           // Perubahan jadwal setelah jadwal aktif di-supersede
-  | 'PEMBACAAN_PUTUSAN_BANDING'  // Pemberitahuan pembacaan putusan tingkat banding (wajib mulai 1 Agu 2026)
-  | 'PERMOHONAN_ELEKTRONIK'      // Pemberitahuan permohonan persidangan elektronik
-  | 'PEMBERITAHUAN_GANGGUAN'     // Notifikasi gangguan teknis atau insiden
-  | 'PEMBERITAHUAN_UMUM';        // Pemberitahuan umum lainnya
+  | 'AGENDA_SIDANG' // Pemberitahuan jadwal dan agenda sidang
+  | 'PERUBAHAN_JADWAL' // Perubahan jadwal setelah jadwal aktif di-supersede
+  | 'PEMBACAAN_PUTUSAN_BANDING' // Pemberitahuan pembacaan putusan tingkat banding (wajib mulai 1 Agu 2026)
+  | 'PERMOHONAN_ELEKTRONIK' // Pemberitahuan permohonan persidangan elektronik
+  | 'PEMBERITAHUAN_GANGGUAN' // Notifikasi gangguan teknis atau insiden
+  | 'PEMBERITAHUAN_UMUM'; // Pemberitahuan umum lainnya
 
 export const NOTICE_TYPES: readonly NoticeType[] = [
   'AGENDA_SIDANG',
@@ -78,7 +78,7 @@ export const NOTICE_TYPES: readonly NoticeType[] = [
   'PEMBACAAN_PUTUSAN_BANDING',
   'PERMOHONAN_ELEKTRONIK',
   'PEMBERITAHUAN_GANGGUAN',
-  'PEMBERITAHUAN_UMUM',
+  'PEMBERITAHUAN_UMUM'
 ] as const;
 
 /**
@@ -117,11 +117,21 @@ export interface ReadinessGateInput {
 
 export interface ReadinessGateResult {
   requiredOrganizationTypes: OrganizationType[];
-  organizations: Array<{ organizationType: OrganizationType; status: ReadinessStatus | 'MISSING'; version?: number }>;
+  organizations: Array<{
+    organizationType: OrganizationType;
+    status: ReadinessStatus | 'MISSING';
+    version?: number;
+  }>;
   ready: boolean;
 }
 
-export type HearingRuntimeState = 'NOT_READY' | 'READY' | 'STARTED' | 'SUSPENDED' | 'ENDED' | 'POSTPONED';
+export type HearingRuntimeState =
+  | 'NOT_READY'
+  | 'READY'
+  | 'STARTED'
+  | 'SUSPENDED'
+  | 'ENDED'
+  | 'POSTPONED';
 export type HearingAction = 'START' | 'SUSPEND' | 'RESUME' | 'END' | 'POSTPONE';
 
 export type AgendaItemStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED';
@@ -235,8 +245,17 @@ export interface AppealTransmission {
  * Hitung kepatuhan "hari yang sama" untuk petikan putusan (SOP 10.15 poin 8).
  * readAt dan publishedAt harus pada tanggal kalender yang sama di timezone lokal.
  */
-export function isAppealSameDayCompliant(readAt: string, publishedAt: string, timezone = 'Asia/Jakarta'): boolean {
-  const fmt = new Intl.DateTimeFormat('id-ID', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' });
+export function isAppealSameDayCompliant(
+  readAt: string,
+  publishedAt: string,
+  timezone = 'Asia/Jakarta'
+): boolean {
+  const fmt = new Intl.DateTimeFormat('id-ID', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
   return fmt.format(new Date(readAt)) === fmt.format(new Date(publishedAt));
 }
 

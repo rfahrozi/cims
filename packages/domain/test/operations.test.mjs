@@ -4,7 +4,7 @@ import {
   assertExpectedRowVersion,
   canonicalJson,
   compareFlatSnapshots,
-  computeOutboxBackoffSeconds,
+  computeOutboxBackoffSeconds
 } from '../dist/index.js';
 
 test('outbox backoff is bounded and increases', () => {
@@ -16,7 +16,7 @@ test('outbox backoff is bounded and increases', () => {
 test('snapshot comparison detects matches, mismatches, and missing values', () => {
   const items = compareFlatSnapshots(
     { case_number: '12/Pid/2026', state: 'ACTIVE', court: 'PN A' },
-    { case_number: '12/Pid/2026', state: 'ENDED', prosecutor: 'Kejari A' },
+    { case_number: '12/Pid/2026', state: 'ENDED', prosecutor: 'Kejari A' }
   );
   assert.equal(items.find((item) => item.fieldPath === 'case_number')?.result, 'MATCHED');
   assert.equal(items.find((item) => item.fieldPath === 'state')?.result, 'MISMATCH');
@@ -25,7 +25,10 @@ test('snapshot comparison detects matches, mismatches, and missing values', () =
 });
 
 test('canonical JSON is stable across object key order', () => {
-  assert.equal(canonicalJson({ b: 2, a: { d: 4, c: 3 } }), canonicalJson({ a: { c: 3, d: 4 }, b: 2 }));
+  assert.equal(
+    canonicalJson({ b: 2, a: { d: 4, c: 3 } }),
+    canonicalJson({ a: { c: 3, d: 4 }, b: 2 })
+  );
 });
 
 test('optimistic concurrency rejects a stale version', () => {

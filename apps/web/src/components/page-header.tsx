@@ -8,7 +8,7 @@ import { WorkflowStepper } from '@/components/workflow-stepper';
 export function PageHeader({
   title,
   description,
-  action,
+  action
 }: {
   title: string;
   description: string;

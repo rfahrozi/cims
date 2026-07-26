@@ -1,8 +1,22 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsIn, IsInt, IsISO8601, IsOptional, IsString, Min, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  Min,
+  MinLength,
+  ValidateNested
+} from 'class-validator';
 
 class ResourceDto {
-  @IsIn(['JUDGE', 'ROOM', 'PROSECUTOR', 'CORRECTIONS']) resource_type!: 'JUDGE' | 'ROOM' | 'PROSECUTOR' | 'CORRECTIONS';
+  @IsIn(['JUDGE', 'ROOM', 'PROSECUTOR', 'CORRECTIONS']) resource_type!:
+    | 'JUDGE'
+    | 'ROOM'
+    | 'PROSECUTOR'
+    | 'CORRECTIONS';
   @IsString() resource_id!: string;
   @IsIn(['REQUIRED', 'PREFERRED']) requirement!: 'REQUIRED' | 'PREFERRED';
 }

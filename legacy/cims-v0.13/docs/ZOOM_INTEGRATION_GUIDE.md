@@ -38,18 +38,18 @@ A Zoom host must be Licensed for meeting registration APIs. If registration is d
 
 ## 5. Capability matrix
 
-| Capability | Zoom REST adapter |
-|---|---|
-| Create scheduled meeting | Automated |
-| Unique participant link | Automated through registrant API |
-| Revoke participant link | Automated through registrant status |
-| Waiting Room | Enabled at meeting creation |
-| Breakout-room pre-assignment | Automated before meeting start |
-| Admit from Waiting Room | Manual host action |
-| Move a live participant to breakout room | Manual host action |
-| Private consultation room move | Manual host action |
-| Cloud recording start/stop | Automated when account settings permit |
-| Meeting and participant webhooks | Automated |
+| Capability                               | Zoom REST adapter                      |
+| ---------------------------------------- | -------------------------------------- |
+| Create scheduled meeting                 | Automated                              |
+| Unique participant link                  | Automated through registrant API       |
+| Revoke participant link                  | Automated through registrant status    |
+| Waiting Room                             | Enabled at meeting creation            |
+| Breakout-room pre-assignment             | Automated before meeting start         |
+| Admit from Waiting Room                  | Manual host action                     |
+| Move a live participant to breakout room | Manual host action                     |
+| Private consultation room move           | Manual host action                     |
+| Cloud recording start/stop               | Automated when account settings permit |
+| Meeting and participant webhooks         | Automated                              |
 
 ## 6. Local contract test
 

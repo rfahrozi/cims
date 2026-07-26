@@ -13,37 +13,49 @@ paths:
   /hearings/{hearingId}/gate-status:
     get:
       summary: Read end-to-end workflow gate status
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Gate status}
+        '200': { description: Gate status }
   /hearings/{hearingId}/participants:
     get:
       summary: List registered hearing participants
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Participant list}
+        '200': { description: Participant list }
     post:
       summary: Register a participant
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       requestBody:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/RegisterParticipant'}
+            schema: { $ref: '#/components/schemas/RegisterParticipant' }
       responses:
-        '201': {description: Registered participant}
-        '409': {description: Duplicate or invalid assignment}
+        '201': { description: Registered participant }
+        '409': { description: Duplicate or invalid assignment }
   /hearings/{hearingId}/participants/{participantId}:
     get:
       summary: Read participant and current session state
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/ParticipantId'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/ParticipantId' }
+        ]
       responses:
-        '200': {description: Participant status}
+        '200': { description: Participant status }
   /hearings/{hearingId}/participants/{participantId}/join-token:
     post:
       summary: Issue a single-use participant join token
       description: Plaintext token is returned once. This endpoint intentionally does not use idempotency response storage.
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/ParticipantId'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/ParticipantId' }
+        ]
       requestBody:
         required: true
         content:
@@ -51,11 +63,11 @@ paths:
             schema:
               type: object
               properties:
-                room_code: {type: string, enum: [WAITING, MAIN, DEFENDANT, WITNESS]}
-                ttl_minutes: {type: integer, minimum: 5, maximum: 120, default: 30}
+                room_code: { type: string, enum: [WAITING, MAIN, DEFENDANT, WITNESS] }
+                ttl_minutes: { type: integer, minimum: 5, maximum: 120, default: 30 }
       responses:
-        '201': {description: Token issued once}
-        '409': {description: Virtual session is not ready}
+        '201': { description: Token issued once }
+        '409': { description: Virtual session is not ready }
   /public/join-tokens:exchange:
     post:
       security: []
@@ -68,16 +80,21 @@ paths:
               type: object
               required: [join_token]
               properties:
-                join_token: {type: string, minLength: 32}
+                join_token: { type: string, minLength: 32 }
       responses:
-        '200': {description: Waiting-room provider access}
-        '401': {description: Invalid token}
-        '409': {description: Token already used or revoked}
-        '410': {description: Token expired}
+        '200': { description: Waiting-room provider access }
+        '401': { description: Invalid token }
+        '409': { description: Token already used or revoked }
+        '410': { description: Token expired }
   /hearings/{hearingId}/participants/{participantId}:admit:
     post:
       summary: Admit a waiting participant to a hearing room
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/ParticipantId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/ParticipantId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       requestBody:
         required: true
         content:
@@ -85,73 +102,98 @@ paths:
             schema:
               type: object
               properties:
-                target_room_code: {type: string, enum: [MAIN, DEFENDANT, WITNESS]}
+                target_room_code: { type: string, enum: [MAIN, DEFENDANT, WITNESS] }
       responses:
-        '200': {description: Participant admitted}
-        '409': {description: Invalid participant state}
+        '200': { description: Participant admitted }
+        '409': { description: Invalid participant state }
   /hearings/{hearingId}/participants/{participantId}:leave:
     post:
       summary: Mark a participant as left or removed
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/ParticipantId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/ParticipantId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                removed: {type: boolean, default: false}
-                reason: {type: string}
+                removed: { type: boolean, default: false }
+                reason: { type: string }
       responses:
-        '200': {description: Participant state updated}
+        '200': { description: Participant state updated }
   /hearings/{hearingId}/attendance:
     get:
       summary: Read attendance summary and append-only attendance events
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Attendance evidence}
+        '200': { description: Attendance evidence }
   /hearings/{hearingId}/runtime:
     get:
       summary: Read hearing runtime and control events
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Runtime status}
+        '200': { description: Runtime status }
   /hearings/{hearingId}:start:
     post:
       summary: Start a hearing
       description: Assigned judge or System Admin only.
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {$ref: '#/components/requestBodies/Reason'}
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
+      requestBody: { $ref: '#/components/requestBodies/Reason' }
       responses:
-        '200': {description: Hearing STARTED}
-        '403': {description: Judge authority required}
-        '409': {description: Invalid transition or blocking incident}
+        '200': { description: Hearing STARTED }
+        '403': { description: Judge authority required }
+        '409': { description: Invalid transition or blocking incident }
   /hearings/{hearingId}:suspend:
     post:
       summary: Suspend a STARTED hearing
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {$ref: '#/components/requestBodies/Reason'}
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
+      requestBody: { $ref: '#/components/requestBodies/Reason' }
       responses:
-        '200': {description: Hearing SUSPENDED}
+        '200': { description: Hearing SUSPENDED }
   /hearings/{hearingId}:resume:
     post:
       summary: Resume a SUSPENDED hearing
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {$ref: '#/components/requestBodies/Reason'}
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
+      requestBody: { $ref: '#/components/requestBodies/Reason' }
       responses:
-        '200': {description: Hearing STARTED}
-        '409': {description: Blocking incident remains open}
+        '200': { description: Hearing STARTED }
+        '409': { description: Blocking incident remains open }
   /hearings/{hearingId}:end:
     post:
       summary: End a STARTED or SUSPENDED hearing
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {$ref: '#/components/requestBodies/Reason'}
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
+      requestBody: { $ref: '#/components/requestBodies/Reason' }
       responses:
-        '200': {description: Hearing ENDED}
-        '409': {description: Active consultation or invalid transition}
+        '200': { description: Hearing ENDED }
+        '409': { description: Active consultation or invalid transition }
   /hearings/{hearingId}/consultations:
     post:
       summary: Start a no-recording private consultation
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       requestBody:
         required: true
         content:
@@ -163,73 +205,105 @@ paths:
                 participant_ids:
                   type: array
                   minItems: 2
-                  items: {type: string, format: uuid}
-                reason: {type: string, minLength: 5}
+                  items: { type: string, format: uuid }
+                reason: { type: string, minLength: 5 }
       responses:
-        '201': {description: Consultation ACTIVE}
-        '409': {description: Hearing not STARTED or participant not ADMITTED}
+        '201': { description: Consultation ACTIVE }
+        '409': { description: Hearing not STARTED or participant not ADMITTED }
   /hearings/{hearingId}/consultations/current:
     get:
       summary: Read current or latest consultation
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Consultation status}
+        '200': { description: Consultation status }
   /hearings/{hearingId}/consultations/current:end:
     post:
       summary: End private consultation and return participants to prior rooms
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {$ref: '#/components/requestBodies/Reason'}
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
+      requestBody: { $ref: '#/components/requestBodies/Reason' }
       responses:
-        '200': {description: Consultation ENDED}
+        '200': { description: Consultation ENDED }
   /hearings/{hearingId}/incidents:
     get:
       summary: List hearing incidents and action timeline
-      parameters: [{$ref: '#/components/parameters/HearingId'}]
+      parameters: [{ $ref: '#/components/parameters/HearingId' }]
       responses:
-        '200': {description: Incident list}
+        '200': { description: Incident list }
     post:
       summary: Create technical, cyber or force-majeure incident
-      parameters: [{$ref: '#/components/parameters/HearingId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/HearingId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       requestBody:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/CreateIncident'}
+            schema: { $ref: '#/components/schemas/CreateIncident' }
       responses:
-        '201': {description: Incident created}
-        '403': {description: Incident-type permission required}
+        '201': { description: Incident created }
+        '403': { description: Incident-type permission required }
   /incidents/{incidentId}/actions:
     post:
       summary: Record a mitigation action
-      parameters: [{$ref: '#/components/parameters/IncidentId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/IncidentId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       responses:
-        '200': {description: Mitigation recorded}
+        '200': { description: Mitigation recorded }
   /incidents/{incidentId}:notify:
     post:
       summary: Record formal cyber or force-majeure notification
-      parameters: [{$ref: '#/components/parameters/IncidentId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/IncidentId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       responses:
-        '200': {description: Notification recorded}
+        '200': { description: Notification recorded }
   /incidents/{incidentId}:resolve:
     post:
       summary: Resolve an incident
-      parameters: [{$ref: '#/components/parameters/IncidentId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/IncidentId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       responses:
-        '200': {description: Incident RESOLVED}
+        '200': { description: Incident RESOLVED }
   /incidents/{incidentId}:close:
     post:
       summary: Close a resolved incident
-      parameters: [{$ref: '#/components/parameters/IncidentId'}, {$ref: '#/components/parameters/IdempotencyKey'}]
+      parameters:
+        [
+          { $ref: '#/components/parameters/IncidentId' },
+          { $ref: '#/components/parameters/IdempotencyKey' }
+        ]
       responses:
-        '200': {description: Incident CLOSED}
+        '200': { description: Incident CLOSED }
 components:
   securitySchemes:
-    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   parameters:
-    HearingId: {name: hearingId, in: path, required: true, schema: {type: string, format: uuid}}
-    ParticipantId: {name: participantId, in: path, required: true, schema: {type: string, format: uuid}}
-    IncidentId: {name: incidentId, in: path, required: true, schema: {type: string, format: uuid}}
-    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
+    HearingId: { name: hearingId, in: path, required: true, schema: { type: string, format: uuid } }
+    ParticipantId:
+      { name: participantId, in: path, required: true, schema: { type: string, format: uuid } }
+    IncidentId:
+      { name: incidentId, in: path, required: true, schema: { type: string, format: uuid } }
+    IdempotencyKey:
+      {
+        name: Idempotency-Key,
+        in: header,
+        required: true,
+        schema: { type: string, minLength: 16, maxLength: 128 }
+      }
   requestBodies:
     Reason:
       required: false
@@ -238,25 +312,41 @@ components:
           schema:
             type: object
             properties:
-              reason: {type: string}
+              reason: { type: string }
   schemas:
     RegisterParticipant:
       type: object
       required: [participant_reference, display_name, participant_role]
       properties:
-        participant_reference: {type: string}
-        display_name: {type: string}
-        participant_role: {type: string, enum: [JUDGE, COURT_CLERK, PROSECUTOR, CORRECTIONS, DEFENDANT, ADVOCATE, WITNESS, EXPERT, INTERPRETER, OTHER]}
-        user_id: {type: [string, 'null'], format: uuid}
-        organization_id: {type: [string, 'null'], format: uuid}
-        protected_identity: {type: boolean, default: false}
-        public_alias: {type: [string, 'null']}
-        default_room_code: {type: string, enum: [MAIN, WAITING, DEFENDANT, WITNESS, CONSULTATION]}
+        participant_reference: { type: string }
+        display_name: { type: string }
+        participant_role:
+          {
+            type: string,
+            enum:
+              [
+                JUDGE,
+                COURT_CLERK,
+                PROSECUTOR,
+                CORRECTIONS,
+                DEFENDANT,
+                ADVOCATE,
+                WITNESS,
+                EXPERT,
+                INTERPRETER,
+                OTHER
+              ]
+          }
+        user_id: { type: [string, 'null'], format: uuid }
+        organization_id: { type: [string, 'null'], format: uuid }
+        protected_identity: { type: boolean, default: false }
+        public_alias: { type: [string, 'null'] }
+        default_room_code: { type: string, enum: [MAIN, WAITING, DEFENDANT, WITNESS, CONSULTATION] }
     CreateIncident:
       type: object
       required: [incident_type, severity, summary]
       properties:
-        incident_type: {type: string, enum: [TECHNICAL, CYBER, FORCE_MAJEURE]}
-        severity: {type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL]}
-        summary: {type: string, minLength: 8}
-        details: {type: [string, 'null']}
+        incident_type: { type: string, enum: [TECHNICAL, CYBER, FORCE_MAJEURE] }
+        severity: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+        summary: { type: string, minLength: 8 }
+        details: { type: [string, 'null'] }

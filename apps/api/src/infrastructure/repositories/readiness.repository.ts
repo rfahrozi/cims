@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { DomainError, evaluateReadinessGate, type OrganizationType, type ReadinessGateResult } from '@cims/domain';
+import {
+  DomainError,
+  evaluateReadinessGate,
+  type OrganizationType,
+  type ReadinessGateResult
+} from '@cims/domain';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import {
   InMemoryStore,
@@ -7,7 +12,7 @@ import {
   type ReadinessItemRecord,
   type ReadinessSubmissionRecord,
   type RoomInspectionRecord,
-  type TechnicalTestRecord,
+  type TechnicalTestRecord
 } from '../in-memory.store.js';
 import { PersistenceModeService } from '../database/persistence-mode.service.js';
 import { PgPoolService } from '../database/pg-pool.service.js';
@@ -25,12 +30,12 @@ export class ReadinessRepository {
     private readonly mode: PersistenceModeService,
     private readonly memory: InMemoryStore,
     private readonly pg: PgPoolService,
-    private readonly core: CoreWorkflowRepository,
+    private readonly core: CoreWorkflowRepository
   ) {}
 
   async createIdentityVerification(
     input: Omit<IdentityVerificationRecord, 'id'>,
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<IdentityVerificationRecord> {
     if (!this.mode.postgres) {
       const record: IdentityVerificationRecord = { id: this.memory.id(), ...input };
@@ -58,8 +63,8 @@ export class ReadinessRepository {
           input.result,
           input.notes ?? null,
           input.verifiedBy,
-          input.verifiedAt,
-        ],
+          input.verifiedAt
+        ]
       );
       return this.mapIdentity(result.rows[0]);
     });
@@ -67,7 +72,7 @@ export class ReadinessRepository {
 
   async createRoomInspection(
     input: Omit<RoomInspectionRecord, 'id'>,
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<RoomInspectionRecord> {
     if (!this.mode.postgres) {
       const record: RoomInspectionRecord = { id: this.memory.id(), ...input };
@@ -92,8 +97,8 @@ export class ReadinessRepository {
           input.result,
           input.notes ?? null,
           input.inspectedBy,
-          input.inspectedAt,
-        ],
+          input.inspectedAt
+        ]
       );
       return this.mapRoom(result.rows[0]);
     });
@@ -102,12 +107,26 @@ export class ReadinessRepository {
   async latestVerificationStatus(
     hearingId: string,
     organizationId: string,
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<{ identity: boolean; room: boolean }> {
     if (!this.mode.postgres) {
       return {
-        identity: [...this.memory.identityVerifications].reverse().some((item) => item.hearingId === hearingId && item.organizationId === organizationId && item.result === 'PASS'),
-        room: [...this.memory.roomInspections].reverse().some((item) => item.hearingId === hearingId && item.organizationId === organizationId && item.result === 'PASS'),
+        identity: [...this.memory.identityVerifications]
+          .reverse()
+          .some(
+            (item) =>
+              item.hearingId === hearingId &&
+              item.organizationId === organizationId &&
+              item.result === 'PASS'
+          ),
+        room: [...this.memory.roomInspections]
+          .reverse()
+          .some(
+            (item) =>
+              item.hearingId === hearingId &&
+              item.organizationId === organizationId &&
+              item.result === 'PASS'
+          )
       };
     }
     return this.pg.transactionAs(user, async (client) => {
@@ -115,7 +134,7 @@ export class ReadinessRepository {
         `select
            exists(select 1 from identity_verifications where hearing_id=$1 and organization_id=$2 and result='PASS') as identity,
            exists(select 1 from room_inspections where hearing_id=$1 and organization_id=$2 and result='PASS') as room`,
-        [hearingId, organizationId],
+        [hearingId, organizationId]
       );
       return { identity: Boolean(result.rows[0]?.identity), room: Boolean(result.rows[0]?.room) };
     });
@@ -133,10 +152,14 @@ export class ReadinessRepository {
       items: Array<Omit<ReadinessItemRecord, 'id' | 'submissionId'>>;
       technicalTest: Omit<TechnicalTestRecord, 'id' | 'submissionId'>;
     },
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<HydratedReadiness> {
     if (!this.mode.postgres) {
-      const version = this.memory.readinessSubmissions.filter((item) => item.hearingId === input.hearingId && item.organizationId === input.organizationId).length + 1;
+      const version =
+        this.memory.readinessSubmissions.filter(
+          (item) =>
+            item.hearingId === input.hearingId && item.organizationId === input.organizationId
+        ).length + 1;
       const submission: ReadinessSubmissionRecord = {
         id: this.memory.id(),
         hearingId: input.hearingId,
@@ -146,21 +169,32 @@ export class ReadinessRepository {
         locationCode: input.locationCode,
         status: input.status,
         submittedBy: input.submittedBy,
-        submittedAt: input.submittedAt,
+        submittedAt: input.submittedAt
       };
       this.memory.readinessSubmissions.push(submission);
-      for (const item of input.items) this.memory.readinessItems.push({ id: this.memory.id(), submissionId: submission.id, ...item });
-      this.memory.technicalTests.push({ id: this.memory.id(), submissionId: submission.id, ...input.technicalTest });
+      for (const item of input.items)
+        this.memory.readinessItems.push({
+          id: this.memory.id(),
+          submissionId: submission.id,
+          ...item
+        });
+      this.memory.technicalTests.push({
+        id: this.memory.id(),
+        submissionId: submission.id,
+        ...input.technicalTest
+      });
       return this.hydrate(submission.id, user);
     }
 
     return this.pg.transactionAs(user, async (client) => {
-      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [`readiness:${input.hearingId}:${input.organizationId}`]);
+      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
+        `readiness:${input.hearingId}:${input.organizationId}`
+      ]);
       const versionResult = await client.query(
         `select coalesce(max(version),0)+1 as version
            from readiness_submissions
           where hearing_id=$1 and organization_id=$2`,
-        [input.hearingId, input.organizationId],
+        [input.hearingId, input.organizationId]
       );
       const version = Number(versionResult.rows[0]?.version ?? 1);
       const result = await client.query(
@@ -176,15 +210,15 @@ export class ReadinessRepository {
           input.locationCode,
           input.status,
           input.submittedBy,
-          input.submittedAt,
-        ],
+          input.submittedAt
+        ]
       );
       const submissionId = String(result.rows[0].id);
       for (const item of input.items) {
         await client.query(
           `insert into readiness_items(submission_id,item_code,required,result,notes)
            values($1,$2,$3,$4,$5)`,
-          [submissionId, item.itemCode, item.required, item.result, item.notes ?? null],
+          [submissionId, item.itemCode, item.required, item.result, item.notes ?? null]
         );
       }
       await client.query(
@@ -199,8 +233,8 @@ export class ReadinessRepository {
           input.technicalTest.primaryNetwork,
           input.technicalTest.backupNetwork,
           input.technicalTest.providerAccess,
-          input.technicalTest.testedAt,
-        ],
+          input.technicalTest.testedAt
+        ]
       );
       return this.hydrateWithClient(submissionId, client);
     });
@@ -208,15 +242,20 @@ export class ReadinessRepository {
 
   async list(hearingId: string, user: CurrentUser): Promise<HydratedReadiness[]> {
     if (!this.mode.postgres) {
-      return Promise.all(this.memory.readinessSubmissions.filter((item) => item.hearingId === hearingId).map((item) => this.hydrate(item.id, user)));
+      return Promise.all(
+        this.memory.readinessSubmissions
+          .filter((item) => item.hearingId === hearingId)
+          .map((item) => this.hydrate(item.id, user))
+      );
     }
     return this.pg.transactionAs(user, async (client) => {
       const result = await client.query(
         `select id::text from readiness_submissions where hearing_id=$1 order by submitted_at desc,id`,
-        [hearingId],
+        [hearingId]
       );
       const items: HydratedReadiness[] = [];
-      for (const row of result.rows) items.push(await this.hydrateWithClient(String(row.id), client));
+      for (const row of result.rows)
+        items.push(await this.hydrateWithClient(String(row.id), client));
       return items;
     });
   }
@@ -230,35 +269,40 @@ export class ReadinessRepository {
   async hydrate(id: string, user: CurrentUser): Promise<HydratedReadiness> {
     if (!this.mode.postgres) {
       const submission = this.memory.readinessSubmissions.find((item) => item.id === id);
-      if (!submission) throw new DomainError('READINESS_NOT_FOUND', 'Readiness submission was not found.', 404);
+      if (!submission)
+        throw new DomainError('READINESS_NOT_FOUND', 'Readiness submission was not found.', 404);
       return {
         ...submission,
         rowVersion: 1,
         items: this.memory.readinessItems.filter((item) => item.submissionId === id),
-        technical_test: this.memory.technicalTests.find((item) => item.submissionId === id) ?? null,
+        technical_test: this.memory.technicalTests.find((item) => item.submissionId === id) ?? null
       };
     }
     return this.pg.transactionAs(user, (client) => this.hydrateWithClient(id, client));
   }
 
-  private async hydrateWithClient(id: string, client: import('pg').PoolClient): Promise<HydratedReadiness> {
+  private async hydrateWithClient(
+    id: string,
+    client: import('pg').PoolClient
+  ): Promise<HydratedReadiness> {
     const result = await client.query(
       `select id::text,hearing_id,organization_id,organization_type,version,location_code,status,
               submitted_by,submitted_at::text,row_version
          from readiness_submissions where id=$1`,
-      [id],
+      [id]
     );
     const row = result.rows[0];
-    if (!row) throw new DomainError('READINESS_NOT_FOUND', 'Readiness submission was not found.', 404);
+    if (!row)
+      throw new DomainError('READINESS_NOT_FOUND', 'Readiness submission was not found.', 404);
     const items = await client.query(
       `select id::text,submission_id::text,item_code,required,result,notes
          from readiness_items where submission_id=$1 order by item_code`,
-      [id],
+      [id]
     );
     const tests = await client.query(
       `select id::text,submission_id::text,camera,microphone,audio,primary_network,backup_network,provider_access,tested_at::text
          from technical_tests where submission_id=$1`,
-      [id],
+      [id]
     );
     return {
       id: String(row.id),
@@ -277,7 +321,7 @@ export class ReadinessRepository {
         itemCode: String(item.item_code),
         required: Boolean(item.required),
         result: String(item.result) as ReadinessItemRecord['result'],
-        notes: item.notes ? String(item.notes) : undefined,
+        notes: item.notes ? String(item.notes) : undefined
       })),
       technical_test: tests.rows[0]
         ? {
@@ -286,12 +330,18 @@ export class ReadinessRepository {
             camera: String(tests.rows[0].camera) as TechnicalTestRecord['camera'],
             microphone: String(tests.rows[0].microphone) as TechnicalTestRecord['microphone'],
             audio: String(tests.rows[0].audio) as TechnicalTestRecord['audio'],
-            primaryNetwork: String(tests.rows[0].primary_network) as TechnicalTestRecord['primaryNetwork'],
-            backupNetwork: String(tests.rows[0].backup_network) as TechnicalTestRecord['backupNetwork'],
-            providerAccess: String(tests.rows[0].provider_access) as TechnicalTestRecord['providerAccess'],
-            testedAt: String(tests.rows[0].tested_at),
+            primaryNetwork: String(
+              tests.rows[0].primary_network
+            ) as TechnicalTestRecord['primaryNetwork'],
+            backupNetwork: String(
+              tests.rows[0].backup_network
+            ) as TechnicalTestRecord['backupNetwork'],
+            providerAccess: String(
+              tests.rows[0].provider_access
+            ) as TechnicalTestRecord['providerAccess'],
+            testedAt: String(tests.rows[0].tested_at)
           }
-        : null,
+        : null
     };
   }
 
@@ -303,13 +353,17 @@ export class ReadinessRepository {
       participantReference: String(row.participant_reference),
       participantRole: row.participant_role ? String(row.participant_role) : undefined,
       locationCode: row.location_code ? String(row.location_code) : undefined,
-      supervisorOfficerId: row.supervisor_officer_id ? String(row.supervisor_officer_id) : undefined,
-      supervisorOfficerName: row.supervisor_officer_name ? String(row.supervisor_officer_name) : undefined,
+      supervisorOfficerId: row.supervisor_officer_id
+        ? String(row.supervisor_officer_id)
+        : undefined,
+      supervisorOfficerName: row.supervisor_officer_name
+        ? String(row.supervisor_officer_name)
+        : undefined,
       method: String(row.method),
       result: String(row.result) as IdentityVerificationRecord['result'],
       notes: row.notes ? String(row.notes) : undefined,
       verifiedBy: String(row.verified_by),
-      verifiedAt: String(row.verified_at),
+      verifiedAt: String(row.verified_at)
     };
   }
 
@@ -325,7 +379,7 @@ export class ReadinessRepository {
       result: String(row.result) as RoomInspectionRecord['result'],
       notes: row.notes ? String(row.notes) : undefined,
       inspectedBy: String(row.inspected_by),
-      inspectedAt: String(row.inspected_at),
+      inspectedAt: String(row.inspected_at)
     };
   }
 }

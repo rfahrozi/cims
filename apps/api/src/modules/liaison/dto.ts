@@ -1,4 +1,12 @@
-import { IsBoolean, IsEmail, IsIn, IsISO8601, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsIn,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  MinLength
+} from 'class-validator';
 
 // ── Organization unit ─────────────────────────────────────────────────────────
 export class CreateOrganizationUnitDto {
@@ -48,7 +56,14 @@ export class RevokeDelegationDto {
 export class CreateEscalationDto {
   @IsOptional() @IsString() hearing_id?: string;
   @IsString() liaison_officer_id!: string;
-  @IsIn(['NOTICE_NO_ACK', 'READINESS_DELAYED', 'INCIDENT_UNRESOLVED', 'SCHEDULE_CONFLICT', 'DEFENDANT_TRANSFER', 'OTHER'])
+  @IsIn([
+    'NOTICE_NO_ACK',
+    'READINESS_DELAYED',
+    'INCIDENT_UNRESOLVED',
+    'SCHEDULE_CONFLICT',
+    'DEFENDANT_TRANSFER',
+    'OTHER'
+  ])
   escalation_type!: string;
   @IsString() @MinLength(10) description!: string;
   @IsString() escalated_to!: string;

@@ -1,10 +1,31 @@
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength
+} from 'class-validator';
 
-import { IsBoolean, IsEmail, IsEnum, IsIn, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
-
-const roles = ['JUDGE','COURT_CLERK','PROSECUTOR','DEFENDANT','ADVOCATE','WITNESS','EXPERT','INTERPRETER','CORRECTIONS_OFFICER','IT_OPERATOR'] as const;
+const roles = [
+  'JUDGE',
+  'COURT_CLERK',
+  'PROSECUTOR',
+  'DEFENDANT',
+  'ADVOCATE',
+  'WITNESS',
+  'EXPERT',
+  'INTERPRETER',
+  'CORRECTIONS_OFFICER',
+  'IT_OPERATOR'
+] as const;
 
 export class RegisterParticipantDto {
-  @IsEnum(roles) role!: typeof roles[number];
+  @IsEnum(roles) role!: (typeof roles)[number];
   @IsString() @MinLength(2) displayName!: string;
   @IsOptional() @IsString() alias?: string;
   @IsOptional() @IsString() organizationId?: string;
@@ -12,11 +33,22 @@ export class RegisterParticipantDto {
   @IsBoolean() protectedIdentity = false;
 }
 
-export class IssueJoinTokenDto { @IsOptional() @IsInt() @Min(60) @Max(3600) ttlSeconds = 900; }
-export class ExchangeJoinTokenDto { @IsString() token!: string; }
-export class AdmitParticipantDto { @IsEnum(['MAIN','DEFENDANT','WITNESS']) roomCode!: 'MAIN'|'DEFENDANT'|'WITNESS'; }
-export class ParticipantLeaveDto { @IsOptional() @IsString() reason?: string; }
-export class StartConsultationDto { @IsString() defendantParticipantId!: string; @IsString() advocateParticipantId!: string; }
+export class IssueJoinTokenDto {
+  @IsOptional() @IsInt() @Min(60) @Max(3600) ttlSeconds = 900;
+}
+export class ExchangeJoinTokenDto {
+  @IsString() token!: string;
+}
+export class AdmitParticipantDto {
+  @IsEnum(['MAIN', 'DEFENDANT', 'WITNESS']) roomCode!: 'MAIN' | 'DEFENDANT' | 'WITNESS';
+}
+export class ParticipantLeaveDto {
+  @IsOptional() @IsString() reason?: string;
+}
+export class StartConsultationDto {
+  @IsString() defendantParticipantId!: string;
+  @IsString() advocateParticipantId!: string;
+}
 
 export class RecordLocationDto {
   @IsIn(['COURT', 'PROSECUTION', 'CORRECTIONS', 'OTHER_COURT', 'EMBASSY', 'REMOTE'])

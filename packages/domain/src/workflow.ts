@@ -7,10 +7,13 @@ import type {
   NoticeGateInput,
   NoticeGateResult,
   ReadinessGateInput,
-  ReadinessGateResult,
+  ReadinessGateResult
 } from './types.js';
 
-export function assertActiveSchedule(hearingId: string, schedules: readonly ActiveSchedule[]): ActiveSchedule {
+export function assertActiveSchedule(
+  hearingId: string,
+  schedules: readonly ActiveSchedule[]
+): ActiveSchedule {
   const schedule = [...schedules]
     .filter((item) => item.hearingId === hearingId && item.status === 'ACTIVE')
     .sort((a, b) => b.version - a.version)[0];
@@ -21,22 +24,35 @@ export function assertActiveSchedule(hearingId: string, schedules: readonly Acti
 }
 
 export function evaluateNoticeGate(input: NoticeGateInput): NoticeGateResult {
-  const activeNoticeIds = new Set(input.notices.filter((item) => item.status !== 'CANCELLED').map((item) => item.id));
-  const required = input.recipients.filter((item) => activeNoticeIds.has(item.noticeId) && item.requiredAck);
+  const activeNoticeIds = new Set(
+    input.notices.filter((item) => item.status !== 'CANCELLED').map((item) => item.id)
+  );
+  const required = input.recipients.filter(
+    (item) => activeNoticeIds.has(item.noticeId) && item.requiredAck
+  );
   const acknowledged = required.filter((item) => item.status === 'ACKNOWLEDGED');
   return {
     noticeCount: activeNoticeIds.size,
     requiredAcknowledgmentCount: required.length,
     acknowledgedCount: acknowledged.length,
-    ready: activeNoticeIds.size > 0 && required.length > 0 && acknowledged.length === required.length,
+    ready:
+      activeNoticeIds.size > 0 && required.length > 0 && acknowledged.length === required.length
   };
 }
 
 export function evaluateReadinessGate(input: ReadinessGateInput): ReadinessGateResult {
-  const latestByType = new Map<string, { organizationType: ReadinessGateInput['submissions'][number]['organizationType']; version: number; status: ReadinessGateInput['submissions'][number]['status'] }>();
+  const latestByType = new Map<
+    string,
+    {
+      organizationType: ReadinessGateInput['submissions'][number]['organizationType'];
+      version: number;
+      status: ReadinessGateInput['submissions'][number]['status'];
+    }
+  >();
   for (const submission of input.submissions) {
     const current = latestByType.get(submission.organizationType);
-    if (!current || submission.version > current.version) latestByType.set(submission.organizationType, submission);
+    if (!current || submission.version > current.version)
+      latestByType.set(submission.organizationType, submission);
   }
   const organizations = input.requiredOrganizationTypes.map((organizationType) => {
     const submission = latestByType.get(organizationType);
@@ -47,7 +63,9 @@ export function evaluateReadinessGate(input: ReadinessGateInput): ReadinessGateR
   return {
     requiredOrganizationTypes: input.requiredOrganizationTypes,
     organizations,
-    ready: organizations.length === input.requiredOrganizationTypes.length && organizations.every((item) => item.status === 'READY'),
+    ready:
+      organizations.length === input.requiredOrganizationTypes.length &&
+      organizations.every((item) => item.status === 'READY')
   };
 }
 
@@ -59,26 +77,43 @@ export function assertVirtualProvisionAllowed(input: {
   readinessGate: ReadinessGateResult;
 }): void {
   const validDetermination = input.determinations.some(
-    (item) => item.hearingId === input.hearingId && item.decision === 'APPROVED',
+    (item) => item.hearingId === input.hearingId && item.decision === 'APPROVED'
   );
-  if (!validDetermination) throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required.');
+  if (!validDetermination)
+    throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required.');
   assertActiveSchedule(input.hearingId, input.schedules);
   if (!input.noticeGate.ready) {
-    throw new DomainError('NOTICE_ACK_REQUIRED', 'Required official notices must be acknowledged.', 409, input.noticeGate);
+    throw new DomainError(
+      'NOTICE_ACK_REQUIRED',
+      'Required official notices must be acknowledged.',
+      409,
+      input.noticeGate
+    );
   }
   if (!input.readinessGate.ready) {
-    throw new DomainError('READINESS_REQUIRED', 'All required organizations must be READY.', 409, input.readinessGate);
+    throw new DomainError(
+      'READINESS_REQUIRED',
+      'All required organizations must be READY.',
+      409,
+      input.readinessGate
+    );
   }
 }
 
-export function transitionHearing(current: HearingRuntimeState, action: HearingAction): HearingRuntimeState {
-  const transitions: Record<HearingRuntimeState, Partial<Record<HearingAction, HearingRuntimeState>>> = {
+export function transitionHearing(
+  current: HearingRuntimeState,
+  action: HearingAction
+): HearingRuntimeState {
+  const transitions: Record<
+    HearingRuntimeState,
+    Partial<Record<HearingAction, HearingRuntimeState>>
+  > = {
     NOT_READY: {},
     READY: { START: 'STARTED', POSTPONE: 'POSTPONED' },
     STARTED: { SUSPEND: 'SUSPENDED', END: 'ENDED', POSTPONE: 'POSTPONED' },
     SUSPENDED: { RESUME: 'STARTED', END: 'ENDED', POSTPONE: 'POSTPONED' },
     ENDED: {},
-    POSTPONED: {},
+    POSTPONED: {}
   };
   const next = transitions[current][action];
   if (!next) {
@@ -86,7 +121,7 @@ export function transitionHearing(current: HearingRuntimeState, action: HearingA
       'INVALID_HEARING_TRANSITION',
       `Hearing cannot perform ${action} from ${current}.`,
       409,
-      { current, action },
+      { current, action }
     );
   }
   return next;

@@ -9,19 +9,19 @@ services:
       CIMS_TOKEN_SECRET: development-only-change-me-at-least-32-characters
       CIMS_OTP_MODE: fixed
       CIMS_FIXED_OTP: 123456
-      CIMS_EXPOSE_DEVELOPMENT_OTP: "true"
+      CIMS_EXPOSE_DEVELOPMENT_OTP: 'true'
       CIMS_ALLOWED_ORIGINS: http://localhost:4173
     volumes:
       - cims_api_data:/data
-    ports: ["4000:4000"]
+    ports: ['4000:4000']
   mock-video-provider:
     image: node:22-alpine
     working_dir: /workspace
-    command: ["node","services/mock-video-provider/src/server.mjs"]
+    command: ['node', 'services/mock-video-provider/src/server.mjs']
     environment:
       MOCK_PROVIDER_PORT: 4100
       MOCK_PROVIDER_WEBHOOK_SECRET: development-only-secret-change-me
-    volumes: ["..:/workspace"]
-    ports: ["4100:4100"]
+    volumes: ['..:/workspace']
+    ports: ['4100:4100']
 volumes:
   cims_api_data: {}

@@ -15,7 +15,7 @@ export class ReconciliationController {
     @Param('hearingId') hearingId: string,
     @Body() dto: RequestReconciliationDto,
     @Headers('x-correlation-id') correlationId?: string,
-    @Headers('traceparent') traceparent?: string,
+    @Headers('traceparent') traceparent?: string
   ) {
     return this.service.request(user, hearingId, dto, correlationId, traceparent);
   }

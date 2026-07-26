@@ -4,16 +4,26 @@ import { DatabaseSync } from 'node:sqlite';
 
 export class SqliteDatabase {
   constructor(filePath) {
-    fs.mkdirSync(path.dirname(filePath), {recursive: true});
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
     this.filePath = filePath;
     this.raw = new DatabaseSync(filePath);
-    this.raw.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;');
+    this.raw.exec(
+      'PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;'
+    );
   }
 
-  exec(sql) { return this.raw.exec(sql); }
-  run(sql, ...params) { return this.raw.prepare(sql).run(...params); }
-  get(sql, ...params) { return this.raw.prepare(sql).get(...params); }
-  all(sql, ...params) { return this.raw.prepare(sql).all(...params); }
+  exec(sql) {
+    return this.raw.exec(sql);
+  }
+  run(sql, ...params) {
+    return this.raw.prepare(sql).run(...params);
+  }
+  get(sql, ...params) {
+    return this.raw.prepare(sql).get(...params);
+  }
+  all(sql, ...params) {
+    return this.raw.prepare(sql).all(...params);
+  }
 
   transaction(callback) {
     this.raw.exec('BEGIN IMMEDIATE');
@@ -27,5 +37,7 @@ export class SqliteDatabase {
     }
   }
 
-  close() { this.raw.close(); }
+  close() {
+    this.raw.close();
+  }
 }

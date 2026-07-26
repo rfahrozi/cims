@@ -7,7 +7,7 @@ import {
   type AcknowledgmentRecord,
   type DeliveryAttemptRecord,
   type NoticeRecipientRecord,
-  type OfficialNoticeRecord,
+  type OfficialNoticeRecord
 } from '../in-memory.store.js';
 import { OutboxService } from '../database/outbox.service.js';
 import { PersistenceModeService } from '../database/persistence-mode.service.js';
@@ -15,11 +15,13 @@ import { PgPoolService } from '../database/pg-pool.service.js';
 
 export interface HydratedNotice extends OfficialNoticeRecord {
   rowVersion: number;
-  recipients: Array<NoticeRecipientRecord & {
-    rowVersion: number;
-    delivery_attempts: DeliveryAttemptRecord[];
-    acknowledgment: AcknowledgmentRecord | null;
-  }>;
+  recipients: Array<
+    NoticeRecipientRecord & {
+      rowVersion: number;
+      delivery_attempts: DeliveryAttemptRecord[];
+      acknowledgment: AcknowledgmentRecord | null;
+    }
+  >;
 }
 
 @Injectable()
@@ -28,7 +30,7 @@ export class NoticesRepository {
     private readonly mode: PersistenceModeService,
     private readonly memory: InMemoryStore,
     private readonly pg: PgPoolService,
-    private readonly outbox: OutboxService,
+    private readonly outbox: OutboxService
   ) {}
 
   async create(
@@ -51,7 +53,7 @@ export class NoticesRepository {
         ackDeadline?: string;
       }>;
     },
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<HydratedNotice> {
     if (!this.mode.postgres) {
       const notice: OfficialNoticeRecord = {
@@ -65,7 +67,7 @@ export class NoticesRepository {
         senderOrganizationId: input.senderOrganizationId,
         createdBy: input.createdBy,
         status: 'DRAFT',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
       };
       this.memory.notices.push(notice);
       for (const recipient of input.recipients) {
@@ -79,7 +81,7 @@ export class NoticesRepository {
           preferredChannel: recipient.preferredChannel,
           requiredAck: recipient.requiredAck,
           ackDeadline: recipient.ackDeadline,
-          status: 'PENDING',
+          status: 'PENDING'
         });
       }
       return this.hydrate(notice.id, user);
@@ -100,8 +102,8 @@ export class NoticesRepository {
           input.message,
           input.officialReference,
           input.senderOrganizationId,
-          input.createdBy,
-        ],
+          input.createdBy
+        ]
       );
       const noticeId = String(noticeResult.rows[0].id);
       for (const recipient of input.recipients) {
@@ -118,8 +120,8 @@ export class NoticesRepository {
             recipient.destination,
             recipient.preferredChannel,
             recipient.requiredAck,
-            recipient.ackDeadline ?? null,
-          ],
+            recipient.ackDeadline ?? null
+          ]
         );
       }
       return this.hydrateWithClient(noticeId, client);
@@ -130,18 +132,24 @@ export class NoticesRepository {
     noticeId: string,
     user: CurrentUser,
     metadata: { correlationId?: string; traceparent?: string } = {},
-    expectedRowVersion?: number,
+    expectedRowVersion?: number
   ): Promise<HydratedNotice> {
     if (!this.mode.postgres) {
       const notice = this.noticeMemory(noticeId);
       if (!['DRAFT', 'PARTIAL', 'FAILED'].includes(notice.status)) {
-        throw new DomainError('NOTICE_STATE_INVALID', 'Notice cannot be sent from the current state.', 409);
+        throw new DomainError(
+          'NOTICE_STATE_INVALID',
+          'Notice cannot be sent from the current state.',
+          409
+        );
       }
       const recipients = this.memory.noticeRecipients.filter((item) => item.noticeId === noticeId);
       for (const recipient of recipients) {
         if (recipient.status === 'ACKNOWLEDGED' || recipient.status === 'DELIVERED') continue;
         const shouldFail = recipient.destination.toLowerCase().includes('fail');
-        const attemptNumber = this.memory.deliveryAttempts.filter((item) => item.recipientId === recipient.id).length + 1;
+        const attemptNumber =
+          this.memory.deliveryAttempts.filter((item) => item.recipientId === recipient.id).length +
+          1;
         this.memory.deliveryAttempts.push({
           id: this.memory.id(),
           recipientId: recipient.id,
@@ -151,7 +159,7 @@ export class NoticesRepository {
           providerReference: shouldFail ? undefined : `MOCK-${this.memory.id()}`,
           evidence: { mode: 'MOCK', destination_masked: this.mask(recipient.destination) },
           errorCode: shouldFail ? 'MOCK_DELIVERY_FAILURE' : undefined,
-          attemptedAt: new Date().toISOString(),
+          attemptedAt: new Date().toISOString()
         });
         recipient.status = shouldFail ? 'FAILED' : 'DELIVERED';
       }
@@ -163,7 +171,12 @@ export class NoticesRepository {
     return this.pg.transactionAs(user, async (client) => {
       const notice = await this.noticeWithClient(noticeId, client, true);
       if (!['DRAFT', 'PARTIAL', 'FAILED'].includes(notice.status)) {
-        throw new DomainError('NOTICE_STATE_INVALID', 'Notice cannot be sent from the current state.', 409, { status: notice.status });
+        throw new DomainError(
+          'NOTICE_STATE_INVALID',
+          'Notice cannot be sent from the current state.',
+          409,
+          { status: notice.status }
+        );
       }
       const expected = expectedRowVersion ?? notice.rowVersion;
       const updated = await client.query(
@@ -171,20 +184,25 @@ export class NoticesRepository {
             set status='SENT', sent_at=coalesce(sent_at,now()), row_version=row_version+1
           where id=$1 and row_version=$2
           returning id`,
-        [noticeId, expected],
+        [noticeId, expected]
       );
       if (updated.rowCount !== 1) {
-        throw new DomainError('OPTIMISTIC_CONCURRENCY_CONFLICT', 'Official notice was changed by another transaction.', 409, {
-          noticeId,
-          expectedRowVersion: expected,
-        });
+        throw new DomainError(
+          'OPTIMISTIC_CONCURRENCY_CONFLICT',
+          'Official notice was changed by another transaction.',
+          409,
+          {
+            noticeId,
+            expectedRowVersion: expected
+          }
+        );
       }
       const recipients = await client.query(
         `select id::text
            from notice_recipients
           where notice_id=$1 and status in ('PENDING','FAILED')
           order by id`,
-        [noticeId],
+        [noticeId]
       );
       for (const recipient of recipients.rows) {
         await this.outbox.enqueueWithClient(
@@ -193,7 +211,7 @@ export class NoticesRepository {
           'NOTICE_RECIPIENT',
           String(recipient.id),
           { notice_id: noticeId, recipient_id: String(recipient.id) },
-          metadata,
+          metadata
         );
       }
       return this.hydrateWithClient(noticeId, client);
@@ -222,7 +240,7 @@ export class NoticesRepository {
         destination: recipient.destination,
         subject: notice.subject,
         message: notice.message,
-        officialReference: notice.officialReference,
+        officialReference: notice.officialReference
       };
     }
     const rows = await this.pg.query<Record<string, unknown>>(
@@ -231,7 +249,7 @@ export class NoticesRepository {
          from notice_recipients r
          join official_notices n on n.id=r.notice_id
         where r.id=$1`,
-      [recipientId],
+      [recipientId]
     );
     const row = rows[0];
     if (!row) throw new NotFoundException('Notice recipient not found');
@@ -243,7 +261,7 @@ export class NoticesRepository {
       destination: String(row.destination),
       subject: String(row.subject),
       message: String(row.message),
-      officialReference: String(row.official_reference),
+      officialReference: String(row.official_reference)
     };
   }
 
@@ -254,7 +272,7 @@ export class NoticesRepository {
       providerReference?: string;
       evidence: Record<string, unknown>;
       errorCode?: string;
-    },
+    }
   ): Promise<void> {
     if (!this.mode.postgres) return;
     await this.pg.transaction(async (client) => {
@@ -263,14 +281,14 @@ export class NoticesRepository {
            from notice_recipients
           where id=$1
           for update`,
-        [recipientId],
+        [recipientId]
       );
       const row = recipient.rows[0];
       if (!row) throw new NotFoundException('Notice recipient not found');
       if (String(row.status) === 'ACKNOWLEDGED') return;
       const attempt = await client.query(
         'select coalesce(max(attempt_number),0)+1 as attempt from notice_delivery_attempts where recipient_id=$1',
-        [recipientId],
+        [recipientId]
       );
       await client.query(
         `insert into notice_delivery_attempts(
@@ -284,14 +302,14 @@ export class NoticesRepository {
           result.status,
           result.providerReference ?? null,
           JSON.stringify(result.evidence),
-          result.errorCode ?? null,
-        ],
+          result.errorCode ?? null
+        ]
       );
       await client.query(
         `update notice_recipients
             set status=$2, row_version=row_version+1
           where id=$1`,
-        [recipientId, result.status],
+        [recipientId, result.status]
       );
       await this.refreshStatusWithClient(String(row.notice_id), client);
     });
@@ -300,14 +318,19 @@ export class NoticesRepository {
   async acknowledge(
     noticeId: string,
     input: { recipientId?: string; method: string; receiptReference: string },
-    user: CurrentUser,
+    user: CurrentUser
   ): Promise<HydratedNotice> {
     if (!this.mode.postgres) {
-      const candidates = this.memory.noticeRecipients.filter((item) => item.noticeId === noticeId && item.status === 'DELIVERED');
+      const candidates = this.memory.noticeRecipients.filter(
+        (item) => item.noticeId === noticeId && item.status === 'DELIVERED'
+      );
       const target = input.recipientId
         ? candidates.find((item) => item.id === input.recipientId)
         : candidates.find((item) => item.recipientUserId === user.id);
-      if (!target && !user.roles.includes('SYSTEM_ADMIN')) throw new NotFoundException('No delivered notice recipient is available for the current user.');
+      if (!target && !user.roles.includes('SYSTEM_ADMIN'))
+        throw new NotFoundException(
+          'No delivered notice recipient is available for the current user.'
+        );
       const selected = target ?? candidates[0];
       if (!selected) throw new NotFoundException('Notice recipient not found');
       selected.status = 'ACKNOWLEDGED';
@@ -317,7 +340,7 @@ export class NoticesRepository {
         acknowledgedBy: user.id,
         method: input.method,
         receiptReference: input.receiptReference,
-        acknowledgedAt: new Date().toISOString(),
+        acknowledgedAt: new Date().toISOString()
       });
       this.refreshMemoryStatus(noticeId);
       return this.hydrate(noticeId, user);
@@ -331,21 +354,26 @@ export class NoticesRepository {
             and ($2::text is null or id::text=$2)
           order by id
           for update`,
-        [noticeId, input.recipientId ?? null],
+        [noticeId, input.recipientId ?? null]
       );
-      let selected = candidateResult.rows.find((row) => String(row.recipient_user_id ?? '') === user.id);
+      let selected = candidateResult.rows.find(
+        (row) => String(row.recipient_user_id ?? '') === user.id
+      );
       if (input.recipientId) selected = candidateResult.rows[0];
       if (!selected && user.roles.includes('SYSTEM_ADMIN')) selected = candidateResult.rows[0];
-      if (!selected) throw new NotFoundException('No delivered notice recipient is available for the current user.');
+      if (!selected)
+        throw new NotFoundException(
+          'No delivered notice recipient is available for the current user.'
+        );
       await client.query(
         `insert into notice_acknowledgments(recipient_id,acknowledged_by,acknowledgment_method,receipt_reference,acknowledged_at)
          values($1,$2,$3,$4,now())
          on conflict (recipient_id) do nothing`,
-        [selected.id, user.id, input.method, input.receiptReference],
+        [selected.id, user.id, input.method, input.receiptReference]
       );
       await client.query(
         `update notice_recipients set status='ACKNOWLEDGED',row_version=row_version+1 where id=$1`,
-        [selected.id],
+        [selected.id]
       );
       await this.refreshStatusWithClient(noticeId, client);
       return this.hydrateWithClient(noticeId, client);
@@ -354,15 +382,20 @@ export class NoticesRepository {
 
   async list(hearingId: string, user: CurrentUser): Promise<HydratedNotice[]> {
     if (!this.mode.postgres) {
-      return Promise.all(this.memory.notices.filter((item) => item.hearingId === hearingId).map((item) => this.hydrate(item.id, user)));
+      return Promise.all(
+        this.memory.notices
+          .filter((item) => item.hearingId === hearingId)
+          .map((item) => this.hydrate(item.id, user))
+      );
     }
     return this.pg.transactionAs(user, async (client) => {
       const result = await client.query(
         `select id::text from official_notices where hearing_id=$1 order by created_at desc,id`,
-        [hearingId],
+        [hearingId]
       );
       const items: HydratedNotice[] = [];
-      for (const row of result.rows) items.push(await this.hydrateWithClient(String(row.id), client));
+      for (const row of result.rows)
+        items.push(await this.hydrateWithClient(String(row.id), client));
       return items;
     });
   }
@@ -371,7 +404,7 @@ export class NoticesRepository {
     const notices = await this.list(hearingId, user);
     return evaluateNoticeGate({
       notices,
-      recipients: notices.flatMap((notice) => notice.recipients),
+      recipients: notices.flatMap((notice) => notice.recipients)
     });
   }
 
@@ -379,32 +412,38 @@ export class NoticesRepository {
    * H-10: Kembalikan daftar penerima notice yang melewati SLA acknowledgment.
    * SOP 11: persentase acknowledgment tepat waktu harus termonitor.
    */
-  async slaOverdue(user: CurrentUser, hearingId?: string): Promise<Array<{
-    noticeId: string;
-    hearingId: string;
-    noticeType: string;
-    recipientId: string;
-    recipientName: string;
-    channel: string;
-    ackDeadline: string;
-    overdueMinutes: number;
-    status: string;
-  }>> {
+  async slaOverdue(
+    user: CurrentUser,
+    hearingId?: string
+  ): Promise<
+    Array<{
+      noticeId: string;
+      hearingId: string;
+      noticeType: string;
+      recipientId: string;
+      recipientName: string;
+      channel: string;
+      ackDeadline: string;
+      overdueMinutes: number;
+      status: string;
+    }>
+  > {
     const now = new Date().toISOString();
 
     if (!this.mode.postgres) {
       const results = [];
       const notices = hearingId
-        ? this.memory.notices.filter(n => n.hearingId === hearingId)
+        ? this.memory.notices.filter((n) => n.hearingId === hearingId)
         : this.memory.notices;
 
       for (const notice of notices) {
-        const recipients = this.memory.noticeRecipients.filter(r =>
-          r.noticeId === notice.id &&
-          r.requiredAck &&
-          r.ackDeadline &&
-          r.ackDeadline < now &&
-          r.status !== 'ACKNOWLEDGED',
+        const recipients = this.memory.noticeRecipients.filter(
+          (r) =>
+            r.noticeId === notice.id &&
+            r.requiredAck &&
+            r.ackDeadline &&
+            r.ackDeadline < now &&
+            r.status !== 'ACKNOWLEDGED'
         );
         for (const r of recipients) {
           const overdue = (Date.parse(now) - Date.parse(r.ackDeadline!)) / 60_000;
@@ -417,7 +456,7 @@ export class NoticesRepository {
             channel: r.preferredChannel,
             ackDeadline: r.ackDeadline!,
             overdueMinutes: Math.round(overdue),
-            status: r.status,
+            status: r.status
           });
         }
       }
@@ -425,8 +464,9 @@ export class NoticesRepository {
     }
 
     return this.pg.transactionAs(user, async (client) => {
-      const rows = (await client.query(
-        `select n.id::text as notice_id, n.hearing_id, n.notice_type,
+      const rows = (
+        await client.query(
+          `select n.id::text as notice_id, n.hearing_id, n.notice_type,
                 r.id::text as recipient_id, r.recipient_name, r.preferred_channel,
                 r.ack_deadline::text, r.status,
                 extract(epoch from (now() - r.ack_deadline)) / 60 as overdue_minutes
@@ -439,10 +479,11 @@ export class NoticesRepository {
             and ($1::text is null or n.hearing_id = $1)
           order by overdue_minutes desc
           limit 100`,
-        [hearingId ?? null],
-      )).rows;
+          [hearingId ?? null]
+        )
+      ).rows;
 
-      return rows.map(row => ({
+      return rows.map((row) => ({
         noticeId: String(row.notice_id),
         hearingId: String(row.hearing_id),
         noticeType: String(row.notice_type),
@@ -451,7 +492,7 @@ export class NoticesRepository {
         channel: String(row.preferred_channel),
         ackDeadline: String(row.ack_deadline),
         overdueMinutes: Math.round(Number(row.overdue_minutes)),
-        status: String(row.status),
+        status: String(row.status)
       }));
     });
   }
@@ -462,24 +503,33 @@ export class NoticesRepository {
       return {
         ...notice,
         rowVersion: 1,
-        recipients: this.memory.noticeRecipients.filter((item) => item.noticeId === noticeId).map((recipient) => ({
-          ...recipient,
-          rowVersion: 1,
-          delivery_attempts: this.memory.deliveryAttempts.filter((item) => item.recipientId === recipient.id),
-          acknowledgment: this.memory.acknowledgments.find((item) => item.recipientId === recipient.id) ?? null,
-        })),
+        recipients: this.memory.noticeRecipients
+          .filter((item) => item.noticeId === noticeId)
+          .map((recipient) => ({
+            ...recipient,
+            rowVersion: 1,
+            delivery_attempts: this.memory.deliveryAttempts.filter(
+              (item) => item.recipientId === recipient.id
+            ),
+            acknowledgment:
+              this.memory.acknowledgments.find((item) => item.recipientId === recipient.id) ?? null
+          }))
       };
     }
     return this.pg.transactionAs(user, (client) => this.hydrateWithClient(noticeId, client));
   }
 
-  private async noticeWithClient(noticeId: string, client: PoolClient, lock = false): Promise<HydratedNotice> {
+  private async noticeWithClient(
+    noticeId: string,
+    client: PoolClient,
+    lock = false
+  ): Promise<HydratedNotice> {
     const result = await client.query(
       `select id::text,hearing_id,schedule_id,notice_type,subject,message,official_reference,
               sender_organization_id,created_by,status,created_at::text,sent_at::text,row_version
          from official_notices
         where id=$1${lock ? ' for update' : ''}`,
-      [noticeId],
+      [noticeId]
     );
     const row = result.rows[0];
     if (!row) throw new NotFoundException('Official notice not found');
@@ -497,7 +547,7 @@ export class NoticesRepository {
       createdAt: String(row.created_at),
       sentAt: row.sent_at ? String(row.sent_at) : undefined,
       rowVersion: Number(row.row_version),
-      recipients: [],
+      recipients: []
     };
   }
 
@@ -509,29 +559,33 @@ export class NoticesRepository {
          from notice_recipients
         where notice_id=$1
         order by id`,
-      [noticeId],
+      [noticeId]
     );
     const recipients: HydratedNotice['recipients'] = [];
     for (const row of recipientResult.rows) {
       const attempts = await client.query(
         `select id::text,recipient_id::text,attempt_number,channel,status,provider_reference,evidence_json,error_code,attempted_at::text
            from notice_delivery_attempts where recipient_id=$1 order by attempt_number`,
-        [row.id],
+        [row.id]
       );
       const acknowledgments = await client.query(
         `select id::text,recipient_id::text,acknowledged_by,acknowledgment_method,receipt_reference,acknowledged_at::text
            from notice_acknowledgments where recipient_id=$1`,
-        [row.id],
+        [row.id]
       );
       const acknowledgmentRow = acknowledgments.rows[0];
       recipients.push({
         id: String(row.id),
         noticeId: String(row.notice_id),
         recipientUserId: row.recipient_user_id ? String(row.recipient_user_id) : undefined,
-        recipientOrganizationId: row.recipient_organization_id ? String(row.recipient_organization_id) : undefined,
+        recipientOrganizationId: row.recipient_organization_id
+          ? String(row.recipient_organization_id)
+          : undefined,
         recipientName: String(row.recipient_name),
         destination: String(row.destination),
-        preferredChannel: String(row.preferred_channel) as NoticeRecipientRecord['preferredChannel'],
+        preferredChannel: String(
+          row.preferred_channel
+        ) as NoticeRecipientRecord['preferredChannel'],
         requiredAck: Boolean(row.required_ack),
         ackDeadline: row.ack_deadline ? String(row.ack_deadline) : undefined,
         status: String(row.status) as NoticeRecipientRecord['status'],
@@ -542,10 +596,12 @@ export class NoticesRepository {
           attemptNumber: Number(attempt.attempt_number),
           channel: String(attempt.channel) as DeliveryAttemptRecord['channel'],
           status: String(attempt.status) as DeliveryAttemptRecord['status'],
-          providerReference: attempt.provider_reference ? String(attempt.provider_reference) : undefined,
+          providerReference: attempt.provider_reference
+            ? String(attempt.provider_reference)
+            : undefined,
           evidence: attempt.evidence_json,
           errorCode: attempt.error_code ? String(attempt.error_code) : undefined,
-          attemptedAt: String(attempt.attempted_at),
+          attemptedAt: String(attempt.attempted_at)
         })),
         acknowledgment: acknowledgmentRow
           ? {
@@ -554,9 +610,9 @@ export class NoticesRepository {
               acknowledgedBy: String(acknowledgmentRow.acknowledged_by),
               method: String(acknowledgmentRow.acknowledgment_method),
               receiptReference: String(acknowledgmentRow.receipt_reference),
-              acknowledgedAt: String(acknowledgmentRow.acknowledged_at),
+              acknowledgedAt: String(acknowledgmentRow.acknowledged_at)
             }
-          : null,
+          : null
       });
     }
     return { ...notice, recipients };
@@ -570,7 +626,7 @@ export class NoticesRepository {
               count(*) filter(where status in ('DELIVERED','ACKNOWLEDGED')) as delivered_count,
               count(*) as total_count
          from notice_recipients where notice_id=$1`,
-      [noticeId],
+      [noticeId]
     );
     const row = result.rows[0];
     const required = Number(row.required_count);
@@ -578,16 +634,17 @@ export class NoticesRepository {
     const failed = Number(row.failed_count);
     const delivered = Number(row.delivered_count);
     const total = Number(row.total_count);
-    const status = required > 0 && required === acknowledged
-      ? 'ACKNOWLEDGED'
-      : total > 0 && failed === total
-        ? 'FAILED'
-        : failed > 0 && delivered > 0
-          ? 'PARTIAL'
-          : 'SENT';
+    const status =
+      required > 0 && required === acknowledged
+        ? 'ACKNOWLEDGED'
+        : total > 0 && failed === total
+          ? 'FAILED'
+          : failed > 0 && delivered > 0
+            ? 'PARTIAL'
+            : 'SENT';
     await client.query(
       `update official_notices set status=$2,row_version=row_version+1 where id=$1`,
-      [noticeId, status],
+      [noticeId, status]
     );
   }
 
@@ -601,9 +658,14 @@ export class NoticesRepository {
     const notice = this.noticeMemory(id);
     const recipients = this.memory.noticeRecipients.filter((item) => item.noticeId === id);
     const required = recipients.filter((item) => item.requiredAck);
-    if (required.length > 0 && required.every((item) => item.status === 'ACKNOWLEDGED')) notice.status = 'ACKNOWLEDGED';
+    if (required.length > 0 && required.every((item) => item.status === 'ACKNOWLEDGED'))
+      notice.status = 'ACKNOWLEDGED';
     else if (recipients.every((item) => item.status === 'FAILED')) notice.status = 'FAILED';
-    else if (recipients.some((item) => item.status === 'FAILED') && recipients.some((item) => ['DELIVERED', 'ACKNOWLEDGED'].includes(item.status))) notice.status = 'PARTIAL';
+    else if (
+      recipients.some((item) => item.status === 'FAILED') &&
+      recipients.some((item) => ['DELIVERED', 'ACKNOWLEDGED'].includes(item.status))
+    )
+      notice.status = 'PARTIAL';
     else if (notice.status !== 'DRAFT') notice.status = 'SENT';
   }
 

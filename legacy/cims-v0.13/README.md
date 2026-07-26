@@ -62,13 +62,13 @@ npm run reset:db
 
 ## Synthetic accounts
 
-| Role | Email | Password | OTP |
-|---|---|---|---|
-| Administrator | admin@cims.local | Admin123! | 123456 |
-| Judge | judge@cims.local | Judge123! | 123456 |
-| Court Clerk | clerk@cims.local | Clerk123! | 123456 |
-| Prosecutor | prosecutor@cims.local | Prosecutor123! | 123456 |
-| Corrections | corrections@cims.local | Corrections123! | 123456 |
+| Role          | Email                  | Password        | OTP    |
+| ------------- | ---------------------- | --------------- | ------ |
+| Administrator | admin@cims.local       | Admin123!       | 123456 |
+| Judge         | judge@cims.local       | Judge123!       | 123456 |
+| Court Clerk   | clerk@cims.local       | Clerk123!       | 123456 |
+| Prosecutor    | prosecutor@cims.local  | Prosecutor123!  | 123456 |
+| Corrections   | corrections@cims.local | Corrections123! | 123456 |
 
 Never use these credentials or synthetic data outside development and test environments.
 

@@ -1,2 +1,23 @@
 import { Injectable } from '@nestjs/common';
-@Injectable() export class ZoomService { async status(){const url=process.env.ZOOM_PROVIDER_URL??'http://localhost:3010';try{const res=await fetch(`${url}/health`,{signal:AbortSignal.timeout(1500)});return {mode:process.env.ZOOM_PROVIDER_MODE??'mock',connected:res.ok,provider_url:url,detail:await res.json()}}catch{return {mode:process.env.ZOOM_PROVIDER_MODE??'mock',connected:false,provider_url:url,detail:'Provider is not running'}}} }
+@Injectable()
+export class ZoomService {
+  async status() {
+    const url = process.env.ZOOM_PROVIDER_URL ?? 'http://localhost:3010';
+    try {
+      const res = await fetch(`${url}/health`, { signal: AbortSignal.timeout(1500) });
+      return {
+        mode: process.env.ZOOM_PROVIDER_MODE ?? 'mock',
+        connected: res.ok,
+        provider_url: url,
+        detail: await res.json()
+      };
+    } catch {
+      return {
+        mode: process.env.ZOOM_PROVIDER_MODE ?? 'mock',
+        connected: false,
+        provider_url: url,
+        detail: 'Provider is not running'
+      };
+    }
+  }
+}

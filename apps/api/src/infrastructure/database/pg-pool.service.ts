@@ -19,13 +19,17 @@ export class PgPoolService implements OnApplicationShutdown {
       statement_timeout: Number(config.get<string>('DB_STATEMENT_TIMEOUT_MS') ?? 15_000),
       query_timeout: Number(config.get<string>('DB_QUERY_TIMEOUT_MS') ?? 20_000),
       application_name: config.get<string>('DB_APPLICATION_NAME') ?? 'cims-api',
-      ssl: config.get<string>('DB_SSL') === 'true'
-        ? { rejectUnauthorized: config.get<string>('DB_SSL_REJECT_UNAUTHORIZED') !== 'false' }
-        : undefined,
+      ssl:
+        config.get<string>('DB_SSL') === 'true'
+          ? { rejectUnauthorized: config.get<string>('DB_SSL_REJECT_UNAUTHORIZED') !== 'false' }
+          : undefined
     });
   }
 
-  async query<T extends QueryResultRow>(text: string, values: readonly unknown[] = []): Promise<T[]> {
+  async query<T extends QueryResultRow>(
+    text: string,
+    values: readonly unknown[] = []
+  ): Promise<T[]> {
     return (await this.pool.query<T>(text, [...values])).rows;
   }
 
@@ -43,8 +47,8 @@ export class PgPoolService implements OnApplicationShutdown {
           user.hearingAssignments.join(','),
           String(user.roles.includes('SYSTEM_ADMIN')),
           user.id,
-          `cims-api:${user.id}`.slice(0, 63),
-        ],
+          `cims-api:${user.id}`.slice(0, 63)
+        ]
       );
       return work(client);
     });

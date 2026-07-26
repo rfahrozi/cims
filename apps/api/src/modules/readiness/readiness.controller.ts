@@ -10,17 +10,32 @@ export class ReadinessController {
   constructor(private readonly service: ReadinessService) {}
 
   @Post('identity-verifications')
-  verify(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: IdentityVerificationDto, @Headers('x-correlation-id') correlationId?: string) {
+  verify(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: IdentityVerificationDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.verifyIdentity(user, id, dto, correlationId);
   }
 
   @Post('room-inspections')
-  inspect(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: RoomInspectionDto, @Headers('x-correlation-id') correlationId?: string) {
+  inspect(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: RoomInspectionDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.inspectRoom(user, id, dto, correlationId);
   }
 
   @Post('readiness-submissions')
-  submit(@CurrentUserContext() user: CurrentUser, @Param('hearingId') id: string, @Body() dto: SubmitReadinessDto, @Headers('x-correlation-id') correlationId?: string) {
+  submit(
+    @CurrentUserContext() user: CurrentUser,
+    @Param('hearingId') id: string,
+    @Body() dto: SubmitReadinessDto,
+    @Headers('x-correlation-id') correlationId?: string
+  ) {
     return this.service.submit(user, id, dto, correlationId);
   }
 

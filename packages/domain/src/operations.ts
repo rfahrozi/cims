@@ -16,7 +16,7 @@ export function computeOutboxBackoffSeconds(attemptCount: number): number {
 
 export function compareFlatSnapshots(
   cims: Readonly<Record<string, unknown>>,
-  source: Readonly<Record<string, unknown>>,
+  source: Readonly<Record<string, unknown>>
 ): ReconciliationItem[] {
   const paths = new Set([...Object.keys(cims), ...Object.keys(source)]);
   return [...paths].sort().map((fieldPath) => {
@@ -38,7 +38,7 @@ export function assertExpectedRowVersion(actual: number, expected?: number): voi
       'OPTIMISTIC_CONCURRENCY_CONFLICT',
       'The record was changed by another transaction.',
       409,
-      { actual, expected },
+      { actual, expected }
     );
   }
 }

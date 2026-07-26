@@ -12,80 +12,105 @@ export class NoticesService {
   constructor(
     private readonly core: CoreWorkflowRepository,
     private readonly repository: NoticesRepository,
-    private readonly audit: AuditService,
+    private readonly audit: AuditService
   ) {}
 
   async create(user: CurrentUser, hearingId: string, dto: CreateNoticeDto, correlationId?: string) {
     requireRoles(user, ['COURT_CLERK', 'PROSECUTOR']);
     await this.core.getHearing(hearingId, user);
     const schedule = await this.core.activeSchedule(hearingId, user);
-    if (!schedule) throw new DomainError('SCHEDULE_REQUIRED', 'An active schedule is required.', 409);
-    const notice = await this.repository.create({
-      hearingId,
-      scheduleId: schedule.id,
-      noticeType: dto.notice_type,
-      subject: dto.subject.trim(),
-      message: dto.message.trim(),
-      officialReference: dto.official_reference.trim(),
-      senderOrganizationId: user.organizationId,
-      createdBy: user.id,
-      recipients: dto.recipients.map((recipient) => ({
-        recipientUserId: recipient.recipient_user_id,
-        recipientOrganizationId: recipient.recipient_organization_id,
-        recipientName: recipient.name,
-        destination: recipient.destination,
-        preferredChannel: recipient.channel,
-        requiredAck: recipient.required_ack !== false,
-        ackDeadline: recipient.ack_deadline,
-      })),
-    }, user);
-    await this.audit.append({
-      eventType: 'OFFICIAL_NOTICE_CREATED',
-      objectType: 'HEARING',
-      objectId: hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: {
-        notice_id: notice.id,
-        official_reference: notice.officialReference,
-        recipient_count: notice.recipients.length,
-        schedule_id: schedule.id,
+    if (!schedule)
+      throw new DomainError('SCHEDULE_REQUIRED', 'An active schedule is required.', 409);
+    const notice = await this.repository.create(
+      {
+        hearingId,
+        scheduleId: schedule.id,
+        noticeType: dto.notice_type,
+        subject: dto.subject.trim(),
+        message: dto.message.trim(),
+        officialReference: dto.official_reference.trim(),
+        senderOrganizationId: user.organizationId,
+        createdBy: user.id,
+        recipients: dto.recipients.map((recipient) => ({
+          recipientUserId: recipient.recipient_user_id,
+          recipientOrganizationId: recipient.recipient_organization_id,
+          recipientName: recipient.name,
+          destination: recipient.destination,
+          preferredChannel: recipient.channel,
+          requiredAck: recipient.required_ack !== false,
+          ackDeadline: recipient.ack_deadline
+        }))
       },
-    }, user);
+      user
+    );
+    await this.audit.append(
+      {
+        eventType: 'OFFICIAL_NOTICE_CREATED',
+        objectType: 'HEARING',
+        objectId: hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          notice_id: notice.id,
+          official_reference: notice.officialReference,
+          recipient_count: notice.recipients.length,
+          schedule_id: schedule.id
+        }
+      },
+      user
+    );
     return notice;
   }
 
   async send(user: CurrentUser, noticeId: string, correlationId?: string, traceparent?: string) {
     requireRoles(user, ['COURT_CLERK', 'PROSECUTOR']);
-    const notice = await this.repository.queueDelivery(noticeId, user, { correlationId, traceparent });
-    await this.audit.append({
-      eventType: 'OFFICIAL_NOTICE_DELIVERY_QUEUED',
-      objectType: 'HEARING',
-      objectId: notice.hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
+    const notice = await this.repository.queueDelivery(noticeId, user, {
       correlationId,
-      payload: { notice_id: notice.id, recipient_count: notice.recipients.length },
-    }, user);
+      traceparent
+    });
+    await this.audit.append(
+      {
+        eventType: 'OFFICIAL_NOTICE_DELIVERY_QUEUED',
+        objectType: 'HEARING',
+        objectId: notice.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: { notice_id: notice.id, recipient_count: notice.recipients.length }
+      },
+      user
+    );
     return notice;
   }
 
-  async acknowledge(user: CurrentUser, noticeId: string, dto: AcknowledgeNoticeDto, correlationId?: string) {
-    const notice = await this.repository.acknowledge(noticeId, {
-      recipientId: dto.recipient_id,
-      method: dto.method ?? 'IN_APP',
-      receiptReference: dto.receipt_reference.trim(),
-    }, user);
-    await this.audit.append({
-      eventType: 'NOTICE_ACKNOWLEDGED',
-      objectType: 'HEARING',
-      objectId: notice.hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: { notice_id: noticeId, receipt_reference: dto.receipt_reference.trim() },
-    }, user);
+  async acknowledge(
+    user: CurrentUser,
+    noticeId: string,
+    dto: AcknowledgeNoticeDto,
+    correlationId?: string
+  ) {
+    const notice = await this.repository.acknowledge(
+      noticeId,
+      {
+        recipientId: dto.recipient_id,
+        method: dto.method ?? 'IN_APP',
+        receiptReference: dto.receipt_reference.trim()
+      },
+      user
+    );
+    await this.audit.append(
+      {
+        eventType: 'NOTICE_ACKNOWLEDGED',
+        objectType: 'HEARING',
+        objectId: notice.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: { notice_id: noticeId, receipt_reference: dto.receipt_reference.trim() }
+      },
+      user
+    );
     return notice;
   }
 

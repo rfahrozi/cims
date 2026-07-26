@@ -9,7 +9,7 @@ import type {
   CreateOrganizationUnitDto,
   DeactivateLiaisonOfficerDto,
   ResolveEscalationDto,
-  RevokeDelegationDto,
+  RevokeDelegationDto
 } from './dto.js';
 
 @ApiTags('liaison')
@@ -24,7 +24,7 @@ export class LiaisonController {
     @Param('orgId') orgId: string,
     @Body() dto: CreateOrganizationUnitDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createUnit(user, { ...dto, organization_id: orgId }, correlationId);
   }
@@ -41,16 +41,13 @@ export class LiaisonController {
     @Param('orgId') orgId: string,
     @Body() dto: CreateLiaisonOfficerDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createLiaison(user, { ...dto, organization_id: orgId }, correlationId);
   }
 
   @Get('organizations/:orgId/liaison-officers')
-  listLiaisons(
-    @Param('orgId') orgId: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  listLiaisons(@Param('orgId') orgId: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.listLiaisons(orgId, user);
   }
 
@@ -59,7 +56,7 @@ export class LiaisonController {
     @Param('id') id: string,
     @Body() dto: DeactivateLiaisonOfficerDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.deactivateLiaison(id, dto.reason, user, correlationId);
   }
@@ -71,16 +68,13 @@ export class LiaisonController {
     @Param('orgId') orgId: string,
     @Body() dto: CreateDelegationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createDelegation(user, { ...dto, organization_id: orgId }, correlationId);
   }
 
   @Get('organizations/:orgId/delegations')
-  listDelegations(
-    @Param('orgId') orgId: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  listDelegations(@Param('orgId') orgId: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.listDelegations(orgId, user);
   }
 
@@ -89,7 +83,7 @@ export class LiaisonController {
     @Param('id') id: string,
     @Body() dto: RevokeDelegationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.revokeDelegation(id, dto, user, correlationId);
   }
@@ -100,7 +94,7 @@ export class LiaisonController {
   createEscalation(
     @Body() dto: CreateEscalationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createEscalation(user, dto, correlationId);
   }
@@ -109,7 +103,7 @@ export class LiaisonController {
   listEscalations(
     @Query('hearing_id') hearingId: string | undefined,
     @Query('liaison_officer_id') liaisonOfficerId: string | undefined,
-    @CurrentUserContext() user: CurrentUser,
+    @CurrentUserContext() user: CurrentUser
   ) {
     return this.service.listEscalations(hearingId, liaisonOfficerId, user);
   }
@@ -119,7 +113,7 @@ export class LiaisonController {
     @Param('id') id: string,
     @Body() dto: ResolveEscalationDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.resolveEscalation(id, dto, user, correlationId);
   }

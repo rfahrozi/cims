@@ -11,22 +11,36 @@ export class ReconciliationService {
   constructor(
     private readonly core: CoreWorkflowRepository,
     private readonly repository: ReconciliationRepository,
-    private readonly audit: AuditService,
+    private readonly audit: AuditService
   ) {}
 
-  async request(user: CurrentUser, hearingId: string, dto: RequestReconciliationDto, correlationId?: string, traceparent?: string) {
+  async request(
+    user: CurrentUser,
+    hearingId: string,
+    dto: RequestReconciliationDto,
+    correlationId?: string,
+    traceparent?: string
+  ) {
     requirePermission(user, 'audit.read', hearingId);
     await this.core.getHearing(hearingId, user);
-    const run = await this.repository.request(hearingId, dto.source_system ?? 'OFFICIAL_CASE_SYSTEM', user, { correlationId, traceparent });
-    await this.audit.append({
-      eventType: 'RECONCILIATION_REQUESTED',
-      objectType: 'HEARING',
-      objectId: hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: { reconciliation_run_id: run.id, source_system: run.sourceSystem },
-    }, user);
+    const run = await this.repository.request(
+      hearingId,
+      dto.source_system ?? 'OFFICIAL_CASE_SYSTEM',
+      user,
+      { correlationId, traceparent }
+    );
+    await this.audit.append(
+      {
+        eventType: 'RECONCILIATION_REQUESTED',
+        objectType: 'HEARING',
+        objectId: hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: { reconciliation_run_id: run.id, source_system: run.sourceSystem }
+      },
+      user
+    );
     return run;
   }
 

@@ -37,7 +37,7 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     private readonly videoProvider: VideoProviderGateway,
     private readonly audit: AuditService,
     private readonly metrics: MetricsService,
-    private readonly governance: GovernanceRepository,
+    private readonly governance: GovernanceRepository
   ) {
     this.enabled = config.get<string>('OUTBOX_WORKER_ENABLED') !== 'false';
     this.intervalMs = Number(config.get<string>('OUTBOX_POLL_INTERVAL_MS') ?? 1000);
@@ -72,14 +72,17 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     const started = Date.now();
     try {
       if (event.eventType === 'OFFICIAL_NOTICE_DELIVERY_REQUESTED') await this.deliverNotice(event);
-      else if (event.eventType === 'VIRTUAL_SESSION_PROVISION_REQUESTED') await this.provisionVirtualSession(event);
+      else if (event.eventType === 'VIRTUAL_SESSION_PROVISION_REQUESTED')
+        await this.provisionVirtualSession(event);
       else if (event.eventType === 'OFFICIAL_RECONCILIATION_REQUESTED') await this.reconcile(event);
       else if (event.eventType === 'EVIDENCE_EXPORT_REQUESTED') await this.exportEvidence(event);
       else if (event.eventType === 'SCHEDULE_CHANGED') await this.notifyScheduleChange(event);
       else throw new Error(`Unsupported outbox event type: ${event.eventType}`);
       await this.outbox.markPublished(event.id);
       this.metrics.increment('outbox_events_published_total', { event_type: event.eventType });
-      this.metrics.observe('outbox_handler_duration_ms', Date.now() - started, { event_type: event.eventType });
+      this.metrics.observe('outbox_handler_duration_ms', Date.now() - started, {
+        event_type: event.eventType
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await this.outbox.markFailed(event.id, message, event.attemptCount, this.maxAttempts);
@@ -96,11 +99,14 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
       subject: payload.subject,
       message: payload.message,
       officialReference: payload.officialReference,
-      correlationId: event.correlationId,
+      correlationId: event.correlationId
     });
     await this.notices.recordDeliveryResult(recipientId, result);
     await this.audit.append({
-      eventType: result.status === 'DELIVERED' ? 'OFFICIAL_NOTICE_DELIVERED' : 'OFFICIAL_NOTICE_DELIVERY_FAILED',
+      eventType:
+        result.status === 'DELIVERED'
+          ? 'OFFICIAL_NOTICE_DELIVERED'
+          : 'OFFICIAL_NOTICE_DELIVERY_FAILED',
       objectType: 'HEARING',
       objectId: payload.hearingId,
       correlationId: event.correlationId,
@@ -109,8 +115,8 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
         recipient_id: recipientId,
         channel: payload.channel,
         provider_reference: result.providerReference ?? null,
-        error_code: result.errorCode ?? null,
-      },
+        error_code: result.errorCode ?? null
+      }
     });
   }
 
@@ -120,64 +126,87 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     if (!session || session.state === 'READY') return;
     const user = this.systemUser(session.hearingId);
     const schedule = await this.core.activeSchedule(session.hearingId, user);
-    if (!schedule) throw new Error('Active schedule was not found for virtual session provisioning.');
+    if (!schedule)
+      throw new Error('Active schedule was not found for virtual session provisioning.');
     const health = await this.videoProvider.health(event.correlationId);
     if (health.status !== 'HEALTHY') throw new Error('Video provider is not healthy.');
     try {
-      const providerSession = await this.videoProvider.createSession({
-        hearingReference: session.hearingId,
-        startAt: schedule.startAt,
-        endAt: schedule.endAt,
-        recordingPolicy: session.recordingPolicy,
-      }, event.correlationId, event.id);
+      const providerSession = await this.videoProvider.createSession(
+        {
+          hearingReference: session.hearingId,
+          startAt: schedule.startAt,
+          endAt: schedule.endAt,
+          recordingPolicy: session.recordingPolicy
+        },
+        event.correlationId,
+        event.id
+      );
       const definitions = [
         ['MAIN', 'MAIN', session.recordingPolicy === 'COURT_CONTROLLED'],
         ['WAITING', 'WAITING', false],
         ['DEFENDANT', 'DEFENDANT', false],
         ['WITNESS', 'WITNESS', false],
-        ['CONSULTATION', 'CONSULTATION', false],
+        ['CONSULTATION', 'CONSULTATION', false]
       ] as const;
-      const rooms: Array<{ roomCode: "DEFENDANT" | "MAIN" | "WAITING" | "WITNESS" | "CONSULTATION"; roomType: string; providerRoomReference: string; recordingAllowed: boolean }> = [];
+      const rooms: Array<{
+        roomCode: 'DEFENDANT' | 'MAIN' | 'WAITING' | 'WITNESS' | 'CONSULTATION';
+        roomType: string;
+        providerRoomReference: string;
+        recordingAllowed: boolean;
+      }> = [];
       for (const [roomCode, roomType, recordingAllowed] of definitions) {
         const room = await this.videoProvider.createRoom(
           providerSession.providerSessionReference,
           { roomCode, roomType, recordingAllowed },
           event.correlationId,
-          `${event.id}:${roomCode}`,
+          `${event.id}:${roomCode}`
         );
-        rooms.push({ roomCode, roomType, providerRoomReference: room.providerRoomReference, recordingAllowed });
+        rooms.push({
+          roomCode,
+          roomType,
+          providerRoomReference: room.providerRoomReference,
+          recordingAllowed
+        });
       }
       await this.virtualSessions.markReady(id, providerSession.providerSessionReference, rooms);
-      await this.audit.append({
-        eventType: 'VIRTUAL_SESSION_READY',
-        objectType: 'HEARING',
-        objectId: session.hearingId,
-        correlationId: event.correlationId,
-        payload: {
-          virtual_session_id: id,
-          provider_session_reference: providerSession.providerSessionReference,
-          room_count: rooms.length,
+      await this.audit.append(
+        {
+          eventType: 'VIRTUAL_SESSION_READY',
+          objectType: 'HEARING',
+          objectId: session.hearingId,
+          correlationId: event.correlationId,
+          payload: {
+            virtual_session_id: id,
+            provider_session_reference: providerSession.providerSessionReference,
+            room_count: rooms.length
+          }
         },
-      }, user);
+        user
+      );
     } catch (error) {
-      await this.virtualSessions.markFailed(id, error instanceof Error ? error.name : 'PROVIDER_ERROR');
+      await this.virtualSessions.markFailed(
+        id,
+        error instanceof Error ? error.name : 'PROVIDER_ERROR'
+      );
       throw error;
     }
   }
-
 
   private async exportEvidence(event: OutboxEventRecord): Promise<void> {
     const exportId = String(event.payload.export_id ?? event.aggregateId);
     const hearingId = String(event.payload.hearing_id ?? '');
     if (!hearingId) throw new Error('Evidence export event is missing hearing_id.');
     await this.governance.processEvidenceExport(exportId, hearingId, event.correlationId);
-    await this.audit.append({
-      eventType: 'EVIDENCE_EXPORT_COMPLETED',
-      objectType: 'HEARING',
-      objectId: hearingId,
-      correlationId: event.correlationId,
-      payload: { evidence_export_id: exportId },
-    }, this.systemUser(hearingId));
+    await this.audit.append(
+      {
+        eventType: 'EVIDENCE_EXPORT_COMPLETED',
+        objectType: 'HEARING',
+        objectId: hearingId,
+        correlationId: event.correlationId,
+        payload: { evidence_export_id: exportId }
+      },
+      this.systemUser(hearingId)
+    );
   }
 
   private async reconcile(event: OutboxEventRecord): Promise<void> {
@@ -186,15 +215,22 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     if (!claimed) return;
     try {
       const cimsSnapshot = await this.reconciliation.cimsSnapshot(claimed.hearingId);
-      const sourceSnapshot = await this.officialSystem.snapshot(claimed.hearingId, cimsSnapshot, event.correlationId);
+      const sourceSnapshot = await this.officialSystem.snapshot(
+        claimed.hearingId,
+        cimsSnapshot,
+        event.correlationId
+      );
       await this.reconciliation.complete(runId, cimsSnapshot, sourceSnapshot);
-      await this.audit.append({
-        eventType: 'RECONCILIATION_COMPLETED',
-        objectType: 'HEARING',
-        objectId: claimed.hearingId,
-        correlationId: event.correlationId,
-        payload: { reconciliation_run_id: runId, source_system: claimed.sourceSystem },
-      }, this.systemUser(claimed.hearingId));
+      await this.audit.append(
+        {
+          eventType: 'RECONCILIATION_COMPLETED',
+          objectType: 'HEARING',
+          objectId: claimed.hearingId,
+          correlationId: event.correlationId,
+          payload: { reconciliation_run_id: runId, source_system: claimed.sourceSystem }
+        },
+        this.systemUser(claimed.hearingId)
+      );
     } catch (error) {
       await this.reconciliation.fail(runId, error instanceof Error ? error.message : String(error));
       throw error;
@@ -218,29 +254,35 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
     // Ambil semua notice aktif untuk hearing ini dan kirim ulang sebagai PERUBAHAN_JADWAL
     const existingNotices = await this.notices.list(hearingId, user);
     const activeNotices = existingNotices.filter(
-      (n: { status: string }) => !['CANCELLED'].includes(n.status),
+      (n: { status: string }) => !['CANCELLED'].includes(n.status)
     );
 
     if (activeNotices.length === 0) {
       // Tidak ada notice sebelumnya — catat di audit saja
-      await this.audit.append({
-        eventType: 'SCHEDULE_CHANGE_NO_PRIOR_NOTICES',
-        objectType: 'HEARING',
-        objectId: hearingId,
-        correlationId: event.correlationId,
-        payload: { schedule_id: scheduleId, note: 'Tidak ada notice aktif untuk di-re-notify.' },
-      }, user);
+      await this.audit.append(
+        {
+          eventType: 'SCHEDULE_CHANGE_NO_PRIOR_NOTICES',
+          objectType: 'HEARING',
+          objectId: hearingId,
+          correlationId: event.correlationId,
+          payload: { schedule_id: scheduleId, note: 'Tidak ada notice aktif untuk di-re-notify.' }
+        },
+        user
+      );
       return;
     }
 
     // Kumpulkan semua penerima unik dari notice sebelumnya
-    const recipientSet = new Map<string, {
-      recipientUserId?: string;
-      recipientOrganizationId?: string;
-      recipientName: string;
-      destination: string;
-      channel: string;
-    }>();
+    const recipientSet = new Map<
+      string,
+      {
+        recipientUserId?: string;
+        recipientOrganizationId?: string;
+        recipientName: string;
+        destination: string;
+        channel: string;
+      }
+    >();
 
     for (const notice of activeNotices as Array<{
       recipients?: Array<{
@@ -259,7 +301,7 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
             recipientOrganizationId: r.recipientOrganizationId,
             recipientName: r.recipientName,
             destination: r.destination,
-            channel: r.preferredChannel,
+            channel: r.preferredChannel
           });
         }
       }
@@ -280,36 +322,42 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
           subject: `[CIMS] Perubahan Jadwal Sidang — ${hearingId}`,
           message: `Jadwal sidang telah diubah.\n\nJadwal baru: ${startFormatted}\nAlasan: ${changeReason}\n\nHarap konfirmasi penerimaan pemberitahuan ini.`,
           officialReference: `PERUBAHAN-JADWAL/${scheduleId}`,
-          correlationId: event.correlationId,
+          correlationId: event.correlationId
         });
       } catch (err) {
         // Log tapi tidak gagalkan seluruh event — lanjutkan ke penerima berikutnya
-        await this.audit.append({
-          eventType: 'SCHEDULE_CHANGE_NOTIFY_FAILED',
-          objectType: 'HEARING',
-          objectId: hearingId,
-          correlationId: event.correlationId,
-          payload: {
-            recipient_name: recipient.recipientName,
-            error: err instanceof Error ? err.message : String(err),
+        await this.audit.append(
+          {
+            eventType: 'SCHEDULE_CHANGE_NOTIFY_FAILED',
+            objectType: 'HEARING',
+            objectId: hearingId,
+            correlationId: event.correlationId,
+            payload: {
+              recipient_name: recipient.recipientName,
+              error: err instanceof Error ? err.message : String(err)
+            }
           },
-        }, user);
+          user
+        );
       }
     }
 
-    await this.audit.append({
-      eventType: 'SCHEDULE_CHANGE_NOTIFICATIONS_SENT',
-      objectType: 'HEARING',
-      objectId: hearingId,
-      correlationId: event.correlationId,
-      payload: {
-        schedule_id: scheduleId,
-        new_start_at: newStartAt,
-        new_end_at: newEndAt,
-        change_reason: changeReason,
-        recipient_count: recipientSet.size,
+    await this.audit.append(
+      {
+        eventType: 'SCHEDULE_CHANGE_NOTIFICATIONS_SENT',
+        objectType: 'HEARING',
+        objectId: hearingId,
+        correlationId: event.correlationId,
+        payload: {
+          schedule_id: scheduleId,
+          new_start_at: newStartAt,
+          new_end_at: newEndAt,
+          change_reason: changeReason,
+          recipient_count: recipientSet.size
+        }
       },
-    }, user);
+      user
+    );
   }
 
   private systemUser(hearingId: string): CurrentUser {
@@ -322,7 +370,7 @@ export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicatio
       organizationIds: [],
       permissions: ['*'],
       hearingAssignments: [hearingId],
-      authSource: 'DEV',
+      authSource: 'DEV'
     };
   }
 }

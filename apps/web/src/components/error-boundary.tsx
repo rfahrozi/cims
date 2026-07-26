@@ -33,19 +33,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <AlertOctagon className="h-8 w-8 text-rose-500" />
           </div>
-          <h2 className="mb-2 text-xl font-bold text-rose-900">
-            Terjadi Kesalahan Antarmuka
-          </h2>
+          <h2 className="mb-2 text-xl font-bold text-rose-900">Terjadi Kesalahan Antarmuka</h2>
           <p className="mb-6 max-w-md text-sm text-rose-700">
-            Aplikasi mengalami kesalahan yang tidak terduga saat memuat komponen ini.
-            Silakan segarkan halaman untuk memulihkan sesi Anda.
+            Aplikasi mengalami kesalahan yang tidak terduga saat memuat komponen ini. Silakan
+            segarkan halaman untuk memulihkan sesi Anda.
           </p>
 
           {this.state.error && (
             <div className="mb-6 max-w-2xl overflow-auto rounded border border-rose-200 bg-white p-3 text-left">
-              <code className="text-[11px] text-rose-800">
-                {this.state.error.message}
-              </code>
+              <code className="text-[11px] text-rose-800">{this.state.error.message}</code>
             </div>
           )}
 

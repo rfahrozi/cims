@@ -236,7 +236,11 @@ paths:
       tags: [hearing-control]
       operationId: startHearing
       parameters: [{ $ref: '#/components/parameters/HearingId' }]
-      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/ExpectedVersion' } } } }
+      requestBody:
+        {
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/ExpectedVersion' } } }
+        }
       responses: { '201': { description: Hearing started } }
   /hearings/{hearingId}/suspend:
     post:
@@ -268,7 +272,8 @@ paths:
       parameters: [{ $ref: '#/components/parameters/HearingId' }]
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/RegisterParticipant' } } }
+        content:
+          { application/json: { schema: { $ref: '#/components/schemas/RegisterParticipant' } } }
       responses: { '201': { description: Participant registered with encrypted sensitive fields } }
   /hearings/{hearingId}/participants/{participantId}/join-token:
     post:
@@ -358,7 +363,11 @@ paths:
     get:
       tags: [compliance]
       operationId: getComplianceDashboard
-      responses: { '200': { description: Workflow gates, persistence mode, migration posture, and outbox counts } }
+      responses:
+        {
+          '200':
+            { description: Workflow gates, persistence mode, migration posture, and outbox counts }
+        }
   /health/live:
     get: { security: [], responses: { '200': { description: Process liveness } } }
   /health/ready:
@@ -419,7 +428,23 @@ components:
       type: object
       required: [role, displayName, protectedIdentity]
       properties:
-        role: { type: string, enum: [JUDGE, COURT_CLERK, PROSECUTOR, DEFENDANT, ADVOCATE, WITNESS, EXPERT, INTERPRETER, CORRECTIONS_OFFICER, IT_OPERATOR] }
+        role:
+          {
+            type: string,
+            enum:
+              [
+                JUDGE,
+                COURT_CLERK,
+                PROSECUTOR,
+                DEFENDANT,
+                ADVOCATE,
+                WITNESS,
+                EXPERT,
+                INTERPRETER,
+                CORRECTIONS_OFFICER,
+                IT_OPERATOR
+              ]
+          }
         displayName: { type: string }
         alias: { type: string }
         organizationId: { type: string }

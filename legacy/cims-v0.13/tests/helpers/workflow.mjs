@@ -1,15 +1,154 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { authHeaders } from './test-app.mjs';
-export const DEMO={hearingId:'40000000-0000-4000-8000-000000000001',caseId:'30000000-0000-4000-8000-000000000001',judgeId:'20000000-0000-4000-8000-000000000002',prosecutorId:'20000000-0000-4000-8000-000000000004',correctionsId:'20000000-0000-4000-8000-000000000005',prosecutionOrg:'10000000-0000-4000-8000-000000000002',correctionsOrg:'10000000-0000-4000-8000-000000000003'};
-const idem=p=>`${p}-${randomUUID()}`;async function req(base,path,token,body){const r=await fetch(base+path,{method:'POST',headers:authHeaders(token,idem(path.replace(/\W/g,''))),body:JSON.stringify(body??{})});const j=await r.json();if(!r.ok)throw new Error(JSON.stringify(j));return j;}
-export async function prepareActiveSchedule(base,tokens){
- const hash=createHash('sha256').update(randomUUID()).digest('hex');await req(base,'/api/v1/judicial-determinations',tokens.judge,{hearing_id:DEMO.hearingId,decision:'APPROVED',mode:'ELECTRONIC',reason:'Approved synthetic test determination.',effective_at:new Date(Date.now()-1000).toISOString(),official_reference:`TEST-${randomUUID()}`,document_hash:hash});
- const proposal=await req(base,`/api/v1/hearings/${DEMO.hearingId}/schedule-proposals`,tokens.clerk,{start_at:'2026-08-13T02:00:00.000Z',end_at:'2026-08-13T03:00:00.000Z',display_timezone:'Asia/Jakarta',resources:[{resource_type:'ROOM',resource_id:'ROOM-B',requirement:'REQUIRED'},{resource_type:'JUDGE',resource_id:DEMO.judgeId,requirement:'REQUIRED'}]});await req(base,`/api/v1/schedule-proposals/${proposal.id}/conflicts:check`,tokens.clerk,{});return req(base,`/api/v1/schedule-proposals/${proposal.id}:approve`,tokens.judge,{reason:'Synthetic test approval'});
+export const DEMO = {
+  hearingId: '40000000-0000-4000-8000-000000000001',
+  caseId: '30000000-0000-4000-8000-000000000001',
+  judgeId: '20000000-0000-4000-8000-000000000002',
+  prosecutorId: '20000000-0000-4000-8000-000000000004',
+  correctionsId: '20000000-0000-4000-8000-000000000005',
+  prosecutionOrg: '10000000-0000-4000-8000-000000000002',
+  correctionsOrg: '10000000-0000-4000-8000-000000000003'
+};
+const idem = (p) => `${p}-${randomUUID()}`;
+async function req(base, path, token, body) {
+  const r = await fetch(base + path, {
+    method: 'POST',
+    headers: authHeaders(token, idem(path.replace(/\W/g, ''))),
+    body: JSON.stringify(body ?? {})
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(JSON.stringify(j));
+  return j;
 }
-export async function prepareNotices(base,tokens){
- let n=await req(base,`/api/v1/hearings/${DEMO.hearingId}/notices`,tokens.clerk,{notice_type:'COURT_TO_PROSECUTION',subject:'Pemberitahuan jadwal sidang',message:'Pemberitahuan resmi jadwal persidangan elektronik untuk pengujian.',official_reference:`NOTICE-C-${randomUUID()}`,recipients:[{user_id:DEMO.prosecutorId,organization_id:DEMO.prosecutionOrg,name:'Penuntut Umum Demo',destination:'prosecutor@cims.local',channel:'EMAIL',required_ack:true}]});n=await req(base,`/api/v1/notices/${n.id}:send`,tokens.clerk,{});await req(base,`/api/v1/notices/${n.id}:acknowledge`,tokens.prosecutor,{method:'IN_APP',receipt_reference:`ACK-P-${randomUUID()}`});
- let n2=await req(base,`/api/v1/hearings/${DEMO.hearingId}/notices`,tokens.prosecutor,{notice_type:'PROSECUTION_TO_CORRECTIONS',subject:'Penerusan jadwal sidang',message:'Penerusan resmi jadwal persidangan elektronik kepada Rutan.',official_reference:`NOTICE-P-${randomUUID()}`,recipients:[{user_id:DEMO.correctionsId,organization_id:DEMO.correctionsOrg,name:'Petugas Rutan Demo',destination:'corrections@cims.local',channel:'EMAIL',required_ack:true}]});n2=await req(base,`/api/v1/notices/${n2.id}:send`,tokens.prosecutor,{});await req(base,`/api/v1/notices/${n2.id}:acknowledge`,tokens.corrections,{method:'IN_APP',receipt_reference:`ACK-C-${randomUUID()}`});return[n,n2];
+export async function prepareActiveSchedule(base, tokens) {
+  const hash = createHash('sha256').update(randomUUID()).digest('hex');
+  await req(base, '/api/v1/judicial-determinations', tokens.judge, {
+    hearing_id: DEMO.hearingId,
+    decision: 'APPROVED',
+    mode: 'ELECTRONIC',
+    reason: 'Approved synthetic test determination.',
+    effective_at: new Date(Date.now() - 1000).toISOString(),
+    official_reference: `TEST-${randomUUID()}`,
+    document_hash: hash
+  });
+  const proposal = await req(
+    base,
+    `/api/v1/hearings/${DEMO.hearingId}/schedule-proposals`,
+    tokens.clerk,
+    {
+      start_at: '2026-08-13T02:00:00.000Z',
+      end_at: '2026-08-13T03:00:00.000Z',
+      display_timezone: 'Asia/Jakarta',
+      resources: [
+        { resource_type: 'ROOM', resource_id: 'ROOM-B', requirement: 'REQUIRED' },
+        { resource_type: 'JUDGE', resource_id: DEMO.judgeId, requirement: 'REQUIRED' }
+      ]
+    }
+  );
+  await req(base, `/api/v1/schedule-proposals/${proposal.id}/conflicts:check`, tokens.clerk, {});
+  return req(base, `/api/v1/schedule-proposals/${proposal.id}:approve`, tokens.judge, {
+    reason: 'Synthetic test approval'
+  });
 }
-const readinessBody=(loc)=>({location_code:loc,items:[{item_code:'ROOM_AVAILABLE',required:true,result:'PASS'},{item_code:'AUTHORIZED_OFFICER_AVAILABLE',required:true,result:'PASS'},{item_code:'BACKUP_PROCEDURE_READY',required:true,result:'PASS'}],technical_test:{camera:'PASS',microphone:'PASS',audio:'PASS',primary_network:'PASS',backup_network:'PASS',provider_access:'PASS'}});
-export async function prepareReadiness(base,tokens){await req(base,`/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,tokens.clerk,readinessBody('COURT-ROOM-B'));await req(base,`/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,tokens.prosecutor,readinessBody('PROSECUTION-ROOM'));await req(base,`/api/v1/hearings/${DEMO.hearingId}/identity-verifications`,tokens.corrections,{participant_reference:'DEFENDANT-SYNTHETIC-001',method:'OFFICIAL_DOCUMENT_AND_VISUAL',result:'PASS'});await req(base,`/api/v1/hearings/${DEMO.hearingId}/room-inspections`,tokens.corrections,{location_code:'RUTAN-ROOM-01',camera_full_view:true,unauthorized_person_absent:true,confidentiality_ready:true});await req(base,`/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,tokens.corrections,readinessBody('RUTAN-ROOM-01'));}
-export async function prepareVirtual(base,tokens){const r=await fetch(`${base}/api/v1/hearings/${DEMO.hearingId}/virtual-session:provision`,{method:'POST',headers:authHeaders(tokens.clerk,idem('provision')),body:JSON.stringify({recording_policy:'COURT_CONTROLLED'})});const j=await r.json();if(!r.ok)throw new Error(JSON.stringify(j));return j;}
+export async function prepareNotices(base, tokens) {
+  let n = await req(base, `/api/v1/hearings/${DEMO.hearingId}/notices`, tokens.clerk, {
+    notice_type: 'COURT_TO_PROSECUTION',
+    subject: 'Pemberitahuan jadwal sidang',
+    message: 'Pemberitahuan resmi jadwal persidangan elektronik untuk pengujian.',
+    official_reference: `NOTICE-C-${randomUUID()}`,
+    recipients: [
+      {
+        user_id: DEMO.prosecutorId,
+        organization_id: DEMO.prosecutionOrg,
+        name: 'Penuntut Umum Demo',
+        destination: 'prosecutor@cims.local',
+        channel: 'EMAIL',
+        required_ack: true
+      }
+    ]
+  });
+  n = await req(base, `/api/v1/notices/${n.id}:send`, tokens.clerk, {});
+  await req(base, `/api/v1/notices/${n.id}:acknowledge`, tokens.prosecutor, {
+    method: 'IN_APP',
+    receipt_reference: `ACK-P-${randomUUID()}`
+  });
+  let n2 = await req(base, `/api/v1/hearings/${DEMO.hearingId}/notices`, tokens.prosecutor, {
+    notice_type: 'PROSECUTION_TO_CORRECTIONS',
+    subject: 'Penerusan jadwal sidang',
+    message: 'Penerusan resmi jadwal persidangan elektronik kepada Rutan.',
+    official_reference: `NOTICE-P-${randomUUID()}`,
+    recipients: [
+      {
+        user_id: DEMO.correctionsId,
+        organization_id: DEMO.correctionsOrg,
+        name: 'Petugas Rutan Demo',
+        destination: 'corrections@cims.local',
+        channel: 'EMAIL',
+        required_ack: true
+      }
+    ]
+  });
+  n2 = await req(base, `/api/v1/notices/${n2.id}:send`, tokens.prosecutor, {});
+  await req(base, `/api/v1/notices/${n2.id}:acknowledge`, tokens.corrections, {
+    method: 'IN_APP',
+    receipt_reference: `ACK-C-${randomUUID()}`
+  });
+  return [n, n2];
+}
+const readinessBody = (loc) => ({
+  location_code: loc,
+  items: [
+    { item_code: 'ROOM_AVAILABLE', required: true, result: 'PASS' },
+    { item_code: 'AUTHORIZED_OFFICER_AVAILABLE', required: true, result: 'PASS' },
+    { item_code: 'BACKUP_PROCEDURE_READY', required: true, result: 'PASS' }
+  ],
+  technical_test: {
+    camera: 'PASS',
+    microphone: 'PASS',
+    audio: 'PASS',
+    primary_network: 'PASS',
+    backup_network: 'PASS',
+    provider_access: 'PASS'
+  }
+});
+export async function prepareReadiness(base, tokens) {
+  await req(
+    base,
+    `/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,
+    tokens.clerk,
+    readinessBody('COURT-ROOM-B')
+  );
+  await req(
+    base,
+    `/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,
+    tokens.prosecutor,
+    readinessBody('PROSECUTION-ROOM')
+  );
+  await req(base, `/api/v1/hearings/${DEMO.hearingId}/identity-verifications`, tokens.corrections, {
+    participant_reference: 'DEFENDANT-SYNTHETIC-001',
+    method: 'OFFICIAL_DOCUMENT_AND_VISUAL',
+    result: 'PASS'
+  });
+  await req(base, `/api/v1/hearings/${DEMO.hearingId}/room-inspections`, tokens.corrections, {
+    location_code: 'RUTAN-ROOM-01',
+    camera_full_view: true,
+    unauthorized_person_absent: true,
+    confidentiality_ready: true
+  });
+  await req(
+    base,
+    `/api/v1/hearings/${DEMO.hearingId}/readiness-submissions`,
+    tokens.corrections,
+    readinessBody('RUTAN-ROOM-01')
+  );
+}
+export async function prepareVirtual(base, tokens) {
+  const r = await fetch(`${base}/api/v1/hearings/${DEMO.hearingId}/virtual-session:provision`, {
+    method: 'POST',
+    headers: authHeaders(tokens.clerk, idem('provision')),
+    body: JSON.stringify({ recording_policy: 'COURT_CONTROLLED' })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(JSON.stringify(j));
+  return j;
+}

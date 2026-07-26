@@ -11,7 +11,7 @@ import {
   MaxLength,
   Min,
   MinLength,
-  ValidateNested,
+  ValidateNested
 } from 'class-validator';
 
 const caseClassifications = ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL'] as const;
@@ -22,14 +22,14 @@ export class InitialDefendantDto {
   @IsString() @MinLength(2) @MaxLength(200) display_name!: string;
   @IsOptional() @IsString() @MaxLength(100) alias?: string;
   @IsBoolean() protected_identity = false;
-  @IsEnum(defendantCustodyStatuses) custody_status!: typeof defendantCustodyStatuses[number];
+  @IsEnum(defendantCustodyStatuses) custody_status!: (typeof defendantCustodyStatuses)[number];
   @IsOptional() @IsString() detention_organization_id?: string;
 }
 
 export class ManualHearingDto {
   @IsString() @MinLength(5) @MaxLength(150) case_number!: string;
   @IsOptional() @IsString() @MaxLength(150) official_case_reference?: string;
-  @IsEnum(caseClassifications) case_classification!: typeof caseClassifications[number];
+  @IsEnum(caseClassifications) case_classification!: (typeof caseClassifications)[number];
   @IsString() @MinLength(2) @MaxLength(50) case_type_code!: string;
   @IsString() @MinLength(3) @MaxLength(300) case_title!: string;
   @IsString() @MinLength(3) @MaxLength(100) hearing_type!: string;
@@ -37,8 +37,12 @@ export class ManualHearingDto {
   @IsString() court_organization_id!: string;
   @IsString() prosecution_organization_id!: string;
   @IsOptional() @IsString() corrections_organization_id?: string;
-  @IsEnum(custodyStatuses) defendant_custody_status!: typeof custodyStatuses[number];
-  @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => InitialDefendantDto) defendants!: InitialDefendantDto[];
+  @IsEnum(custodyStatuses) defendant_custody_status!: (typeof custodyStatuses)[number];
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => InitialDefendantDto)
+  defendants!: InitialDefendantDto[];
   @IsOptional() @IsString() @MaxLength(2000) notes?: string;
 }
 

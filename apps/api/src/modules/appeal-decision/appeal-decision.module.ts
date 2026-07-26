@@ -9,6 +9,6 @@ import { AppealDecisionService } from './appeal-decision.service.js';
   imports: [InfrastructureModule, HearingsModule],
   controllers: [AppealDecisionController],
   providers: [AppealDecisionService, AppealDecisionRepository],
-  exports: [AppealDecisionService],
+  exports: [AppealDecisionService]
 })
 export class AppealDecisionModule {}

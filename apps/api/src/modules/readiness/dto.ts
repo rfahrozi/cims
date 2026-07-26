@@ -38,6 +38,9 @@ export class TechnicalTestDto {
 
 export class SubmitReadinessDto {
   @IsString() location_code!: string;
-  @IsArray() @ValidateNested({ each: true }) @Type(() => ReadinessItemDto) items!: ReadinessItemDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ReadinessItemDto)
+  items!: ReadinessItemDto[];
   @ValidateNested() @Type(() => TechnicalTestDto) technical_test!: TechnicalTestDto;
 }

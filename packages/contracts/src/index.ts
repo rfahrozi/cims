@@ -1,21 +1,61 @@
-export interface ApiError { error: { code: string; message: string; details?: unknown } }
+export interface ApiError {
+  error: { code: string; message: string; details?: unknown };
+}
 export interface GateStatus {
   hearing_id: string;
   hearing_data: boolean;
   determination: boolean;
   schedule: boolean;
-  notice: { noticeCount: number; requiredAcknowledgmentCount: number; acknowledgedCount: number; ready: boolean };
+  notice: {
+    noticeCount: number;
+    requiredAcknowledgmentCount: number;
+    acknowledgedCount: number;
+    ready: boolean;
+  };
   readiness: { ready: boolean; organizations: Array<{ organizationType: string; status: string }> };
   virtual_session: boolean;
   hearing_ended: boolean;
   next_gate: string;
 }
-export interface ZoomStatus { mode: string; connected: boolean; provider_url: string; detail: unknown }
-export interface HearingSummary { id: string; caseId?: string; caseNumber: string; caseTitle?: string; type: string; state: string; hearingSequence?: number; intakeStatus?: HearingIntakeStatus; dataSource?: HearingDataSource }
-export interface OfficialNoticeSummary { id: string; hearingId: string; status: string; subject: string; officialReference: string }
-export interface ReadinessGateSummary { ready: boolean; organizations: Array<{ organizationType: string; status: string }> }
-export interface VirtualSessionSummary { id: string; state: string; providerCode: string; rooms: Array<{ roomCode: string; recordingAllowed: boolean }> }
-export interface HearingRuntimeSummary { hearing_id: string; state: string; events: Array<{ eventType: string; occurredAt: string }> }
+export interface ZoomStatus {
+  mode: string;
+  connected: boolean;
+  provider_url: string;
+  detail: unknown;
+}
+export interface HearingSummary {
+  id: string;
+  caseId?: string;
+  caseNumber: string;
+  caseTitle?: string;
+  type: string;
+  state: string;
+  hearingSequence?: number;
+  intakeStatus?: HearingIntakeStatus;
+  dataSource?: HearingDataSource;
+}
+export interface OfficialNoticeSummary {
+  id: string;
+  hearingId: string;
+  status: string;
+  subject: string;
+  officialReference: string;
+}
+export interface ReadinessGateSummary {
+  ready: boolean;
+  organizations: Array<{ organizationType: string; status: string }>;
+}
+export interface VirtualSessionSummary {
+  id: string;
+  state: string;
+  providerCode: string;
+  rooms: Array<{ roomCode: string; recordingAllowed: boolean }>;
+}
+export interface HearingRuntimeSummary {
+  hearing_id: string;
+  state: string;
+  events: Array<{ eventType: string; occurredAt: string }>;
+}
 
 export type HearingIntakeStatus = 'DRAFT' | 'SUBMITTED' | 'ACTIVE' | 'RETURNED' | 'ARCHIVED';
 export type HearingDataSource = 'MANUAL' | 'EXTERNAL_DATABASE';

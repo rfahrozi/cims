@@ -1,8 +1,8 @@
-import { X, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
+import { X, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 
 export interface HearingDetailsCardProps {
   caseType?: string;
@@ -25,7 +25,7 @@ export interface HearingDetailsCardProps {
 }
 
 export function HearingDetailsCard({
-  caseType = "DETAIL PERKARA BANDING",
+  caseType = 'DETAIL PERKARA BANDING',
   caseNumber,
   defendant,
   senderCourt,
@@ -36,16 +36,19 @@ export function HearingDetailsCard({
   className
 }: HearingDetailsCardProps) {
   return (
-    <div className={cn("flex flex-col rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm w-full max-w-3xl", className)}>
+    <div
+      className={cn(
+        'flex flex-col rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm w-full max-w-3xl',
+        className
+      )}
+    >
       {/* Header Section */}
       <div className="bg-[#242b6a] px-6 py-5 flex items-start justify-between">
         <div>
           <div className="text-xs font-semibold text-slate-300/80 uppercase tracking-wider mb-2">
             {caseType}
           </div>
-          <h2 className="text-xl font-extrabold text-white tracking-wide">
-            {caseNumber}
-          </h2>
+          <h2 className="text-xl font-extrabold text-white tracking-wide">{caseNumber}</h2>
         </div>
         {onClose && (
           <Button
@@ -67,9 +70,7 @@ export function HearingDetailsCard({
           <Label className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2 block">
             Terdakwa
           </Label>
-          <div className="font-bold text-slate-900 text-[15px]">
-            {defendant}
-          </div>
+          <div className="font-bold text-slate-900 text-[15px]">{defendant}</div>
         </div>
 
         {/* Row 2: Pengadilan Negeri Pengirim */}
@@ -88,17 +89,13 @@ export function HearingDetailsCard({
             <Label className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2 block">
               Kejaksaan Negeri (Kejari)
             </Label>
-            <div className="font-bold text-slate-900 text-[15px]">
-              {prosecutorOffice}
-            </div>
+            <div className="font-bold text-slate-900 text-[15px]">{prosecutorOffice}</div>
           </div>
           <div>
             <Label className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2 block">
               Lapas / Rutan Terkait
             </Label>
-            <div className="font-bold text-slate-900 text-[15px]">
-              {relatedPrison}
-            </div>
+            <div className="font-bold text-slate-900 text-[15px]">{relatedPrison}</div>
           </div>
         </div>
 

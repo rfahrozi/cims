@@ -11,6 +11,7 @@ export function secretValue(config: ConfigService, name: string): string | undef
 
 export function requiredSecret(config: ConfigService, name: string, minimumLength = 16): string {
   const value = secretValue(config, name);
-  if (!value || value.length < minimumLength) throw new Error(`${name} is not configured or is too short.`);
+  if (!value || value.length < minimumLength)
+    throw new Error(`${name} is not configured or is too short.`);
   return value;
 }

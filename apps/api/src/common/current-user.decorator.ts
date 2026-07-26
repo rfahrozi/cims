@@ -1,4 +1,3 @@
-
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import type { CimsRole } from '@cims/domain';
 
@@ -15,8 +14,10 @@ export interface CurrentUser {
   authSource: 'DEV' | 'OIDC';
 }
 
-export const CurrentUserContext = createParamDecorator((_data: unknown, context: ExecutionContext): CurrentUser => {
-  const request = context.switchToHttp().getRequest<{ user?: CurrentUser }>();
-  if (!request.user) throw new Error('Authenticated user context is missing.');
-  return request.user;
-});
+export const CurrentUserContext = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): CurrentUser => {
+    const request = context.switchToHttp().getRequest<{ user?: CurrentUser }>();
+    if (!request.user) throw new Error('Authenticated user context is missing.');
+    return request.user;
+  }
+);

@@ -1,82 +1,1638 @@
 <!doctype html>
 <html lang="id">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CIMS Sprint 0-13 Zoom Integration</title>
-<style>
-:root{--navy:#0b2a4a;--blue:#1677ff;--gold:#c9a227;--bg:#f4f7fb;--card:#fff;--text:#182233;--muted:#64748b;--ok:#166534;--warn:#a16207;--bad:#b91c1c;--line:#dbe5ef}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial;color:var(--text);background:var(--bg)}button,input,select,textarea{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.side{background:var(--navy);color:#fff;padding:22px 15px;position:sticky;top:0;height:100vh}.brand{font-size:21px;font-weight:900}.sub{font-size:12px;color:#bfd3e7;margin:4px 0 24px}.nav button{width:100%;display:block;border:0;background:transparent;color:#dbeafe;padding:11px;border-radius:9px;text-align:left;margin:3px 0;cursor:pointer}.nav button.active,.nav button:hover{background:#153b63;color:#fff}.main{padding:22px 26px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}.top h1{margin:0;color:var(--navy);font-size:25px}.notice{padding:11px 13px;background:#fff8dc;border:1px solid #ead487;border-radius:10px;color:#6a5300;margin-bottom:15px}.section{display:none}.section.active{display:block}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.two{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 5px 18px rgba(15,23,42,.04);margin-bottom:14px}.card h2{margin:0 0 13px;color:var(--navy);font-size:19px}.kpi span{display:block;color:var(--muted);font-size:12px}.kpi b{font-size:22px;color:var(--navy);display:block;margin-top:5px}.field{margin-bottom:11px}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff}.actions{display:flex;flex-wrap:wrap;gap:8px}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:var(--blue);color:#fff}.secondary{background:#e7f0ff;color:#1159bd}.ghost{background:#edf2f7;color:#334155}.danger{background:#fee2e2;color:var(--bad)}.btn:disabled{opacity:.45;cursor:not-allowed}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:900}.ok{background:#dcfce7;color:var(--ok)}.pending{background:#fef3c7;color:#92400e}.blocked{background:#fee2e2;color:#991b1b}.table{width:100%;border-collapse:collapse}.table th,.table td{border-bottom:1px solid var(--line);padding:9px;text-align:left;font-size:12px;vertical-align:top}.table th{background:#f8fafc;color:#475569}.log{background:#0f172a;color:#dbeafe;border-radius:10px;padding:12px;min-height:100px;white-space:pre-wrap;overflow:auto;font:12px ui-monospace,SFMono-Regular,Consolas,monospace}.stepper{display:flex;gap:7px;flex-wrap:wrap}.step{padding:7px 9px;border-radius:8px;background:#e2e8f0;font-size:11px;font-weight:900}.step.done{background:#dcfce7;color:#166534}.step.current{background:#dbeafe;color:#1d4ed8}.hidden{display:none!important}.account-buttons{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.account-buttons button{font-size:12px}.muted{font-size:12px;color:var(--muted)}@media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:static}.nav{display:flex;overflow:auto}.nav button{min-width:150px}.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
-</style>
-</head>
-<body><div class="app"><aside class="side"><div class="brand">CIMS</div><div class="sub">Sprint 0-13 Zoom-ready build</div><nav class="nav" id="nav"><button class="active" data-screen="login">01 Login</button><button data-screen="dashboard">02 Dashboard</button><button data-screen="determination">03 Determination</button><button data-screen="scheduling">04 Scheduling</button><button data-screen="notice">05 Notice</button><button data-screen="readiness">06 Readiness</button><button data-screen="virtual">07 Virtual Session</button><button data-screen="participants">08 Participants</button><button data-screen="control">09 Hearing Control</button><button data-screen="incidents">10 Incidents</button><button data-screen="appeal">11 Putusan Banding</button><button data-screen="compliance">12 Compliance</button><button data-screen="audit">13 Audit</button></nav></aside><main class="main"><div class="top"><div><h1 id="title">Login</h1><div class="muted">Data sintetis. Zoom live memerlukan kredensial Server-to-Server OAuth dan email peserta yang sah</div></div><div><span id="persona" class="badge pending">Belum login</span> <button id="logout" class="btn ghost hidden">Logout</button></div></div><div class="notice">Urutan gate sistem: autentikasi dan assignment → judicial determination yang sah → conflict check → schedule ACTIVE. Tidak tersedia tombol bypass.</div>
-<section id="login" class="section active"><div class="two"><div class="card"><h2>Akun pengembangan</h2><div class="account-buttons"><button class="btn secondary quick" data-email="judge@cims.local" data-password="Judge123!">Hakim</button><button class="btn secondary quick" data-email="clerk@cims.local" data-password="Clerk123!">Panitera</button><button class="btn secondary quick" data-email="admin@cims.local" data-password="Admin123!">Admin</button><button class="btn secondary quick" data-email="prosecutor@cims.local" data-password="Prosecutor123!">Jaksa</button></div><div class="field"><label>Email</label><input id="email" value="clerk@cims.local"></div><div class="field"><label>Password</label><input id="password" type="password" value="Clerk123!"></div><div class="actions"><button id="loginBtn" class="btn primary">Login dan minta OTP</button></div><div id="otpBlock" class="hidden" style="margin-top:14px"><div class="field"><label>OTP pengembangan</label><input id="otp" value="123456" maxlength="6"></div><button id="verifyBtn" class="btn primary">Verifikasi OTP</button></div></div><div class="card"><h2>Status API</h2><div id="apiHealth" class="log">Memeriksa API...</div></div></div></section>
-<section id="dashboard" class="section"><div class="grid"><div class="card kpi"><span>Determination</span><b id="detKpi">UNKNOWN</b></div><div class="card kpi"><span>Schedule</span><b id="schKpi">UNKNOWN</b></div><div class="card kpi"><span>Next gate</span><b id="nextKpi">-</b></div><div class="card kpi"><span>Role</span><b id="roleKpi">-</b></div></div><div class="two"><div class="card"><h2>Workflow</h2><div class="stepper"><div id="stepIam" class="step done">IAM</div><div id="stepDet" class="step current">Determination</div><div id="stepSch" class="step">Scheduling</div><div id="stepNotice" class="step">Notice</div><div id="stepReady" class="step">Readiness</div><div id="stepVirtual" class="step">Virtual Session</div><div id="stepControl" class="step">Hearing Control</div></div><p id="workflowText" class="muted"></p></div><div class="card"><h2>Demo hearing</h2><table class="table"><tr><th>Case</th><td>123/Pid.Sus/2026/PN Demo</td></tr><tr><th>Hearing ID</th><td id="hearingId"></td></tr><tr><th>Type</th><td>PEMERIKSAAN_SAKSI</td></tr></table></div></div></section>
-<section id="determination" class="section"><div class="two"><div class="card"><h2>Permohonan persidangan elektronik</h2><div class="field"><label>Mode</label><select id="requestMode"><option>ELECTRONIC</option><option>HYBRID</option></select></div><div class="field"><label>Alasan</label><textarea id="requestReason">Para pihak berada pada lokasi berbeda dan sarana elektronik telah direncanakan.</textarea></div><button id="requestBtn" class="btn secondary">Buat permohonan</button></div><div class="card"><h2>Penetapan hakim</h2><div class="field"><label>Referensi resmi</label><input id="officialRef" value="PEN-EL/001/2026"></div><div class="field"><label>Alasan</label><textarea id="detReason">Keadaan tertentu telah dinilai dan persidangan elektronik disetujui untuk hearing ini.</textarea></div><button id="detBtn" class="btn primary">Catat APPROVED determination</button><p class="muted">Hanya akun Hakim atau Admin yang dapat menjalankan aksi ini.</p></div></div><div class="card"><h2>Respons</h2><div id="detLog" class="log">Belum ada aksi.</div></div></section>
-<section id="scheduling" class="section"><div class="two"><div class="card"><h2>Schedule proposal</h2><div class="field"><label>Tanggal dan waktu mulai WIB</label><input id="startLocal" type="datetime-local" value="2026-08-12T11:00"></div><div class="field"><label>Durasi</label><select id="duration"><option value="60">60 menit</option><option value="90">90 menit</option><option value="120">120 menit</option></select></div><div class="field"><label>Ruang</label><select id="room"><option value="ROOM-A">Ruang A, contoh konflik 09.00 WIB</option><option value="ROOM-B" selected>Ruang B</option></select></div><div class="actions"><button id="availabilityBtn" class="btn ghost">Cek availability</button><button id="proposalBtn" class="btn secondary">Buat proposal</button><button id="conflictBtn" class="btn secondary" disabled>Check conflict</button><button id="approveBtn" class="btn primary" disabled>Approve</button></div></div><div class="card"><h2>Status proposal</h2><table class="table"><tr><th>Proposal ID</th><td id="proposalId">-</td></tr><tr><th>Conflict status</th><td id="conflictStatus">-</td></tr><tr><th>Schedule</th><td id="scheduleStatus">-</td></tr></table><div id="conflictTable"></div></div></div><div class="card"><h2>Respons API</h2><div id="scheduleLog" class="log">Belum ada aksi.</div></div></section>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CIMS Sprint 0-13 Zoom Integration</title>
+    <style>
+      :root {
+        --navy: #0b2a4a;
+        --blue: #1677ff;
+        --gold: #c9a227;
+        --bg: #f4f7fb;
+        --card: #fff;
+        --text: #182233;
+        --muted: #64748b;
+        --ok: #166534;
+        --warn: #a16207;
+        --bad: #b91c1c;
+        --line: #dbe5ef;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Arial;
+        color: var(--text);
+        background: var(--bg);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+      }
+      .side {
+        background: var(--navy);
+        color: #fff;
+        padding: 22px 15px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+      }
+      .brand {
+        font-size: 21px;
+        font-weight: 900;
+      }
+      .sub {
+        font-size: 12px;
+        color: #bfd3e7;
+        margin: 4px 0 24px;
+      }
+      .nav button {
+        width: 100%;
+        display: block;
+        border: 0;
+        background: transparent;
+        color: #dbeafe;
+        padding: 11px;
+        border-radius: 9px;
+        text-align: left;
+        margin: 3px 0;
+        cursor: pointer;
+      }
+      .nav button.active,
+      .nav button:hover {
+        background: #153b63;
+        color: #fff;
+      }
+      .main {
+        padding: 22px 26px 60px;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 15px;
+      }
+      .top h1 {
+        margin: 0;
+        color: var(--navy);
+        font-size: 25px;
+      }
+      .notice {
+        padding: 11px 13px;
+        background: #fff8dc;
+        border: 1px solid #ead487;
+        border-radius: 10px;
+        color: #6a5300;
+        margin-bottom: 15px;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        margin: 0 0 13px;
+        color: var(--navy);
+        font-size: 19px;
+      }
+      .kpi span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .kpi b {
+        font-size: 22px;
+        color: var(--navy);
+        display: block;
+        margin-top: 5px;
+      }
+      .field {
+        margin-bottom: 11px;
+      }
+      .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 5px;
+      }
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .btn {
+        border: 0;
+        border-radius: 9px;
+        padding: 10px 13px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .primary {
+        background: var(--blue);
+        color: #fff;
+      }
+      .secondary {
+        background: #e7f0ff;
+        color: #1159bd;
+      }
+      .ghost {
+        background: #edf2f7;
+        color: #334155;
+      }
+      .danger {
+        background: #fee2e2;
+        color: var(--bad);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .badge {
+        display: inline-flex;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .ok {
+        background: #dcfce7;
+        color: var(--ok);
+      }
+      .pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .blocked {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .table th,
+      .table td {
+        border-bottom: 1px solid var(--line);
+        padding: 9px;
+        text-align: left;
+        font-size: 12px;
+        vertical-align: top;
+      }
+      .table th {
+        background: #f8fafc;
+        color: #475569;
+      }
+      .log {
+        background: #0f172a;
+        color: #dbeafe;
+        border-radius: 10px;
+        padding: 12px;
+        min-height: 100px;
+        white-space: pre-wrap;
+        overflow: auto;
+        font:
+          12px ui-monospace,
+          SFMono-Regular,
+          Consolas,
+          monospace;
+      }
+      .stepper {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+      .step {
+        padding: 7px 9px;
+        border-radius: 8px;
+        background: #e2e8f0;
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .step.done {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .step.current {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .account-buttons {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .account-buttons button {
+        font-size: 12px;
+      }
+      .muted {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      @media (max-width: 900px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          height: auto;
+          position: static;
+        }
+        .nav {
+          display: flex;
+          overflow: auto;
+        }
+        .nav button {
+          min-width: 150px;
+        }
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .two {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand">CIMS</div>
+        <div class="sub">Sprint 0-13 Zoom-ready build</div>
+        <nav class="nav" id="nav">
+          <button class="active" data-screen="login">01 Login</button
+          ><button data-screen="dashboard">02 Dashboard</button
+          ><button data-screen="determination">03 Determination</button
+          ><button data-screen="scheduling">04 Scheduling</button
+          ><button data-screen="notice">05 Notice</button
+          ><button data-screen="readiness">06 Readiness</button
+          ><button data-screen="virtual">07 Virtual Session</button
+          ><button data-screen="participants">08 Participants</button
+          ><button data-screen="control">09 Hearing Control</button
+          ><button data-screen="incidents">10 Incidents</button
+          ><button data-screen="appeal">11 Putusan Banding</button
+          ><button data-screen="compliance">12 Compliance</button
+          ><button data-screen="audit">13 Audit</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="top">
+          <div>
+            <h1 id="title">Login</h1>
+            <div class="muted">
+              Data sintetis. Zoom live memerlukan kredensial Server-to-Server OAuth dan email
+              peserta yang sah
+            </div>
+          </div>
+          <div>
+            <span id="persona" class="badge pending">Belum login</span>
+            <button id="logout" class="btn ghost hidden">Logout</button>
+          </div>
+        </div>
+        <div class="notice">
+          Urutan gate sistem: autentikasi dan assignment → judicial determination yang sah →
+          conflict check → schedule ACTIVE. Tidak tersedia tombol bypass.
+        </div>
+        <section id="login" class="section active">
+          <div class="two">
+            <div class="card">
+              <h2>Akun pengembangan</h2>
+              <div class="account-buttons">
+                <button
+                  class="btn secondary quick"
+                  data-email="judge@cims.local"
+                  data-password="Judge123!"
+                >
+                  Hakim</button
+                ><button
+                  class="btn secondary quick"
+                  data-email="clerk@cims.local"
+                  data-password="Clerk123!"
+                >
+                  Panitera</button
+                ><button
+                  class="btn secondary quick"
+                  data-email="admin@cims.local"
+                  data-password="Admin123!"
+                >
+                  Admin</button
+                ><button
+                  class="btn secondary quick"
+                  data-email="prosecutor@cims.local"
+                  data-password="Prosecutor123!"
+                >
+                  Jaksa
+                </button>
+              </div>
+              <div class="field">
+                <label>Email</label><input id="email" value="clerk@cims.local" />
+              </div>
+              <div class="field">
+                <label>Password</label><input id="password" type="password" value="Clerk123!" />
+              </div>
+              <div class="actions">
+                <button id="loginBtn" class="btn primary">Login dan minta OTP</button>
+              </div>
+              <div id="otpBlock" class="hidden" style="margin-top: 14px">
+                <div class="field">
+                  <label>OTP pengembangan</label><input id="otp" value="123456" maxlength="6" />
+                </div>
+                <button id="verifyBtn" class="btn primary">Verifikasi OTP</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Status API</h2>
+              <div id="apiHealth" class="log">Memeriksa API...</div>
+            </div>
+          </div>
+        </section>
+        <section id="dashboard" class="section">
+          <div class="grid">
+            <div class="card kpi"><span>Determination</span><b id="detKpi">UNKNOWN</b></div>
+            <div class="card kpi"><span>Schedule</span><b id="schKpi">UNKNOWN</b></div>
+            <div class="card kpi"><span>Next gate</span><b id="nextKpi">-</b></div>
+            <div class="card kpi"><span>Role</span><b id="roleKpi">-</b></div>
+          </div>
+          <div class="two">
+            <div class="card">
+              <h2>Workflow</h2>
+              <div class="stepper">
+                <div id="stepIam" class="step done">IAM</div>
+                <div id="stepDet" class="step current">Determination</div>
+                <div id="stepSch" class="step">Scheduling</div>
+                <div id="stepNotice" class="step">Notice</div>
+                <div id="stepReady" class="step">Readiness</div>
+                <div id="stepVirtual" class="step">Virtual Session</div>
+                <div id="stepControl" class="step">Hearing Control</div>
+              </div>
+              <p id="workflowText" class="muted"></p>
+            </div>
+            <div class="card">
+              <h2>Demo hearing</h2>
+              <table class="table">
+                <tr>
+                  <th>Case</th>
+                  <td>123/Pid.Sus/2026/PN Demo</td>
+                </tr>
+                <tr>
+                  <th>Hearing ID</th>
+                  <td id="hearingId"></td>
+                </tr>
+                <tr>
+                  <th>Type</th>
+                  <td>PEMERIKSAAN_SAKSI</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </section>
+        <section id="determination" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Permohonan persidangan elektronik</h2>
+              <div class="field">
+                <label>Mode</label
+                ><select id="requestMode">
+                  <option>ELECTRONIC</option>
+                  <option>HYBRID</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Alasan</label
+                ><textarea id="requestReason">
+Para pihak berada pada lokasi berbeda dan sarana elektronik telah direncanakan.</textarea
+                >
+              </div>
+              <button id="requestBtn" class="btn secondary">Buat permohonan</button>
+            </div>
+            <div class="card">
+              <h2>Penetapan hakim</h2>
+              <div class="field">
+                <label>Referensi resmi</label><input id="officialRef" value="PEN-EL/001/2026" />
+              </div>
+              <div class="field">
+                <label>Alasan</label
+                ><textarea id="detReason">
+Keadaan tertentu telah dinilai dan persidangan elektronik disetujui untuk hearing ini.</textarea
+                >
+              </div>
+              <button id="detBtn" class="btn primary">Catat APPROVED determination</button>
+              <p class="muted">Hanya akun Hakim atau Admin yang dapat menjalankan aksi ini.</p>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Respons</h2>
+            <div id="detLog" class="log">Belum ada aksi.</div>
+          </div>
+        </section>
+        <section id="scheduling" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Schedule proposal</h2>
+              <div class="field">
+                <label>Tanggal dan waktu mulai WIB</label
+                ><input id="startLocal" type="datetime-local" value="2026-08-12T11:00" />
+              </div>
+              <div class="field">
+                <label>Durasi</label
+                ><select id="duration">
+                  <option value="60">60 menit</option>
+                  <option value="90">90 menit</option>
+                  <option value="120">120 menit</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Ruang</label
+                ><select id="room">
+                  <option value="ROOM-A">Ruang A, contoh konflik 09.00 WIB</option>
+                  <option value="ROOM-B" selected>Ruang B</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button id="availabilityBtn" class="btn ghost">Cek availability</button
+                ><button id="proposalBtn" class="btn secondary">Buat proposal</button
+                ><button id="conflictBtn" class="btn secondary" disabled>Check conflict</button
+                ><button id="approveBtn" class="btn primary" disabled>Approve</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Status proposal</h2>
+              <table class="table">
+                <tr>
+                  <th>Proposal ID</th>
+                  <td id="proposalId">-</td>
+                </tr>
+                <tr>
+                  <th>Conflict status</th>
+                  <td id="conflictStatus">-</td>
+                </tr>
+                <tr>
+                  <th>Schedule</th>
+                  <td id="scheduleStatus">-</td>
+                </tr>
+              </table>
+              <div id="conflictTable"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Respons API</h2>
+            <div id="scheduleLog" class="log">Belum ada aksi.</div>
+          </div>
+        </section>
 
-<section id="notice" class="section"><div class="two"><div class="card"><h2>Buat dan kirim notice</h2><div class="field"><label>Jenis</label><select id="noticeType"><option>COURT_TO_PROSECUTION</option><option>PROSECUTION_TO_CORRECTIONS</option></select></div><div class="field"><label>User tujuan</label><select id="noticeRecipient"><option value="prosecutor">Penuntut Umum</option><option value="corrections">Petugas Rutan</option></select></div><div class="actions"><button id="noticeCreateBtn" class="btn secondary">Create + Send</button><button id="noticeAckBtn" class="btn primary">Acknowledge notice terakhir</button></div><p class="muted">Create dijalankan oleh akun yang sedang login. Acknowledge harus dilakukan oleh user tujuan.</p></div><div class="card"><h2>Notice status</h2><div id="noticeLog" class="log">Belum ada aksi.</div></div></div></section>
-<section id="readiness" class="section"><div class="two"><div class="card"><h2>Readiness per instansi</h2><div class="field"><label>Location code</label><input id="locationCode" value="COURT-ROOM-B"></div><div class="actions"><button id="verifyBtn2" class="btn ghost">Identity + Room PASS</button><button id="readinessBtn" class="btn primary">Submit READY</button><button id="readinessRefresh" class="btn secondary">Refresh</button></div><p class="muted">Petugas Rutan harus menjalankan Identity + Room PASS sebelum submit.</p></div><div class="card"><h2>Readiness gate</h2><div id="readinessLog" class="log">Belum dimuat.</div></div></div></section>
-<section id="virtual" class="section"><div class="two"><div class="card"><h2>Provision virtual session</h2><div class="field"><label>Recording policy</label><select id="recordingPolicy"><option>DISABLED</option><option>COURT_CONTROLLED</option></select></div><button id="provisionBtn" class="btn primary">Provision melalui provider adapter</button><p class="muted">Tombol tetap ditolak API bila notice atau readiness belum lengkap.</p></div><div class="card"><h2>Provider response</h2><div id="virtualLog" class="log">Belum ada aksi.</div></div></div></section>
+        <section id="notice" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Buat dan kirim notice</h2>
+              <div class="field">
+                <label>Jenis</label
+                ><select id="noticeType">
+                  <option>COURT_TO_PROSECUTION</option>
+                  <option>PROSECUTION_TO_CORRECTIONS</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>User tujuan</label
+                ><select id="noticeRecipient">
+                  <option value="prosecutor">Penuntut Umum</option>
+                  <option value="corrections">Petugas Rutan</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button id="noticeCreateBtn" class="btn secondary">Create + Send</button
+                ><button id="noticeAckBtn" class="btn primary">Acknowledge notice terakhir</button>
+              </div>
+              <p class="muted">
+                Create dijalankan oleh akun yang sedang login. Acknowledge harus dilakukan oleh user
+                tujuan.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Notice status</h2>
+              <div id="noticeLog" class="log">Belum ada aksi.</div>
+            </div>
+          </div>
+        </section>
+        <section id="readiness" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Readiness per instansi</h2>
+              <div class="field">
+                <label>Location code</label><input id="locationCode" value="COURT-ROOM-B" />
+              </div>
+              <div class="actions">
+                <button id="verifyBtn2" class="btn ghost">Identity + Room PASS</button
+                ><button id="readinessBtn" class="btn primary">Submit READY</button
+                ><button id="readinessRefresh" class="btn secondary">Refresh</button>
+              </div>
+              <p class="muted">
+                Petugas Rutan harus menjalankan Identity + Room PASS sebelum submit.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Readiness gate</h2>
+              <div id="readinessLog" class="log">Belum dimuat.</div>
+            </div>
+          </div>
+        </section>
+        <section id="virtual" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Provision virtual session</h2>
+              <div class="field">
+                <label>Recording policy</label
+                ><select id="recordingPolicy">
+                  <option>DISABLED</option>
+                  <option>COURT_CONTROLLED</option>
+                </select>
+              </div>
+              <button id="provisionBtn" class="btn primary">
+                Provision melalui provider adapter
+              </button>
+              <p class="muted">
+                Tombol tetap ditolak API bila notice atau readiness belum lengkap.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Provider response</h2>
+              <div id="virtualLog" class="log">Belum ada aksi.</div>
+            </div>
+          </div>
+        </section>
 
-<section id="participants" class="section"><div class="two"><div class="card"><h2>Participant registry dan join token</h2><div class="field"><label>Participant reference</label><input id="participantRef" value="DEFENDANT-DEMO-001"></div><div class="field"><label>Display name</label><input id="participantName" value="Terdakwa Sintetis"></div><div class="field"><label>Email kontak provider</label><input id="participantEmail" type="email" value="terdakwa.demo@example.test"><div class="muted">Diperlukan untuk unique Zoom registrant link. Tidak ditampilkan di daftar peserta atau audit log.</div></div><div class="field"><label>Role</label><select id="participantRole"><option>DEFENDANT</option><option>ADVOCATE</option><option>WITNESS</option><option>EXPERT</option><option>INTERPRETER</option></select></div><div class="field"><label>Participant ID aktif</label><input id="participantId" placeholder="Diisi setelah registrasi atau tempel ID"></div><div class="actions"><button id="participantCreateBtn" class="btn secondary">Register</button><button id="tokenIssueBtn" class="btn secondary">Issue one-time token</button><button id="participantsRefresh" class="btn ghost">Refresh list</button></div></div><div class="card"><h2>Waiting room</h2><div class="field"><label>Join token sekali pakai</label><textarea id="joinToken" placeholder="Token muncul setelah issuance"></textarea></div><div class="field"><label>Target room</label><select id="admitRoom"><option>DEFENDANT</option><option>WITNESS</option><option>MAIN</option></select></div><div class="actions"><button id="tokenExchangeBtn" class="btn secondary">Public exchange</button><button id="admitBtn" class="btn primary">Admit participant</button><button id="leaveBtn" class="btn danger">Mark left</button></div></div></div><div class="card"><h2>Participant dan attendance response</h2><div id="participantLog" class="log">Belum ada aksi.</div></div></section>
-<section id="control" class="section"><div class="two"><div class="card"><h2>Hearing lifecycle</h2><div class="field"><label>Alasan atau catatan</label><input id="controlReason" value="Perintah hakim pada working build"></div><div class="actions"><button id="startBtn" class="btn primary">Start</button><button id="suspendBtn" class="btn secondary">Suspend</button><button id="resumeBtn" class="btn secondary">Resume</button><button id="endBtn" class="btn danger">End</button><button id="runtimeRefresh" class="btn ghost">Refresh</button></div><p class="muted">Start, suspend, resume, dan end hanya dapat dilakukan Hakim yang ditugaskan atau System Admin.</p></div><div class="card"><h2>Private consultation</h2><div class="field"><label>Participant IDs, pisahkan koma</label><input id="consultationParticipants" placeholder="defendant-id,advocate-id"></div><div class="actions"><button id="consultStartBtn" class="btn secondary">Start consultation</button><button id="consultEndBtn" class="btn primary">End consultation</button></div><p class="muted">Consultation room selalu no-recording dan peserta dikembalikan ke ruang sebelumnya saat selesai.</p></div></div><div class="card"><h2>Runtime response</h2><div id="controlLog" class="log">Belum ada aksi.</div></div></section>
-<section id="incidents" class="section"><div class="two"><div class="card"><h2>Incident reporting</h2><div class="field"><label>Type</label><select id="incidentType"><option>TECHNICAL</option><option>CYBER</option><option>FORCE_MAJEURE</option></select></div><div class="field"><label>Severity</label><select id="incidentSeverity"><option>LOW</option><option>MEDIUM</option><option selected>HIGH</option><option>CRITICAL</option></select></div><div class="field"><label>Summary</label><input id="incidentSummary" value="Gangguan teknis pada koneksi peserta"></div><div class="field"><label>Incident ID aktif</label><input id="incidentId" placeholder="Diisi setelah incident dibuat"></div><div class="actions"><button id="incidentCreateBtn" class="btn danger">Create incident</button><button id="incidentResolveBtn" class="btn primary">Resolve</button><button id="incidentNotifyBtn" class="btn secondary">Record notification</button><button id="incidentRefresh" class="btn ghost">Refresh list</button></div></div><div class="card"><h2>Continuity rules</h2><table class="table"><tr><th>Technical</th><td>HIGH atau CRITICAL dapat menskors runtime secara otomatis untuk kemudian dikonfirmasi hakim.</td></tr><tr><th>Cyber</th><td>Timer pemberitahuan 1 x 24 jam dan hanya akun berwenang.</td></tr><tr><th>Force majeure</th><td>Timer pemberitahuan tertulis 3 x 24 jam.</td></tr></table></div></div><div class="card"><h2>Incident response</h2><div id="incidentLog" class="log">Belum ada aksi.</div></div></section>
-<section id="appeal" class="section"><div class="two"><div class="card"><h2>Jadwal pembacaan putusan banding</h2><div class="field"><label>Waktu pembacaan</label><input id="appealScheduled" type="datetime-local" value="2026-08-24T09:00"></div><div class="field"><label>Mode</label><select id="appealMode"><option>ELECTRONIC</option><option>DIRECT</option><option>HYBRID</option></select></div><div class="field"><label>Referensi penetapan</label><input id="appealDetermination" value="PT-DEMO/PEN/001/2026"></div><div class="actions"><button id="appealCreate" class="btn primary">Buat jadwal</button><button id="appealComplete" class="btn secondary">Catat pembacaan</button><button id="appealEvidence" class="btn ghost">Catat publikasi dan pengiriman</button></div></div><div class="card"><h2>Status kepatuhan</h2><div id="appealLog" class="log">Belum ada workflow.</div></div></div></section>
-<section id="compliance" class="section"><div class="grid"><div class="card kpi"><span>Audit chain</span><b id="auditChainKpi">-</b></div><div class="card kpi"><span>Notice acknowledged</span><b id="noticeComplianceKpi">-</b></div><div class="card kpi"><span>Readiness ready</span><b id="readinessComplianceKpi">-</b></div><div class="card kpi"><span>Open incidents</span><b id="incidentComplianceKpi">-</b></div></div><div class="two"><div class="card"><h2>Compliance dashboard</h2><button id="complianceRefresh" class="btn secondary">Refresh</button><div id="complianceLog" class="log" style="margin-top:12px">Belum dimuat.</div></div><div class="card"><h2>Reconciliation demo</h2><button id="reconciliationRun" class="btn primary">Jalankan reconciliation SIP-DEMO</button><div id="reconciliationLog" class="log" style="margin-top:12px">Belum dijalankan.</div></div></div></section>
-<section id="audit" class="section"><div class="card"><h2>Append-only audit events</h2><button id="auditBtn" class="btn secondary">Refresh audit</button><table class="table" style="margin-top:12px"><thead><tr><th>Time</th><th>Event</th><th>Object</th><th>Correlation</th></tr></thead><tbody id="auditRows"><tr><td colspan="4">Belum dimuat.</td></tr></tbody></table></div></section>
-</main></div><script>
-const API='http://localhost:4000/api/v1';const DEMO={caseId:'30000000-0000-4000-8000-000000000001',hearingId:'40000000-0000-4000-8000-000000000001',judgeId:'20000000-0000-4000-8000-000000000002',prosecutorId:'20000000-0000-4000-8000-000000000004',correctionsId:'20000000-0000-4000-8000-000000000005',prosecutionOrg:'10000000-0000-4000-8000-000000000002',correctionsOrg:'10000000-0000-4000-8000-000000000003'};let token=localStorage.getItem('cims_token')||'';let challengeId='';let proposal=null;let lastNoticeId='';let lastParticipantId=localStorage.getItem('cims_participant_id')||'';let lastJoinToken='';let lastIncidentId='';let lastAppealReadingId='';const $=id=>document.getElementById(id);$('hearingId').textContent=DEMO.hearingId;if($('participantId'))$('participantId').value=lastParticipantId;
-function show(screen){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$(screen).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===screen));$('title').textContent=document.querySelector(`[data-screen="${screen}"]`).textContent.replace(/^\d+\s/,'');}
-function headers(idem){return {'authorization':`Bearer ${token}`,'content-type':'application/json',...(idem?{'idempotency-key':idem}:{})}}
-const idem=prefix=>`${prefix}-${crypto.randomUUID()}`;
-async function api(path,options={}){const r=await fetch(API+path,options);let body;try{body=await r.json()}catch{body={}}if(!r.ok)throw Object.assign(new Error(body.error?.message||`HTTP ${r.status}`),{body,status:r.status});return body}
-function log(id,data){$(id).textContent=JSON.stringify(data,null,2)}
-async function health(){try{const r=await fetch('http://localhost:4000/health');log('apiHealth',await r.json())}catch(e){$('apiHealth').textContent='API belum berjalan. Jalankan npm run api.'}}
-async function refreshMe(){if(!token)return;try{const me=await api('/me',{headers:headers()});$('persona').textContent=`${me.name} · ${me.roles.join(', ')}`;$('persona').className='badge ok';$('logout').classList.remove('hidden');$('roleKpi').textContent=me.roles[0]||'-';await refreshGate()}catch{logout()}}
-async function refreshGate(){const gate=await api(`/hearings/${DEMO.hearingId}/gate-status`,{headers:headers()});$('detKpi').textContent=gate.determination_valid?'VALID':'PENDING';$('schKpi').textContent=gate.schedule_active?'ACTIVE':'NOT ACTIVE';$('nextKpi').textContent=gate.next_gate;$('stepDet').className='step '+(gate.determination_valid?'done':'current');$('stepSch').className='step '+(gate.schedule_active?'done':gate.determination_valid?'current':'');$('stepNotice').className='step '+(gate.notice.ready?'done':gate.schedule_active?'current':'');$('stepReady').className='step '+(gate.readiness.ready?'done':gate.notice.ready?'current':'');$('stepVirtual').className='step '+(gate.virtual.ready?'done':gate.readiness.ready?'current':'');$('stepControl').className='step '+(gate.runtime?.state==='ENDED'?'done':gate.virtual.ready?'current':'');$('workflowText').textContent=`Notice ack ${gate.notice.acknowledged_count}/${gate.notice.required_ack_count}. Readiness ${gate.readiness.organizations.filter(x=>x.status==='READY').length}/${gate.readiness.organizations.length}. Participants ${gate.participants?.registered||0}, waiting ${gate.participants?.waiting||0}, admitted ${gate.participants?.admitted||0}. Runtime ${gate.runtime?.state||'NOT_READY'}. Open incidents ${gate.incidents?.open||0}. Next: ${gate.next_gate}.`;return gate}
-function logout(){token='';localStorage.removeItem('cims_token');$('persona').textContent='Belum login';$('persona').className='badge pending';$('logout').classList.add('hidden');show('login')}
-document.getElementById('nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.screen!=='login'&&!token){alert('Login terlebih dahulu.');return}show(b.dataset.screen);if(b.dataset.screen==='dashboard')refreshGate();if(b.dataset.screen==='audit')loadAudit();if(b.dataset.screen==='participants')loadParticipants();if(b.dataset.screen==='control')loadRuntime();if(b.dataset.screen==='incidents')loadIncidents();if(b.dataset.screen==='compliance')loadCompliance()};document.querySelectorAll('.quick').forEach(b=>b.onclick=()=>{$('email').value=b.dataset.email;$('password').value=b.dataset.password});
-$('loginBtn').onclick=async()=>{try{const data=await api('/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('email').value,password:$('password').value})});challengeId=data.challenge_id;$('otpBlock').classList.remove('hidden');$('otp').value=data.development_otp||'';log('apiHealth',data)}catch(e){log('apiHealth',e.body||{error:e.message})}};
-$('verifyBtn').onclick=async()=>{try{const data=await api('/auth/verify-otp',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({challenge_id:challengeId,otp:$('otp').value})});token=data.access_token;localStorage.setItem('cims_token',token);await refreshMe();show('dashboard')}catch(e){log('apiHealth',e.body||{error:e.message})}};$('logout').onclick=logout;
-$('requestBtn').onclick=async()=>{try{const data=await api('/electronic-hearing-requests',{method:'POST',headers:headers(idem('request')),body:JSON.stringify({case_reference_id:DEMO.caseId,requested_mode:$('requestMode').value,reason:$('requestReason').value,evidence_references:['SYNTHETIC-EVIDENCE-001']})});log('detLog',data)}catch(e){log('detLog',e.body||{error:e.message})}};
-$('detBtn').onclick=async()=>{try{const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode($('officialRef').value+Date.now()));const hex=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');const data=await api('/judicial-determinations',{method:'POST',headers:headers(idem('det')),body:JSON.stringify({hearing_id:DEMO.hearingId,decision:'APPROVED',mode:'ELECTRONIC',reason:$('detReason').value,effective_at:new Date().toISOString(),official_reference:$('officialRef').value,document_hash:hex})});log('detLog',data);await refreshGate()}catch(e){log('detLog',e.body||{error:e.message})}};
-function period(){const local=$('startLocal').value;const start=new Date(local+'+07:00');const end=new Date(start.getTime()+Number($('duration').value)*60000);return{start_at:start.toISOString(),end_at:end.toISOString()}}
-$('availabilityBtn').onclick=async()=>{try{const p=period();log('scheduleLog',await api(`/hearings/${DEMO.hearingId}/availability?from=${encodeURIComponent(p.start_at)}&to=${encodeURIComponent(p.end_at)}`,{headers:headers()}))}catch(e){log('scheduleLog',e.body||{error:e.message})}};
-$('proposalBtn').onclick=async()=>{try{const p=period();proposal=await api(`/hearings/${DEMO.hearingId}/schedule-proposals`,{method:'POST',headers:headers(idem('proposal')),body:JSON.stringify({...p,display_timezone:'Asia/Jakarta',resources:[{resource_type:'ROOM',resource_id:$('room').value,requirement:'REQUIRED'},{resource_type:'JUDGE',resource_id:DEMO.judgeId,requirement:'REQUIRED'}]})});$('proposalId').textContent=proposal.id;$('conflictBtn').disabled=false;$('approveBtn').disabled=true;log('scheduleLog',proposal)}catch(e){log('scheduleLog',e.body||{error:e.message})}};
-$('conflictBtn').onclick=async()=>{try{const data=await api(`/schedule-proposals/${proposal.id}/conflicts:check`,{method:'POST',headers:headers(idem('check')),body:'{}'});$('conflictStatus').textContent=data.status;$('approveBtn').disabled=data.status==='BLOCKED';$('conflictTable').innerHTML=data.conflicts.length?`<table class="table"><thead><tr><th>Rule</th><th>Severity</th><th>Message</th></tr></thead><tbody>${data.conflicts.map(c=>`<tr><td>${c.rule_code}</td><td>${c.severity}</td><td>${c.message}</td></tr>`).join('')}</tbody></table>`:'<p class="badge ok">CLEAR</p>';log('scheduleLog',data)}catch(e){log('scheduleLog',e.body||{error:e.message})}};
-$('approveBtn').onclick=async()=>{try{const data=await api(`/schedule-proposals/${proposal.id}:approve`,{method:'POST',headers:headers(idem('approve')),body:JSON.stringify({reason:'Seluruh conflict required telah diperiksa.'})});$('scheduleStatus').textContent=`ACTIVE v${data.version}`;log('scheduleLog',data);await refreshGate()}catch(e){log('scheduleLog',e.body||{error:e.message})}};
+        <section id="participants" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Participant registry dan join token</h2>
+              <div class="field">
+                <label>Participant reference</label
+                ><input id="participantRef" value="DEFENDANT-DEMO-001" />
+              </div>
+              <div class="field">
+                <label>Display name</label><input id="participantName" value="Terdakwa Sintetis" />
+              </div>
+              <div class="field">
+                <label>Email kontak provider</label
+                ><input id="participantEmail" type="email" value="terdakwa.demo@example.test" />
+                <div class="muted">
+                  Diperlukan untuk unique Zoom registrant link. Tidak ditampilkan di daftar peserta
+                  atau audit log.
+                </div>
+              </div>
+              <div class="field">
+                <label>Role</label
+                ><select id="participantRole">
+                  <option>DEFENDANT</option>
+                  <option>ADVOCATE</option>
+                  <option>WITNESS</option>
+                  <option>EXPERT</option>
+                  <option>INTERPRETER</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Participant ID aktif</label
+                ><input id="participantId" placeholder="Diisi setelah registrasi atau tempel ID" />
+              </div>
+              <div class="actions">
+                <button id="participantCreateBtn" class="btn secondary">Register</button
+                ><button id="tokenIssueBtn" class="btn secondary">Issue one-time token</button
+                ><button id="participantsRefresh" class="btn ghost">Refresh list</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Waiting room</h2>
+              <div class="field">
+                <label>Join token sekali pakai</label
+                ><textarea id="joinToken" placeholder="Token muncul setelah issuance"></textarea>
+              </div>
+              <div class="field">
+                <label>Target room</label
+                ><select id="admitRoom">
+                  <option>DEFENDANT</option>
+                  <option>WITNESS</option>
+                  <option>MAIN</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button id="tokenExchangeBtn" class="btn secondary">Public exchange</button
+                ><button id="admitBtn" class="btn primary">Admit participant</button
+                ><button id="leaveBtn" class="btn danger">Mark left</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Participant dan attendance response</h2>
+            <div id="participantLog" class="log">Belum ada aksi.</div>
+          </div>
+        </section>
+        <section id="control" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Hearing lifecycle</h2>
+              <div class="field">
+                <label>Alasan atau catatan</label
+                ><input id="controlReason" value="Perintah hakim pada working build" />
+              </div>
+              <div class="actions">
+                <button id="startBtn" class="btn primary">Start</button
+                ><button id="suspendBtn" class="btn secondary">Suspend</button
+                ><button id="resumeBtn" class="btn secondary">Resume</button
+                ><button id="endBtn" class="btn danger">End</button
+                ><button id="runtimeRefresh" class="btn ghost">Refresh</button>
+              </div>
+              <p class="muted">
+                Start, suspend, resume, dan end hanya dapat dilakukan Hakim yang ditugaskan atau
+                System Admin.
+              </p>
+            </div>
+            <div class="card">
+              <h2>Private consultation</h2>
+              <div class="field">
+                <label>Participant IDs, pisahkan koma</label
+                ><input id="consultationParticipants" placeholder="defendant-id,advocate-id" />
+              </div>
+              <div class="actions">
+                <button id="consultStartBtn" class="btn secondary">Start consultation</button
+                ><button id="consultEndBtn" class="btn primary">End consultation</button>
+              </div>
+              <p class="muted">
+                Consultation room selalu no-recording dan peserta dikembalikan ke ruang sebelumnya
+                saat selesai.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Runtime response</h2>
+            <div id="controlLog" class="log">Belum ada aksi.</div>
+          </div>
+        </section>
+        <section id="incidents" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Incident reporting</h2>
+              <div class="field">
+                <label>Type</label
+                ><select id="incidentType">
+                  <option>TECHNICAL</option>
+                  <option>CYBER</option>
+                  <option>FORCE_MAJEURE</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Severity</label
+                ><select id="incidentSeverity">
+                  <option>LOW</option>
+                  <option>MEDIUM</option>
+                  <option selected>HIGH</option>
+                  <option>CRITICAL</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Summary</label
+                ><input id="incidentSummary" value="Gangguan teknis pada koneksi peserta" />
+              </div>
+              <div class="field">
+                <label>Incident ID aktif</label
+                ><input id="incidentId" placeholder="Diisi setelah incident dibuat" />
+              </div>
+              <div class="actions">
+                <button id="incidentCreateBtn" class="btn danger">Create incident</button
+                ><button id="incidentResolveBtn" class="btn primary">Resolve</button
+                ><button id="incidentNotifyBtn" class="btn secondary">Record notification</button
+                ><button id="incidentRefresh" class="btn ghost">Refresh list</button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Continuity rules</h2>
+              <table class="table">
+                <tr>
+                  <th>Technical</th>
+                  <td>
+                    HIGH atau CRITICAL dapat menskors runtime secara otomatis untuk kemudian
+                    dikonfirmasi hakim.
+                  </td>
+                </tr>
+                <tr>
+                  <th>Cyber</th>
+                  <td>Timer pemberitahuan 1 x 24 jam dan hanya akun berwenang.</td>
+                </tr>
+                <tr>
+                  <th>Force majeure</th>
+                  <td>Timer pemberitahuan tertulis 3 x 24 jam.</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h2>Incident response</h2>
+            <div id="incidentLog" class="log">Belum ada aksi.</div>
+          </div>
+        </section>
+        <section id="appeal" class="section">
+          <div class="two">
+            <div class="card">
+              <h2>Jadwal pembacaan putusan banding</h2>
+              <div class="field">
+                <label>Waktu pembacaan</label
+                ><input id="appealScheduled" type="datetime-local" value="2026-08-24T09:00" />
+              </div>
+              <div class="field">
+                <label>Mode</label
+                ><select id="appealMode">
+                  <option>ELECTRONIC</option>
+                  <option>DIRECT</option>
+                  <option>HYBRID</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Referensi penetapan</label
+                ><input id="appealDetermination" value="PT-DEMO/PEN/001/2026" />
+              </div>
+              <div class="actions">
+                <button id="appealCreate" class="btn primary">Buat jadwal</button
+                ><button id="appealComplete" class="btn secondary">Catat pembacaan</button
+                ><button id="appealEvidence" class="btn ghost">
+                  Catat publikasi dan pengiriman
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Status kepatuhan</h2>
+              <div id="appealLog" class="log">Belum ada workflow.</div>
+            </div>
+          </div>
+        </section>
+        <section id="compliance" class="section">
+          <div class="grid">
+            <div class="card kpi"><span>Audit chain</span><b id="auditChainKpi">-</b></div>
+            <div class="card kpi">
+              <span>Notice acknowledged</span><b id="noticeComplianceKpi">-</b>
+            </div>
+            <div class="card kpi">
+              <span>Readiness ready</span><b id="readinessComplianceKpi">-</b>
+            </div>
+            <div class="card kpi">
+              <span>Open incidents</span><b id="incidentComplianceKpi">-</b>
+            </div>
+          </div>
+          <div class="two">
+            <div class="card">
+              <h2>Compliance dashboard</h2>
+              <button id="complianceRefresh" class="btn secondary">Refresh</button>
+              <div id="complianceLog" class="log" style="margin-top: 12px">Belum dimuat.</div>
+            </div>
+            <div class="card">
+              <h2>Reconciliation demo</h2>
+              <button id="reconciliationRun" class="btn primary">
+                Jalankan reconciliation SIP-DEMO
+              </button>
+              <div id="reconciliationLog" class="log" style="margin-top: 12px">
+                Belum dijalankan.
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="audit" class="section">
+          <div class="card">
+            <h2>Append-only audit events</h2>
+            <button id="auditBtn" class="btn secondary">Refresh audit</button>
+            <table class="table" style="margin-top: 12px">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Event</th>
+                  <th>Object</th>
+                  <th>Correlation</th>
+                </tr>
+              </thead>
+              <tbody id="auditRows">
+                <tr>
+                  <td colspan="4">Belum dimuat.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      const API = 'http://localhost:4000/api/v1';
+      const DEMO = {
+        caseId: '30000000-0000-4000-8000-000000000001',
+        hearingId: '40000000-0000-4000-8000-000000000001',
+        judgeId: '20000000-0000-4000-8000-000000000002',
+        prosecutorId: '20000000-0000-4000-8000-000000000004',
+        correctionsId: '20000000-0000-4000-8000-000000000005',
+        prosecutionOrg: '10000000-0000-4000-8000-000000000002',
+        correctionsOrg: '10000000-0000-4000-8000-000000000003'
+      };
+      let token = localStorage.getItem('cims_token') || '';
+      let challengeId = '';
+      let proposal = null;
+      let lastNoticeId = '';
+      let lastParticipantId = localStorage.getItem('cims_participant_id') || '';
+      let lastJoinToken = '';
+      let lastIncidentId = '';
+      let lastAppealReadingId = '';
+      const $ = (id) => document.getElementById(id);
+      $('hearingId').textContent = DEMO.hearingId;
+      if ($('participantId')) $('participantId').value = lastParticipantId;
+      function show(screen) {
+        document.querySelectorAll('.section').forEach((x) => x.classList.remove('active'));
+        $(screen).classList.add('active');
+        document
+          .querySelectorAll('.nav button')
+          .forEach((x) => x.classList.toggle('active', x.dataset.screen === screen));
+        $('title').textContent = document
+          .querySelector(`[data-screen="${screen}"]`)
+          .textContent.replace(/^\d+\s/, '');
+      }
+      function headers(idem) {
+        return {
+          authorization: `Bearer ${token}`,
+          'content-type': 'application/json',
+          ...(idem ? { 'idempotency-key': idem } : {})
+        };
+      }
+      const idem = (prefix) => `${prefix}-${crypto.randomUUID()}`;
+      async function api(path, options = {}) {
+        const r = await fetch(API + path, options);
+        let body;
+        try {
+          body = await r.json();
+        } catch {
+          body = {};
+        }
+        if (!r.ok)
+          throw Object.assign(new Error(body.error?.message || `HTTP ${r.status}`), {
+            body,
+            status: r.status
+          });
+        return body;
+      }
+      function log(id, data) {
+        $(id).textContent = JSON.stringify(data, null, 2);
+      }
+      async function health() {
+        try {
+          const r = await fetch('http://localhost:4000/health');
+          log('apiHealth', await r.json());
+        } catch (e) {
+          $('apiHealth').textContent = 'API belum berjalan. Jalankan npm run api.';
+        }
+      }
+      async function refreshMe() {
+        if (!token) return;
+        try {
+          const me = await api('/me', { headers: headers() });
+          $('persona').textContent = `${me.name} · ${me.roles.join(', ')}`;
+          $('persona').className = 'badge ok';
+          $('logout').classList.remove('hidden');
+          $('roleKpi').textContent = me.roles[0] || '-';
+          await refreshGate();
+        } catch {
+          logout();
+        }
+      }
+      async function refreshGate() {
+        const gate = await api(`/hearings/${DEMO.hearingId}/gate-status`, { headers: headers() });
+        $('detKpi').textContent = gate.determination_valid ? 'VALID' : 'PENDING';
+        $('schKpi').textContent = gate.schedule_active ? 'ACTIVE' : 'NOT ACTIVE';
+        $('nextKpi').textContent = gate.next_gate;
+        $('stepDet').className = 'step ' + (gate.determination_valid ? 'done' : 'current');
+        $('stepSch').className =
+          'step ' + (gate.schedule_active ? 'done' : gate.determination_valid ? 'current' : '');
+        $('stepNotice').className =
+          'step ' + (gate.notice.ready ? 'done' : gate.schedule_active ? 'current' : '');
+        $('stepReady').className =
+          'step ' + (gate.readiness.ready ? 'done' : gate.notice.ready ? 'current' : '');
+        $('stepVirtual').className =
+          'step ' + (gate.virtual.ready ? 'done' : gate.readiness.ready ? 'current' : '');
+        $('stepControl').className =
+          'step ' +
+          (gate.runtime?.state === 'ENDED' ? 'done' : gate.virtual.ready ? 'current' : '');
+        $('workflowText').textContent =
+          `Notice ack ${gate.notice.acknowledged_count}/${gate.notice.required_ack_count}. Readiness ${gate.readiness.organizations.filter((x) => x.status === 'READY').length}/${gate.readiness.organizations.length}. Participants ${gate.participants?.registered || 0}, waiting ${gate.participants?.waiting || 0}, admitted ${gate.participants?.admitted || 0}. Runtime ${gate.runtime?.state || 'NOT_READY'}. Open incidents ${gate.incidents?.open || 0}. Next: ${gate.next_gate}.`;
+        return gate;
+      }
+      function logout() {
+        token = '';
+        localStorage.removeItem('cims_token');
+        $('persona').textContent = 'Belum login';
+        $('persona').className = 'badge pending';
+        $('logout').classList.add('hidden');
+        show('login');
+      }
+      document.getElementById('nav').onclick = (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.screen !== 'login' && !token) {
+          alert('Login terlebih dahulu.');
+          return;
+        }
+        show(b.dataset.screen);
+        if (b.dataset.screen === 'dashboard') refreshGate();
+        if (b.dataset.screen === 'audit') loadAudit();
+        if (b.dataset.screen === 'participants') loadParticipants();
+        if (b.dataset.screen === 'control') loadRuntime();
+        if (b.dataset.screen === 'incidents') loadIncidents();
+        if (b.dataset.screen === 'compliance') loadCompliance();
+      };
+      document.querySelectorAll('.quick').forEach(
+        (b) =>
+          (b.onclick = () => {
+            $('email').value = b.dataset.email;
+            $('password').value = b.dataset.password;
+          })
+      );
+      $('loginBtn').onclick = async () => {
+        try {
+          const data = await api('/auth/login', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ email: $('email').value, password: $('password').value })
+          });
+          challengeId = data.challenge_id;
+          $('otpBlock').classList.remove('hidden');
+          $('otp').value = data.development_otp || '';
+          log('apiHealth', data);
+        } catch (e) {
+          log('apiHealth', e.body || { error: e.message });
+        }
+      };
+      $('verifyBtn').onclick = async () => {
+        try {
+          const data = await api('/auth/verify-otp', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ challenge_id: challengeId, otp: $('otp').value })
+          });
+          token = data.access_token;
+          localStorage.setItem('cims_token', token);
+          await refreshMe();
+          show('dashboard');
+        } catch (e) {
+          log('apiHealth', e.body || { error: e.message });
+        }
+      };
+      $('logout').onclick = logout;
+      $('requestBtn').onclick = async () => {
+        try {
+          const data = await api('/electronic-hearing-requests', {
+            method: 'POST',
+            headers: headers(idem('request')),
+            body: JSON.stringify({
+              case_reference_id: DEMO.caseId,
+              requested_mode: $('requestMode').value,
+              reason: $('requestReason').value,
+              evidence_references: ['SYNTHETIC-EVIDENCE-001']
+            })
+          });
+          log('detLog', data);
+        } catch (e) {
+          log('detLog', e.body || { error: e.message });
+        }
+      };
+      $('detBtn').onclick = async () => {
+        try {
+          const hash = await crypto.subtle.digest(
+            'SHA-256',
+            new TextEncoder().encode($('officialRef').value + Date.now())
+          );
+          const hex = [...new Uint8Array(hash)]
+            .map((x) => x.toString(16).padStart(2, '0'))
+            .join('');
+          const data = await api('/judicial-determinations', {
+            method: 'POST',
+            headers: headers(idem('det')),
+            body: JSON.stringify({
+              hearing_id: DEMO.hearingId,
+              decision: 'APPROVED',
+              mode: 'ELECTRONIC',
+              reason: $('detReason').value,
+              effective_at: new Date().toISOString(),
+              official_reference: $('officialRef').value,
+              document_hash: hex
+            })
+          });
+          log('detLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('detLog', e.body || { error: e.message });
+        }
+      };
+      function period() {
+        const local = $('startLocal').value;
+        const start = new Date(local + '+07:00');
+        const end = new Date(start.getTime() + Number($('duration').value) * 60000);
+        return { start_at: start.toISOString(), end_at: end.toISOString() };
+      }
+      $('availabilityBtn').onclick = async () => {
+        try {
+          const p = period();
+          log(
+            'scheduleLog',
+            await api(
+              `/hearings/${DEMO.hearingId}/availability?from=${encodeURIComponent(p.start_at)}&to=${encodeURIComponent(p.end_at)}`,
+              { headers: headers() }
+            )
+          );
+        } catch (e) {
+          log('scheduleLog', e.body || { error: e.message });
+        }
+      };
+      $('proposalBtn').onclick = async () => {
+        try {
+          const p = period();
+          proposal = await api(`/hearings/${DEMO.hearingId}/schedule-proposals`, {
+            method: 'POST',
+            headers: headers(idem('proposal')),
+            body: JSON.stringify({
+              ...p,
+              display_timezone: 'Asia/Jakarta',
+              resources: [
+                { resource_type: 'ROOM', resource_id: $('room').value, requirement: 'REQUIRED' },
+                { resource_type: 'JUDGE', resource_id: DEMO.judgeId, requirement: 'REQUIRED' }
+              ]
+            })
+          });
+          $('proposalId').textContent = proposal.id;
+          $('conflictBtn').disabled = false;
+          $('approveBtn').disabled = true;
+          log('scheduleLog', proposal);
+        } catch (e) {
+          log('scheduleLog', e.body || { error: e.message });
+        }
+      };
+      $('conflictBtn').onclick = async () => {
+        try {
+          const data = await api(`/schedule-proposals/${proposal.id}/conflicts:check`, {
+            method: 'POST',
+            headers: headers(idem('check')),
+            body: '{}'
+          });
+          $('conflictStatus').textContent = data.status;
+          $('approveBtn').disabled = data.status === 'BLOCKED';
+          $('conflictTable').innerHTML = data.conflicts.length
+            ? `<table class="table"><thead><tr><th>Rule</th><th>Severity</th><th>Message</th></tr></thead><tbody>${data.conflicts.map((c) => `<tr><td>${c.rule_code}</td><td>${c.severity}</td><td>${c.message}</td></tr>`).join('')}</tbody></table>`
+            : '<p class="badge ok">CLEAR</p>';
+          log('scheduleLog', data);
+        } catch (e) {
+          log('scheduleLog', e.body || { error: e.message });
+        }
+      };
+      $('approveBtn').onclick = async () => {
+        try {
+          const data = await api(`/schedule-proposals/${proposal.id}:approve`, {
+            method: 'POST',
+            headers: headers(idem('approve')),
+            body: JSON.stringify({ reason: 'Seluruh conflict required telah diperiksa.' })
+          });
+          $('scheduleStatus').textContent = `ACTIVE v${data.version}`;
+          log('scheduleLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('scheduleLog', e.body || { error: e.message });
+        }
+      };
 
-const targets={prosecutor:{user_id:DEMO.prosecutorId,organization_id:DEMO.prosecutionOrg,name:'Penuntut Umum Demo',destination:'prosecutor@cims.local'},corrections:{user_id:DEMO.correctionsId,organization_id:DEMO.correctionsOrg,name:'Petugas Rutan Demo',destination:'corrections@cims.local'}};
-$('noticeCreateBtn').onclick=async()=>{try{const target=targets[$('noticeRecipient').value];let n=await api(`/hearings/${DEMO.hearingId}/notices`,{method:'POST',headers:headers(idem('notice')),body:JSON.stringify({notice_type:$('noticeType').value,subject:'Pemberitahuan jadwal sidang elektronik',message:'Pemberitahuan resmi jadwal sidang elektronik untuk workflow development.',official_reference:`NOTICE-${Date.now()}`,recipients:[{...target,channel:'EMAIL',required_ack:true}]})});n=await api(`/notices/${n.id}:send`,{method:'POST',headers:headers(idem('sendnotice')),body:'{}'});lastNoticeId=n.id;log('noticeLog',n);await refreshGate()}catch(e){log('noticeLog',e.body||{error:e.message})}};
-$('noticeAckBtn').onclick=async()=>{try{if(!lastNoticeId)throw new Error('Create notice terlebih dahulu.');const n=await api(`/notices/${lastNoticeId}:acknowledge`,{method:'POST',headers:headers(idem('acknotice')),body:JSON.stringify({method:'IN_APP',receipt_reference:`ACK-${Date.now()}`})});log('noticeLog',n);await refreshGate()}catch(e){log('noticeLog',e.body||{error:e.message})}};
-$('verifyBtn2').onclick=async()=>{try{const a=await api(`/hearings/${DEMO.hearingId}/identity-verifications`,{method:'POST',headers:headers(idem('identity')),body:JSON.stringify({participant_reference:'DEFENDANT-SYNTHETIC-001',method:'OFFICIAL_DOCUMENT_AND_VISUAL',result:'PASS'})});const b=await api(`/hearings/${DEMO.hearingId}/room-inspections`,{method:'POST',headers:headers(idem('roominspect')),body:JSON.stringify({location_code:$('locationCode').value,camera_full_view:true,unauthorized_person_absent:true,confidentiality_ready:true})});log('readinessLog',{identity:a,room:b})}catch(e){log('readinessLog',e.body||{error:e.message})}};
-$('readinessBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/readiness-submissions`,{method:'POST',headers:headers(idem('readiness')),body:JSON.stringify({location_code:$('locationCode').value,items:[{item_code:'ROOM_AVAILABLE',required:true,result:'PASS'},{item_code:'AUTHORIZED_OFFICER_AVAILABLE',required:true,result:'PASS'},{item_code:'BACKUP_PROCEDURE_READY',required:true,result:'PASS'}],technical_test:{camera:'PASS',microphone:'PASS',audio:'PASS',primary_network:'PASS',backup_network:'PASS',provider_access:'PASS'}})});log('readinessLog',data);await refreshGate()}catch(e){log('readinessLog',e.body||{error:e.message})}};
-$('readinessRefresh').onclick=async()=>{try{log('readinessLog',await api(`/hearings/${DEMO.hearingId}/readiness`,{headers:headers()}));await refreshGate()}catch(e){log('readinessLog',e.body||{error:e.message})}};
-$('provisionBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/virtual-session:provision`,{method:'POST',headers:headers(idem('provision')),body:JSON.stringify({recording_policy:$('recordingPolicy').value})});log('virtualLog',data);await refreshGate()}catch(e){log('virtualLog',e.body||{error:e.message})}};
+      const targets = {
+        prosecutor: {
+          user_id: DEMO.prosecutorId,
+          organization_id: DEMO.prosecutionOrg,
+          name: 'Penuntut Umum Demo',
+          destination: 'prosecutor@cims.local'
+        },
+        corrections: {
+          user_id: DEMO.correctionsId,
+          organization_id: DEMO.correctionsOrg,
+          name: 'Petugas Rutan Demo',
+          destination: 'corrections@cims.local'
+        }
+      };
+      $('noticeCreateBtn').onclick = async () => {
+        try {
+          const target = targets[$('noticeRecipient').value];
+          let n = await api(`/hearings/${DEMO.hearingId}/notices`, {
+            method: 'POST',
+            headers: headers(idem('notice')),
+            body: JSON.stringify({
+              notice_type: $('noticeType').value,
+              subject: 'Pemberitahuan jadwal sidang elektronik',
+              message: 'Pemberitahuan resmi jadwal sidang elektronik untuk workflow development.',
+              official_reference: `NOTICE-${Date.now()}`,
+              recipients: [{ ...target, channel: 'EMAIL', required_ack: true }]
+            })
+          });
+          n = await api(`/notices/${n.id}:send`, {
+            method: 'POST',
+            headers: headers(idem('sendnotice')),
+            body: '{}'
+          });
+          lastNoticeId = n.id;
+          log('noticeLog', n);
+          await refreshGate();
+        } catch (e) {
+          log('noticeLog', e.body || { error: e.message });
+        }
+      };
+      $('noticeAckBtn').onclick = async () => {
+        try {
+          if (!lastNoticeId) throw new Error('Create notice terlebih dahulu.');
+          const n = await api(`/notices/${lastNoticeId}:acknowledge`, {
+            method: 'POST',
+            headers: headers(idem('acknotice')),
+            body: JSON.stringify({ method: 'IN_APP', receipt_reference: `ACK-${Date.now()}` })
+          });
+          log('noticeLog', n);
+          await refreshGate();
+        } catch (e) {
+          log('noticeLog', e.body || { error: e.message });
+        }
+      };
+      $('verifyBtn2').onclick = async () => {
+        try {
+          const a = await api(`/hearings/${DEMO.hearingId}/identity-verifications`, {
+            method: 'POST',
+            headers: headers(idem('identity')),
+            body: JSON.stringify({
+              participant_reference: 'DEFENDANT-SYNTHETIC-001',
+              method: 'OFFICIAL_DOCUMENT_AND_VISUAL',
+              result: 'PASS'
+            })
+          });
+          const b = await api(`/hearings/${DEMO.hearingId}/room-inspections`, {
+            method: 'POST',
+            headers: headers(idem('roominspect')),
+            body: JSON.stringify({
+              location_code: $('locationCode').value,
+              camera_full_view: true,
+              unauthorized_person_absent: true,
+              confidentiality_ready: true
+            })
+          });
+          log('readinessLog', { identity: a, room: b });
+        } catch (e) {
+          log('readinessLog', e.body || { error: e.message });
+        }
+      };
+      $('readinessBtn').onclick = async () => {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/readiness-submissions`, {
+            method: 'POST',
+            headers: headers(idem('readiness')),
+            body: JSON.stringify({
+              location_code: $('locationCode').value,
+              items: [
+                { item_code: 'ROOM_AVAILABLE', required: true, result: 'PASS' },
+                { item_code: 'AUTHORIZED_OFFICER_AVAILABLE', required: true, result: 'PASS' },
+                { item_code: 'BACKUP_PROCEDURE_READY', required: true, result: 'PASS' }
+              ],
+              technical_test: {
+                camera: 'PASS',
+                microphone: 'PASS',
+                audio: 'PASS',
+                primary_network: 'PASS',
+                backup_network: 'PASS',
+                provider_access: 'PASS'
+              }
+            })
+          });
+          log('readinessLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('readinessLog', e.body || { error: e.message });
+        }
+      };
+      $('readinessRefresh').onclick = async () => {
+        try {
+          log(
+            'readinessLog',
+            await api(`/hearings/${DEMO.hearingId}/readiness`, { headers: headers() })
+          );
+          await refreshGate();
+        } catch (e) {
+          log('readinessLog', e.body || { error: e.message });
+        }
+      };
+      $('provisionBtn').onclick = async () => {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/virtual-session:provision`, {
+            method: 'POST',
+            headers: headers(idem('provision')),
+            body: JSON.stringify({ recording_policy: $('recordingPolicy').value })
+          });
+          log('virtualLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('virtualLog', e.body || { error: e.message });
+        }
+      };
 
-async function loadParticipants(){try{const data=await api(`/hearings/${DEMO.hearingId}/participants`,{headers:headers()});const attendance=await api(`/hearings/${DEMO.hearingId}/attendance`,{headers:headers()});log('participantLog',{participants:data.items,attendance})}catch(e){log('participantLog',e.body||{error:e.message})}}
-$('participantCreateBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/participants`,{method:'POST',headers:headers(idem('participant')),body:JSON.stringify({participant_reference:$('participantRef').value,display_name:$('participantName').value,contact_email:$('participantEmail').value,participant_role:$('participantRole').value,default_room_code:$('participantRole').value==='WITNESS'?'WITNESS':'DEFENDANT',protected_identity:$('participantRole').value==='DEFENDANT',public_alias:$('participantRole').value==='DEFENDANT'?'Terdakwa A':null})});lastParticipantId=data.id;$('participantId').value=data.id;localStorage.setItem('cims_participant_id',data.id);log('participantLog',data);await refreshGate()}catch(e){log('participantLog',e.body||{error:e.message})}};
-$('tokenIssueBtn').onclick=async()=>{try{const pid=$('participantId').value;const data=await api(`/hearings/${DEMO.hearingId}/participants/${pid}/join-token`,{method:'POST',headers:headers(),body:JSON.stringify({room_code:'WAITING',ttl_minutes:30})});lastJoinToken=data.join_token;$('joinToken').value=data.join_token;log('participantLog',data)}catch(e){log('participantLog',e.body||{error:e.message})}};
-$('tokenExchangeBtn').onclick=async()=>{try{const data=await api('/public/join-tokens:exchange',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({join_token:$('joinToken').value})});log('participantLog',data);await refreshGate()}catch(e){log('participantLog',e.body||{error:e.message})}};
-$('admitBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/participants/${$('participantId').value}:admit`,{method:'POST',headers:headers(idem('admit')),body:JSON.stringify({target_room_code:$('admitRoom').value})});log('participantLog',data);await refreshGate()}catch(e){log('participantLog',e.body||{error:e.message})}};
-$('leaveBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/participants/${$('participantId').value}:leave`,{method:'POST',headers:headers(idem('leave')),body:JSON.stringify({reason:'Participant meninggalkan sesi',removed:false})});log('participantLog',data);await refreshGate()}catch(e){log('participantLog',e.body||{error:e.message})}};$('participantsRefresh').onclick=loadParticipants;
-async function loadRuntime(){try{log('controlLog',{runtime:await api(`/hearings/${DEMO.hearingId}/runtime`,{headers:headers()}),consultation:await api(`/hearings/${DEMO.hearingId}/consultations/current`,{headers:headers()})})}catch(e){log('controlLog',e.body||{error:e.message})}}
-async function control(action){try{const data=await api(`/hearings/${DEMO.hearingId}:${action}`,{method:'POST',headers:headers(idem(action)),body:JSON.stringify({reason:$('controlReason').value})});log('controlLog',data);await refreshGate()}catch(e){log('controlLog',e.body||{error:e.message})}}
-$('startBtn').onclick=()=>control('start');$('suspendBtn').onclick=()=>control('suspend');$('resumeBtn').onclick=()=>control('resume');$('endBtn').onclick=()=>control('end');$('runtimeRefresh').onclick=loadRuntime;
-$('consultStartBtn').onclick=async()=>{try{const ids=$('consultationParticipants').value.split(',').map(x=>x.trim()).filter(Boolean);const data=await api(`/hearings/${DEMO.hearingId}/consultations`,{method:'POST',headers:headers(idem('consult')),body:JSON.stringify({participant_ids:ids,reason:'Konsultasi rahasia terdakwa dengan advokat'})});log('controlLog',data)}catch(e){log('controlLog',e.body||{error:e.message})}};
-$('consultEndBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/consultations/current:end`,{method:'POST',headers:headers(idem('consultend')),body:JSON.stringify({reason:'Konsultasi selesai'})});log('controlLog',data)}catch(e){log('controlLog',e.body||{error:e.message})}};
-async function loadIncidents(){try{const data=await api(`/hearings/${DEMO.hearingId}/incidents`,{headers:headers()});log('incidentLog',data)}catch(e){log('incidentLog',e.body||{error:e.message})}}
-$('incidentCreateBtn').onclick=async()=>{try{const data=await api(`/hearings/${DEMO.hearingId}/incidents`,{method:'POST',headers:headers(idem('incident')),body:JSON.stringify({incident_type:$('incidentType').value,severity:$('incidentSeverity').value,summary:$('incidentSummary').value,details:'Incident development scenario'})});lastIncidentId=data.id;$('incidentId').value=data.id;log('incidentLog',data);await refreshGate()}catch(e){log('incidentLog',e.body||{error:e.message})}};
-$('incidentResolveBtn').onclick=async()=>{try{const data=await api(`/incidents/${$('incidentId').value}:resolve`,{method:'POST',headers:headers(idem('resolveincident')),body:JSON.stringify({resolution:'Mitigasi selesai dan kondisi telah diverifikasi aman.'})});log('incidentLog',data);await refreshGate()}catch(e){log('incidentLog',e.body||{error:e.message})}};
-$('incidentNotifyBtn').onclick=async()=>{try{const data=await api(`/incidents/${$('incidentId').value}:notify`,{method:'POST',headers:headers(idem('notifyincident')),body:JSON.stringify({reference:`INC-NOTICE-${Date.now()}`})});log('incidentLog',data)}catch(e){log('incidentLog',e.body||{error:e.message})}};$('incidentRefresh').onclick=loadIncidents;
+      async function loadParticipants() {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/participants`, {
+            headers: headers()
+          });
+          const attendance = await api(`/hearings/${DEMO.hearingId}/attendance`, {
+            headers: headers()
+          });
+          log('participantLog', { participants: data.items, attendance });
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      }
+      $('participantCreateBtn').onclick = async () => {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/participants`, {
+            method: 'POST',
+            headers: headers(idem('participant')),
+            body: JSON.stringify({
+              participant_reference: $('participantRef').value,
+              display_name: $('participantName').value,
+              contact_email: $('participantEmail').value,
+              participant_role: $('participantRole').value,
+              default_room_code: $('participantRole').value === 'WITNESS' ? 'WITNESS' : 'DEFENDANT',
+              protected_identity: $('participantRole').value === 'DEFENDANT',
+              public_alias: $('participantRole').value === 'DEFENDANT' ? 'Terdakwa A' : null
+            })
+          });
+          lastParticipantId = data.id;
+          $('participantId').value = data.id;
+          localStorage.setItem('cims_participant_id', data.id);
+          log('participantLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      };
+      $('tokenIssueBtn').onclick = async () => {
+        try {
+          const pid = $('participantId').value;
+          const data = await api(`/hearings/${DEMO.hearingId}/participants/${pid}/join-token`, {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ room_code: 'WAITING', ttl_minutes: 30 })
+          });
+          lastJoinToken = data.join_token;
+          $('joinToken').value = data.join_token;
+          log('participantLog', data);
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      };
+      $('tokenExchangeBtn').onclick = async () => {
+        try {
+          const data = await api('/public/join-tokens:exchange', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ join_token: $('joinToken').value })
+          });
+          log('participantLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      };
+      $('admitBtn').onclick = async () => {
+        try {
+          const data = await api(
+            `/hearings/${DEMO.hearingId}/participants/${$('participantId').value}:admit`,
+            {
+              method: 'POST',
+              headers: headers(idem('admit')),
+              body: JSON.stringify({ target_room_code: $('admitRoom').value })
+            }
+          );
+          log('participantLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      };
+      $('leaveBtn').onclick = async () => {
+        try {
+          const data = await api(
+            `/hearings/${DEMO.hearingId}/participants/${$('participantId').value}:leave`,
+            {
+              method: 'POST',
+              headers: headers(idem('leave')),
+              body: JSON.stringify({ reason: 'Participant meninggalkan sesi', removed: false })
+            }
+          );
+          log('participantLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('participantLog', e.body || { error: e.message });
+        }
+      };
+      $('participantsRefresh').onclick = loadParticipants;
+      async function loadRuntime() {
+        try {
+          log('controlLog', {
+            runtime: await api(`/hearings/${DEMO.hearingId}/runtime`, { headers: headers() }),
+            consultation: await api(`/hearings/${DEMO.hearingId}/consultations/current`, {
+              headers: headers()
+            })
+          });
+        } catch (e) {
+          log('controlLog', e.body || { error: e.message });
+        }
+      }
+      async function control(action) {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}:${action}`, {
+            method: 'POST',
+            headers: headers(idem(action)),
+            body: JSON.stringify({ reason: $('controlReason').value })
+          });
+          log('controlLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('controlLog', e.body || { error: e.message });
+        }
+      }
+      $('startBtn').onclick = () => control('start');
+      $('suspendBtn').onclick = () => control('suspend');
+      $('resumeBtn').onclick = () => control('resume');
+      $('endBtn').onclick = () => control('end');
+      $('runtimeRefresh').onclick = loadRuntime;
+      $('consultStartBtn').onclick = async () => {
+        try {
+          const ids = $('consultationParticipants')
+            .value.split(',')
+            .map((x) => x.trim())
+            .filter(Boolean);
+          const data = await api(`/hearings/${DEMO.hearingId}/consultations`, {
+            method: 'POST',
+            headers: headers(idem('consult')),
+            body: JSON.stringify({
+              participant_ids: ids,
+              reason: 'Konsultasi rahasia terdakwa dengan advokat'
+            })
+          });
+          log('controlLog', data);
+        } catch (e) {
+          log('controlLog', e.body || { error: e.message });
+        }
+      };
+      $('consultEndBtn').onclick = async () => {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/consultations/current:end`, {
+            method: 'POST',
+            headers: headers(idem('consultend')),
+            body: JSON.stringify({ reason: 'Konsultasi selesai' })
+          });
+          log('controlLog', data);
+        } catch (e) {
+          log('controlLog', e.body || { error: e.message });
+        }
+      };
+      async function loadIncidents() {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/incidents`, { headers: headers() });
+          log('incidentLog', data);
+        } catch (e) {
+          log('incidentLog', e.body || { error: e.message });
+        }
+      }
+      $('incidentCreateBtn').onclick = async () => {
+        try {
+          const data = await api(`/hearings/${DEMO.hearingId}/incidents`, {
+            method: 'POST',
+            headers: headers(idem('incident')),
+            body: JSON.stringify({
+              incident_type: $('incidentType').value,
+              severity: $('incidentSeverity').value,
+              summary: $('incidentSummary').value,
+              details: 'Incident development scenario'
+            })
+          });
+          lastIncidentId = data.id;
+          $('incidentId').value = data.id;
+          log('incidentLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('incidentLog', e.body || { error: e.message });
+        }
+      };
+      $('incidentResolveBtn').onclick = async () => {
+        try {
+          const data = await api(`/incidents/${$('incidentId').value}:resolve`, {
+            method: 'POST',
+            headers: headers(idem('resolveincident')),
+            body: JSON.stringify({
+              resolution: 'Mitigasi selesai dan kondisi telah diverifikasi aman.'
+            })
+          });
+          log('incidentLog', data);
+          await refreshGate();
+        } catch (e) {
+          log('incidentLog', e.body || { error: e.message });
+        }
+      };
+      $('incidentNotifyBtn').onclick = async () => {
+        try {
+          const data = await api(`/incidents/${$('incidentId').value}:notify`, {
+            method: 'POST',
+            headers: headers(idem('notifyincident')),
+            body: JSON.stringify({ reference: `INC-NOTICE-${Date.now()}` })
+          });
+          log('incidentLog', data);
+        } catch (e) {
+          log('incidentLog', e.body || { error: e.message });
+        }
+      };
+      $('incidentRefresh').onclick = loadIncidents;
 
+      $('appealCreate').onclick = async () => {
+        try {
+          const scheduled = new Date($('appealScheduled').value + '+07:00').toISOString();
+          const data = await api('/appeal-decision-readings', {
+            method: 'POST',
+            headers: headers(idem('appealcreate')),
+            body: JSON.stringify({
+              case_reference_id: DEMO.caseId,
+              scheduled_at: scheduled,
+              display_timezone: 'Asia/Jakarta',
+              delivery_mode: $('appealMode').value,
+              determination_reference: $('appealDetermination').value
+            })
+          });
+          lastAppealReadingId = data.id;
+          log('appealLog', data);
+        } catch (e) {
+          log('appealLog', e.body || { error: e.message });
+        }
+      };
+      $('appealComplete').onclick = async () => {
+        try {
+          if (!lastAppealReadingId) throw new Error('Buat jadwal pembacaan terlebih dahulu.');
+          for (const record of [
+            {
+              party_role: 'DEFENDANT',
+              party_reference: 'DEFENDANT-DEMO',
+              attendance_status: 'PRESENT',
+              attendance_mode: 'ELECTRONIC'
+            },
+            {
+              party_role: 'PROSECUTOR',
+              party_reference: 'PROSECUTOR-DEMO',
+              attendance_status: 'PRESENT',
+              attendance_mode: 'ELECTRONIC'
+            }
+          ])
+            await api(`/appeal-decision-readings/${lastAppealReadingId}/presence`, {
+              method: 'POST',
+              headers: headers(idem('appealpresence')),
+              body: JSON.stringify(record)
+            });
+          const data = await api(`/appeal-decision-readings/${lastAppealReadingId}:complete`, {
+            method: 'POST',
+            headers: headers(idem('appealcomplete')),
+            body: JSON.stringify({ read_at: new Date().toISOString(), open_to_public: true })
+          });
+          log('appealLog', data);
+        } catch (e) {
+          log('appealLog', e.body || { error: e.message });
+        }
+      };
+      $('appealEvidence').onclick = async () => {
+        try {
+          if (!lastAppealReadingId) throw new Error('Buat jadwal pembacaan terlebih dahulu.');
+          await api(`/appeal-decision-readings/${lastAppealReadingId}/excerpt`, {
+            method: 'POST',
+            headers: headers(idem('appealexcerpt')),
+            body: JSON.stringify({
+              excerpt_reference: `SIP-EXCERPT-${Date.now()}`,
+              source_system_code: 'SIP-DEMO',
+              published_at: new Date().toISOString()
+            })
+          });
+          const data = await api(`/appeal-decision-readings/${lastAppealReadingId}/transmission`, {
+            method: 'POST',
+            headers: headers(idem('appealtransmit')),
+            body: JSON.stringify({
+              destination_court_reference: 'PN-DEMO',
+              transmission_reference: `PT-SEND-${Date.now()}`,
+              transmitted_at: new Date().toISOString()
+            })
+          });
+          log('appealLog', data);
+          await loadCompliance();
+        } catch (e) {
+          log('appealLog', e.body || { error: e.message });
+        }
+      };
+      async function loadCompliance() {
+        try {
+          const data = await api('/compliance-dashboard', { headers: headers() });
+          const chain = await api('/audit-events/verify-chain', { headers: headers() });
+          $('auditChainKpi').textContent = chain.valid ? 'VALID' : 'INVALID';
+          $('noticeComplianceKpi').textContent =
+            `${data.notices.acknowledged}/${data.notices.total}`;
+          $('readinessComplianceKpi').textContent =
+            `${data.readiness.ready}/${data.readiness.total}`;
+          $('incidentComplianceKpi').textContent = data.incidents.open;
+          log('complianceLog', { dashboard: data, audit_chain: chain });
+        } catch (e) {
+          log('complianceLog', e.body || { error: e.message });
+        }
+      }
+      $('complianceRefresh').onclick = loadCompliance;
+      $('reconciliationRun').onclick = async () => {
+        try {
+          const data = await api('/reconciliation-runs', {
+            method: 'POST',
+            headers: headers(idem('reconcile')),
+            body: JSON.stringify({
+              source_system_code: 'SIP-DEMO',
+              records: [
+                {
+                  external_case_id: 'EXT-CASE-001',
+                  case_number: '123/Pid.Sus/2026/PN Demo',
+                  case_type: 'PIDANA_KHUSUS'
+                },
+                {
+                  external_case_id: 'EXT-CASE-002',
+                  case_number: '124/Pid.Sus/2026/PN Demo',
+                  case_type: 'PIDANA_KHUSUS'
+                }
+              ]
+            })
+          });
+          log('reconciliationLog', data);
+          await loadCompliance();
+        } catch (e) {
+          log('reconciliationLog', e.body || { error: e.message });
+        }
+      };
 
-$('appealCreate').onclick=async()=>{try{const scheduled=new Date($('appealScheduled').value+'+07:00').toISOString();const data=await api('/appeal-decision-readings',{method:'POST',headers:headers(idem('appealcreate')),body:JSON.stringify({case_reference_id:DEMO.caseId,scheduled_at:scheduled,display_timezone:'Asia/Jakarta',delivery_mode:$('appealMode').value,determination_reference:$('appealDetermination').value})});lastAppealReadingId=data.id;log('appealLog',data)}catch(e){log('appealLog',e.body||{error:e.message})}};
-$('appealComplete').onclick=async()=>{try{if(!lastAppealReadingId)throw new Error('Buat jadwal pembacaan terlebih dahulu.');for(const record of [{party_role:'DEFENDANT',party_reference:'DEFENDANT-DEMO',attendance_status:'PRESENT',attendance_mode:'ELECTRONIC'},{party_role:'PROSECUTOR',party_reference:'PROSECUTOR-DEMO',attendance_status:'PRESENT',attendance_mode:'ELECTRONIC'}])await api(`/appeal-decision-readings/${lastAppealReadingId}/presence`,{method:'POST',headers:headers(idem('appealpresence')),body:JSON.stringify(record)});const data=await api(`/appeal-decision-readings/${lastAppealReadingId}:complete`,{method:'POST',headers:headers(idem('appealcomplete')),body:JSON.stringify({read_at:new Date().toISOString(),open_to_public:true})});log('appealLog',data)}catch(e){log('appealLog',e.body||{error:e.message})}};
-$('appealEvidence').onclick=async()=>{try{if(!lastAppealReadingId)throw new Error('Buat jadwal pembacaan terlebih dahulu.');await api(`/appeal-decision-readings/${lastAppealReadingId}/excerpt`,{method:'POST',headers:headers(idem('appealexcerpt')),body:JSON.stringify({excerpt_reference:`SIP-EXCERPT-${Date.now()}`,source_system_code:'SIP-DEMO',published_at:new Date().toISOString()})});const data=await api(`/appeal-decision-readings/${lastAppealReadingId}/transmission`,{method:'POST',headers:headers(idem('appealtransmit')),body:JSON.stringify({destination_court_reference:'PN-DEMO',transmission_reference:`PT-SEND-${Date.now()}`,transmitted_at:new Date().toISOString()})});log('appealLog',data);await loadCompliance()}catch(e){log('appealLog',e.body||{error:e.message})}};
-async function loadCompliance(){try{const data=await api('/compliance-dashboard',{headers:headers()});const chain=await api('/audit-events/verify-chain',{headers:headers()});$('auditChainKpi').textContent=chain.valid?'VALID':'INVALID';$('noticeComplianceKpi').textContent=`${data.notices.acknowledged}/${data.notices.total}`;$('readinessComplianceKpi').textContent=`${data.readiness.ready}/${data.readiness.total}`;$('incidentComplianceKpi').textContent=data.incidents.open;log('complianceLog',{dashboard:data,audit_chain:chain})}catch(e){log('complianceLog',e.body||{error:e.message})}}
-$('complianceRefresh').onclick=loadCompliance;
-$('reconciliationRun').onclick=async()=>{try{const data=await api('/reconciliation-runs',{method:'POST',headers:headers(idem('reconcile')),body:JSON.stringify({source_system_code:'SIP-DEMO',records:[{external_case_id:'EXT-CASE-001',case_number:'123/Pid.Sus/2026/PN Demo',case_type:'PIDANA_KHUSUS'},{external_case_id:'EXT-CASE-002',case_number:'124/Pid.Sus/2026/PN Demo',case_type:'PIDANA_KHUSUS'}]})});log('reconciliationLog',data);await loadCompliance()}catch(e){log('reconciliationLog',e.body||{error:e.message})}};
-
-async function loadAudit(){try{const data=await api(`/audit-events?hearing_id=${DEMO.hearingId}&limit=100`,{headers:headers()});$('auditRows').innerHTML=data.items.map(x=>`<tr><td>${new Date(x.occurred_at).toLocaleString('id-ID')}</td><td>${x.event_type}</td><td>${x.object_type}<br>${x.object_id}</td><td>${x.correlation_id}</td></tr>`).join('')||'<tr><td colspan="4">Belum ada event.</td></tr>'}catch(e){$('auditRows').innerHTML=`<tr><td colspan="4">${e.message}</td></tr>`}}$('auditBtn').onclick=loadAudit;health();refreshMe();
-</script></body></html>
+      async function loadAudit() {
+        try {
+          const data = await api(`/audit-events?hearing_id=${DEMO.hearingId}&limit=100`, {
+            headers: headers()
+          });
+          $('auditRows').innerHTML =
+            data.items
+              .map(
+                (x) =>
+                  `<tr><td>${new Date(x.occurred_at).toLocaleString('id-ID')}</td><td>${x.event_type}</td><td>${x.object_type}<br>${x.object_id}</td><td>${x.correlation_id}</td></tr>`
+              )
+              .join('') || '<tr><td colspan="4">Belum ada event.</td></tr>';
+        } catch (e) {
+          $('auditRows').innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`;
+        }
+      }
+      $('auditBtn').onclick = loadAudit;
+      health();
+      refreshMe();
+    </script>
+  </body>
+</html>

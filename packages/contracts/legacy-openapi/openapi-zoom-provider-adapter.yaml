@@ -10,8 +10,8 @@ paths:
     get:
       summary: OAuth and capability health
       responses:
-        '200': {description: Healthy}
-        '503': {description: Missing credentials or Zoom unavailable}
+        '200': { description: Healthy }
+        '503': { description: Missing credentials or Zoom unavailable }
   /sessions:
     post:
       summary: Create a scheduled Zoom meeting
@@ -19,7 +19,7 @@ paths:
         - in: header
           name: Idempotency-Key
           required: true
-          schema: {type: string}
+          schema: { type: string }
       requestBody:
         required: true
         content:
@@ -28,12 +28,12 @@ paths:
               type: object
               required: [hearing_reference, start_at, end_at]
               properties:
-                hearing_reference: {type: string}
-                start_at: {type: string, format: date-time}
-                end_at: {type: string, format: date-time}
-                recording_policy: {type: string, enum: [DISABLED, COURT_CONTROLLED]}
+                hearing_reference: { type: string }
+                start_at: { type: string, format: date-time }
+                end_at: { type: string, format: date-time }
+                recording_policy: { type: string, enum: [DISABLED, COURT_CONTROLLED] }
       responses:
-        '201': {description: Meeting created}
+        '201': { description: Meeting created }
   /sessions/{sessionRef}/rooms:
     post:
       summary: Create a logical CIMS room and Zoom breakout preassignment target
@@ -41,9 +41,9 @@ paths:
         - in: path
           name: sessionRef
           required: true
-          schema: {type: string}
+          schema: { type: string }
       responses:
-        '201': {description: Logical room created}
+        '201': { description: Logical room created }
   /sessions/{sessionRef}/access:
     post:
       summary: Register a participant and return a unique Zoom join URL
@@ -51,24 +51,32 @@ paths:
         - in: path
           name: sessionRef
           required: true
-          schema: {type: string}
+          schema: { type: string }
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [participant_reference, participant_email, participant_name, role, room_reference, expires_at]
+              required:
+                [
+                  participant_reference,
+                  participant_email,
+                  participant_name,
+                  role,
+                  room_reference,
+                  expires_at
+                ]
               properties:
-                participant_reference: {type: string}
-                participant_email: {type: string, format: email}
-                participant_name: {type: string}
-                role: {type: string}
-                room_reference: {type: string}
-                expires_at: {type: string, format: date-time}
+                participant_reference: { type: string }
+                participant_email: { type: string, format: email }
+                participant_name: { type: string }
+                role: { type: string }
+                room_reference: { type: string }
+                expires_at: { type: string, format: date-time }
       responses:
-        '201': {description: Unique registrant access created}
-        '400': {description: Email or request invalid}
+        '201': { description: Unique registrant access created }
+        '400': { description: Email or request invalid }
   /access/{accessRef}/move:
     post:
       summary: Update pre-meeting breakout assignment
@@ -77,10 +85,10 @@ paths:
         - in: path
           name: accessRef
           required: true
-          schema: {type: string}
+          schema: { type: string }
       responses:
-        '200': {description: Preassignment updated}
-        '409': {description: Manual host action required}
+        '200': { description: Preassignment updated }
+        '409': { description: Manual host action required }
   /access/{accessRef}/revoke:
     post:
       summary: Cancel Zoom registrant access
@@ -88,12 +96,12 @@ paths:
         - in: path
           name: accessRef
           required: true
-          schema: {type: string}
+          schema: { type: string }
       responses:
-        '200': {description: Access revoked}
+        '200': { description: Access revoked }
   /webhooks/zoom:
     post:
       summary: Zoom URL validation and signed event endpoint
       responses:
-        '200': {description: Accepted or validation challenge answered}
-        '401': {description: Signature invalid}
+        '200': { description: Accepted or validation challenge answered }
+        '401': { description: Signature invalid }

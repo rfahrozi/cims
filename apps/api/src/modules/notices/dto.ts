@@ -1,5 +1,14 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsBoolean, IsEnum, IsISO8601, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsEnum,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateNested
+} from 'class-validator';
 import { NOTICE_TYPES, type NoticeType } from '@cims/domain';
 
 export class NoticeRecipientDto {
@@ -22,7 +31,10 @@ export class CreateNoticeDto {
   @IsString() @MinLength(3) subject!: string;
   @IsString() @MinLength(10) message!: string;
   @IsString() official_reference!: string;
-  @IsArray() @ValidateNested({ each: true }) @Type(() => NoticeRecipientDto) recipients!: NoticeRecipientDto[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => NoticeRecipientDto)
+  recipients!: NoticeRecipientDto[];
 }
 
 export class AcknowledgeNoticeDto {

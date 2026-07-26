@@ -4,13 +4,17 @@ import {
   ConflictException,
   Injectable,
   OnApplicationShutdown,
-  ServiceUnavailableException,
+  ServiceUnavailableException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { secretValue } from './secret-value.js';
-import type { CreateRoomInput, CreateSessionInput, SessionResponse } from './zoom-provider.types.js';
+import type {
+  CreateRoomInput,
+  CreateSessionInput,
+  SessionResponse
+} from './zoom-provider.types.js';
 
 interface ZoomTokenResponse {
   access_token: string;
@@ -39,7 +43,10 @@ export class ZoomProviderService implements OnApplicationShutdown {
   private readonly hostUserId?: string;
   private readonly timeoutMs: number;
   private readonly pool?: Pool;
-  private readonly memoryOperations = new Map<string, { requestHash: string; response: SessionResponse }>();
+  private readonly memoryOperations = new Map<
+    string,
+    { requestHash: string; response: SessionResponse }
+  >();
 
   constructor(private readonly config: ConfigService) {
     this.accountId = secretValue(config, 'ZOOM_ACCOUNT_ID');
@@ -54,7 +61,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         max: Number(config.get<string>('ZOOM_DB_POOL_MAX') ?? 3),
         connectionTimeoutMillis: Number(config.get<string>('ZOOM_DB_CONNECT_TIMEOUT_MS') ?? 5_000),
         statement_timeout: Number(config.get<string>('ZOOM_DB_STATEMENT_TIMEOUT_MS') ?? 20_000),
-        application_name: 'cims-zoom-provider',
+        application_name: 'cims-zoom-provider'
       });
     }
     if (config.get<string>('NODE_ENV') === 'production') this.assertProductionConfiguration();
@@ -70,7 +77,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         status: 'DOWN',
         provider: 'ZOOM',
         code: 'ZOOM_CONFIG_INCOMPLETE',
-        capabilities: this.capabilities(),
+        capabilities: this.capabilities()
       });
     }
     try {
@@ -80,7 +87,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         provider: 'ZOOM',
         checked_at: new Date().toISOString(),
         durable_idempotency: Boolean(this.pool),
-        capabilities: this.capabilities(),
+        capabilities: this.capabilities()
       };
     } catch (error) {
       throw new ServiceUnavailableException({
@@ -88,7 +95,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         provider: 'ZOOM',
         code: 'ZOOM_OAUTH_UNAVAILABLE',
         message: error instanceof Error ? error.message : String(error),
-        capabilities: this.capabilities(),
+        capabilities: this.capabilities()
       });
     }
   }
@@ -103,7 +110,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
       live_room_move: false,
       participant_registration: false,
       recording_control: false,
-      manual_action_required_for: ['LIVE_WAITING_ROOM_ADMISSION', 'LIVE_ROOM_MOVE'],
+      manual_action_required_for: ['LIVE_WAITING_ROOM_ADMISSION', 'LIVE_ROOM_MOVE']
     };
   }
 
@@ -114,7 +121,8 @@ export class ZoomProviderService implements OnApplicationShutdown {
 
     const prior = this.memoryOperations.get(idempotencyKey);
     if (prior) {
-      if (prior.requestHash !== requestHash) throw new ConflictException('Idempotency key was already used with another request.');
+      if (prior.requestHash !== requestHash)
+        throw new ConflictException('Idempotency key was already used with another request.');
       return prior.response;
     }
     const response = await this.createZoomMeeting(input, idempotencyKey);
@@ -133,11 +141,18 @@ export class ZoomProviderService implements OnApplicationShutdown {
       room_code: input.room_code,
       room_type: input.room_type,
       recording_allowed: input.recording_allowed,
-      provider_operation: input.room_type === 'MAIN' || input.room_type === 'WAITING' ? 'NATIVE' : 'LOGICAL_MANUAL_CONTROL',
+      provider_operation:
+        input.room_type === 'MAIN' || input.room_type === 'WAITING'
+          ? 'NATIVE'
+          : 'LOGICAL_MANUAL_CONTROL'
     };
   }
 
-  private async createSessionDurable(input: CreateSessionInput, idempotencyKey: string, requestHash: string): Promise<SessionResponse> {
+  private async createSessionDurable(
+    input: CreateSessionInput,
+    idempotencyKey: string,
+    requestHash: string
+  ): Promise<SessionResponse> {
     const client = await this.pool!.connect();
     try {
       await client.query('begin');
@@ -147,21 +162,26 @@ export class ZoomProviderService implements OnApplicationShutdown {
          ) values($1,'ZOOM','CREATE_SESSION',$2,'PROCESSING',now(),now())
          on conflict(idempotency_key) do nothing
          returning idempotency_key`,
-        [idempotencyKey, requestHash],
+        [idempotencyKey, requestHash]
       );
       const row = await client.query<StoredOperation>(
         `select request_hash,status,response_payload
            from video_provider_operations
           where idempotency_key=$1
           for update`,
-        [idempotencyKey],
+        [idempotencyKey]
       );
       const operation = row.rows[0];
-      if (!operation) throw new ServiceUnavailableException('Provider operation ledger is unavailable.');
+      if (!operation)
+        throw new ServiceUnavailableException('Provider operation ledger is unavailable.');
       if (operation.request_hash !== requestHash) {
         throw new ConflictException('Idempotency key was already used with another request.');
       }
-      if (inserted.rowCount === 0 && operation.status === 'SUCCEEDED' && operation.response_payload) {
+      if (
+        inserted.rowCount === 0 &&
+        operation.status === 'SUCCEEDED' &&
+        operation.response_payload
+      ) {
         await client.query('commit');
         return operation.response_payload;
       }
@@ -170,7 +190,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         `update video_provider_operations
             set status='SUCCEEDED',provider_reference=$2,response_payload=$3::jsonb,last_error=null,updated_at=now()
           where idempotency_key=$1`,
-        [idempotencyKey, response.provider_session_reference, JSON.stringify(response)],
+        [idempotencyKey, response.provider_session_reference, JSON.stringify(response)]
       );
       await client.query('commit');
       return response;
@@ -186,7 +206,12 @@ export class ZoomProviderService implements OnApplicationShutdown {
     }
   }
 
-  private async recordFailure(client: PoolClient, idempotencyKey: string, requestHash: string, error: unknown): Promise<void> {
+  private async recordFailure(
+    client: PoolClient,
+    idempotencyKey: string,
+    requestHash: string,
+    error: unknown
+  ): Promise<void> {
     try {
       await client.query('rollback');
       await client.query(
@@ -195,14 +220,21 @@ export class ZoomProviderService implements OnApplicationShutdown {
          ) values($1,'ZOOM','CREATE_SESSION',$2,'FAILED',$3,now(),now())
          on conflict(idempotency_key) do update
            set status='FAILED',last_error=excluded.last_error,updated_at=now()`,
-        [idempotencyKey, requestHash, (error instanceof Error ? error.message : String(error)).slice(0, 2_000)],
+        [
+          idempotencyKey,
+          requestHash,
+          (error instanceof Error ? error.message : String(error)).slice(0, 2_000)
+        ]
       );
     } catch {
       // The original provider failure remains the primary error.
     }
   }
 
-  private async createZoomMeeting(input: CreateSessionInput, idempotencyKey: string): Promise<SessionResponse> {
+  private async createZoomMeeting(
+    input: CreateSessionInput,
+    idempotencyKey: string
+  ): Promise<SessionResponse> {
     const token = await this.accessToken();
     const start = new Date(input.start_at);
     const end = new Date(input.end_at);
@@ -214,7 +246,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
         headers: {
           authorization: `Bearer ${token}`,
           'content-type': 'application/json',
-          'x-cims-idempotency-key': idempotencyKey,
+          'x-cims-idempotency-key': idempotencyKey
         },
         body: JSON.stringify({
           topic: `CIMS ${input.hearing_reference}`,
@@ -227,31 +259,45 @@ export class ZoomProviderService implements OnApplicationShutdown {
             waiting_room: true,
             join_before_host: false,
             mute_upon_entry: true,
-            auto_recording: 'none',
-          },
-        }),
-      },
+            auto_recording: 'none'
+          }
+        })
+      }
     );
     if (!response.ok) {
       const text = (await response.text()).slice(0, 1_000);
-      throw new BadGatewayException({ code: 'ZOOM_CREATE_MEETING_FAILED', status: response.status, retryable: response.status >= 500 || response.status === 429, details: text });
+      throw new BadGatewayException({
+        code: 'ZOOM_CREATE_MEETING_FAILED',
+        status: response.status,
+        retryable: response.status >= 500 || response.status === 429,
+        details: text
+      });
     }
-    const data = await response.json() as ZoomMeetingResponse;
-    if (!data.id) throw new BadGatewayException('Zoom response did not contain a meeting identifier.');
+    const data = (await response.json()) as ZoomMeetingResponse;
+    if (!data.id)
+      throw new BadGatewayException('Zoom response did not contain a meeting identifier.');
     return { provider_session_reference: String(data.id), state: 'READY' };
   }
 
   private async accessToken(): Promise<string> {
     if (this.token && this.token.expiresAt > Date.now() + 60_000) return this.token.value;
-    if (!this.configured()) throw new ServiceUnavailableException('Zoom credentials are incomplete.');
+    if (!this.configured())
+      throw new ServiceUnavailableException('Zoom credentials are incomplete.');
     const basic = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
     const url = new URL('https://zoom.us/oauth/token');
     url.searchParams.set('grant_type', 'account_credentials');
     url.searchParams.set('account_id', this.accountId!);
-    const response = await this.fetchWithTimeout(url, { method: 'POST', headers: { authorization: `Basic ${basic}` } });
-    if (!response.ok) throw new ServiceUnavailableException(`Zoom OAuth request failed with HTTP ${response.status}.`);
-    const data = await response.json() as ZoomTokenResponse;
-    if (!data.access_token || !data.expires_in) throw new ServiceUnavailableException('Zoom OAuth response is incomplete.');
+    const response = await this.fetchWithTimeout(url, {
+      method: 'POST',
+      headers: { authorization: `Basic ${basic}` }
+    });
+    if (!response.ok)
+      throw new ServiceUnavailableException(
+        `Zoom OAuth request failed with HTTP ${response.status}.`
+      );
+    const data = (await response.json()) as ZoomTokenResponse;
+    if (!data.access_token || !data.expires_in)
+      throw new ServiceUnavailableException('Zoom OAuth response is incomplete.');
     this.token = { value: data.access_token, expiresAt: Date.now() + data.expires_in * 1_000 };
     return data.access_token;
   }
@@ -261,8 +307,10 @@ export class ZoomProviderService implements OnApplicationShutdown {
   }
 
   private validateSession(input: CreateSessionInput, idempotencyKey: string): void {
-    if (!idempotencyKey?.trim()) throw new BadRequestException('Idempotency-Key header is required.');
-    if (!input.hearing_reference?.trim()) throw new BadRequestException('hearing_reference is required.');
+    if (!idempotencyKey?.trim())
+      throw new BadRequestException('Idempotency-Key header is required.');
+    if (!input.hearing_reference?.trim())
+      throw new BadRequestException('hearing_reference is required.');
     const start = new Date(input.start_at);
     const end = new Date(input.end_at);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
@@ -271,12 +319,16 @@ export class ZoomProviderService implements OnApplicationShutdown {
   }
 
   private requestHash(input: CreateSessionInput): string {
-    return createHash('sha256').update(JSON.stringify({
-      hearing_reference: input.hearing_reference,
-      start_at: input.start_at,
-      end_at: input.end_at,
-      recording_policy: input.recording_policy ?? 'DISABLED',
-    })).digest('hex');
+    return createHash('sha256')
+      .update(
+        JSON.stringify({
+          hearing_reference: input.hearing_reference,
+          start_at: input.start_at,
+          end_at: input.end_at,
+          recording_policy: input.recording_policy ?? 'DISABLED'
+        })
+      )
+      .digest('hex');
   }
 
   private async fetchWithTimeout(input: string | URL, init: RequestInit): Promise<Response> {
@@ -285,7 +337,8 @@ export class ZoomProviderService implements OnApplicationShutdown {
     try {
       return await fetch(input, { ...init, signal: controller.signal });
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') throw new ServiceUnavailableException('Zoom API request timed out.');
+      if (error instanceof Error && error.name === 'AbortError')
+        throw new ServiceUnavailableException('Zoom API request timed out.');
       throw error;
     } finally {
       clearTimeout(timer);
@@ -294,6 +347,9 @@ export class ZoomProviderService implements OnApplicationShutdown {
 
   private assertProductionConfiguration(): void {
     if (!this.configured()) throw new Error('Zoom production credentials are incomplete.');
-    if (!this.pool) throw new Error('DATABASE_URL or DATABASE_URL_FILE is required for durable Zoom idempotency in production.');
+    if (!this.pool)
+      throw new Error(
+        'DATABASE_URL or DATABASE_URL_FILE is required for durable Zoom idempotency in production.'
+      );
   }
 }

@@ -1,536 +1,660 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CIMS - Court Intelligence Management System | Project Description & SOP</title>
     <style>
-        :root {
-            --primary: #0b2a4a;
-            --primary-light: #1d4ed8;
-            --secondary: #3b82f6;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --surface: #f8fafc;
-            --surface-alt: #f1f5f9;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-        }
+      :root {
+        --primary: #0b2a4a;
+        --primary-light: #1d4ed8;
+        --secondary: #3b82f6;
+        --accent: #f59e0b;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --surface: #f8fafc;
+        --surface-alt: #f1f5f9;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+      }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-main);
-            background-color: #f4f7fb;
-            padding: 20px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+          sans-serif;
+        line-height: 1.6;
+        color: var(--text-main);
+        background-color: #f4f7fb;
+        padding: 20px;
+      }
 
-        .container {
-            max-w-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
+      .container {
+        max-w-width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
 
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 40px 40px 30px;
-            position: relative;
-        }
+      header {
+        background-color: var(--primary);
+        color: white;
+        padding: 40px 40px 30px;
+        position: relative;
+      }
 
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
+      header h1 {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+      }
 
-        header p {
-            font-size: 1.1rem;
-            color: #bfdbfe;
-            max-width: 800px;
-        }
+      header p {
+        font-size: 1.1rem;
+        color: #bfdbfe;
+        max-width: 800px;
+      }
 
-        .version-badge {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            background-color: var(--success);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
+      .version-badge {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        background-color: var(--success);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
 
-        .content { padding: 40px; }
+      .content {
+        padding: 40px;
+      }
 
-        h2 {
-            color: var(--primary);
-            font-size: 1.75rem;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--surface-alt);
-        }
+      h2 {
+        color: var(--primary);
+        font-size: 1.75rem;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--surface-alt);
+      }
 
-        h2:first-child { margin-top: 0; }
+      h2:first-child {
+        margin-top: 0;
+      }
 
-        h3 {
-            color: var(--primary-light);
-            font-size: 1.25rem;
-            margin-top: 25px;
-            margin-bottom: 15px;
-        }
+      h3 {
+        color: var(--primary-light);
+        font-size: 1.25rem;
+        margin-top: 25px;
+        margin-bottom: 15px;
+      }
 
-        p { margin-bottom: 16px; }
+      p {
+        margin-bottom: 16px;
+      }
 
-        ul, ol { margin-bottom: 16px; padding-left: 24px; }
-        li { margin-bottom: 8px; }
+      ul,
+      ol {
+        margin-bottom: 16px;
+        padding-left: 24px;
+      }
+      li {
+        margin-bottom: 8px;
+      }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+      }
 
-        .card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-        }
+      .card {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+      }
 
-        .card h4 {
-            color: var(--primary);
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+      .card h4 {
+        color: var(--primary);
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-        .card h4::before {
-            content: '';
-            display: block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--secondary);
-        }
+      .card h4::before {
+        content: '';
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--secondary);
+      }
 
-        /* Workflow styling */
-        .workflow {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 30px;
-        }
+      /* Workflow styling */
+      .workflow {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 30px;
+      }
 
-        .workflow-step {
-            display: flex;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+      .workflow-step {
+        display: flex;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
 
-        .workflow-number {
-            background-color: var(--primary);
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 60px;
-            flex-shrink: 0;
-        }
+      .workflow-number {
+        background-color: var(--primary);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        flex-shrink: 0;
+      }
 
-        .workflow-content { padding: 20px; flex-grow: 1; }
+      .workflow-content {
+        padding: 20px;
+        flex-grow: 1;
+      }
 
-        .workflow-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
+      .workflow-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
 
-        .workflow-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+      .workflow-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
 
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
 
-        .badge-actor { background-color: #e0e7ff; color: #1e40af; border: 1px solid #bfdbfe; }
-        .badge-gate { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .badge-system { background-color: #f3f4f6; color: #475569; border: 1px solid #e2e8f0; }
+      .badge-actor {
+        background-color: #e0e7ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
+      .badge-gate {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+      .badge-system {
+        background-color: #f3f4f6;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
 
-        .workflow-desc { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 12px; }
+      .workflow-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+      }
 
-        .checklist {
-            background-color: var(--surface-alt);
-            padding: 12px 16px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
+      .checklist {
+        background-color: var(--surface-alt);
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+      }
 
-        .checklist ul { margin-bottom: 0; }
+      .checklist ul {
+        margin-bottom: 0;
+      }
 
-        /* Architecture table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 24px 0;
-            font-size: 0.95rem;
-        }
+      /* Architecture table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 24px 0;
+        font-size: 0.95rem;
+      }
 
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
 
-        th {
-            background-color: var(--surface-alt);
-            color: var(--primary);
-            font-weight: 600;
-        }
+      th {
+        background-color: var(--surface-alt);
+        color: var(--primary);
+        font-weight: 600;
+      }
 
-        tr:nth-child(even) { background-color: var(--surface); }
+      tr:nth-child(even) {
+        background-color: var(--surface);
+      }
 
-        .footer {
-            background-color: var(--text-main);
-            color: white;
-            text-align: center;
-            padding: 24px;
-            font-size: 0.875rem;
-        }
+      .footer {
+        background-color: var(--text-main);
+        color: white;
+        text-align: center;
+        padding: 24px;
+        font-size: 0.875rem;
+      }
 
-        .highlight-box {
-            background-color: #fffbeb;
-            border-left: 4px solid var(--accent);
-            padding: 16px;
-            border-radius: 0 8px 8px 0;
-            margin: 24px 0;
-        }
+      .highlight-box {
+        background-color: #fffbeb;
+        border-left: 4px solid var(--accent);
+        padding: 16px;
+        border-radius: 0 8px 8px 0;
+        margin: 24px 0;
+      }
 
-        .highlight-box strong { color: #b45309; }
-
+      .highlight-box strong {
+        color: #b45309;
+      }
     </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
+  </head>
+  <body>
+    <div class="container">
+      <header>
         <div class="version-badge">v0.20.0 MVP (Preproduction)</div>
         <h1>CIMS</h1>
-        <p>Court Intelligence Management System &mdash; Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan).</p>
-    </header>
+        <p>
+          Court Intelligence Management System &mdash; Sistem Koordinasi Persidangan Pidana
+          Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan).
+        </p>
+      </header>
 
-    <div class="content">
+      <div class="content">
         <h2>1. Ringkasan Eksekutif</h2>
-        <p>CIMS tidak dirancang untuk menggantikan Sistem Informasi Penelusuran Perkara (SIPP) atau e-Berpadu yang merupakan register resmi perkara. CIMS bertindak murni sebagai <strong>lapisan orkestrasi dan koordinasi (Orchestration Layer)</strong> untuk memfasilitasi kelancaran operasional sidang elektronik (virtual).</p>
+        <p>
+          CIMS tidak dirancang untuk menggantikan Sistem Informasi Penelusuran Perkara (SIPP) atau
+          e-Berpadu yang merupakan register resmi perkara. CIMS bertindak murni sebagai
+          <strong>lapisan orkestrasi dan koordinasi (Orchestration Layer)</strong> untuk
+          memfasilitasi kelancaran operasional sidang elektronik (virtual).
+        </p>
 
-        <p>Pengembangan v0.20.0 mematuhi <strong>SOP/CIMS/PPE/001/2026</strong> dan pendekatan <em>Compliance-First Architecture</em>, di mana setiap fase (mulai dari penetapan hakim hingga ruang virtual) diamankan oleh <em>Hard Gates</em>. Ruang virtual tidak akan dapat dibuat atau diakses jika gerbang persetujuan administratif dan hukum belum terpenuhi oleh instansi terkait.</p>
+        <p>
+          Pengembangan v0.20.0 mematuhi <strong>SOP/CIMS/PPE/001/2026</strong> dan pendekatan
+          <em>Compliance-First Architecture</em>, di mana setiap fase (mulai dari penetapan hakim
+          hingga ruang virtual) diamankan oleh <em>Hard Gates</em>. Ruang virtual tidak akan dapat
+          dibuat atau diakses jika gerbang persetujuan administratif dan hukum belum terpenuhi oleh
+          instansi terkait.
+        </p>
 
         <div class="highlight-box">
-            <strong>Prinsip Pareto MVP (80/20 Rule)</strong><br>
-            Rilis v0.20 ini difokuskan pada alur linear utama sidang (7 langkah inti) yang memberikan 80% nilai koordinasi operasional bagi pengguna, dengan menangguhkan fitur-fitur administratif berat seperti sinkronisasi otomatis SIPP, kebijakan retensi otomatis, dan analitik makro ke fase selanjutnya.
+          <strong>Prinsip Pareto MVP (80/20 Rule)</strong><br />
+          Rilis v0.20 ini difokuskan pada alur linear utama sidang (7 langkah inti) yang memberikan
+          80% nilai koordinasi operasional bagi pengguna, dengan menangguhkan fitur-fitur
+          administratif berat seperti sinkronisasi otomatis SIPP, kebijakan retensi otomatis, dan
+          analitik makro ke fase selanjutnya.
         </div>
 
         <h2>2. Arsitektur Inti & Teknologi</h2>
         <div class="grid-3">
-            <div class="card">
-                <h4>Domain-Driven Design</h4>
-                <p>Logika hukum dipisahkan dari <em>framework</em> dan database. Semua aturan bisnis (SOP) berada dalam paket <code>@cims/domain</code> murni TypeScript, yang dapat diuji dan divalidasi 100% tanpa perlu server database menyala.</p>
-            </div>
-            <div class="card">
-                <h4>Hard Gates Enforcement</h4>
-                <p>Arsitektur <em>State Machine</em> mencegah proses melompat. Tidak ada ruang Zoom yang terbentuk tanpa <code>APPROVED</code> Determination dari Hakim, tidak ada jadwal tanpa Ceklis Kesiapan (Readiness) yang lulus dari ketiga instansi.</p>
-            </div>
-            <div class="card">
-                <h4>Immutable Audit Trail</h4>
-                <p>Setiap kejadian penting dicatat di database dengan skema <em>append-only</em>. Menggunakan teknik mirip blockchain (<em>HMAC Chaining</em>), data log memiliki <code>event_hash</code> yang bertautan sehingga tidak dapat dimanipulasi dari belakang layar.</p>
-            </div>
-            <div class="card">
-                <h4>Transactional Outbox</h4>
-                <p>Pengiriman pemberitahuan resmi dan rekonsiliasi data disimpan di antrian database (Outbox) sebelum dikirim. Ini memastikan keandalan (<em>resiliency</em>) jika sistem notifikasi eksternal sedang <em>down</em>.</p>
-            </div>
-            <div class="card">
-                <h4>RBAC & ABAC Security</h4>
-                <p>Akses diatur bukan hanya berdasarkan peran (Hakim, Jaksa, dll), melainkan juga batasan organisasi dan penugasan sidang (<em>Attribute-Based Access Control</em>). Panitera pengadilan A tidak bisa melihat sidang pengadilan B.</p>
-            </div>
-            <div class="card">
-                <h4>Provider-Agnostic Video</h4>
-                <p>Ruang sidang virtual tidak di-hardcode ke Zoom. Sistem menggunakan <em>adapter pattern</em> sehingga sewaktu-waktu pengadilan dapat berpindah ke WebEx atau layanan on-premise mandiri tanpa merombak CIMS.</p>
-            </div>
+          <div class="card">
+            <h4>Domain-Driven Design</h4>
+            <p>
+              Logika hukum dipisahkan dari <em>framework</em> dan database. Semua aturan bisnis
+              (SOP) berada dalam paket <code>@cims/domain</code> murni TypeScript, yang dapat diuji
+              dan divalidasi 100% tanpa perlu server database menyala.
+            </p>
+          </div>
+          <div class="card">
+            <h4>Hard Gates Enforcement</h4>
+            <p>
+              Arsitektur <em>State Machine</em> mencegah proses melompat. Tidak ada ruang Zoom yang
+              terbentuk tanpa <code>APPROVED</code> Determination dari Hakim, tidak ada jadwal tanpa
+              Ceklis Kesiapan (Readiness) yang lulus dari ketiga instansi.
+            </p>
+          </div>
+          <div class="card">
+            <h4>Immutable Audit Trail</h4>
+            <p>
+              Setiap kejadian penting dicatat di database dengan skema <em>append-only</em>.
+              Menggunakan teknik mirip blockchain (<em>HMAC Chaining</em>), data log memiliki
+              <code>event_hash</code> yang bertautan sehingga tidak dapat dimanipulasi dari belakang
+              layar.
+            </p>
+          </div>
+          <div class="card">
+            <h4>Transactional Outbox</h4>
+            <p>
+              Pengiriman pemberitahuan resmi dan rekonsiliasi data disimpan di antrian database
+              (Outbox) sebelum dikirim. Ini memastikan keandalan (<em>resiliency</em>) jika sistem
+              notifikasi eksternal sedang <em>down</em>.
+            </p>
+          </div>
+          <div class="card">
+            <h4>RBAC & ABAC Security</h4>
+            <p>
+              Akses diatur bukan hanya berdasarkan peran (Hakim, Jaksa, dll), melainkan juga batasan
+              organisasi dan penugasan sidang (<em>Attribute-Based Access Control</em>). Panitera
+              pengadilan A tidak bisa melihat sidang pengadilan B.
+            </p>
+          </div>
+          <div class="card">
+            <h4>Provider-Agnostic Video</h4>
+            <p>
+              Ruang sidang virtual tidak di-hardcode ke Zoom. Sistem menggunakan
+              <em>adapter pattern</em> sehingga sewaktu-waktu pengadilan dapat berpindah ke WebEx
+              atau layanan on-premise mandiri tanpa merombak CIMS.
+            </p>
+          </div>
         </div>
 
         <h2>3. Alur SOP Persidangan Elektronik (SOP 10.1 – 10.15)</h2>
-        <p>Berikut adalah representasi visual diagram interaktif dan detail dari 7 langkah utama (Alur Utama) pada sistem CIMS yang diwajibkan oleh Standar Operasional Prosedur 2026:</p>
+        <p>
+          Berikut adalah representasi visual diagram interaktif dan detail dari 7 langkah utama
+          (Alur Utama) pada sistem CIMS yang diwajibkan oleh Standar Operasional Prosedur 2026:
+        </p>
 
-        <div class="card" style="margin-top: 20px; overflow-x: auto; background: white;">
-            <div class="mermaid">
-            stateDiagram-v2
-                direction TB
-
-                state "1. Input Data Perkara" as S1
-                state "2. Penetapan Hakim" as S2
-                state "3. Jadwal & Agenda" as S3
-                state "4. Pemberitahuan & ACK" as S4
-                state "5. Checklist Kesiapan" as S5
-                state "6. Registrasi & Ruang Virtual" as S6
-                state "7. Kontrol Sidang" as S7
-                state "Dokumentasi & Pasca Sidang" as S8
-
-                [*] --> DRAFT
-
-                state "Pembuatan Kasus" as C1 {
-                  DRAFT --> SUBMITTED : Panitera Pengganti (Maker)
-                  SUBMITTED --> ACTIVE_INTAKE : Panitera (Checker)
-                  SUBMITTED --> DRAFT : Revisi
-                }
-
-                C1 --> S1
-
-                S1 --> S2 : Hard Gate
-                S2 --> S3 : Jika APPROVED
-
-                state "Otorisasi Sidang" as C2 {
-                  S2 --> REJECTED : Hakim Menolak
-                }
-
-                S3 --> S4
-
-                state "Koordinasi Multi-Instansi" as C3 {
-                  S4 --> SENT_NOTICE : Outbox Worker
-                  SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan
-
-                  ACKNOWLEDGED --> S5 : Hard Gate
-
-                  state "Kesiapan" as Readiness {
-                     VERIFY_ID --> ROOM_INSPECT : Rutan (Terdakwa)
-                     ROOM_INSPECT --> SUBMIT_RUTAN
-                     SUBMIT_JAKSA
-                     SUBMIT_PENGADILAN
-                  }
-                }
-
-                S5 --> S6 : Hard Gate
-
-                state "Virtual Session" as C4 {
-                   S6 --> PROVISIONING : IT Operator
-                   PROVISIONING --> READY : Zoom / WebEx Adapter
-                }
-
-                S6 --> S7 : Hard Gate
-
-                state "Sidang Berlangsung" as C5 {
-                   S7 --> STARTED : Hakim
-                   STARTED --> SUSPENDED : Skors
-                   SUSPENDED --> STARTED : Lanjut
-                   STARTED --> ENDED : Hakim Tutup
-                   STARTED --> POSTPONED : Ditunda
-                }
-
-                C5 --> S8
-                S8 --> [*]
-
-                note right of C3 : Jika terjadi Mutasi Tahanan,\nalur akan terputus & dikembalikan ke\nChecklist Kesiapan Rutan tujuan.
-                note right of C5 : Segala Insiden CRITICAL/HIGH\nakan otomatis men-trigger\nstatus SUSPENDED.
-            </div>
+        <div class="card" style="margin-top: 20px; overflow-x: auto; background: white">
+          <div class="mermaid">
+            stateDiagram-v2 direction TB state "1. Input Data Perkara" as S1 state "2. Penetapan
+            Hakim" as S2 state "3. Jadwal & Agenda" as S3 state "4. Pemberitahuan & ACK" as S4 state
+            "5. Checklist Kesiapan" as S5 state "6. Registrasi & Ruang Virtual" as S6 state "7.
+            Kontrol Sidang" as S7 state "Dokumentasi & Pasca Sidang" as S8 [*] --> DRAFT state
+            "Pembuatan Kasus" as C1 { DRAFT --> SUBMITTED : Panitera Pengganti (Maker) SUBMITTED -->
+            ACTIVE_INTAKE : Panitera (Checker) SUBMITTED --> DRAFT : Revisi } C1 --> S1 S1 --> S2 :
+            Hard Gate S2 --> S3 : Jika APPROVED state "Otorisasi Sidang" as C2 { S2 --> REJECTED :
+            Hakim Menolak } S3 --> S4 state "Koordinasi Multi-Instansi" as C3 { S4 --> SENT_NOTICE :
+            Outbox Worker SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan ACKNOWLEDGED --> S5 :
+            Hard Gate state "Kesiapan" as Readiness { VERIFY_ID --> ROOM_INSPECT : Rutan (Terdakwa)
+            ROOM_INSPECT --> SUBMIT_RUTAN SUBMIT_JAKSA SUBMIT_PENGADILAN } } S5 --> S6 : Hard Gate
+            state "Virtual Session" as C4 { S6 --> PROVISIONING : IT Operator PROVISIONING --> READY
+            : Zoom / WebEx Adapter } S6 --> S7 : Hard Gate state "Sidang Berlangsung" as C5 { S7 -->
+            STARTED : Hakim STARTED --> SUSPENDED : Skors SUSPENDED --> STARTED : Lanjut STARTED -->
+            ENDED : Hakim Tutup STARTED --> POSTPONED : Ditunda } C5 --> S8 S8 --> [*] note right of
+            C3 : Jika terjadi Mutasi Tahanan,\nalur akan terputus & dikembalikan ke\nChecklist
+            Kesiapan Rutan tujuan. note right of C5 : Segala Insiden CRITICAL/HIGH\nakan otomatis
+            men-trigger\nstatus SUSPENDED.
+          </div>
         </div>
 
         <div class="workflow">
-            <!-- Step 1 -->
-            <div class="workflow-step">
-                <div class="workflow-number">1</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Input Data Perkara (Intake)</div>
-                        <div>
-                            <span class="badge badge-actor">Panitera Pengganti</span>
-                            <span class="badge badge-actor">Panitera</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Sebagai sumber data awal MVP, Panitera Pengganti memasukkan data perkara secara manual ke CIMS (Nomor Kasus, Klasifikasi, Terdakwa, Instansi Terkait).
-                    </div>
-                    <div class="checklist">
-                        <strong>Kepatuhan Maker-Checker:</strong> Data yang berstatus <code>DRAFT</code> diajukan (<code>SUBMITTED</code>), dan wajib di-<em>approve</em> menjadi <code>ACTIVE</code> oleh akun Panitera yang <strong>berbeda</strong>.
-                    </div>
+          <!-- Step 1 -->
+          <div class="workflow-step">
+            <div class="workflow-number">1</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Input Data Perkara (Intake)</div>
+                <div>
+                  <span class="badge badge-actor">Panitera Pengganti</span>
+                  <span class="badge badge-actor">Panitera</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Sebagai sumber data awal MVP, Panitera Pengganti memasukkan data perkara secara
+                manual ke CIMS (Nomor Kasus, Klasifikasi, Terdakwa, Instansi Terkait).
+              </div>
+              <div class="checklist">
+                <strong>Kepatuhan Maker-Checker:</strong> Data yang berstatus
+                <code>DRAFT</code> diajukan (<code>SUBMITTED</code>), dan wajib di-<em>approve</em>
+                menjadi <code>ACTIVE</code> oleh akun Panitera yang <strong>berbeda</strong>.
+              </div>
             </div>
+          </div>
 
-            <!-- Step 2 -->
-            <div class="workflow-step">
-                <div class="workflow-number">2</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Penetapan Hakim (SOP 10.2)</div>
-                        <div>
-                            <span class="badge badge-actor">Hakim</span>
-                            <span class="badge badge-gate">Hard Gate</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Hakim yang ditunjuk mengotorisasi bahwa perkara ini diizinkan untuk disidangkan secara elektronik berdasarkan alasan dan keadaan yang dibenarkan.
-                    </div>
-                    <div class="checklist">
-                        <strong>Data Tersimpan:</strong> Keputusan (APPROVED/REJECTED), Nomor Penetapan Resmi, Mode Persidangan (LANGSUNG / ELEKTRONIK / HYBRID), dan Alasan.
-                    </div>
+          <!-- Step 2 -->
+          <div class="workflow-step">
+            <div class="workflow-number">2</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Penetapan Hakim (SOP 10.2)</div>
+                <div>
+                  <span class="badge badge-actor">Hakim</span>
+                  <span class="badge badge-gate">Hard Gate</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Hakim yang ditunjuk mengotorisasi bahwa perkara ini diizinkan untuk disidangkan
+                secara elektronik berdasarkan alasan dan keadaan yang dibenarkan.
+              </div>
+              <div class="checklist">
+                <strong>Data Tersimpan:</strong> Keputusan (APPROVED/REJECTED), Nomor Penetapan
+                Resmi, Mode Persidangan (LANGSUNG / ELEKTRONIK / HYBRID), dan Alasan.
+              </div>
             </div>
+          </div>
 
-            <!-- Step 3 -->
-            <div class="workflow-step">
-                <div class="workflow-number">3</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Penjadwalan & Agenda Sidang (SOP 10.3)</div>
-                        <div>
-                            <span class="badge badge-actor">Panitera</span>
-                            <span class="badge badge-system">Conflict Check Engine</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Panitera menyusun jadwal dan rincian agenda (multi-item: misal Pembacaan Dakwaan + Pemeriksaan Saksi). Sistem CIMS otomatis memvalidasi konflik resource (Hakim, Ruangan) sebelum disetujui.
-                    </div>
-                    <div class="checklist">
-                        <strong>SOP 10.3 (Perubahan Jadwal):</strong> Bila jadwal yang sudah <code>ACTIVE</code> dibatalkan/ditimpa jadwal baru (<code>SUPERSEDED</code>), wajib menyertakan alasan (<em>change_reason</em>) dan memicu otomatis pengiriman pemberitahuan ulang ke seluruh pihak.
-                    </div>
+          <!-- Step 3 -->
+          <div class="workflow-step">
+            <div class="workflow-number">3</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Penjadwalan & Agenda Sidang (SOP 10.3)</div>
+                <div>
+                  <span class="badge badge-actor">Panitera</span>
+                  <span class="badge badge-system">Conflict Check Engine</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Panitera menyusun jadwal dan rincian agenda (multi-item: misal Pembacaan Dakwaan +
+                Pemeriksaan Saksi). Sistem CIMS otomatis memvalidasi konflik resource (Hakim,
+                Ruangan) sebelum disetujui.
+              </div>
+              <div class="checklist">
+                <strong>SOP 10.3 (Perubahan Jadwal):</strong> Bila jadwal yang sudah
+                <code>ACTIVE</code> dibatalkan/ditimpa jadwal baru (<code>SUPERSEDED</code>), wajib
+                menyertakan alasan (<em>change_reason</em>) dan memicu otomatis pengiriman
+                pemberitahuan ulang ke seluruh pihak.
+              </div>
             </div>
+          </div>
 
-            <!-- Step 4 -->
-            <div class="workflow-step">
-                <div class="workflow-number">4</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Pemberitahuan & Tanda Terima (SOP 10.5)</div>
-                        <div>
-                            <span class="badge badge-actor">Liaison Officer</span>
-                            <span class="badge badge-actor">Semua Instansi</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Pengadilan mengirimkan pemberitahuan resmi (Surat Panggilan / Penetapan Jadwal) ke Kejaksaan dan Pemasyarakatan melalui sistem (In-App atau Email/WA).
-                    </div>
-                    <div class="checklist">
-                        <ul>
-                            <li><strong>Acknowledgment:</strong> Setiap instansi penerima wajib melakukan konfirmasi tanda terima (ACK).</li>
-                            <li><strong>SLA Monitoring:</strong> Dashboard CIMS menampilkan peringatan merah jika terdapat pemberitahuan yang melewati tenggat waktu (Overdue).</li>
-                        </ul>
-                    </div>
+          <!-- Step 4 -->
+          <div class="workflow-step">
+            <div class="workflow-number">4</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Pemberitahuan & Tanda Terima (SOP 10.5)</div>
+                <div>
+                  <span class="badge badge-actor">Liaison Officer</span>
+                  <span class="badge badge-actor">Semua Instansi</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Pengadilan mengirimkan pemberitahuan resmi (Surat Panggilan / Penetapan Jadwal) ke
+                Kejaksaan dan Pemasyarakatan melalui sistem (In-App atau Email/WA).
+              </div>
+              <div class="checklist">
+                <ul>
+                  <li>
+                    <strong>Acknowledgment:</strong> Setiap instansi penerima wajib melakukan
+                    konfirmasi tanda terima (ACK).
+                  </li>
+                  <li>
+                    <strong>SLA Monitoring:</strong> Dashboard CIMS menampilkan peringatan merah
+                    jika terdapat pemberitahuan yang melewati tenggat waktu (Overdue).
+                  </li>
+                </ul>
+              </div>
             </div>
+          </div>
 
-            <!-- Step 5 -->
-            <div class="workflow-step">
-                <div class="workflow-number">5</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Kesiapan Instansi & Ceklis (SOP 10.6 & 10.7)</div>
-                        <div>
-                            <span class="badge badge-actor">Semua Instansi</span>
-                            <span class="badge badge-gate">Hard Gate</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Sebelum ruang virtual dapat dibuat, Pengadilan, Kejaksaan, dan Rutan harus melaporkan kesiapan infrastruktur (kamera, mikrofon, internet). CIMS menyediakan <em>Dynamic Checklist Template</em> per jenis instansi.
-                    </div>
-                    <div class="checklist">
-                        <strong>SOP 10.7 (Rutan):</strong> Pemasyarakatan secara khusus wajib melakukan Verifikasi Identitas Terdakwa dan Inspeksi Sterilitas Ruangan Konsultasi sebelum bisa mensubmit formulir kesiapan.
-                    </div>
+          <!-- Step 5 -->
+          <div class="workflow-step">
+            <div class="workflow-number">5</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Kesiapan Instansi & Ceklis (SOP 10.6 & 10.7)</div>
+                <div>
+                  <span class="badge badge-actor">Semua Instansi</span>
+                  <span class="badge badge-gate">Hard Gate</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Sebelum ruang virtual dapat dibuat, Pengadilan, Kejaksaan, dan Rutan harus
+                melaporkan kesiapan infrastruktur (kamera, mikrofon, internet). CIMS menyediakan
+                <em>Dynamic Checklist Template</em> per jenis instansi.
+              </div>
+              <div class="checklist">
+                <strong>SOP 10.7 (Rutan):</strong> Pemasyarakatan secara khusus wajib melakukan
+                Verifikasi Identitas Terdakwa dan Inspeksi Sterilitas Ruangan Konsultasi sebelum
+                bisa mensubmit formulir kesiapan.
+              </div>
             </div>
+          </div>
 
-            <!-- Step 6 -->
-            <div class="workflow-step">
-                <div class="workflow-number">6</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Registrasi Peserta & Ruang Virtual</div>
-                        <div>
-                            <span class="badge badge-actor">Panitera</span>
-                            <span class="badge badge-actor">Operator TI</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Pembuatan <em>Join Token</em> satu kali pakai (Expired dalam 15 menit) untuk Terdakwa, Saksi, dan Advokat. Di saat yang sama, Operator TI melakukan "Provisioning" ruangan (seperti Zoom).
-                    </div>
-                    <div class="checklist">
-                        <ul>
-                            <li><strong>SOP 10.9 (Saksi Rentan):</strong> CIMS secara otomatis mengaktifkan status "Identitas Dilindungi" dan *Auto-Masking Name* (Alias) bagi peran Saksi, Ahli, dan Penerjemah.</li>
-                            <li><strong>SOP 10.8 (Lokasi Advokat):</strong> Jika advokat berada terpisah dari Rutan Terdakwa, Panitera wajib menginput Referensi Penetapan Hakim untuk izin pemisahan fisik tersebut.</li>
-                        </ul>
-                    </div>
+          <!-- Step 6 -->
+          <div class="workflow-step">
+            <div class="workflow-number">6</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Registrasi Peserta & Ruang Virtual</div>
+                <div>
+                  <span class="badge badge-actor">Panitera</span>
+                  <span class="badge badge-actor">Operator TI</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Pembuatan <em>Join Token</em> satu kali pakai (Expired dalam 15 menit) untuk
+                Terdakwa, Saksi, dan Advokat. Di saat yang sama, Operator TI melakukan
+                "Provisioning" ruangan (seperti Zoom).
+              </div>
+              <div class="checklist">
+                <ul>
+                  <li>
+                    <strong>SOP 10.9 (Saksi Rentan):</strong> CIMS secara otomatis mengaktifkan
+                    status "Identitas Dilindungi" dan *Auto-Masking Name* (Alias) bagi peran Saksi,
+                    Ahli, dan Penerjemah.
+                  </li>
+                  <li>
+                    <strong>SOP 10.8 (Lokasi Advokat):</strong> Jika advokat berada terpisah dari
+                    Rutan Terdakwa, Panitera wajib menginput Referensi Penetapan Hakim untuk izin
+                    pemisahan fisik tersebut.
+                  </li>
+                </ul>
+              </div>
             </div>
+          </div>
 
-            <!-- Step 7 -->
-            <div class="workflow-step">
-                <div class="workflow-number">7</div>
-                <div class="workflow-content">
-                    <div class="workflow-header">
-                        <div class="workflow-title">Kontrol Sidang & Pelaksanaan (SOP 10.10)</div>
-                        <div>
-                            <span class="badge badge-actor">Hakim</span>
-                            <span class="badge badge-system">CIMS Core</span>
-                        </div>
-                    </div>
-                    <div class="workflow-desc">
-                        Hanya persona <strong>Hakim</strong> yang memiliki akses untuk mengubah status mesin sidang: Buka Sidang (START), Skors Sementara (SUSPEND), Lanjutkan (RESUME), atau Tutup Sidang (END).
-                    </div>
-                    <div class="checklist">
-                        <strong>Konsultasi Privat (SOP 10.8):</strong> Jika Terdakwa dan Advokat meminta konsultasi tertutup, sistem mencatat waktu dimulainya diskusi dan memiliki sensor (Webhook Alert) untuk mencegah/melarang segala bentuk *Recording* pada sesi tersebut.
-                    </div>
+          <!-- Step 7 -->
+          <div class="workflow-step">
+            <div class="workflow-number">7</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Kontrol Sidang & Pelaksanaan (SOP 10.10)</div>
+                <div>
+                  <span class="badge badge-actor">Hakim</span>
+                  <span class="badge badge-system">CIMS Core</span>
                 </div>
+              </div>
+              <div class="workflow-desc">
+                Hanya persona <strong>Hakim</strong> yang memiliki akses untuk mengubah status mesin
+                sidang: Buka Sidang (START), Skors Sementara (SUSPEND), Lanjutkan (RESUME), atau
+                Tutup Sidang (END).
+              </div>
+              <div class="checklist">
+                <strong>Konsultasi Privat (SOP 10.8):</strong> Jika Terdakwa dan Advokat meminta
+                konsultasi tertutup, sistem mencatat waktu dimulainya diskusi dan memiliki sensor
+                (Webhook Alert) untuk mencegah/melarang segala bentuk *Recording* pada sesi
+                tersebut.
+              </div>
             </div>
+          </div>
         </div>
 
         <h2>4. Skenario Khusus (Edge Cases) & Tindakan Administratif Lanjutan</h2>
 
         <h3>A. Penanganan Insiden (SOP 10.11, 10.12, 10.13)</h3>
-        <p>CIMS mengakomodasi pencatatan tiga domain insiden yang mungkin menggagalkan jalannya sidang: <strong>Gangguan Teknis</strong>, <strong>Insiden Siber</strong> (wajib lapor 1x24 jam), dan <strong>Keadaan Kahar / Force Majeure</strong> (wajib lapor 3x24 jam). Insiden yang bersifat `CRITICAL` atau `HIGH` akan secara otomatis menskors sidang (SUSPEND) di dalam sistem.</p>
+        <p>
+          CIMS mengakomodasi pencatatan tiga domain insiden yang mungkin menggagalkan jalannya
+          sidang: <strong>Gangguan Teknis</strong>, <strong>Insiden Siber</strong> (wajib lapor 1x24
+          jam), dan <strong>Keadaan Kahar / Force Majeure</strong> (wajib lapor 3x24 jam). Insiden
+          yang bersifat `CRITICAL` atau `HIGH` akan secara otomatis menskors sidang (SUSPEND) di
+          dalam sistem.
+        </p>
 
         <h3>B. Mutasi dan Perpindahan Tahanan (SOP 10.14)</h3>
-        <p>Jika Terdakwa dipindahkan ke Rutan lain saat proses sidang sedang berjalan, Pejabat Penghubung mendaftarkan data Mutasi di CIMS. Sistem secara otomatis membatalkan kesiapan Rutan sebelumnya dan <strong>memaksa (force)</strong> dilakukannya re-checklist, re-inspeksi ruangan, dan re-verifikasi identitas di Lapas tujuan baru.</p>
+        <p>
+          Jika Terdakwa dipindahkan ke Rutan lain saat proses sidang sedang berjalan, Pejabat
+          Penghubung mendaftarkan data Mutasi di CIMS. Sistem secara otomatis membatalkan kesiapan
+          Rutan sebelumnya dan <strong>memaksa (force)</strong> dilakukannya re-checklist,
+          re-inspeksi ruangan, dan re-verifikasi identitas di Lapas tujuan baru.
+        </p>
 
         <h3>C. Pembacaan Putusan Tingkat Banding (SOP 10.15)</h3>
-        <p>Ini adalah modul spesifik yang berlaku 1 Agustus 2026. Alurnya meliputi: Pengadilan Tinggi menetapkan jadwal &rarr; Rantai Pemberitahuan Khusus (PT ke Kejaksaan ke Rutan ke Terdakwa) &rarr; Rekam Kehadiran Para Pihak &rarr; <strong>Publikasi Petikan Putusan</strong> (kepatuhan dihitung harus hari yang sama/Same-day compliant) &rarr; Transmisi Berkas ke PT Tingkat 1 (maks. 7 Hari).</p>
+        <p>
+          Ini adalah modul spesifik yang berlaku 1 Agustus 2026. Alurnya meliputi: Pengadilan Tinggi
+          menetapkan jadwal &rarr; Rantai Pemberitahuan Khusus (PT ke Kejaksaan ke Rutan ke
+          Terdakwa) &rarr; Rekam Kehadiran Para Pihak &rarr;
+          <strong>Publikasi Petikan Putusan</strong> (kepatuhan dihitung harus hari yang
+          sama/Same-day compliant) &rarr; Transmisi Berkas ke PT Tingkat 1 (maks. 7 Hari).
+        </p>
 
         <h2>5. Pengalaman Pengguna (Frontend React)</h2>
-        <p>Dibangun menggunakan <em>React</em> dan <em>Vite</em>, antarmuka CIMS berfokus pada ketegasan fungsional bagi Pejabat Hukum:</p>
+        <p>
+          Dibangun menggunakan <em>React</em> dan <em>Vite</em>, antarmuka CIMS berfokus pada
+          ketegasan fungsional bagi Pejabat Hukum:
+        </p>
         <ul>
-            <li><strong>Dashboard Per-Peran:</strong> Kartu statistik (metrik) yang muncul di layar Beranda disesuaikan. Hakim melihat daftar sidang yang menanti penetapan, Jaksa melihat tenggat waktu Acknowledgment, Rutan melihat peringatan verifikasi Terdakwa.</li>
-            <li><strong>Workflow Stepper:</strong> Terdapat <em>Progress Bar</em> adaptif di *header* halaman yang otomatis membaca API "Gate" dan memberikan indikator centang hijau untuk langkah yang telah dilalui.</li>
-            <li><strong>Pencegahan Kesalahan (Error Boundary & Dialog):</strong> Aksi merusak (seperti Tutup Sidang) harus melalui Dialog Konfirmasi merah. Jika koneksi API gagal, UI akan menampilkan Alert Banner berbahasa Indonesia yang jelas alih-alih melempar teks <em>JSON</em> mentah.</li>
-            <li><strong>Mobile Responsive:</strong> Navigasi dapat diakses menggunakan *Hamburger Menu* saat diakses melalui *Tablet* dari dalam ruang Rutan yang terbatas.</li>
+          <li>
+            <strong>Dashboard Per-Peran:</strong> Kartu statistik (metrik) yang muncul di layar
+            Beranda disesuaikan. Hakim melihat daftar sidang yang menanti penetapan, Jaksa melihat
+            tenggat waktu Acknowledgment, Rutan melihat peringatan verifikasi Terdakwa.
+          </li>
+          <li>
+            <strong>Workflow Stepper:</strong> Terdapat <em>Progress Bar</em> adaptif di *header*
+            halaman yang otomatis membaca API "Gate" dan memberikan indikator centang hijau untuk
+            langkah yang telah dilalui.
+          </li>
+          <li>
+            <strong>Pencegahan Kesalahan (Error Boundary & Dialog):</strong> Aksi merusak (seperti
+            Tutup Sidang) harus melalui Dialog Konfirmasi merah. Jika koneksi API gagal, UI akan
+            menampilkan Alert Banner berbahasa Indonesia yang jelas alih-alih melempar teks
+            <em>JSON</em> mentah.
+          </li>
+          <li>
+            <strong>Mobile Responsive:</strong> Navigasi dapat diakses menggunakan *Hamburger Menu*
+            saat diakses melalui *Tablet* dari dalam ruang Rutan yang terbatas.
+          </li>
         </ul>
+      </div>
 
-    </div>
-
-    <div class="footer">
-        CIMS v0.20.0 MVP &mdash; Dokumen Arsitektur & Operasional (Generated 2026) <br>
+      <div class="footer">
+        CIMS v0.20.0 MVP &mdash; Dokumen Arsitektur & Operasional (Generated 2026) <br />
         Implementasi Penuh Kepatuhan SOP CIMS/PPE/001/2026.
+      </div>
     </div>
-</div>
-
-</body>
+  </body>
 </html>

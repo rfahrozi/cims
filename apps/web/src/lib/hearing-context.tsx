@@ -25,8 +25,13 @@ const HearingContext = createContext<HearingContextValue | undefined>(undefined)
 const storageKey = 'cims_active_hearing_id';
 
 export function HearingProvider({ children }: { children: ReactNode }) {
-  const [hearingId, setHearingIdState] = useState(() => localStorage.getItem(storageKey) ?? 'hearing-demo-001');
-  const query = useQuery({ queryKey: ['hearings'], queryFn: () => api<{ items: HearingSummary[] }>('/hearings') });
+  const [hearingId, setHearingIdState] = useState(
+    () => localStorage.getItem(storageKey) ?? 'hearing-demo-001'
+  );
+  const query = useQuery({
+    queryKey: ['hearings'],
+    queryFn: () => api<{ items: HearingSummary[] }>('/hearings')
+  });
 
   // Amankan agar hearings selalu berupa array, bahkan jika api mengembalikan bentuk lain
   const hearings = Array.isArray(query.data?.items) ? query.data.items : [];
@@ -46,13 +51,16 @@ export function HearingProvider({ children }: { children: ReactNode }) {
     window.dispatchEvent(new CustomEvent('cims-hearing-change', { detail: id }));
   }
 
-  const value = useMemo<HearingContextValue>(() => ({
-    hearingId,
-    hearing: hearings.find((item) => item.id === hearingId),
-    hearings,
-    setHearingId,
-    loading: query.isLoading,
-  }), [hearingId, hearings, query.isLoading]);
+  const value = useMemo<HearingContextValue>(
+    () => ({
+      hearingId,
+      hearing: hearings.find((item) => item.id === hearingId),
+      hearings,
+      setHearingId,
+      loading: query.isLoading
+    }),
+    [hearingId, hearings, query.isLoading]
+  );
 
   return <HearingContext.Provider value={value}>{children}</HearingContext.Provider>;
 }

@@ -16,7 +16,7 @@ export class ProviderWebhookController {
     @Req() request: RawBodyRequest<FastifyRequest>,
     @Body() body: Record<string, unknown>,
     @Headers('x-cims-signature') signature?: string,
-    @Headers('x-cims-timestamp') timestamp?: string,
+    @Headers('x-cims-timestamp') timestamp?: string
   ) {
     const rawBody = request.rawBody ?? Buffer.from(JSON.stringify(body));
     return this.service.ingest(providerCode.toUpperCase(), rawBody, body, { signature, timestamp });

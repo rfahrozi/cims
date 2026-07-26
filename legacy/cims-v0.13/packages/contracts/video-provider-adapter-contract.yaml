@@ -6,11 +6,25 @@ purpose: >-
   participant join URLs must never appear in ordinary logs.
 operations:
   create_session:
-    input: {correlation_id: uuid, idempotency_key: string, hearing_reference: string, start_at: datetime_utc, end_at: datetime_utc, recording_policy: DISABLED | COURT_CONTROLLED}
-    output: {provider_session_reference: string, state: PROVISIONING | READY}
+    input:
+      {
+        correlation_id: uuid,
+        idempotency_key: string,
+        hearing_reference: string,
+        start_at: datetime_utc,
+        end_at: datetime_utc,
+        recording_policy: DISABLED | COURT_CONTROLLED
+      }
+    output: { provider_session_reference: string, state: PROVISIONING | READY }
   create_room:
-    input: {provider_session_reference: string, room_code: string, room_type: MAIN | WAITING | DEFENDANT | WITNESS | CONSULTATION, recording_allowed: boolean}
-    output: {provider_room_reference: string}
+    input:
+      {
+        provider_session_reference: string,
+        room_code: string,
+        room_type: MAIN | WAITING | DEFENDANT | WITNESS | CONSULTATION,
+        recording_allowed: boolean
+      }
+    output: { provider_room_reference: string }
   issue_participant_access:
     input:
       provider_session_reference: string
@@ -31,35 +45,97 @@ operations:
       - no host secret in output
       - consultation access must never include recording permission
   get_participant_access:
-    input: {participant_access_reference: string}
-    output: {participant_join_url: secret_string, room_reference: string, revoked: boolean, expires_at: datetime_utc}
+    input: { participant_access_reference: string }
+    output:
+      {
+        participant_join_url: secret_string,
+        room_reference: string,
+        revoked: boolean,
+        expires_at: datetime_utc
+      }
     usage: token-exchange backend only
   move_participant_access:
-    input: {participant_access_reference: string, room_reference: string}
-    output: {participant_access_reference: string, room_reference: string, room_type: string}
+    input: { participant_access_reference: string, room_reference: string }
+    output: { participant_access_reference: string, room_reference: string, room_type: string }
     usage: waiting-room admission and private consultation
   revoke_participant_access:
-    input: {participant_access_reference: string, reason: string}
-    output: {revoked: boolean}
+    input: { participant_access_reference: string, reason: string }
+    output: { revoked: boolean }
   get_health:
-    output: {status: HEALTHY | DEGRADED | DOWN, checked_at: datetime_utc, details: object, capabilities: object}
+    output:
+      {
+        status: HEALTHY | DEGRADED | DOWN,
+        checked_at: datetime_utc,
+        details: object,
+        capabilities: object
+      }
   capability_negotiation:
     requirements:
       - provider must report unsupported live operations explicitly
       - manual provider action must never be represented as an automated success
       - CAPABILITY_NOT_SUPPORTED must include manual_action_required and operation
   recording_control:
-    input: {provider_session_reference: string, action: START | STOP, authorized_actor_reference: string, reason: string}
-    output: {recording_reference: string | null, state: STARTED | STOPPED | DENIED}
+    input:
+      {
+        provider_session_reference: string,
+        action: START | STOP,
+        authorized_actor_reference: string,
+        reason: string
+      }
+    output: { recording_reference: string | null, state: STARTED | STOPPED | DENIED }
 webhooks:
-  headers: {X-Provider-Signature: required, X-Provider-Timestamp: required, X-Provider-Event-Id: required}
-  requirements: [signature_validation, timestamp_freshness, replay_detection, idempotent_processing, correlation_id_propagation]
-  event_types: [session.ready, session.failed, participant.access-issued, participant.joined, participant.left, participant.moved, participant.revoked, provider.degraded, provider.recovered]
+  headers:
+    {
+      X-Provider-Signature: required,
+      X-Provider-Timestamp: required,
+      X-Provider-Event-Id: required
+    }
+  requirements:
+    [
+      signature_validation,
+      timestamp_freshness,
+      replay_detection,
+      idempotent_processing,
+      correlation_id_propagation
+    ]
+  event_types:
+    [
+      session.ready,
+      session.failed,
+      participant.access-issued,
+      participant.joined,
+      participant.left,
+      participant.moved,
+      participant.revoked,
+      provider.degraded,
+      provider.recovered
+    ]
 error_model:
   fields: [code, message, provider_reference, retryable, correlation_id, details]
-  required_codes: [AUTHENTICATION_FAILED, RATE_LIMITED, SESSION_NOT_FOUND, ROOM_NOT_FOUND, ACCESS_NOT_FOUND, ACCESS_REVOKED, INVALID_STATE, PROVIDER_UNAVAILABLE, TIMEOUT, DUPLICATE_REQUEST, CAPABILITY_NOT_SUPPORTED, PARTICIPANT_EMAIL_REQUIRED]
+  required_codes:
+    [
+      AUTHENTICATION_FAILED,
+      RATE_LIMITED,
+      SESSION_NOT_FOUND,
+      ROOM_NOT_FOUND,
+      ACCESS_NOT_FOUND,
+      ACCESS_REVOKED,
+      INVALID_STATE,
+      PROVIDER_UNAVAILABLE,
+      TIMEOUT,
+      DUPLICATE_REQUEST,
+      CAPABILITY_NOT_SUPPORTED,
+      PARTICIPANT_EMAIL_REQUIRED
+    ]
 nonfunctional:
-  timeout_seconds: {create_session: 15, create_room: 10, issue_participant_access: 10, move_participant_access: 10, get_health: 5}
+  timeout_seconds:
+    {
+      create_session: 15,
+      create_room: 10,
+      issue_participant_access: 10,
+      move_participant_access: 10,
+      get_health: 5
+    }
   retry:
     allowed_for: [RATE_LIMITED, PROVIDER_UNAVAILABLE, TIMEOUT]
     forbidden_for: [AUTHENTICATION_FAILED, INVALID_STATE, ACCESS_REVOKED]
@@ -69,7 +145,8 @@ nonfunctional:
     client_exposure: only_through_single_use_exchange
   observability:
     required_fields: [correlation_id, operation, provider_code, latency_ms, result_code]
-    prohibited_fields: [host_secret, participant_join_url, access_token, refresh_token, plaintext_join_token]
+    prohibited_fields:
+      [host_secret, participant_join_url, access_token, refresh_token, plaintext_join_token]
 acceptance_tests:
   - idempotent create session
   - host secret absent from response and logs

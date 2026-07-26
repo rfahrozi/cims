@@ -60,13 +60,31 @@ create table if not exists zoom_webhook_events(
 
 export class AdapterDatabase {
   constructor(filePath) {
-    fs.mkdirSync(path.dirname(filePath),{recursive:true});
-    this.raw=new DatabaseSync(filePath);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    this.raw = new DatabaseSync(filePath);
     this.raw.exec(SCHEMA);
   }
-  run(sql,...params){return this.raw.prepare(sql).run(...params);}
-  get(sql,...params){return this.raw.prepare(sql).get(...params);}
-  all(sql,...params){return this.raw.prepare(sql).all(...params);}
-  transaction(fn){this.raw.exec('BEGIN IMMEDIATE');try{const r=fn();this.raw.exec('COMMIT');return r;}catch(e){this.raw.exec('ROLLBACK');throw e;}}
-  close(){this.raw.close();}
+  run(sql, ...params) {
+    return this.raw.prepare(sql).run(...params);
+  }
+  get(sql, ...params) {
+    return this.raw.prepare(sql).get(...params);
+  }
+  all(sql, ...params) {
+    return this.raw.prepare(sql).all(...params);
+  }
+  transaction(fn) {
+    this.raw.exec('BEGIN IMMEDIATE');
+    try {
+      const r = fn();
+      this.raw.exec('COMMIT');
+      return r;
+    } catch (e) {
+      this.raw.exec('ROLLBACK');
+      throw e;
+    }
+  }
+  close() {
+    this.raw.close();
+  }
 }

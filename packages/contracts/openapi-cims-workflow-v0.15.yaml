@@ -13,7 +13,8 @@ paths:
     post:
       summary: Create an official notice
       parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
-      responses: { '201': { description: Notice created }, '409': { description: Active schedule required } }
+      responses:
+        { '201': { description: Notice created }, '409': { description: Active schedule required } }
   /notices/{noticeId}/send:
     post:
       summary: Send an official notice
@@ -38,7 +39,11 @@ paths:
     post:
       summary: Submit organization readiness
       parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
-      responses: { '201': { description: Readiness submitted }, '409': { description: Notice acknowledgment or verification required } }
+      responses:
+        {
+          '201': { description: Readiness submitted },
+          '409': { description: Notice acknowledgment or verification required }
+        }
   /hearings/{hearingId}/readiness:
     get:
       summary: Read readiness gate
@@ -48,7 +53,11 @@ paths:
     post:
       summary: Provision provider-neutral virtual hearing rooms
       parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
-      responses: { '201': { description: Virtual session ready }, '409': { description: Compliance gate incomplete } }
+      responses:
+        {
+          '201': { description: Virtual session ready },
+          '409': { description: Compliance gate incomplete }
+        }
   /hearings/{hearingId}/runtime:
     get:
       summary: Get hearing runtime state
@@ -58,7 +67,8 @@ paths:
     post:
       summary: Start hearing
       parameters: [{ name: hearingId, in: path, required: true, schema: { type: string } }]
-      responses: { '200': { description: Hearing started }, '403': { description: Judge role required } }
+      responses:
+        { '200': { description: Hearing started }, '403': { description: Judge role required } }
   /hearings/{hearingId}/suspend:
     post:
       summary: Suspend hearing

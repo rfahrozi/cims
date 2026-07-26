@@ -8,7 +8,10 @@ import { SaveAgendaDto } from './dto.js';
 @ApiTags('hearings')
 @Controller('hearings')
 export class HearingsController {
-  constructor(private readonly service: HearingsService, private readonly audit: AuditService) {}
+  constructor(
+    private readonly service: HearingsService,
+    private readonly audit: AuditService
+  ) {}
 
   @Get()
   async list(@CurrentUserContext() user: CurrentUser) {
@@ -23,7 +26,10 @@ export class HearingsController {
   @Get(':id/audit-events')
   async events(@CurrentUserContext() user: CurrentUser, @Param('id') id: string) {
     await this.service.get(id, user);
-    return { items: await this.audit.list(user, id), integrity: await this.audit.verifyChain(user, 'HEARING', id) };
+    return {
+      items: await this.audit.list(user, id),
+      integrity: await this.audit.verifyChain(user, 'HEARING', id)
+    };
   }
 
   // ── H-03: Agenda multi-item per sidang ────────────────────────────────────
@@ -37,7 +43,7 @@ export class HearingsController {
   saveAgenda(
     @CurrentUserContext() user: CurrentUser,
     @Param('id') id: string,
-    @Body() dto: SaveAgendaDto,
+    @Body() dto: SaveAgendaDto
   ) {
     return this.service.saveAgenda(id, dto.items, user);
   }

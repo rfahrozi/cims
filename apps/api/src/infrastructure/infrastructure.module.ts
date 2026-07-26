@@ -58,7 +58,7 @@ const providers = [
   ParticipantsRepository,
   IncidentsRepository,
   AuditService,
-  OutboxWorkerService,
+  OutboxWorkerService
 ];
 
 @Global()

@@ -7,6 +7,6 @@ import { CustodyService } from './custody.service.js';
   imports: [InfrastructureModule],
   controllers: [CustodyController],
   providers: [CustodyService],
-  exports: [CustodyService],
+  exports: [CustodyService]
 })
 export class CustodyModule {}

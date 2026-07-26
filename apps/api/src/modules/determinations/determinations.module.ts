@@ -1,2 +1,11 @@
-import { Module } from '@nestjs/common'; import { DeterminationsController } from './determinations.controller.js'; import { DeterminationsService } from './determinations.service.js'; import { HearingsModule } from '../hearings/hearings.module.js';
-@Module({imports:[HearingsModule],controllers:[DeterminationsController],providers:[DeterminationsService],exports:[DeterminationsService]}) export class DeterminationsModule {}
+import { Module } from '@nestjs/common';
+import { DeterminationsController } from './determinations.controller.js';
+import { DeterminationsService } from './determinations.service.js';
+import { HearingsModule } from '../hearings/hearings.module.js';
+@Module({
+  imports: [HearingsModule],
+  controllers: [DeterminationsController],
+  providers: [DeterminationsService],
+  exports: [DeterminationsService]
+})
+export class DeterminationsModule {}

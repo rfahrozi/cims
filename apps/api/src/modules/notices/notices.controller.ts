@@ -14,7 +14,7 @@ export class NoticesController {
     @CurrentUserContext() user: CurrentUser,
     @Param('hearingId') id: string,
     @Body() dto: CreateNoticeDto,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.create(user, id, dto, correlationId);
   }
@@ -24,7 +24,7 @@ export class NoticesController {
     @CurrentUserContext() user: CurrentUser,
     @Param('noticeId') id: string,
     @Headers('x-correlation-id') correlationId?: string,
-    @Headers('traceparent') traceparent?: string,
+    @Headers('traceparent') traceparent?: string
   ) {
     return this.service.send(user, id, correlationId, traceparent);
   }
@@ -34,7 +34,7 @@ export class NoticesController {
     @CurrentUserContext() user: CurrentUser,
     @Param('noticeId') id: string,
     @Body() dto: AcknowledgeNoticeDto,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.acknowledge(user, id, dto, correlationId);
   }
@@ -50,10 +50,7 @@ export class NoticesController {
    * SOP 11: persentase acknowledgment tepat waktu harus termonitor.
    */
   @Get('notices/sla-report')
-  slaReport(
-    @CurrentUserContext() user: CurrentUser,
-    @Query('hearing_id') hearingId?: string,
-  ) {
+  slaReport(@CurrentUserContext() user: CurrentUser, @Query('hearing_id') hearingId?: string) {
     return this.service.slaReport(user, hearingId);
   }
 }

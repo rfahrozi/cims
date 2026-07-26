@@ -40,10 +40,36 @@
     "release:phase6": "npm run check:phase6 && npm run db:migrate:dry-run && npm run release:manifest",
     "test:governance-domain": "npm run build -w @cims/domain && node --test packages/domain/test/governance.test.mjs",
     "test:postgres:phase6": "node tools/postgres-phase6-smoke.mjs",
-    "verify:evidence": "node tools/verify-evidence-package.mjs"
+    "verify:evidence": "node tools/verify-evidence-package.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test:api": "npm run test -w @cims/api",
+    "test:web": "npm run test -w @cims/web",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "npm@10.9.0"
+  "packageManager": "npm@10.9.0",
+  "devDependencies": {
+    "@eslint/js": "^8.57.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "globals": "^15.9.0",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^7.18.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,jsx,mjs,cjs,json,md}": [
+      "prettier --write"
+    ],
+    "*.{js,ts,tsx,jsx,mjs,cjs}": [
+      "eslint --fix"
+    ]
+  }
 }

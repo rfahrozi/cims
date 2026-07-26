@@ -5,21 +5,27 @@ import {
   assertAccessReviewDecisionAllowed,
   assertLegalHoldReleaseAllowed,
   productionGateDecision,
-  retentionEligibility,
+  retentionEligibility
 } from '../dist/index.js';
 
 test('production gate is NO_GO when a blocking check fails', () => {
-  assert.equal(productionGateDecision([
-    { code: 'DB', status: 'PASS', blocking: true, message: 'ok' },
-    { code: 'OIDC', status: 'FAIL', blocking: true, message: 'missing' },
-  ]), 'NO_GO');
+  assert.equal(
+    productionGateDecision([
+      { code: 'DB', status: 'PASS', blocking: true, message: 'ok' },
+      { code: 'OIDC', status: 'FAIL', blocking: true, message: 'missing' }
+    ]),
+    'NO_GO'
+  );
 });
 
 test('production gate is conditional when only warnings remain', () => {
-  assert.equal(productionGateDecision([
-    { code: 'DB', status: 'PASS', blocking: true, message: 'ok' },
-    { code: 'PEN_TEST', status: 'WARNING', blocking: false, message: 'pending' },
-  ]), 'CONDITIONAL_GO');
+  assert.equal(
+    productionGateDecision([
+      { code: 'DB', status: 'PASS', blocking: true, message: 'ok' },
+      { code: 'PEN_TEST', status: 'WARNING', blocking: false, message: 'pending' }
+    ]),
+    'CONDITIONAL_GO'
+  );
 });
 
 test('retention remains blocked by an active legal hold', () => {
@@ -27,7 +33,7 @@ test('retention remains blocked by an active legal hold', () => {
     closedAt: '2020-01-01T00:00:00.000Z',
     retentionDays: 365,
     activeLegalHoldCount: 1,
-    now: '2026-01-01T00:00:00.000Z',
+    now: '2026-01-01T00:00:00.000Z'
   });
   assert.equal(result.status, 'ON_HOLD');
   assert.equal(result.eligibleForReview, false);
@@ -38,7 +44,7 @@ test('retention is due only after the configured period', () => {
     closedAt: '2025-01-01T00:00:00.000Z',
     retentionDays: 365,
     activeLegalHoldCount: 0,
-    now: '2026-01-02T00:00:00.000Z',
+    now: '2026-01-02T00:00:00.000Z'
   });
   assert.equal(result.status, 'DUE_FOR_REVIEW');
   assert.equal(result.eligibleForReview, true);

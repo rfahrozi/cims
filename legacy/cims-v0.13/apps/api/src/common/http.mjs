@@ -11,7 +11,12 @@ export async function readJson(request, maxBytes = 1_000_000) {
   let size = 0;
   for await (const chunk of request) {
     size += chunk.length;
-    if (size > maxBytes) throw new DomainError('PAYLOAD_TOO_LARGE', 'Request body exceeds the configured size limit.', 413);
+    if (size > maxBytes)
+      throw new DomainError(
+        'PAYLOAD_TOO_LARGE',
+        'Request body exceeds the configured size limit.',
+        413
+      );
     chunks.push(chunk);
   }
   if (chunks.length === 0) return {};
@@ -27,7 +32,10 @@ export function applySecurityHeaders(response) {
   response.setHeader('x-frame-options', 'DENY');
   response.setHeader('referrer-policy', 'no-referrer');
   response.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
-  response.setHeader('content-security-policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+  response.setHeader(
+    'content-security-policy',
+    "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+  );
 }
 
 export function sendJson(response, status, payload, corrId, extraHeaders = {}) {
@@ -37,24 +45,30 @@ export function sendJson(response, status, payload, corrId, extraHeaders = {}) {
     'content-length': Buffer.byteLength(body),
     'x-correlation-id': corrId,
     'cache-control': 'no-store',
-    ...extraHeaders,
+    ...extraHeaders
   });
   response.end(body);
 }
 
 export function sendError(response, error, corrId) {
-  const normalized = error instanceof DomainError
-    ? error
-    : new DomainError('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
+  const normalized =
+    error instanceof DomainError
+      ? error
+      : new DomainError('INTERNAL_ERROR', 'An unexpected error occurred.', 500);
   if (!(error instanceof DomainError)) console.error(error);
-  sendJson(response, normalized.status, {
-    error: {
-      code: normalized.code,
-      message: normalized.message,
-      correlation_id: corrId,
-      details: normalized.details ?? {},
+  sendJson(
+    response,
+    normalized.status,
+    {
+      error: {
+        code: normalized.code,
+        message: normalized.message,
+        correlation_id: corrId,
+        details: normalized.details ?? {}
+      }
     },
-  }, corrId);
+    corrId
+  );
 }
 
 export function applyCors(request, response, allowedOrigins) {
@@ -64,6 +78,9 @@ export function applyCors(request, response, allowedOrigins) {
     response.setHeader('vary', 'origin');
   }
   response.setHeader('access-control-allow-methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-  response.setHeader('access-control-allow-headers', 'authorization,content-type,idempotency-key,x-correlation-id');
+  response.setHeader(
+    'access-control-allow-headers',
+    'authorization,content-type,idempotency-key,x-correlation-id'
+  );
   response.setHeader('access-control-expose-headers', 'x-correlation-id');
 }

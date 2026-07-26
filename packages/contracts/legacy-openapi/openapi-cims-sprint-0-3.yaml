@@ -24,10 +24,15 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/LoginRequest'}
+            schema: { $ref: '#/components/schemas/LoginRequest' }
       responses:
-        '200': {description: OTP challenge, content: {application/json: {schema: {$ref: '#/components/schemas/LoginChallenge'}}}}
-        '401': {$ref: '#/components/responses/Error'}
+        '200':
+          {
+            description: OTP challenge,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/LoginChallenge' } } }
+          }
+        '401': { $ref: '#/components/responses/Error' }
   /auth/verify-otp:
     post:
       tags: [Authentication]
@@ -37,23 +42,32 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/OtpVerification'}
+            schema: { $ref: '#/components/schemas/OtpVerification' }
       responses:
-        '200': {description: Access token, content: {application/json: {schema: {$ref: '#/components/schemas/TokenResponse'}}}}
-        '401': {$ref: '#/components/responses/Error'}
+        '200':
+          {
+            description: Access token,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } }
+          }
+        '401': { $ref: '#/components/responses/Error' }
   /me:
     get:
       tags: [IAM]
       operationId: getCurrentUser
       responses:
-        '200': {description: Current authorization context, content: {application/json: {schema: {$ref: '#/components/schemas/UserContext'}}}}
+        '200':
+          {
+            description: Current authorization context,
+            content: { application/json: { schema: { $ref: '#/components/schemas/UserContext' } } }
+          }
   /admin/users:
     get:
       tags: [IAM]
       operationId: listUsers
       responses:
-        '200': {description: Users}
-        '403': {$ref: '#/components/responses/Error'}
+        '200': { description: Users }
+        '403': { $ref: '#/components/responses/Error' }
     post:
       tags: [IAM]
       operationId: createUser
@@ -63,11 +77,11 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/UserCreate'}
+            schema: { $ref: '#/components/schemas/UserCreate' }
       responses:
-        '201': {description: User created}
-        '403': {$ref: '#/components/responses/Error'}
-        '409': {$ref: '#/components/responses/Error'}
+        '201': { description: User created }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
   /admin/hearings/{hearingId}/assignments:
     post:
       tags: [IAM]
@@ -79,21 +93,21 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/HearingAssignmentCreate'}
+            schema: { $ref: '#/components/schemas/HearingAssignmentCreate' }
       responses:
-        '201': {description: Assignment created}
+        '201': { description: Assignment created }
   /cases:
     get:
       tags: [Reference]
       operationId: listCases
       responses:
-        '200': {description: Case references}
+        '200': { description: Case references }
   /hearings:
     get:
       tags: [Reference]
       operationId: listHearings
       responses:
-        '200': {description: Assigned hearings}
+        '200': { description: Assigned hearings }
   /electronic-hearing-requests:
     post:
       tags: [Determination]
@@ -105,10 +119,10 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/ElectronicHearingRequestCreate'}
+            schema: { $ref: '#/components/schemas/ElectronicHearingRequestCreate' }
       responses:
-        '201': {description: Request created}
-        '403': {$ref: '#/components/responses/Error'}
+        '201': { description: Request created }
+        '403': { $ref: '#/components/responses/Error' }
   /judicial-determinations:
     post:
       tags: [Determination]
@@ -120,11 +134,11 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/JudicialDeterminationCreate'}
+            schema: { $ref: '#/components/schemas/JudicialDeterminationCreate' }
       responses:
-        '201': {description: Determination recorded}
-        '403': {$ref: '#/components/responses/Error'}
-        '409': {$ref: '#/components/responses/Error'}
+        '201': { description: Determination recorded }
+        '403': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
   /hearings/{hearingId}/gate-status:
     get:
       tags: [Determination]
@@ -132,17 +146,21 @@ paths:
       parameters:
         - $ref: '#/components/parameters/HearingId'
       responses:
-        '200': {description: Gate status, content: {application/json: {schema: {$ref: '#/components/schemas/GateStatus'}}}}
+        '200':
+          {
+            description: Gate status,
+            content: { application/json: { schema: { $ref: '#/components/schemas/GateStatus' } } }
+          }
   /hearings/{hearingId}/availability:
     get:
       tags: [Scheduling]
       operationId: getHearingAvailability
       parameters:
         - $ref: '#/components/parameters/HearingId'
-        - {name: from, in: query, required: true, schema: {type: string, format: date-time}}
-        - {name: to, in: query, required: true, schema: {type: string, format: date-time}}
+        - { name: from, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date-time } }
       responses:
-        '200': {description: Availability result}
+        '200': { description: Availability result }
   /hearings/{hearingId}/schedule-proposals:
     post:
       tags: [Scheduling]
@@ -154,10 +172,10 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/ScheduleProposalCreate'}
+            schema: { $ref: '#/components/schemas/ScheduleProposalCreate' }
       responses:
-        '201': {description: Proposal created}
-        '409': {$ref: '#/components/responses/Error'}
+        '201': { description: Proposal created }
+        '409': { $ref: '#/components/responses/Error' }
   /schedule-proposals/{proposalId}/conflicts:check:
     post:
       tags: [Scheduling]
@@ -166,14 +184,19 @@ paths:
         - $ref: '#/components/parameters/ProposalId'
         - $ref: '#/components/parameters/IdempotencyKey'
       responses:
-        '200': {description: Conflict check, content: {application/json: {schema: {$ref: '#/components/schemas/ConflictCheckResult'}}}}
+        '200':
+          {
+            description: Conflict check,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/ConflictCheckResult' } } }
+          }
   /schedule-proposals/{proposalId}/conflicts/{conflictId}:resolve:
     post:
       tags: [Scheduling]
       operationId: resolveScheduleConflict
       parameters:
         - $ref: '#/components/parameters/ProposalId'
-        - {name: conflictId, in: path, required: true, schema: {type: string, format: uuid}}
+        - { name: conflictId, in: path, required: true, schema: { type: string, format: uuid } }
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
@@ -182,9 +205,9 @@ paths:
             schema:
               type: object
               required: [note]
-              properties: {note: {type: string, minLength: 3}}
+              properties: { note: { type: string, minLength: 3 } }
       responses:
-        '200': {description: Conflict resolved}
+        '200': { description: Conflict resolved }
   /schedule-proposals/{proposalId}:approve:
     post:
       tags: [Scheduling]
@@ -199,10 +222,15 @@ paths:
             schema:
               type: object
               required: [reason]
-              properties: {reason: {type: string, minLength: 3}}
+              properties: { reason: { type: string, minLength: 3 } }
       responses:
-        '200': {description: Active schedule, content: {application/json: {schema: {$ref: '#/components/schemas/HearingSchedule'}}}}
-        '409': {$ref: '#/components/responses/Error'}
+        '200':
+          {
+            description: Active schedule,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/HearingSchedule' } } }
+          }
+        '409': { $ref: '#/components/responses/Error' }
   /hearings/{hearingId}/reschedules:
     post:
       tags: [Scheduling]
@@ -214,9 +242,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/RescheduleCreate'}
+            schema: { $ref: '#/components/schemas/RescheduleCreate' }
       responses:
-        '201': {description: New active schedule}
+        '201': { description: New active schedule }
   /hearings/{hearingId}/schedules:
     get:
       tags: [Scheduling]
@@ -224,16 +252,21 @@ paths:
       parameters:
         - $ref: '#/components/parameters/HearingId'
       responses:
-        '200': {description: Schedule history}
+        '200': { description: Schedule history }
   /audit-events:
     get:
       tags: [Audit]
       operationId: listAuditEvents
       parameters:
-        - {name: hearing_id, in: query, required: false, schema: {type: string, format: uuid}}
-        - {name: limit, in: query, required: false, schema: {type: integer, minimum: 1, maximum: 500}}
+        - { name: hearing_id, in: query, required: false, schema: { type: string, format: uuid } }
+        - {
+            name: limit,
+            in: query,
+            required: false,
+            schema: { type: integer, minimum: 1, maximum: 500 }
+          }
       responses:
-        '200': {description: Append-only audit events}
+        '200': { description: Append-only audit events }
 components:
   securitySchemes:
     bearerAuth:
@@ -241,108 +274,122 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    HearingId: {name: hearingId, in: path, required: true, schema: {type: string, format: uuid}}
-    ProposalId: {name: proposalId, in: path, required: true, schema: {type: string, format: uuid}}
-    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 16, maxLength: 128}}
-    CorrelationId: {name: X-Correlation-ID, in: header, required: false, schema: {type: string, format: uuid}}
+    HearingId: { name: hearingId, in: path, required: true, schema: { type: string, format: uuid } }
+    ProposalId:
+      { name: proposalId, in: path, required: true, schema: { type: string, format: uuid } }
+    IdempotencyKey:
+      {
+        name: Idempotency-Key,
+        in: header,
+        required: true,
+        schema: { type: string, minLength: 16, maxLength: 128 }
+      }
+    CorrelationId:
+      {
+        name: X-Correlation-ID,
+        in: header,
+        required: false,
+        schema: { type: string, format: uuid }
+      }
   responses:
     Error:
       description: Error envelope
       content:
         application/json:
-          schema: {$ref: '#/components/schemas/ErrorEnvelope'}
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
   schemas:
     LoginRequest:
       type: object
       required: [email, password]
       properties:
-        email: {type: string, format: email}
-        password: {type: string, minLength: 8}
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
     LoginChallenge:
       type: object
       required: [challenge_id, expires_at, otp_required]
       properties:
-        challenge_id: {type: string, format: uuid}
-        expires_at: {type: string, format: date-time}
-        otp_required: {type: boolean}
-        development_otp: {type: string, description: Development-only field}
+        challenge_id: { type: string, format: uuid }
+        expires_at: { type: string, format: date-time }
+        otp_required: { type: boolean }
+        development_otp: { type: string, description: Development-only field }
     OtpVerification:
       type: object
       required: [challenge_id, otp]
       properties:
-        challenge_id: {type: string, format: uuid}
-        otp: {type: string, pattern: '^\d{6}$'}
+        challenge_id: { type: string, format: uuid }
+        otp: { type: string, pattern: '^\d{6}$' }
     TokenResponse:
       type: object
       required: [access_token, token_type, expires_in, user]
       properties:
-        access_token: {type: string}
-        token_type: {type: string, const: Bearer}
-        expires_in: {type: integer}
-        user: {$ref: '#/components/schemas/UserContext'}
+        access_token: { type: string }
+        token_type: { type: string, const: Bearer }
+        expires_in: { type: integer }
+        user: { $ref: '#/components/schemas/UserContext' }
     UserContext:
       type: object
       properties:
-        id: {type: string, format: uuid}
-        email: {type: string, format: email}
-        name: {type: string}
-        organization_id: {type: string, format: uuid}
-        roles: {type: array, items: {type: string}}
-        permissions: {type: array, items: {type: string}}
-        hearing_assignments: {type: array, items: {type: object}}
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        organization_id: { type: string, format: uuid }
+        roles: { type: array, items: { type: string } }
+        permissions: { type: array, items: { type: string } }
+        hearing_assignments: { type: array, items: { type: object } }
     UserCreate:
       type: object
       required: [email, name, password, organization_id, role_codes]
       properties:
-        email: {type: string, format: email}
-        name: {type: string}
-        password: {type: string, minLength: 8}
-        organization_id: {type: string, format: uuid}
-        role_codes: {type: array, minItems: 1, items: {type: string}}
+        email: { type: string, format: email }
+        name: { type: string }
+        password: { type: string, minLength: 8 }
+        organization_id: { type: string, format: uuid }
+        role_codes: { type: array, minItems: 1, items: { type: string } }
     HearingAssignmentCreate:
       type: object
       required: [user_id, organization_id, assignment_role]
       properties:
-        user_id: {type: string, format: uuid}
-        organization_id: {type: string, format: uuid}
-        assignment_role: {type: string}
-        valid_from: {type: string, format: date-time}
-        valid_until: {type: string, format: date-time}
+        user_id: { type: string, format: uuid }
+        organization_id: { type: string, format: uuid }
+        assignment_role: { type: string }
+        valid_from: { type: string, format: date-time }
+        valid_until: { type: string, format: date-time }
     ElectronicHearingRequestCreate:
       type: object
       required: [case_reference_id, requested_mode, reason]
       properties:
-        case_reference_id: {type: string, format: uuid}
-        requested_mode: {type: string, enum: [ELECTRONIC, HYBRID]}
-        reason: {type: string, minLength: 10}
-        evidence_references: {type: array, items: {type: string}}
+        case_reference_id: { type: string, format: uuid }
+        requested_mode: { type: string, enum: [ELECTRONIC, HYBRID] }
+        reason: { type: string, minLength: 10 }
+        evidence_references: { type: array, items: { type: string } }
     JudicialDeterminationCreate:
       type: object
       required: [hearing_id, decision, mode, effective_at, official_reference, document_hash]
       properties:
-        hearing_id: {type: string, format: uuid}
-        decision: {type: string, enum: [APPROVED, REJECTED]}
-        mode: {type: string, enum: [IN_PERSON, ELECTRONIC, HYBRID]}
-        reason: {type: string}
-        effective_at: {type: string, format: date-time}
-        official_reference: {type: string}
-        document_hash: {type: string, pattern: '^[A-Fa-f0-9]{64}$'}
+        hearing_id: { type: string, format: uuid }
+        decision: { type: string, enum: [APPROVED, REJECTED] }
+        mode: { type: string, enum: [IN_PERSON, ELECTRONIC, HYBRID] }
+        reason: { type: string }
+        effective_at: { type: string, format: date-time }
+        official_reference: { type: string }
+        document_hash: { type: string, pattern: '^[A-Fa-f0-9]{64}$' }
     GateStatus:
       type: object
       required: [hearing_id, determination_valid, schedule_active, next_gate]
       properties:
-        hearing_id: {type: string, format: uuid}
-        determination_valid: {type: boolean}
-        schedule_active: {type: boolean}
-        next_gate: {type: string, enum: [JUDICIAL_DETERMINATION, SCHEDULING, NOTICE_AND_READINESS]}
+        hearing_id: { type: string, format: uuid }
+        determination_valid: { type: boolean }
+        schedule_active: { type: boolean }
+        next_gate:
+          { type: string, enum: [JUDICIAL_DETERMINATION, SCHEDULING, NOTICE_AND_READINESS] }
     ScheduleProposalCreate:
       type: object
       required: [start_at, end_at, display_timezone, resources]
       properties:
-        start_at: {type: string, format: date-time}
-        end_at: {type: string, format: date-time}
-        display_timezone: {type: string}
-        notes: {type: string}
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        display_timezone: { type: string }
+        notes: { type: string }
         resources:
           type: array
           minItems: 1
@@ -350,37 +397,37 @@ components:
             type: object
             required: [resource_type, resource_id, requirement]
             properties:
-              resource_type: {type: string}
-              resource_id: {type: string}
-              requirement: {type: string, enum: [REQUIRED, PREFERRED]}
+              resource_type: { type: string }
+              resource_id: { type: string }
+              requirement: { type: string, enum: [REQUIRED, PREFERRED] }
     ConflictCheckResult:
       type: object
       required: [proposal_id, status, conflicts]
       properties:
-        proposal_id: {type: string, format: uuid}
-        status: {type: string, enum: [CLEAR, WARNING, BLOCKED]}
-        conflicts: {type: array, items: {type: object}}
+        proposal_id: { type: string, format: uuid }
+        status: { type: string, enum: [CLEAR, WARNING, BLOCKED] }
+        conflicts: { type: array, items: { type: object } }
     HearingSchedule:
       type: object
       required: [id, hearing_id, version, status, start_at, end_at]
       properties:
-        id: {type: string, format: uuid}
-        hearing_id: {type: string, format: uuid}
-        version: {type: integer}
-        status: {type: string, enum: [ACTIVE, SUPERSEDED, CANCELLED]}
-        start_at: {type: string, format: date-time}
-        end_at: {type: string, format: date-time}
-        display_timezone: {type: string}
-        resources: {type: array, items: {type: object}}
+        id: { type: string, format: uuid }
+        hearing_id: { type: string, format: uuid }
+        version: { type: integer }
+        status: { type: string, enum: [ACTIVE, SUPERSEDED, CANCELLED] }
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        display_timezone: { type: string }
+        resources: { type: array, items: { type: object } }
     RescheduleCreate:
       type: object
       required: [new_start_at, new_end_at, reason, basis_reference]
       properties:
-        new_start_at: {type: string, format: date-time}
-        new_end_at: {type: string, format: date-time}
-        display_timezone: {type: string}
-        reason: {type: string, minLength: 3}
-        basis_reference: {type: string}
+        new_start_at: { type: string, format: date-time }
+        new_end_at: { type: string, format: date-time }
+        display_timezone: { type: string }
+        reason: { type: string, minLength: 3 }
+        basis_reference: { type: string }
     ErrorEnvelope:
       type: object
       required: [error]
@@ -389,7 +436,7 @@ components:
           type: object
           required: [code, message, correlation_id]
           properties:
-            code: {type: string}
-            message: {type: string}
-            correlation_id: {type: string}
-            details: {type: object, additionalProperties: true}
+            code: { type: string }
+            message: { type: string }
+            correlation_id: { type: string }
+            details: { type: object, additionalProperties: true }

@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { DomainError, transitionHearing, type HearingAction, type HearingRuntimeState } from '@cims/domain';
+import {
+  DomainError,
+  transitionHearing,
+  type HearingAction,
+  type HearingRuntimeState
+} from '@cims/domain';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import {
   InMemoryStore,
   type HearingControlEventRecord,
-  type HearingRuntimeRecord,
+  type HearingRuntimeRecord
 } from '../in-memory.store.js';
 import { PersistenceModeService } from '../database/persistence-mode.service.js';
 import { PgPoolService } from '../database/pg-pool.service.js';
@@ -21,18 +26,20 @@ export class HearingControlRepository {
   constructor(
     private readonly mode: PersistenceModeService,
     private readonly memory: InMemoryStore,
-    private readonly pg: PgPoolService,
+    private readonly pg: PgPoolService
   ) {}
 
   async status(hearingId: string, user: CurrentUser): Promise<HearingRuntimeStatus> {
     if (!this.mode.postgres) {
       const runtime = this.memory.hearingRuntimes.find((item) => item.hearingId === hearingId);
-      const virtualReady = this.memory.virtualSessions.some((item) => item.hearingId === hearingId && item.state === 'READY');
+      const virtualReady = this.memory.virtualSessions.some(
+        (item) => item.hearingId === hearingId && item.state === 'READY'
+      );
       return {
         hearing_id: hearingId,
         state: runtime?.state ?? (virtualReady ? 'READY' : 'NOT_READY'),
         runtime: runtime ? { ...runtime, rowVersion: 1 } : null,
-        events: this.memory.hearingControlEvents.filter((item) => item.hearingId === hearingId),
+        events: this.memory.hearingControlEvents.filter((item) => item.hearingId === hearingId)
       };
     }
     return this.pg.transactionAs(user, async (client) => {
@@ -40,12 +47,12 @@ export class HearingControlRepository {
         `select id::text,hearing_id,virtual_session_id::text,state,started_by,started_at::text,
                 suspended_by,suspended_at::text,suspension_reason,ended_by,ended_at::text,updated_at::text,row_version
            from hearing_runtime where hearing_id=$1`,
-        [hearingId],
+        [hearingId]
       );
       const eventResult = await client.query(
         `select id::text,hearing_id,sequence,event_type,reason,actor_user_id,occurred_at::text
            from hearing_control_events where hearing_id=$1 order by sequence`,
-        [hearingId],
+        [hearingId]
       );
       const runtimeRow = runtimeResult.rows[0];
       let state: HearingRuntimeState;
@@ -61,16 +68,18 @@ export class HearingControlRepository {
           startedAt: runtimeRow.started_at ? String(runtimeRow.started_at) : undefined,
           suspendedBy: runtimeRow.suspended_by ? String(runtimeRow.suspended_by) : undefined,
           suspendedAt: runtimeRow.suspended_at ? String(runtimeRow.suspended_at) : undefined,
-          suspensionReason: runtimeRow.suspension_reason ? String(runtimeRow.suspension_reason) : undefined,
+          suspensionReason: runtimeRow.suspension_reason
+            ? String(runtimeRow.suspension_reason)
+            : undefined,
           endedBy: runtimeRow.ended_by ? String(runtimeRow.ended_by) : undefined,
           endedAt: runtimeRow.ended_at ? String(runtimeRow.ended_at) : undefined,
           updatedAt: String(runtimeRow.updated_at),
-          rowVersion: Number(runtimeRow.row_version),
+          rowVersion: Number(runtimeRow.row_version)
         };
       } else {
         const ready = await client.query(
           `select exists(select 1 from virtual_sessions where hearing_id=$1 and state='READY') as ready`,
-          [hearingId],
+          [hearingId]
         );
         state = Boolean(ready.rows[0]?.ready) ? 'READY' : 'NOT_READY';
       }
@@ -85,8 +94,8 @@ export class HearingControlRepository {
           eventType: String(row.event_type),
           reason: row.reason ? String(row.reason) : undefined,
           actorUserId: String(row.actor_user_id),
-          occurredAt: String(row.occurred_at),
-        })),
+          occurredAt: String(row.occurred_at)
+        }))
       };
     });
   }
@@ -96,17 +105,30 @@ export class HearingControlRepository {
     action: HearingAction,
     reason: string | undefined,
     user: CurrentUser,
-    expectedRowVersion?: number,
+    expectedRowVersion?: number
   ): Promise<HearingRuntimeStatus> {
     if (!this.mode.postgres) {
-      const virtual = [...this.memory.virtualSessions].reverse().find((item) => item.hearingId === hearingId && item.state === 'READY');
-      if (!virtual) throw new DomainError('VIRTUAL_SESSION_REQUIRED', 'A READY virtual session is required before hearing control.', 409);
+      const virtual = [...this.memory.virtualSessions]
+        .reverse()
+        .find((item) => item.hearingId === hearingId && item.state === 'READY');
+      if (!virtual)
+        throw new DomainError(
+          'VIRTUAL_SESSION_REQUIRED',
+          'A READY virtual session is required before hearing control.',
+          409
+        );
       let runtime = this.memory.hearingRuntimes.find((item) => item.hearingId === hearingId);
       const current = runtime?.state ?? 'READY';
       const next = transitionHearing(current, action);
       const at = new Date().toISOString();
       if (!runtime) {
-        runtime = { id: this.memory.id(), hearingId, virtualSessionId: virtual.id, state: next, updatedAt: at };
+        runtime = {
+          id: this.memory.id(),
+          hearingId,
+          virtualSessionId: virtual.id,
+          state: next,
+          updatedAt: at
+        };
         this.memory.hearingRuntimes.push(runtime);
       } else {
         runtime.state = next;
@@ -118,31 +140,40 @@ export class HearingControlRepository {
       this.memory.hearingControlEvents.push({
         id: this.memory.id(),
         hearingId,
-        sequence: this.memory.hearingControlEvents.filter((item) => item.hearingId === hearingId).length + 1,
+        sequence:
+          this.memory.hearingControlEvents.filter((item) => item.hearingId === hearingId).length +
+          1,
         eventType: this.eventType(action),
         reason,
         actorUserId: user.id,
-        occurredAt: at,
+        occurredAt: at
       });
       return this.status(hearingId, user);
     }
 
     await this.pg.transactionAs(user, async (client) => {
-      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [`hearing-runtime:${hearingId}`]);
+      await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
+        `hearing-runtime:${hearingId}`
+      ]);
       const virtualResult = await client.query(
         `select id::text from virtual_sessions
           where hearing_id=$1 and state='READY'
           order by created_at desc limit 1`,
-        [hearingId],
+        [hearingId]
       );
       const virtual = virtualResult.rows[0];
-      if (!virtual) throw new DomainError('VIRTUAL_SESSION_REQUIRED', 'A READY virtual session is required before hearing control.', 409);
+      if (!virtual)
+        throw new DomainError(
+          'VIRTUAL_SESSION_REQUIRED',
+          'A READY virtual session is required before hearing control.',
+          409
+        );
       const runtimeResult = await client.query(
         `select id::text,state,row_version from hearing_runtime where hearing_id=$1 for update`,
-        [hearingId],
+        [hearingId]
       );
       const runtimeRow = runtimeResult.rows[0];
-      const current = runtimeRow ? String(runtimeRow.state) as HearingRuntimeState : 'READY';
+      const current = runtimeRow ? (String(runtimeRow.state) as HearingRuntimeState) : 'READY';
       const next = transitionHearing(current, action);
       const at = new Date().toISOString();
       if (!runtimeRow) {
@@ -159,11 +190,11 @@ export class HearingControlRepository {
             action === 'START' ? at : null,
             action === 'SUSPEND' ? user.id : null,
             action === 'SUSPEND' ? at : null,
-            action === 'SUSPEND' ? reason ?? null : null,
+            action === 'SUSPEND' ? (reason ?? null) : null,
             action === 'END' ? user.id : null,
             action === 'END' ? at : null,
-            at,
-          ],
+            at
+          ]
         );
       } else {
         const expected = expectedRowVersion ?? Number(runtimeRow.row_version);
@@ -181,39 +212,58 @@ export class HearingControlRepository {
                   row_version=row_version+1
             where hearing_id=$1 and row_version=$2
             returning id`,
-          [hearingId, expected, next, action, user.id, at, reason ?? null],
+          [hearingId, expected, next, action, user.id, at, reason ?? null]
         );
         if (updated.rowCount !== 1) {
-          throw new DomainError('OPTIMISTIC_CONCURRENCY_CONFLICT', 'Hearing runtime was changed by another transaction.', 409, {
-            hearingId,
-            expectedRowVersion: expected,
-          });
+          throw new DomainError(
+            'OPTIMISTIC_CONCURRENCY_CONFLICT',
+            'Hearing runtime was changed by another transaction.',
+            409,
+            {
+              hearingId,
+              expectedRowVersion: expected
+            }
+          );
         }
       }
       const sequenceResult = await client.query(
         'select coalesce(max(sequence),0)+1 as sequence from hearing_control_events where hearing_id=$1',
-        [hearingId],
+        [hearingId]
       );
       await client.query(
         `insert into hearing_control_events(hearing_id,sequence,event_type,reason,actor_user_id,occurred_at)
          values($1,$2,$3,$4,$5,$6)`,
-        [hearingId, Number(sequenceResult.rows[0]?.sequence ?? 1), this.eventType(action), reason ?? null, user.id, at],
+        [
+          hearingId,
+          Number(sequenceResult.rows[0]?.sequence ?? 1),
+          this.eventType(action),
+          reason ?? null,
+          user.id,
+          at
+        ]
       );
       await client.query(
         `update hearings set state=$2,row_version=row_version+1,updated_at=$3 where id=$1`,
-        [hearingId, this.hearingState(action), at],
+        [hearingId, this.hearingState(action), at]
       );
     });
     return this.status(hearingId, user);
   }
 
   async ended(hearingId: string, user: CurrentUser): Promise<boolean> {
-    if (!this.mode.postgres) return this.memory.hearingRuntimes.some((item) => item.hearingId === hearingId && item.state === 'ENDED');
-    const rows = await this.pg.transactionAs(user, async (client) =>
-      (await client.query(
-        `select exists(select 1 from hearing_runtime where hearing_id=$1 and state='ENDED') as ended`,
-        [hearingId],
-      )).rows,
+    if (!this.mode.postgres)
+      return this.memory.hearingRuntimes.some(
+        (item) => item.hearingId === hearingId && item.state === 'ENDED'
+      );
+    const rows = await this.pg.transactionAs(
+      user,
+      async (client) =>
+        (
+          await client.query(
+            `select exists(select 1 from hearing_runtime where hearing_id=$1 and state='ENDED') as ended`,
+            [hearingId]
+          )
+        ).rows
     );
     return Boolean(rows[0]?.ended);
   }
@@ -223,7 +273,7 @@ export class HearingControlRepository {
     action: HearingAction,
     userId: string,
     reason: string | undefined,
-    at: string,
+    at: string
   ): void {
     if (action === 'START') {
       runtime.startedBy = userId;

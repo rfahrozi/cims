@@ -7,13 +7,13 @@ import { api } from '@/lib/api';
 
 // ── Definisi langkah alur sidang elektronik ─────────────────────────────────
 export const WORKFLOW_STEPS = [
-  { path: '/hearing-intake',  label: 'Data Perkara',    shortLabel: '1',  gateKey: 'hearing_data'     },
-  { path: '/determination',   label: 'Penetapan Hakim', shortLabel: '2',  gateKey: 'determination'    },
-  { path: '/scheduling',      label: 'Jadwal',          shortLabel: '3',  gateKey: 'schedule'         },
-  { path: '/notices',         label: 'Pemberitahuan',   shortLabel: '4',  gateKey: 'notice'           },
-  { path: '/readiness',       label: 'Kesiapan',        shortLabel: '5',  gateKey: 'readiness'        },
-  { path: '/virtual-session', label: 'Ruang Virtual',   shortLabel: '6',  gateKey: 'virtual_session'  },
-  { path: '/hearing-control', label: 'Sidang',          shortLabel: '7',  gateKey: 'hearing_ended'    },
+  { path: '/hearing-intake', label: 'Data Perkara', shortLabel: '1', gateKey: 'hearing_data' },
+  { path: '/determination', label: 'Penetapan Hakim', shortLabel: '2', gateKey: 'determination' },
+  { path: '/scheduling', label: 'Jadwal', shortLabel: '3', gateKey: 'schedule' },
+  { path: '/notices', label: 'Pemberitahuan', shortLabel: '4', gateKey: 'notice' },
+  { path: '/readiness', label: 'Kesiapan', shortLabel: '5', gateKey: 'readiness' },
+  { path: '/virtual-session', label: 'Ruang Virtual', shortLabel: '6', gateKey: 'virtual_session' },
+  { path: '/hearing-control', label: 'Sidang', shortLabel: '7', gateKey: 'hearing_ended' }
 ] as const;
 
 type GateData = {
@@ -41,17 +41,15 @@ export function WorkflowStepper() {
     queryKey: ['hearing-gate', hearingId],
     queryFn: () => api<GateData>(`/hearings/${hearingId}/gate`),
     enabled: Boolean(hearingId),
-    refetchInterval: 15_000, // refresh tiap 15 detik
+    refetchInterval: 15_000 // refresh tiap 15 detik
   });
 
   // Hanya tampilkan di halaman workflow inti
-  const currentStep = WORKFLOW_STEPS.findIndex(s => location.pathname.startsWith(s.path));
+  const currentStep = WORKFLOW_STEPS.findIndex((s) => location.pathname.startsWith(s.path));
   if (currentStep === -1) return null;
 
   const currentStepData = WORKFLOW_STEPS[currentStep];
-  const doneCount = gate
-    ? WORKFLOW_STEPS.filter(s => isGateDone(gate, s.gateKey)).length
-    : 0;
+  const doneCount = gate ? WORKFLOW_STEPS.filter((s) => isGateDone(gate, s.gateKey)).length : 0;
 
   return (
     <div className="mb-5 rounded-xl border bg-white px-4 py-3 shadow-sm">
@@ -86,14 +84,15 @@ export function WorkflowStepper() {
                   active
                     ? 'bg-blue-600 text-white shadow-sm'
                     : done
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-slate-100 text-slate-400',
+                      ? 'bg-green-50 text-green-700'
+                      : 'bg-slate-100 text-slate-400'
                 )}
               >
-                {done && !active
-                  ? <CheckCircle2 className="h-3 w-3 shrink-0" />
-                  : <Circle className={cn('h-3 w-3 shrink-0', active && 'text-blue-200')} />
-                }
+                {done && !active ? (
+                  <CheckCircle2 className="h-3 w-3 shrink-0" />
+                ) : (
+                  <Circle className={cn('h-3 w-3 shrink-0', active && 'text-blue-200')} />
+                )}
                 <span className="hidden sm:inline">{step.label}</span>
                 <span className="sm:hidden">{step.shortLabel}</span>
               </div>

@@ -13,7 +13,10 @@ export class CreateDeterminationDto {
    * Mode persidangan yang ditetapkan hakim — wajib eksplisit per SOP 10.2.
    * Nilai: LANGSUNG | ELEKTRONIK | HYBRID
    */
-  @IsOptional() @IsIn(['LANGSUNG', 'ELEKTRONIK', 'HYBRID']) hearing_mode?: 'LANGSUNG' | 'ELEKTRONIK' | 'HYBRID';
+  @IsOptional() @IsIn(['LANGSUNG', 'ELEKTRONIK', 'HYBRID']) hearing_mode?:
+    | 'LANGSUNG'
+    | 'ELEKTRONIK'
+    | 'HYBRID';
   @IsString() @MinLength(3) official_reference!: string;
   @IsString() @MinLength(10) reason!: string;
 }

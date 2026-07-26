@@ -10,7 +10,7 @@ import type {
   PublishExcerptDto,
   RecordPresenceDto,
   RescheduleAppealReadingDto,
-  TransmitDto,
+  TransmitDto
 } from './dto.js';
 
 @ApiTags('appeal-decision')
@@ -25,26 +25,20 @@ export class AppealDecisionController {
   create(
     @Body() dto: CreateAppealReadingDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.create(user, dto, correlationId);
   }
 
   /** GET /api/v1/appeal-decisions/hearings/:hearingId — Daftar pembacaan per perkara */
   @Get('hearings/:hearingId')
-  list(
-    @Param('hearingId') hearingId: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  list(@Param('hearingId') hearingId: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.list(user, hearingId);
   }
 
   /** GET /api/v1/appeal-decisions/:id — Detail pembacaan */
   @Get(':id')
-  getById(
-    @Param('id') id: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  getById(@Param('id') id: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.getById(user, id);
   }
 
@@ -54,7 +48,7 @@ export class AppealDecisionController {
     @Param('id') id: string,
     @Body() dto: RescheduleAppealReadingDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.reschedule(user, id, dto, correlationId);
   }
@@ -65,7 +59,7 @@ export class AppealDecisionController {
     @Param('id') id: string,
     @Body() dto: MarkReadDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.markRead(user, id, dto, correlationId);
   }
@@ -78,17 +72,14 @@ export class AppealDecisionController {
     @Param('id') readingId: string,
     @Body() dto: CreateNoticeStepDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createNoticeStep(user, readingId, dto, correlationId);
   }
 
   /** GET /api/v1/appeal-decisions/:id/notice-steps — Daftar rantai pemberitahuan */
   @Get(':id/notice-steps')
-  listNoticeSteps(
-    @Param('id') readingId: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  listNoticeSteps(@Param('id') readingId: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.listNoticeSteps(user, readingId);
   }
 
@@ -98,7 +89,7 @@ export class AppealDecisionController {
     @Param('stepId') stepId: string,
     @Body() dto: AcknowledgeNoticeStepDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.acknowledgeNoticeStep(user, stepId, dto, correlationId);
   }
@@ -111,17 +102,14 @@ export class AppealDecisionController {
     @Param('id') readingId: string,
     @Body() dto: RecordPresenceDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.recordPresence(user, readingId, dto, correlationId);
   }
 
   /** GET /api/v1/appeal-decisions/:id/presence — Daftar kehadiran */
   @Get(':id/presence')
-  listPresence(
-    @Param('id') readingId: string,
-    @CurrentUserContext() user: CurrentUser,
-  ) {
+  listPresence(@Param('id') readingId: string, @CurrentUserContext() user: CurrentUser) {
     return this.service.listPresence(user, readingId);
   }
 
@@ -133,7 +121,7 @@ export class AppealDecisionController {
     @Param('id') readingId: string,
     @Body() dto: PublishExcerptDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.publishExcerpt(user, readingId, dto, correlationId);
   }
@@ -146,7 +134,7 @@ export class AppealDecisionController {
     @Param('id') readingId: string,
     @Body() dto: TransmitDto,
     @CurrentUserContext() user: CurrentUser,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.transmit(user, readingId, dto, correlationId);
   }

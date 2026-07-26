@@ -7,6 +7,6 @@ import { LiaisonService } from './liaison.service.js';
   imports: [InfrastructureModule],
   controllers: [LiaisonController],
   providers: [LiaisonService],
-  exports: [LiaisonService],
+  exports: [LiaisonService]
 })
 export class LiaisonModule {}

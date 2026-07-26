@@ -17,20 +17,31 @@ export interface EvidenceStorageResult {
 export class EvidenceStorageGateway {
   constructor(
     private readonly config: ConfigService,
-    private readonly circuitBreaker: CircuitBreakerService,
+    private readonly circuitBreaker: CircuitBreakerService
   ) {}
 
   capability(): { mode: 'LOCAL' | 'HTTP' | 'DISABLED'; configured: boolean } {
     const mode = this.mode;
     if (mode === 'LOCAL') return { mode, configured: true };
     if (mode === 'DISABLED') return { mode, configured: false };
-    return { mode, configured: Boolean(this.config.get<string>('EVIDENCE_STORAGE_URL') && secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY')) };
+    return {
+      mode,
+      configured: Boolean(
+        this.config.get<string>('EVIDENCE_STORAGE_URL') &&
+          secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY')
+      )
+    };
   }
 
-  async putJson(objectKey: string, value: unknown, correlationId?: string): Promise<EvidenceStorageResult> {
+  async putJson(
+    objectKey: string,
+    value: unknown,
+    correlationId?: string
+  ): Promise<EvidenceStorageResult> {
     const bytes = Buffer.from(JSON.stringify(value));
     const objectHash = createHash('sha256').update(bytes).digest('hex');
-    if (this.mode === 'DISABLED') throw new DomainError('EVIDENCE_STORAGE_DISABLED', 'Evidence storage is disabled.', 503);
+    if (this.mode === 'DISABLED')
+      throw new DomainError('EVIDENCE_STORAGE_DISABLED', 'Evidence storage is disabled.', 503);
     if (this.mode === 'LOCAL') {
       const directory = this.config.get<string>('EVIDENCE_LOCAL_DIR') ?? '/tmp/cims-evidence';
       await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -41,7 +52,12 @@ export class EvidenceStorageGateway {
     }
     const baseUrl = this.config.get<string>('EVIDENCE_STORAGE_URL')?.replace(/\/$/, '');
     const apiKey = secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY');
-    if (!baseUrl || !apiKey) throw new DomainError('EVIDENCE_STORAGE_CONFIG_INVALID', 'Evidence storage HTTP configuration is incomplete.', 500);
+    if (!baseUrl || !apiKey)
+      throw new DomainError(
+        'EVIDENCE_STORAGE_CONFIG_INVALID',
+        'Evidence storage HTTP configuration is incomplete.',
+        500
+      );
     return this.circuitBreaker.execute('evidence-storage', async () => {
       const response = await fetch(`${baseUrl}/objects/${encodeURIComponent(objectKey)}`, {
         method: 'PUT',
@@ -49,17 +65,27 @@ export class EvidenceStorageGateway {
           authorization: `Bearer ${apiKey}`,
           'content-type': 'application/json',
           'x-content-sha256': objectHash,
-          ...(correlationId ? { 'x-correlation-id': correlationId } : {}),
+          ...(correlationId ? { 'x-correlation-id': correlationId } : {})
         },
         body: bytes,
-        signal: AbortSignal.timeout(Number(this.config.get<string>('EVIDENCE_STORAGE_TIMEOUT_MS') ?? 15_000)),
+        signal: AbortSignal.timeout(
+          Number(this.config.get<string>('EVIDENCE_STORAGE_TIMEOUT_MS') ?? 15_000)
+        )
       });
       const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-      if (!response.ok) throw new DomainError('EVIDENCE_STORAGE_ERROR', 'Evidence storage rejected the object.', 502, { status: response.status });
+      if (!response.ok)
+        throw new DomainError(
+          'EVIDENCE_STORAGE_ERROR',
+          'Evidence storage rejected the object.',
+          502,
+          { status: response.status }
+        );
       return {
-        storageUri: String(body.storage_uri ?? body.uri ?? `${baseUrl}/objects/${encodeURIComponent(objectKey)}`),
+        storageUri: String(
+          body.storage_uri ?? body.uri ?? `${baseUrl}/objects/${encodeURIComponent(objectKey)}`
+        ),
         objectHash,
-        sizeBytes: bytes.length,
+        sizeBytes: bytes.length
       };
     });
   }

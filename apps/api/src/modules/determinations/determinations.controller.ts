@@ -13,7 +13,7 @@ export class DeterminationsController {
   request(
     @CurrentUserContext() user: CurrentUser,
     @Body() dto: CreateRequestDto,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createRequest(user, dto, correlationId);
   }
@@ -22,7 +22,7 @@ export class DeterminationsController {
   determine(
     @CurrentUserContext() user: CurrentUser,
     @Body() dto: CreateDeterminationDto,
-    @Headers('x-correlation-id') correlationId?: string,
+    @Headers('x-correlation-id') correlationId?: string
   ) {
     return this.service.createDetermination(user, dto, correlationId);
   }

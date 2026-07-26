@@ -11,7 +11,7 @@ export class ComplianceController {
   constructor(
     private readonly hearings: HearingsService,
     private readonly persistence: PersistenceModeService,
-    private readonly outbox: OutboxService,
+    private readonly outbox: OutboxService
   ) {}
 
   @Get()
@@ -20,24 +20,39 @@ export class ComplianceController {
     return {
       release: '0.19.0',
       persistence_mode: this.persistence.mode,
-      hearings: await Promise.all(hearings.map(async (item) => ({
-        id: item.id,
-        case_number: item.caseNumber,
-        state: item.state,
-        gate: await this.hearings.gate(item.id, user),
-      }))),
-      outbox: this.persistence.postgres ? await this.outbox.status() : { mode: 'MEMORY', pending: 0 },
+      hearings: await Promise.all(
+        hearings.map(async (item) => ({
+          id: item.id,
+          case_number: item.caseNumber,
+          state: item.state,
+          gate: await this.hearings.gate(item.id, user)
+        }))
+      ),
+      outbox: this.persistence.postgres
+        ? await this.outbox.status()
+        : { mode: 'MEMORY', pending: 0 },
       migration: {
         backend: 'NESTJS_TYPESCRIPT',
         frontend: 'REACT_SHADCN',
         postgres_native_modules: [
-          'hearings', 'determinations', 'scheduling', 'official_notice', 'acknowledgment',
-          'readiness', 'identity_verification', 'room_inspection', 'virtual_session',
-          'hearing_control', 'audit', 'participants', 'attendance', 'incidents',
+          'hearings',
+          'determinations',
+          'scheduling',
+          'official_notice',
+          'acknowledgment',
+          'readiness',
+          'identity_verification',
+          'room_inspection',
+          'virtual_session',
+          'hearing_control',
+          'audit',
+          'participants',
+          'attendance',
+          'incidents'
         ],
         transactional_outbox: this.persistence.postgres,
-        legacy_proxy: process.env.ENABLE_LEGACY_PROXY === 'true',
-      },
+        legacy_proxy: process.env.ENABLE_LEGACY_PROXY === 'true'
+      }
     };
   }
 }

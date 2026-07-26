@@ -15,7 +15,7 @@ export class HearingsService {
     private readonly notices: NoticesRepository,
     private readonly readiness: ReadinessRepository,
     private readonly virtualSessions: VirtualSessionsRepository,
-    private readonly hearingControl: HearingControlRepository,
+    private readonly hearingControl: HearingControlRepository
   ) {}
 
   list(user: CurrentUser) {
@@ -31,7 +31,11 @@ export class HearingsService {
     return this.core.getAgendaItems(id, user);
   }
 
-  async saveAgenda(id: string, items: Array<{ itemType: string; itemDescription: string; estimatedDurationMinutes?: number }>, user: CurrentUser) {
+  async saveAgenda(
+    id: string,
+    items: Array<{ itemType: string; itemDescription: string; estimatedDurationMinutes?: number }>,
+    user: CurrentUser
+  ) {
     requireRoles(user, ['COURT_CLERK', 'JUDGE']);
     await this.core.getHearing(id, user);
     return this.core.saveAgendaItems(id, items, user);
@@ -39,14 +43,22 @@ export class HearingsService {
 
   async gate(id: string, user: CurrentUser) {
     await this.get(id, user);
-    const [hearingData, determination, activeSchedule, notice, readiness, virtualSession, hearingEnded] = await Promise.all([
+    const [
+      hearingData,
+      determination,
+      activeSchedule,
+      notice,
+      readiness,
+      virtualSession,
+      hearingEnded
+    ] = await Promise.all([
       this.core.hasActiveIntake(id, user),
       this.core.hasApprovedDetermination(id, user),
       this.core.activeSchedule(id, user),
       this.notices.gate(id, user),
       this.readiness.gate(id, user),
       this.virtualSessions.isReady(id, user),
-      this.hearingControl.ended(id, user),
+      this.hearingControl.ended(id, user)
     ]);
     const schedule = Boolean(activeSchedule);
     return {
@@ -65,8 +77,8 @@ export class HearingsService {
         notice: notice.ready,
         readiness: readiness.ready,
         virtualSession,
-        hearingEnded,
-      }),
+        hearingEnded
+      })
     };
   }
 }

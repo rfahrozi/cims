@@ -17,7 +17,7 @@ export function validateProposal(proposal: ScheduleProposal): void {
 
 export function detectConflicts(
   proposal: ScheduleProposal,
-  activeSchedules: readonly ActiveSchedule[],
+  activeSchedules: readonly ActiveSchedule[]
 ): ScheduleConflict[] {
   validateProposal(proposal);
   const proposalStart = Date.parse(proposal.startAt);
@@ -26,13 +26,14 @@ export function detectConflicts(
 
   for (const active of activeSchedules) {
     if (active.hearingId === proposal.hearingId || active.status !== 'ACTIVE') continue;
-    const overlap = proposalStart < Date.parse(active.endAt) && proposalEnd > Date.parse(active.startAt);
+    const overlap =
+      proposalStart < Date.parse(active.endAt) && proposalEnd > Date.parse(active.startAt);
     if (!overlap) continue;
     for (const resource of proposal.resources) {
       const match = active.resources.find(
         (candidate) =>
           candidate.resourceType === resource.resourceType &&
-          candidate.resourceId === resource.resourceId,
+          candidate.resourceId === resource.resourceId
       );
       if (match) {
         conflicts.push({
@@ -40,7 +41,7 @@ export function detectConflicts(
           severity: resource.requirement === 'REQUIRED' ? 'REQUIRED' : 'WARNING',
           message: `${resource.resourceType} ${resource.resourceId} already has an overlapping hearing.`,
           resourceType: resource.resourceType,
-          resourceId: resource.resourceId,
+          resourceId: resource.resourceId
         });
       }
     }
@@ -51,6 +52,11 @@ export function detectConflicts(
 export function assertConflictsResolved(conflicts: readonly ScheduleConflict[]): void {
   const blocking = conflicts.filter((item) => item.severity === 'REQUIRED');
   if (blocking.length > 0) {
-    throw new DomainError('CONFLICT_UNRESOLVED', 'Required scheduling conflicts remain.', 409, blocking);
+    throw new DomainError(
+      'CONFLICT_UNRESOLVED',
+      'Required scheduling conflicts remain.',
+      409,
+      blocking
+    );
   }
 }

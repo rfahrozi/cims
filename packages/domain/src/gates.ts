@@ -3,7 +3,7 @@ import type { Determination, GateCode } from './types.js';
 
 export function assertValidDetermination(
   hearingId: string,
-  determinations: readonly Determination[],
+  determinations: readonly Determination[]
 ): Determination {
   const valid = [...determinations]
     .filter((item) => item.hearingId === hearingId && item.decision === 'APPROVED')
@@ -12,7 +12,7 @@ export function assertValidDetermination(
   if (!valid) {
     throw new DomainError(
       'DETERMINATION_REQUIRED',
-      'A valid judicial determination is required before scheduling.',
+      'A valid judicial determination is required before scheduling.'
     );
   }
   return valid;

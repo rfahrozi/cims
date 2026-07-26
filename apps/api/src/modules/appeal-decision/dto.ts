@@ -5,7 +5,7 @@ import type {
   AppealDeliveryMode,
   AppealNoticeStepCode,
   AppealNoticeStepStatus,
-  AppealPartyRole,
+  AppealPartyRole
 } from '@cims/domain';
 
 // ── Create reading ──────────────────────────────────────────────────────────
@@ -36,7 +36,12 @@ export class MarkReadDto {
 
 // ── Notice step ─────────────────────────────────────────────────────────────
 export class CreateNoticeStepDto {
-  @IsIn(['PT_TO_PROSECUTION', 'PROSECUTION_TO_CORRECTIONS', 'CORRECTIONS_TO_DEFENDANT', 'PROSECUTION_TO_ADVOCATE'])
+  @IsIn([
+    'PT_TO_PROSECUTION',
+    'PROSECUTION_TO_CORRECTIONS',
+    'CORRECTIONS_TO_DEFENDANT',
+    'PROSECUTION_TO_ADVOCATE'
+  ])
   step_code!: AppealNoticeStepCode;
   @IsString() sender_organization_id!: string;
   @IsString() recipient_reference!: string;
@@ -52,7 +57,8 @@ export class AcknowledgeNoticeStepDto {
 
 // ── Presence record (kehadiran) ──────────────────────────────────────────────
 export class RecordPresenceDto {
-  @IsIn(['DEFENDANT', 'ADVOCATE', 'PROSECUTOR', 'CORRECTIONS_OFFICER']) party_role!: AppealPartyRole;
+  @IsIn(['DEFENDANT', 'ADVOCATE', 'PROSECUTOR', 'CORRECTIONS_OFFICER'])
+  party_role!: AppealPartyRole;
   @IsString() party_reference!: string;
   @IsString() @MinLength(2) party_name!: string;
   @IsIn(['PRESENT', 'ABSENT', 'EXCUSED']) attendance_status!: AppealAttendanceStatus;

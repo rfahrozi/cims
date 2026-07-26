@@ -15,7 +15,7 @@ export class VirtualSessionsController {
     @Param('hearingId') id: string,
     @Body() dto: ProvisionVirtualSessionDto,
     @Headers('x-correlation-id') correlationId?: string,
-    @Headers('traceparent') traceparent?: string,
+    @Headers('traceparent') traceparent?: string
   ) {
     return this.service.provision(user, id, dto, correlationId, traceparent);
   }

@@ -10,11 +10,7 @@
     "ready": true
   },
   "readiness_gate": {
-    "requiredOrganizationTypes": [
-      "COURT",
-      "PROSECUTION",
-      "CORRECTIONS"
-    ],
+    "requiredOrganizationTypes": ["COURT", "PROSECUTION", "CORRECTIONS"],
     "organizations": [
       {
         "organizationType": "COURT",

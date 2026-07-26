@@ -27,7 +27,7 @@ export class MetricsService {
     const state = this.histograms.get(key) ?? {
       count: 0,
       sum: 0,
-      buckets: new Map(this.defaultBuckets.map((bucket) => [bucket, 0])),
+      buckets: new Map(this.defaultBuckets.map((bucket) => [bucket, 0]))
     };
     state.count += 1;
     state.sum += value;
@@ -44,9 +44,13 @@ export class MetricsService {
     for (const [key, state] of this.histograms.entries()) {
       const parsed = this.parseKey(key);
       for (const [bucket, count] of state.buckets.entries()) {
-        lines.push(`cims_${parsed.name}_bucket${this.labels({ ...parsed.labels, le: String(bucket) })} ${count}`);
+        lines.push(
+          `cims_${parsed.name}_bucket${this.labels({ ...parsed.labels, le: String(bucket) })} ${count}`
+        );
       }
-      lines.push(`cims_${parsed.name}_bucket${this.labels({ ...parsed.labels, le: '+Inf' })} ${state.count}`);
+      lines.push(
+        `cims_${parsed.name}_bucket${this.labels({ ...parsed.labels, le: '+Inf' })} ${state.count}`
+      );
       lines.push(`cims_${parsed.name}_count${this.labels(parsed.labels)} ${state.count}`);
       lines.push(`cims_${parsed.name}_sum${this.labels(parsed.labels)} ${state.sum}`);
     }

@@ -6,7 +6,10 @@ export class PersistenceModeService {
   readonly mode: 'MEMORY' | 'POSTGRES';
 
   constructor(config: ConfigService) {
-    this.mode = (config.get<string>('PERSISTENCE_MODE') ?? 'MEMORY').toUpperCase() === 'POSTGRES' ? 'POSTGRES' : 'MEMORY';
+    this.mode =
+      (config.get<string>('PERSISTENCE_MODE') ?? 'MEMORY').toUpperCase() === 'POSTGRES'
+        ? 'POSTGRES'
+        : 'MEMORY';
   }
 
   get postgres(): boolean {

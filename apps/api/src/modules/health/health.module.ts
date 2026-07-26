@@ -4,6 +4,6 @@ import { InfrastructureModule } from '../../infrastructure/infrastructure.module
 
 @Module({
   imports: [InfrastructureModule],
-  controllers: [HealthController],
+  controllers: [HealthController]
 })
 export class HealthModule {}

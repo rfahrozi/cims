@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { assertConflictsResolved, DomainError, detectConflicts, validateProposal } from '@cims/domain';
+import {
+  assertConflictsResolved,
+  DomainError,
+  detectConflicts,
+  validateProposal
+} from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import { AuditService } from '../../infrastructure/audit.service.js';
@@ -14,7 +19,7 @@ export class SchedulingService {
     private readonly core: CoreWorkflowRepository,
     private readonly audit: AuditService,
     private readonly outbox: OutboxService,
-    private readonly persistence: PersistenceModeService,
+    private readonly persistence: PersistenceModeService
   ) {}
 
   async listHistory(user: CurrentUser, hearingId: string) {
@@ -23,7 +28,7 @@ export class SchedulingService {
     const history = await this.core.scheduleHistory(hearingId, user);
 
     return {
-      items: history.map(h => ({
+      items: history.map((h) => ({
         id: h.id,
         hearing_id: h.hearingId,
         start_at: h.startAt,
@@ -34,20 +39,29 @@ export class SchedulingService {
         approval_reason: h.approvalReason,
         approved_by: h.approvedBy,
         approved_at: h.approvedAt,
-        resources: h.resources.map(r => ({
+        resources: h.resources.map((r) => ({
           resource_type: r.resourceType,
           resource_id: r.resourceId,
-          requirement: r.requirement,
-        })),
+          requirement: r.requirement
+        }))
       }))
     };
   }
 
-  async create(user: CurrentUser, hearingId: string, dto: CreateProposalDto, correlationId?: string) {
+  async create(
+    user: CurrentUser,
+    hearingId: string,
+    dto: CreateProposalDto,
+    correlationId?: string
+  ) {
     requireRoles(user, ['COURT_CLERK']);
     await this.core.getHearing(hearingId, user);
     if (!(await this.core.hasApprovedDetermination(hearingId, user))) {
-      throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required before scheduling.', 409);
+      throw new DomainError(
+        'DETERMINATION_REQUIRED',
+        'A valid judicial determination is required before scheduling.',
+        409
+      );
     }
     const input = {
       hearingId,
@@ -57,58 +71,95 @@ export class SchedulingService {
       resources: dto.resources.map((resource) => ({
         resourceType: resource.resource_type,
         resourceId: resource.resource_id,
-        requirement: resource.requirement,
-      })),
+        requirement: resource.requirement
+      }))
     };
     validateProposal({ id: 'validation', ...input, status: 'DRAFT' });
     const proposal = await this.core.createProposal(input, user);
-    await this.audit.append({
-      eventType: 'SCHEDULE_PROPOSAL_CREATED',
-      objectType: 'HEARING',
-      objectId: hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: { proposal_id: proposal.id, start_at: proposal.startAt, end_at: proposal.endAt },
-    }, user);
+    await this.audit.append(
+      {
+        eventType: 'SCHEDULE_PROPOSAL_CREATED',
+        objectType: 'HEARING',
+        objectId: hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: { proposal_id: proposal.id, start_at: proposal.startAt, end_at: proposal.endAt }
+      },
+      user
+    );
     return this.publicProposal(proposal);
   }
 
-  async check(user: CurrentUser, proposalId: string, dto: CheckProposalDto, correlationId?: string) {
+  async check(
+    user: CurrentUser,
+    proposalId: string,
+    dto: CheckProposalDto,
+    correlationId?: string
+  ) {
     requireRoles(user, ['COURT_CLERK']);
     const proposal = await this.core.getProposal(proposalId, user);
     if (!(await this.core.hasApprovedDetermination(proposal.hearingId, user))) {
-      throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required before conflict checking.', 409);
+      throw new DomainError(
+        'DETERMINATION_REQUIRED',
+        'A valid judicial determination is required before conflict checking.',
+        409
+      );
     }
     const schedules = await this.core.activeSchedulesForConflict(proposal, user);
     const conflicts = detectConflicts(proposal, schedules);
-    const updated = await this.core.saveConflictCheck(proposalId, conflicts, user, dto.expected_row_version);
-    await this.audit.append({
-      eventType: 'SCHEDULE_CONFLICT_CHECKED',
-      objectType: 'HEARING',
-      objectId: proposal.hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: {
-        proposal_id: proposalId,
-        result: conflicts.some((item) => item.severity === 'REQUIRED') ? 'BLOCKED' : conflicts.length ? 'WARNING' : 'CLEAR',
-        conflict_count: conflicts.length,
+    const updated = await this.core.saveConflictCheck(
+      proposalId,
+      conflicts,
+      user,
+      dto.expected_row_version
+    );
+    await this.audit.append(
+      {
+        eventType: 'SCHEDULE_CONFLICT_CHECKED',
+        objectType: 'HEARING',
+        objectId: proposal.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          proposal_id: proposalId,
+          result: conflicts.some((item) => item.severity === 'REQUIRED')
+            ? 'BLOCKED'
+            : conflicts.length
+              ? 'WARNING'
+              : 'CLEAR',
+          conflict_count: conflicts.length
+        }
       },
-    }, user);
+      user
+    );
     return {
       proposal_id: proposalId,
-      status: conflicts.some((item) => item.severity === 'REQUIRED') ? 'BLOCKED' : conflicts.length ? 'WARNING' : 'CLEAR',
+      status: conflicts.some((item) => item.severity === 'REQUIRED')
+        ? 'BLOCKED'
+        : conflicts.length
+          ? 'WARNING'
+          : 'CLEAR',
       row_version: updated.rowVersion,
-      conflicts,
+      conflicts
     };
   }
 
-  async approve(user: CurrentUser, proposalId: string, dto: ApproveProposalDto, correlationId?: string) {
+  async approve(
+    user: CurrentUser,
+    proposalId: string,
+    dto: ApproveProposalDto,
+    correlationId?: string
+  ) {
     requireRoles(user, ['JUDGE', 'COURT_CLERK']);
     const proposal = await this.core.getProposal(proposalId, user);
     if (!(await this.core.hasApprovedDetermination(proposal.hearingId, user))) {
-      throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required before approval.', 409);
+      throw new DomainError(
+        'DETERMINATION_REQUIRED',
+        'A valid judicial determination is required before approval.',
+        409
+      );
     }
     assertConflictsResolved(await this.core.conflicts(proposalId, user));
 
@@ -121,30 +172,38 @@ export class SchedulingService {
         'CHANGE_REASON_REQUIRED',
         'Alasan perubahan jadwal wajib diisi karena sudah ada jadwal aktif yang akan digantikan (SOP 10.3).',
         409,
-        { existing_schedule_id: existingActive!.id, existing_start_at: existingActive!.startAt },
+        { existing_schedule_id: existingActive!.id, existing_start_at: existingActive!.startAt }
       );
     }
 
-    const schedule = await this.core.approveProposal(proposalId, dto.reason.trim(), user, dto.expected_row_version);
+    const schedule = await this.core.approveProposal(
+      proposalId,
+      dto.reason.trim(),
+      user,
+      dto.expected_row_version
+    );
 
-    await this.audit.append({
-      eventType: isReschedule ? 'HEARING_SCHEDULE_CHANGED' : 'HEARING_SCHEDULE_ACTIVATED',
-      objectType: 'HEARING',
-      objectId: schedule.hearingId,
-      actorUserId: user.id,
-      actorOrganizationId: user.organizationId,
-      correlationId,
-      payload: {
-        schedule_id: schedule.id,
-        version: schedule.version,
-        start_at: schedule.startAt,
-        end_at: schedule.endAt,
-        approval_reason: schedule.approvalReason,
-        change_reason: dto.change_reason ?? null,
-        superseded_schedule_id: existingActive?.id ?? null,
-        is_reschedule: isReschedule,
+    await this.audit.append(
+      {
+        eventType: isReschedule ? 'HEARING_SCHEDULE_CHANGED' : 'HEARING_SCHEDULE_ACTIVATED',
+        objectType: 'HEARING',
+        objectId: schedule.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          schedule_id: schedule.id,
+          version: schedule.version,
+          start_at: schedule.startAt,
+          end_at: schedule.endAt,
+          approval_reason: schedule.approvalReason,
+          change_reason: dto.change_reason ?? null,
+          superseded_schedule_id: existingActive?.id ?? null,
+          is_reschedule: isReschedule
+        }
       },
-    }, user);
+      user
+    );
 
     // ── H-02: Enqueue SCHEDULE_CHANGED outbox event untuk re-notification ─────
     // Outbox worker akan mengirim PERUBAHAN_JADWAL notice ke semua pihak.
@@ -159,9 +218,9 @@ export class SchedulingService {
           new_start_at: schedule.startAt,
           new_end_at: schedule.endAt,
           change_reason: dto.change_reason,
-          superseded_schedule_id: existingActive?.id,
+          superseded_schedule_id: existingActive?.id
         },
-        { correlationId },
+        { correlationId }
       );
     }
 
@@ -177,14 +236,14 @@ export class SchedulingService {
       change_reason: dto.change_reason ?? null,
       is_reschedule: isReschedule,
       resources: schedule.resources,
-      row_version: schedule.rowVersion,
+      row_version: schedule.rowVersion
     };
   }
 
   async listCalendar(user: CurrentUser, from: string, to: string, organizationId?: string) {
     // Audit dan read permissions diperiksa melalui transactionAs di repository (RBAC via assignment)
     const schedules = await this.core.listCalendar(user, from, to, organizationId);
-    return schedules.map(s => ({
+    return schedules.map((s) => ({
       id: s.id,
       hearing_id: s.hearingId,
       case_number: s.caseNumber,
@@ -194,7 +253,7 @@ export class SchedulingService {
       end_at: s.endAt,
       display_timezone: s.displayTimezone,
       status: s.status,
-      resources: s.resources,
+      resources: s.resources
     }));
   }
 
@@ -207,7 +266,7 @@ export class SchedulingService {
       display_timezone: proposal.displayTimezone,
       status: proposal.status,
       resources: proposal.resources,
-      row_version: proposal.rowVersion,
+      row_version: proposal.rowVersion
     };
   }
 }

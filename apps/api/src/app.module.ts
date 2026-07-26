@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -53,10 +52,13 @@ import { CustodyModule } from './modules/custody/custody.module.js';
     GovernanceModule,
     LegacyProxyModule,
     AppealDecisionModule, // SOP 10.15 — berlaku 1 Agustus 2026
-    LiaisonModule,        // SOP Bagian 7 & 8 — Pejabat Penghubung (C-05)
-    CustodyModule,        // SOP 10.14 — Mutasi/Perpindahan Tahanan (C-06)
+    LiaisonModule, // SOP Bagian 7 & 8 — Pejabat Penghubung (C-05)
+    CustodyModule // SOP 10.14 — Mutasi/Perpindahan Tahanan (C-06)
   ],
-  providers: [OidcTokenVerifierService, { provide: APP_GUARD, useClass: CimsAuthGuard }, { provide: APP_GUARD, useClass: PolicyGuard }],
+  providers: [
+    OidcTokenVerifierService,
+    { provide: APP_GUARD, useClass: CimsAuthGuard },
+    { provide: APP_GUARD, useClass: PolicyGuard }
+  ]
 })
 export class AppModule {}
-

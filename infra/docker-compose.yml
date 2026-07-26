@@ -5,8 +5,8 @@ services:
       POSTGRES_DB: cims
       POSTGRES_USER: cims
       POSTGRES_PASSWORD: cims
-    ports: ["5432:5432"]
-    volumes: ["cims_pg:/var/lib/postgresql/data"]
+    ports: ['5432:5432']
+    volumes: ['cims_pg:/var/lib/postgresql/data']
   api:
     build: ../apps/api
     environment:
@@ -14,10 +14,10 @@ services:
       WEB_ORIGIN: http://localhost:5173
       DATABASE_URL: postgresql://cims:cims@postgres:5432/cims
       ZOOM_PROVIDER_URL: http://zoom-provider:3010
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
     depends_on: [postgres]
   zoom-provider:
     build: ../services/zoom-provider
-    ports: ["3010:3010"]
+    ports: ['3010:3010']
 volumes:
   cims_pg: {}

@@ -17,8 +17,8 @@ paths:
           description: Provider is healthy
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/ProviderHealth'}
-        '503': {$ref: '#/components/responses/ProviderUnavailable'}
+              schema: { $ref: '#/components/schemas/ProviderHealth' }
+        '503': { $ref: '#/components/responses/ProviderUnavailable' }
   /capabilities:
     get:
       summary: Return supported and manual provider operations
@@ -27,7 +27,7 @@ paths:
           description: Capability result
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/Capabilities'}
+              schema: { $ref: '#/components/schemas/Capabilities' }
   /sessions:
     post:
       summary: Create one scheduled provider session
@@ -38,17 +38,17 @@ paths:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/CreateSessionRequest'}
+            schema: { $ref: '#/components/schemas/CreateSessionRequest' }
       responses:
         '201':
           description: Session created or replayed from the durable idempotency ledger
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/CreateSessionResponse'}
-        '400': {$ref: '#/components/responses/InvalidRequest'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '502': {$ref: '#/components/responses/ProviderError'}
-        '503': {$ref: '#/components/responses/ProviderUnavailable'}
+              schema: { $ref: '#/components/schemas/CreateSessionResponse' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '502': { $ref: '#/components/responses/ProviderError' }
+        '503': { $ref: '#/components/responses/ProviderUnavailable' }
   /sessions/{sessionRef}/rooms:
     post:
       summary: Create a provider or logical CIMS room reference
@@ -56,105 +56,113 @@ paths:
         - in: path
           name: sessionRef
           required: true
-          schema: {type: string}
+          schema: { type: string }
         - $ref: '#/components/parameters/IdempotencyKey'
         - $ref: '#/components/parameters/CorrelationId'
       requestBody:
         required: true
         content:
           application/json:
-            schema: {$ref: '#/components/schemas/CreateRoomRequest'}
+            schema: { $ref: '#/components/schemas/CreateRoomRequest' }
       responses:
         '201':
           description: Room reference created
           content:
             application/json:
-              schema: {$ref: '#/components/schemas/CreateRoomResponse'}
-        '400': {$ref: '#/components/responses/InvalidRequest'}
-        '409': {$ref: '#/components/responses/Conflict'}
+              schema: { $ref: '#/components/schemas/CreateRoomResponse' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
 components:
   parameters:
     IdempotencyKey:
       in: header
       name: Idempotency-Key
       required: true
-      schema: {type: string, minLength: 8, maxLength: 200}
+      schema: { type: string, minLength: 8, maxLength: 200 }
     CorrelationId:
       in: header
       name: X-Correlation-Id
       required: false
-      schema: {type: string, maxLength: 200}
+      schema: { type: string, maxLength: 200 }
   schemas:
     ProviderHealth:
       type: object
       required: [status, provider, checked_at, durable_idempotency, capabilities]
       properties:
-        status: {type: string, enum: [HEALTHY]}
-        provider: {type: string, const: ZOOM}
-        checked_at: {type: string, format: date-time}
-        durable_idempotency: {type: boolean}
-        capabilities: {$ref: '#/components/schemas/Capabilities'}
+        status: { type: string, enum: [HEALTHY] }
+        provider: { type: string, const: ZOOM }
+        checked_at: { type: string, format: date-time }
+        durable_idempotency: { type: boolean }
+        capabilities: { $ref: '#/components/schemas/Capabilities' }
     Capabilities:
       type: object
-      required: [scheduled_meeting, waiting_room, logical_rooms, live_waiting_room_admission, live_room_move]
+      required:
+        [
+          scheduled_meeting,
+          waiting_room,
+          logical_rooms,
+          live_waiting_room_admission,
+          live_room_move
+        ]
       properties:
-        scheduled_meeting: {type: boolean}
-        waiting_room: {type: boolean}
-        logical_rooms: {type: boolean}
-        breakout_preassignment: {type: boolean}
-        live_waiting_room_admission: {type: boolean}
-        live_room_move: {type: boolean}
-        participant_registration: {type: boolean}
-        recording_control: {type: boolean}
+        scheduled_meeting: { type: boolean }
+        waiting_room: { type: boolean }
+        logical_rooms: { type: boolean }
+        breakout_preassignment: { type: boolean }
+        live_waiting_room_admission: { type: boolean }
+        live_room_move: { type: boolean }
+        participant_registration: { type: boolean }
+        recording_control: { type: boolean }
         manual_action_required_for:
           type: array
-          items: {type: string}
+          items: { type: string }
     CreateSessionRequest:
       type: object
       required: [hearing_reference, start_at, end_at]
       properties:
-        hearing_reference: {type: string, minLength: 1}
-        start_at: {type: string, format: date-time}
-        end_at: {type: string, format: date-time}
-        recording_policy: {type: string, enum: [DISABLED, COURT_CONTROLLED], default: DISABLED}
+        hearing_reference: { type: string, minLength: 1 }
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        recording_policy: { type: string, enum: [DISABLED, COURT_CONTROLLED], default: DISABLED }
     CreateSessionResponse:
       type: object
       required: [provider_session_reference, state]
       properties:
-        provider_session_reference: {type: string}
-        state: {type: string, const: READY}
+        provider_session_reference: { type: string }
+        state: { type: string, const: READY }
     CreateRoomRequest:
       type: object
       required: [room_code, room_type, recording_allowed]
       properties:
-        room_code: {type: string}
-        room_type: {type: string, enum: [MAIN, WAITING, DEFENDANT, WITNESS, CONSULTATION]}
-        recording_allowed: {type: boolean}
+        room_code: { type: string }
+        room_type: { type: string, enum: [MAIN, WAITING, DEFENDANT, WITNESS, CONSULTATION] }
+        recording_allowed: { type: boolean }
     CreateRoomResponse:
       type: object
-      required: [provider_room_reference, room_code, room_type, recording_allowed, provider_operation]
+      required:
+        [provider_room_reference, room_code, room_type, recording_allowed, provider_operation]
       properties:
-        provider_room_reference: {type: string}
-        room_code: {type: string}
-        room_type: {type: string}
-        recording_allowed: {type: boolean}
-        provider_operation: {type: string, enum: [NATIVE, LOGICAL_MANUAL_CONTROL]}
+        provider_room_reference: { type: string }
+        room_code: { type: string }
+        room_type: { type: string }
+        recording_allowed: { type: boolean }
+        provider_operation: { type: string, enum: [NATIVE, LOGICAL_MANUAL_CONTROL] }
     Error:
       type: object
       properties:
-        statusCode: {type: integer}
-        message: {oneOf: [{type: string}, {type: array, items: {type: string}}]}
-        error: {type: string}
+        statusCode: { type: integer }
+        message: { oneOf: [{ type: string }, { type: array, items: { type: string } }] }
+        error: { type: string }
   responses:
     InvalidRequest:
       description: Invalid provider request
-      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     Conflict:
       description: Idempotency conflict or prohibited room policy
-      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     ProviderError:
       description: Zoom API rejected or failed the operation
-      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
     ProviderUnavailable:
       description: Configuration, OAuth, database, or provider unavailable
-      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }

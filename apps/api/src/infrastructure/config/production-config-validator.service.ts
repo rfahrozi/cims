@@ -14,11 +14,15 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
     this.requireSecret('TOKEN_PEPPER', 32);
     this.requireSecret('AUDIT_HASH_KEY', 32);
     const encryption = this.requireSecret('FIELD_ENCRYPTION_KEY', 40);
-    if (Buffer.from(encryption, 'base64').length !== 32) throw new Error('FIELD_ENCRYPTION_KEY must decode to exactly 32 bytes.');
-    if (this.config.get<string>('ENABLE_LEGACY_PROXY') === 'true') throw new Error('ENABLE_LEGACY_PROXY=true is forbidden in production.');
+    if (Buffer.from(encryption, 'base64').length !== 32)
+      throw new Error('FIELD_ENCRYPTION_KEY must decode to exactly 32 bytes.');
+    if (this.config.get<string>('ENABLE_LEGACY_PROXY') === 'true')
+      throw new Error('ENABLE_LEGACY_PROXY=true is forbidden in production.');
     this.assertEqual('DB_SSL', 'TRUE');
     if (this.config.get<string>('RETENTION_EXECUTION_ENABLED') === 'true') {
-      throw new Error('RETENTION_EXECUTION_ENABLED=true is forbidden until a legally approved disposition workflow is implemented.');
+      throw new Error(
+        'RETENTION_EXECUTION_ENABLED=true is forbidden until a legally approved disposition workflow is implemented.'
+      );
     }
 
     if (role === 'API') {
@@ -41,7 +45,8 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
       this.assertEqual('EVIDENCE_STORAGE_MODE', 'HTTP');
       this.requireValue('EVIDENCE_STORAGE_URL');
       this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
-      if ((this.config.get<string>('VIDEO_PROVIDER_MODE') ?? 'MOCK').toUpperCase() === 'HTTP') this.requireValue('VIDEO_PROVIDER_URL');
+      if ((this.config.get<string>('VIDEO_PROVIDER_MODE') ?? 'MOCK').toUpperCase() === 'HTTP')
+        this.requireValue('VIDEO_PROVIDER_URL');
     } else {
       throw new Error(`Unsupported CIMS_PROCESS_ROLE: ${role}`);
     }
@@ -67,7 +72,10 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
 
   private requireSecret(name: string, minimumLength: number): string {
     const value = secretValue(this.config, name);
-    if (!value || value.length < minimumLength) throw new Error(`${name} must be provided through a secret manager and contain at least ${minimumLength} characters.`);
+    if (!value || value.length < minimumLength)
+      throw new Error(
+        `${name} must be provided through a secret manager and contain at least ${minimumLength} characters.`
+      );
     return value;
   }
 }
