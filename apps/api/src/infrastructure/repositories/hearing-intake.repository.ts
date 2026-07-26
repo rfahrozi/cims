@@ -568,9 +568,7 @@ export class HearingIntakeRepository {
     });
   }
 
-  async referenceData(
-    user: CurrentUser
-  ): Promise<{
+  async referenceData(user: CurrentUser): Promise<{
     organizations: Array<{ id: string; name: string; type: string }>;
     caseClassifications: string[];
     custodyStatuses: string[];
