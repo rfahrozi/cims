@@ -15,6 +15,6 @@ const providers = [
 @Module({
   imports: [ConfigModule],
   providers,
-  exports: providers
+  exports: [FieldCryptoService, HearingAccessService, ProductionReadinessService]
 })
 export class SecurityModule {}

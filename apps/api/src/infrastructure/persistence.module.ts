@@ -37,6 +37,22 @@ const providers = [
 @Module({
   imports: [ConfigModule],
   providers,
-  exports: providers
+  exports: [
+    DatabaseHealthService,
+    PersistenceModeService,
+    PgPoolService,
+    OutboxService,
+    IdempotencyService,
+    CoreWorkflowRepository,
+    GovernanceRepository,
+    HearingControlRepository,
+    HearingIntakeRepository,
+    IncidentsRepository,
+    NoticesRepository,
+    ParticipantsRepository,
+    ReadinessRepository,
+    ReconciliationRepository,
+    VirtualSessionsRepository
+  ]
 })
 export class PersistenceModule {}

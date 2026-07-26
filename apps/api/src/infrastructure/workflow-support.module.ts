@@ -8,6 +8,6 @@ const providers = [InMemoryStore, OutboxWorkerService];
 @Module({
   imports: [ConfigModule],
   providers,
-  exports: providers
+  exports: [InMemoryStore]
 })
 export class WorkflowSupportModule {}

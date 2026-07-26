@@ -17,6 +17,12 @@ const providers = [
 @Module({
   imports: [ConfigModule],
   providers,
-  exports: providers
+  exports: [
+    EvidenceStorageGateway,
+    NotificationGateway,
+    OfficialSystemGateway,
+    VideoProviderGateway,
+    CircuitBreakerService
+  ]
 })
 export class IntegrationModule {}
