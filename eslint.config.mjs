@@ -30,7 +30,19 @@ export default [
     rules: {
       'no-console': 'warn',
       'no-debugger': 'warn',
-      'import/no-unresolved': 'off'
+      'import/no-unresolved': 'off',
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '**/infrastructure/*.service.js',
+            '!**/infrastructure/observability/*.service.js',
+            '!**/infrastructure/security/*.service.js',
+            '!**/infrastructure/integration/*.gateway.js',
+            '!**/infrastructure/persistence/**/*.js'
+          ]
+        }
+      ]
     }
   },
   eslintConfigPrettier
