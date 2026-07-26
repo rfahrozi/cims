@@ -9,8 +9,8 @@ import {
   transitionParticipant,
   assertAdvocateLocation
 } from '@cims/domain';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { ParticipantsRepository } from '../../infrastructure/repositories/participants.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { ParticipantsRepository } from '../../infrastructure/persistence/repositories/participants.repository.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import { requirePermission } from '../../common/authorization.js';
 import { secretValue } from '../../infrastructure/config/secret-value.js';

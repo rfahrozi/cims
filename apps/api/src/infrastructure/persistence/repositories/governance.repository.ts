@@ -11,11 +11,11 @@ import {
   type ReadinessCheck
 } from '@cims/domain';
 import type { CurrentUser } from '../../../common/current-user.decorator.js';
-import { InMemoryStore } from '../../in-memory.store.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
-import { OutboxService } from '../../database/outbox.service.js';
-import { EvidenceStorageGateway } from '../../evidence-storage.gateway.js';
+import { InMemoryStore } from '../../workflow-support/in-memory.store.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
+import { OutboxService } from '../database/outbox.service.js';
+import { EvidenceStorageGateway } from '../../integration/evidence-storage.gateway.js';
 
 export interface LegalHoldRecord {
   id: string;

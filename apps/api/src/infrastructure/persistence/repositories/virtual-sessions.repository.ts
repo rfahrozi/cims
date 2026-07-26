@@ -5,10 +5,10 @@ import {
   InMemoryStore,
   type VirtualRoomRecord,
   type VirtualSessionRecord
-} from '../../in-memory.store.js';
-import { OutboxService } from '../../database/outbox.service.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { OutboxService } from '../database/outbox.service.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
 
 export interface HydratedVirtualSession extends VirtualSessionRecord {
   rowVersion: number;

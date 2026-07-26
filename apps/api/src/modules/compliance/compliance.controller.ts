@@ -1,8 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUserContext, type CurrentUser } from '../../common/current-user.decorator.js';
-import { OutboxService } from '../../infrastructure/database/outbox.service.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
+import { OutboxService } from '../../infrastructure/persistence/database/outbox.service.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
 import { HearingsService } from '../hearings/hearings.service.js';
 
 @ApiTags('compliance')

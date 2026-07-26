@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { DomainError } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
-import { NoticesRepository } from '../../infrastructure/repositories/notices.repository.js';
-import { ReadinessRepository } from '../../infrastructure/repositories/readiness.repository.js';
-import { VirtualSessionsRepository } from '../../infrastructure/repositories/virtual-sessions.repository.js';
-import { VideoProviderGateway } from '../../infrastructure/video-provider.gateway.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { NoticesRepository } from '../../infrastructure/persistence/repositories/notices.repository.js';
+import { ReadinessRepository } from '../../infrastructure/persistence/repositories/readiness.repository.js';
+import { VirtualSessionsRepository } from '../../infrastructure/persistence/repositories/virtual-sessions.repository.js';
+import { VideoProviderGateway } from '../../infrastructure/integration/video-provider.gateway.js';
 import type { ProvisionVirtualSessionDto } from './dto.js';
 
 @Injectable()

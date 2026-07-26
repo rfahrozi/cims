@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { DomainError } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
-import { NoticesRepository } from '../../infrastructure/repositories/notices.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { NoticesRepository } from '../../infrastructure/persistence/repositories/notices.repository.js';
 import type { AcknowledgeNoticeDto, CreateNoticeDto } from './dto.js';
 
 @Injectable()

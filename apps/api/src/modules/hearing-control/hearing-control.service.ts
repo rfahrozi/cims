@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import type { HearingAction } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
-import { HearingControlRepository } from '../../infrastructure/repositories/hearing-control.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { HearingControlRepository } from '../../infrastructure/persistence/repositories/hearing-control.repository.js';
 import type { HearingActionDto, SuspendHearingDto } from './dto.js';
 
 @Injectable()

@@ -7,10 +7,10 @@ import {
 } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { OutboxService } from '../../infrastructure/database/outbox.service.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { OutboxService } from '../../infrastructure/persistence/database/outbox.service.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
 import type { ApproveProposalDto, CheckProposalDto, CreateProposalDto } from './dto.js';
 
 @Injectable()

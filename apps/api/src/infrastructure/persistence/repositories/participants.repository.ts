@@ -7,9 +7,9 @@ import {
   type ParticipantSessionRecord,
   type ParticipantTokenRecord,
   type ConsultationRecord
-} from '../../in-memory.store.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
-import { FieldCryptoService } from '../../field-crypto.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
+import { FieldCryptoService } from '../../security/field-crypto.service.js';
 
 export interface ParticipantCreateInput {
   hearingId: string;

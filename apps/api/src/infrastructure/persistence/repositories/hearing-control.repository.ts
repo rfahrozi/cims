@@ -10,9 +10,9 @@ import {
   InMemoryStore,
   type HearingControlEventRecord,
   type HearingRuntimeRecord
-} from '../../in-memory.store.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
 
 export interface HearingRuntimeStatus {
   hearing_id: string;

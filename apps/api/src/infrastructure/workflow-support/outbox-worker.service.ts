@@ -1,18 +1,18 @@
 import { Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../audit.service.js';
-import { MetricsService } from '../metrics.service.js';
-import { NotificationGateway } from '../notification.gateway.js';
-import { OfficialSystemGateway } from '../official-system.gateway.js';
-import { OutboxService, type OutboxEventRecord } from '../database/outbox.service.js';
-import { PersistenceModeService } from '../database/persistence-mode.service.js';
-import { CoreWorkflowRepository } from '../repositories/core-workflow.repository.js';
-import { NoticesRepository } from '../repositories/notices.repository.js';
-import { ReconciliationRepository } from '../repositories/reconciliation.repository.js';
-import { VirtualSessionsRepository } from '../repositories/virtual-sessions.repository.js';
-import { VideoProviderGateway } from '../video-provider.gateway.js';
-import { GovernanceRepository } from '../repositories/governance.repository.js';
+import { AuditService } from '../observability/audit.service.js';
+import { MetricsService } from '../observability/metrics.service.js';
+import { NotificationGateway } from '../integration/notification.gateway.js';
+import { OfficialSystemGateway } from '../integration/official-system.gateway.js';
+import { OutboxService, type OutboxEventRecord } from '../persistence/database/outbox.service.js';
+import { PersistenceModeService } from '../persistence/database/persistence-mode.service.js';
+import { CoreWorkflowRepository } from '../persistence/repositories/core-workflow.repository.js';
+import { NoticesRepository } from '../persistence/repositories/notices.repository.js';
+import { ReconciliationRepository } from '../persistence/repositories/reconciliation.repository.js';
+import { VirtualSessionsRepository } from '../persistence/repositories/virtual-sessions.repository.js';
+import { VideoProviderGateway } from '../integration/video-provider.gateway.js';
+import { GovernanceRepository } from '../persistence/repositories/governance.repository.js';
 
 @Injectable()
 export class OutboxWorkerService implements OnApplicationBootstrap, OnApplicationShutdown {

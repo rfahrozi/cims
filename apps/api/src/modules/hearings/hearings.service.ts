@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { nextGate } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
-import { HearingControlRepository } from '../../infrastructure/repositories/hearing-control.repository.js';
-import { NoticesRepository } from '../../infrastructure/repositories/notices.repository.js';
-import { ReadinessRepository } from '../../infrastructure/repositories/readiness.repository.js';
-import { VirtualSessionsRepository } from '../../infrastructure/repositories/virtual-sessions.repository.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { HearingControlRepository } from '../../infrastructure/persistence/repositories/hearing-control.repository.js';
+import { NoticesRepository } from '../../infrastructure/persistence/repositories/notices.repository.js';
+import { ReadinessRepository } from '../../infrastructure/persistence/repositories/readiness.repository.js';
+import { VirtualSessionsRepository } from '../../infrastructure/persistence/repositories/virtual-sessions.repository.js';
 
 @Injectable()
 export class HearingsService {

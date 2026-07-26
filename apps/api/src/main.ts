@@ -10,7 +10,7 @@ import { AppModule } from './app.module.js';
 import { DevIdentityInterceptor } from './common/dev-identity.interceptor.js';
 import { DomainExceptionFilter } from './common/domain-exception.filter.js';
 import { CorrelationInterceptor } from './common/correlation.interceptor.js';
-import { StructuredLogger } from './infrastructure/structured-logger.service.js';
+import { StructuredLogger } from './infrastructure/observability/structured-logger.service.js';
 import { secretValue } from './infrastructure/config/secret-value.js';
 import { validateEnvOrThrow } from './infrastructure/config/env.schema.js';
 import { enforceRuntimeSecurityPolicy } from './infrastructure/security/runtime-security.policy.js';

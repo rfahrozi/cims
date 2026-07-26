@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { InMemoryStore } from '../in-memory.store.js';
-import { PersistenceModeService } from '../database/persistence-mode.service.js';
-import { PgPoolService } from '../database/pg-pool.service.js';
+import { InMemoryStore } from '../workflow-support/in-memory.store.js';
+import { PersistenceModeService } from '../persistence/database/persistence-mode.service.js';
+import { PgPoolService } from '../persistence/database/pg-pool.service.js';
 
 @Injectable()
 export class HearingAccessService {

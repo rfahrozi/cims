@@ -7,9 +7,9 @@ import {
 } from '@cims/domain';
 import { requirePermission } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { HearingControlRepository } from '../../infrastructure/repositories/hearing-control.repository.js';
-import { IncidentsRepository } from '../../infrastructure/repositories/incidents.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { HearingControlRepository } from '../../infrastructure/persistence/repositories/hearing-control.repository.js';
+import { IncidentsRepository } from '../../infrastructure/persistence/repositories/incidents.repository.js';
 import type { CreateIncidentDto, IncidentActionDto } from './dto.js';
 
 @Injectable()

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { CurrentUser } from '../../../common/current-user.decorator.js';
-import { InMemoryStore, type IncidentRecord } from '../../in-memory.store.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
-import { FieldCryptoService } from '../../field-crypto.service.js';
+import { InMemoryStore, type IncidentRecord } from '../../workflow-support/in-memory.store.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
+import { FieldCryptoService } from '../../security/field-crypto.service.js';
 @Injectable()
 export class IncidentsRepository {
   private readonly postgres: boolean;

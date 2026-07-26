@@ -6,8 +6,8 @@ import {
 } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { HearingIntakeRepository } from '../../infrastructure/repositories/hearing-intake.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { HearingIntakeRepository } from '../../infrastructure/persistence/repositories/hearing-intake.repository.js';
 import { HearingImportGateway } from './hearing-import.gateway.js';
 import type {
   ImportJobRequestDto,

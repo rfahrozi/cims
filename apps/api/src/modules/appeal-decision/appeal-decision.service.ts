@@ -7,8 +7,8 @@ import {
 } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
 import { AppealDecisionRepository } from './appeal-decision.repository.js';
 import type {
   AcknowledgeNoticeStepDto,

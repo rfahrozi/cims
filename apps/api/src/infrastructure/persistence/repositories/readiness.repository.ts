@@ -13,9 +13,9 @@ import {
   type ReadinessSubmissionRecord,
   type RoomInspectionRecord,
   type TechnicalTestRecord
-} from '../../in-memory.store.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
 import { CoreWorkflowRepository } from './core-workflow.repository.js';
 
 export interface HydratedReadiness extends ReadinessSubmissionRecord {

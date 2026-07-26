@@ -14,9 +14,9 @@ import type {
   AppealTransmission
 } from '@cims/domain';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
-import { PgPoolService } from '../../infrastructure/database/pg-pool.service.js';
-import { InMemoryStore } from '../../infrastructure/in-memory.store.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
+import { PgPoolService } from '../../infrastructure/persistence/database/pg-pool.service.js';
+import { InMemoryStore } from '../../infrastructure/workflow-support/in-memory.store.js';
 
 @Injectable()
 export class AppealDecisionRepository {

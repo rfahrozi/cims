@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { DomainError } from '@cims/domain';
 import type { CurrentUser } from './current-user.decorator.js';
 import { PERMISSIONS_KEY } from './permissions.decorator.js';
-import { HearingAccessService } from '../infrastructure/hearing-access.service.js';
+import { HearingAccessService } from '../infrastructure/security/hearing-access.service.js';
 
 @Injectable()
 export class PolicyGuard implements CanActivate {

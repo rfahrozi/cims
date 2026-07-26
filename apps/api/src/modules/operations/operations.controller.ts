@@ -2,9 +2,9 @@ import { Controller, Get, Header, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { FastifyReply } from 'fastify';
 import { Public } from '../../common/public.decorator.js';
-import { DatabaseHealthService } from '../../infrastructure/database/database-health.service.js';
-import { MetricsService } from '../../infrastructure/metrics.service.js';
-import { ProductionReadinessService } from '../../infrastructure/production-readiness.service.js';
+import { DatabaseHealthService } from '../../infrastructure/persistence/database/database-health.service.js';
+import { MetricsService } from '../../infrastructure/observability/metrics.service.js';
+import { ProductionReadinessService } from '../../infrastructure/security/production-readiness.service.js';
 @ApiTags('operations')
 @Controller()
 export class OperationsController {

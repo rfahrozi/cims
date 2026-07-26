@@ -5,7 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { DomainError } from '@cims/domain';
 import { secretValue } from '../config/secret-value.js';
-import { CircuitBreakerService } from '../circuit-breaker.service.js';
+import { CircuitBreakerService } from './circuit-breaker.service.js';
 
 export interface EvidenceStorageResult {
   storageUri: string;

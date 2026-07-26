@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { DomainError } from '@cims/domain';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
-import { PgPoolService } from '../../infrastructure/database/pg-pool.service.js';
-import { MetricsService } from '../../infrastructure/metrics.service.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
+import { PgPoolService } from '../../infrastructure/persistence/database/pg-pool.service.js';
+import { MetricsService } from '../../infrastructure/observability/metrics.service.js';
 import { secretValue } from '../../infrastructure/config/secret-value.js';
 
 interface ProviderWebhookPayload {

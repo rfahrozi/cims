@@ -9,16 +9,16 @@ import {
   type ManualHearingIntakeInput
 } from '@cims/domain';
 import type { CurrentUser } from '../../../common/current-user.decorator.js';
-import { FieldCryptoService } from '../../field-crypto.service.js';
+import { FieldCryptoService } from '../../security/field-crypto.service.js';
 import {
   InMemoryStore,
   type CourtCaseRecord,
   type HearingDataRevisionRecord,
   type HearingIntakePartyRecord,
   type HearingRecord
-} from '../../in-memory.store.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
 
 export interface ManualHearingRecord extends HearingRecord {
   caseId: string;

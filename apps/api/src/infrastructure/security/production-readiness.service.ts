@@ -4,15 +4,15 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { productionGateDecision, type ReadinessCheck } from '@cims/domain';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { DatabaseHealthService } from '../database/database-health.service.js';
-import { OutboxService } from '../database/outbox.service.js';
-import { PersistenceModeService } from '../database/persistence-mode.service.js';
-import { NotificationGateway } from '../notification.gateway.js';
-import { OfficialSystemGateway } from '../official-system.gateway.js';
-import { VideoProviderGateway } from '../video-provider.gateway.js';
-import { EvidenceStorageGateway } from '../evidence-storage.gateway.js';
-import { CircuitBreakerService } from '../circuit-breaker.service.js';
-import { GovernanceRepository } from '../repositories/governance.repository.js';
+import { DatabaseHealthService } from '../persistence/database/database-health.service.js';
+import { OutboxService } from '../persistence/database/outbox.service.js';
+import { PersistenceModeService } from '../persistence/database/persistence-mode.service.js';
+import { NotificationGateway } from '../integration/notification.gateway.js';
+import { OfficialSystemGateway } from '../integration/official-system.gateway.js';
+import { VideoProviderGateway } from '../integration/video-provider.gateway.js';
+import { EvidenceStorageGateway } from '../integration/evidence-storage.gateway.js';
+import { CircuitBreakerService } from '../integration/circuit-breaker.service.js';
+import { GovernanceRepository } from '../persistence/repositories/governance.repository.js';
 
 @Injectable()
 export class ProductionReadinessService {

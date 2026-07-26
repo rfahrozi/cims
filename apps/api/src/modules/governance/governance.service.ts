@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { DomainError } from '@cims/domain';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { ProductionReadinessService } from '../../infrastructure/production-readiness.service.js';
-import { GovernanceRepository } from '../../infrastructure/repositories/governance.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { ProductionReadinessService } from '../../infrastructure/security/production-readiness.service.js';
+import { GovernanceRepository } from '../../infrastructure/persistence/repositories/governance.repository.js';
 import type {
   CreateAccessReviewDto,
   CreateEvidenceExportDto,

@@ -15,9 +15,9 @@ import {
   type HearingRecord,
   type OrganizationRecord,
   type HearingAgendaItemRecord
-} from '../../in-memory.store.js';
-import { PgPoolService } from '../../database/pg-pool.service.js';
-import { PersistenceModeService } from '../../database/persistence-mode.service.js';
+} from '../../workflow-support/in-memory.store.js';
+import { PgPoolService } from '../database/pg-pool.service.js';
+import { PersistenceModeService } from '../database/persistence-mode.service.js';
 
 export interface ElectronicHearingRequestRecord {
   id: string;

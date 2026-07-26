@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUserContext, type CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
 import { HearingsService } from './hearings.service.js';
 import { SaveAgendaDto } from './dto.js';
 

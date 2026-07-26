@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { WorkerModule } from './worker.module.js';
-import { StructuredLogger } from './infrastructure/structured-logger.service.js';
+import { StructuredLogger } from './infrastructure/observability/structured-logger.service.js';
 
 async function bootstrap(): Promise<void> {
   if ((process.env.PERSISTENCE_MODE ?? '').toUpperCase() !== 'POSTGRES') {

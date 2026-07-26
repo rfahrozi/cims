@@ -1,12 +1,12 @@
 import { Controller, Get, HttpCode, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { Public } from '../../common/public.decorator.js';
-import { DatabaseHealthService } from '../../infrastructure/database/database-health.service.js';
-import { PersistenceModeService } from '../../infrastructure/database/persistence-mode.service.js';
-import { CircuitBreakerService } from '../../infrastructure/circuit-breaker.service.js';
-import { NotificationGateway } from '../../infrastructure/notification.gateway.js';
-import { OfficialSystemGateway } from '../../infrastructure/official-system.gateway.js';
-import { VideoProviderGateway } from '../../infrastructure/video-provider.gateway.js';
+import { DatabaseHealthService } from '../../infrastructure/persistence/database/database-health.service.js';
+import { PersistenceModeService } from '../../infrastructure/persistence/database/persistence-mode.service.js';
+import { CircuitBreakerService } from '../../infrastructure/integration/circuit-breaker.service.js';
+import { NotificationGateway } from '../../infrastructure/integration/notification.gateway.js';
+import { OfficialSystemGateway } from '../../infrastructure/integration/official-system.gateway.js';
+import { VideoProviderGateway } from '../../infrastructure/integration/video-provider.gateway.js';
 
 const VERSION = '0.19.0';
 const SERVICE = 'cims-api';

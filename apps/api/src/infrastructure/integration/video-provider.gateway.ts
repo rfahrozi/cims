@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DomainError } from '@cims/domain';
 import { randomUUID } from 'node:crypto';
-import { CircuitBreakerService } from '../circuit-breaker.service.js';
+import { CircuitBreakerService } from './circuit-breaker.service.js';
 
 @Injectable()
 export class VideoProviderGateway {

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { requirePermission } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
-import { AuditService } from '../../infrastructure/audit.service.js';
-import { CoreWorkflowRepository } from '../../infrastructure/repositories/core-workflow.repository.js';
-import { ReconciliationRepository } from '../../infrastructure/repositories/reconciliation.repository.js';
+import { AuditService } from '../../infrastructure/observability/audit.service.js';
+import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { ReconciliationRepository } from '../../infrastructure/persistence/repositories/reconciliation.repository.js';
 import type { RequestReconciliationDto } from './dto.js';
 
 @Injectable()
