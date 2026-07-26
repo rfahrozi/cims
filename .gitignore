@@ -7,3 +7,9 @@ coverage/
 *.db
 *.sqlite
 .DS_Store
+
+# Build artifacts and temporary files
+*.tsbuildinfo
+*.tmp
+*.tmp.*
+.vite
