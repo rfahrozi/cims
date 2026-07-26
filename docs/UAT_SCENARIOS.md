@@ -113,6 +113,6 @@ _Sebelum memulai, pastikan Anda menggunakan "Persona Switcher" di sidebar kiri b
 
 _Tanda Tangan Tanda Terima UAT:_
 
-**Penguji Pengadilan:** ********\_\_******** ( )  
-**Penguji Kejaksaan:** ********\_\_******** ( )  
-**Penguji Pemasyarakatan:** ********\_\_******** ( )
+**Penguji Pengadilan:** **\*\*\*\***\_\_**\*\*\*\*** ( )  
+**Penguji Kejaksaan:** **\*\*\*\***\_\_**\*\*\*\*** ( )  
+**Penguji Pemasyarakatan:** **\*\*\*\***\_\_**\*\*\*\*** ( )

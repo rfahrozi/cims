@@ -230,13 +230,13 @@ Production **TIDAK DIIZINKAN** sebelum semua item berikut terpenuhi:
 
 ## 🗓️ Roadmap
 
-| Sprint           | Fokus                                             | Target                 |
-| ---------------- | ------------------------------------------------- | ---------------------- |
-| ~~Sprint 1–10~~  | Alur inti, notifikasi, video, keamanan, modul SOP | ✅ Selesai             |
-| **Sprint 11**    | MFA Keycloak, OIDC production, export laporan     | Agustus 2026           |
-| **Sprint 12**    | Portal per-instansi lanjutan, notif in-app SSE    | Agustus 2026           |
-| **Sprint 13–14** | SIT end-to-end, UAT lintas instansi               | Agustus–September 2026 |
-| **Sprint 15–16** | Release Candidate v1.0, hypercare                 | September–Oktober 2026 |
+| Sprint           | Fokus                                              | Status                  |
+| ---------------- | -------------------------------------------------- | ----------------------- |
+| ~~Sprint 1–10~~  | Alur inti, notifikasi, video, keamanan, modul SOP  | ✅ Selesai              |
+| ~~Sprint 11~~    | MFA Keycloak, OIDC Enforcement, admin config       | ✅ Selesai (Dipercepat) |
+| ~~Sprint 12~~    | Portal per-instansi, notif in-app SSE              | ✅ Selesai (Dipercepat) |
+| ~~Sprint 13–15~~ | SIT & UAT Scenarios, Defect Burn Down, RC          | ✅ Selesai (Dipercepat) |
+| **Sprint 16**    | UAT Lintas Instansi (Dry-Run), Go-Live & Hypercare | Agustus 2026            |
 
 ---
 
