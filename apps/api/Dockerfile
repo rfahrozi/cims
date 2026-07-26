@@ -7,6 +7,7 @@ COPY services/zoom-provider/package.json services/zoom-provider/package.json
 COPY packages/domain/package.json packages/domain/package.json
 COPY packages/contracts/package.json packages/contracts/package.json
 RUN npm install --no-audit --no-fund
+RUN npm install @fastify/static --no-save
 COPY . .
 RUN npm run build:packages && npm run build -w @cims/api
 

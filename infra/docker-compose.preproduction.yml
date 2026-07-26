@@ -93,6 +93,7 @@ services:
       # Gateways — Brevo notification service (HTTP) + official system (MOCK)
       NOTIFICATION_GATEWAY_MODE: HTTP
       NOTIFICATION_GATEWAY_URL: 'http://brevo-notification:3020'
+      NOTIFICATION_GATEWAY_API_KEY_FILE: /run/secrets/notification_gateway_api_key
       OFFICIAL_SYSTEM_GATEWAY_MODE: MOCK
       OFFICIAL_SYSTEM_GATEWAY_URL: ''
       # Video provider
@@ -120,7 +121,11 @@ services:
       - field_encryption_key
       - audit_hash_key
       - webhook_shared_secret
+      - notification_gateway_api_key
+      - official_system_gateway_api_key
       - evidence_storage_api_key
+      - s3_access_key
+      - s3_secret_key
     ports:
       - '3000:3000'
     depends_on:

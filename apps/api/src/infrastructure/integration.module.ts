@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CircuitBreakerService } from './integration/circuit-breaker.service.js';
 import { EvidenceStorageGateway } from './integration/evidence-storage.gateway.js';
@@ -14,6 +14,7 @@ const providers = [
   VideoProviderGateway
 ];
 
+@Global()
 @Module({
   imports: [ConfigModule],
   providers,

@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { SecurityModule } from './security.module.js';
+import { WorkflowSupportModule } from './workflow-support.module.js';
 import { DatabaseHealthService } from './persistence/database/database-health.service.js';
 import { IdempotencyService } from './persistence/database/idempotency.service.js';
 import { OutboxService } from './persistence/database/outbox.service.js';
@@ -36,6 +38,7 @@ const providers = [
   VirtualSessionsRepository
 ];
 
+@Global()
 @Module({
   imports: [ConfigModule],
   providers,
