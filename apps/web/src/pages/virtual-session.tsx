@@ -30,7 +30,7 @@ export function VirtualSessionPage() {
         method: 'POST',
         body: JSON.stringify({ recording_policy: 'DISABLED' })
       });
-      setSuccess('Ruang virtual berhasil diprovisioning.');
+      setSuccess('Ruang virtual berhasil disiapkan.');
       await client.invalidateQueries({ queryKey: ['virtual-session', hearingId] });
       await client.invalidateQueries({ queryKey: ['hearing-gate', hearingId] });
     } catch (e) {
@@ -57,10 +57,10 @@ export function VirtualSessionPage() {
     <>
       <PageHeader
         title="Ruang Virtual"
-        description="Provider-neutral provisioning. Gate: determination, jadwal, notice, dan readiness."
+        description="Penyediaan ruang virtual secara otomatis. Syarat: penetapan, jadwal, notifikasi, dan kesiapan instansi terpenuhi."
         action={
           <Button onClick={provision} disabled={session?.state === 'READY'}>
-            Provision Ruang Virtual
+            Buat Ruang Virtual
           </Button>
         }
       />
@@ -79,11 +79,11 @@ export function VirtualSessionPage() {
             <div className="flex items-center justify-between">
               <CardTitle>Status Sesi Virtual</CardTitle>
               <Badge variant={session?.state === 'READY' ? 'success' : 'warning'}>
-                {session?.state ?? 'NOT PROVISIONED'}
+                {session?.state === 'READY' ? 'SIAP' : (session?.state ?? 'BELUM DIBUAT')}
               </Badge>
             </div>
             <CardDescription>
-              Gunakan persona Operator TI atau Panitera untuk provisioning ruang.
+              Gunakan persona Operator TI atau Panitera untuk menyiapkan ruang.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -93,8 +93,8 @@ export function VirtualSessionPage() {
               <EmptyState
                 icon={Video}
                 title="Ruang Virtual Belum Dibuat"
-                description="Pastikan semua gate sebelumnya (penetapan, jadwal, notifikasi, dan kesiapan instansi) telah terpenuhi sebelum membuat ruang sidang virtual."
-                action={{ label: 'Provision Ruang Virtual', onClick: provision }}
+                description="Pastikan semua prasyarat sebelumnya (penetapan, jadwal, notifikasi, dan kesiapan instansi) telah terpenuhi sebelum membuat ruang sidang virtual."
+                action={{ label: 'Buat Ruang Virtual', onClick: provision }}
               />
             )}
 

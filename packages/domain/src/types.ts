@@ -189,6 +189,17 @@ export interface AppealDecisionReading {
   createdAt: string;
   updatedAt: string;
   rowVersion: number;
+  // Kolom tambahan untuk generate Surat Penetapan (SEMA No. 2/2026)
+  zoomJoinUrl?: string;
+  zoomPassword?: string;
+  courtName?: string;
+  penetapanCity?: string;
+  penetapanNumber?: string;
+  hakimKetua?: string;
+  hakimAnggota?: string[];
+  paniterapengganti?: string;
+  penuntutUmum?: string;
+  deliberationDate?: string;
 }
 
 export interface AppealNoticeStep {
@@ -207,6 +218,14 @@ export interface AppealNoticeStep {
   receiptReference?: string;
   createdBy: string;
   createdAt: string;
+  // Kolom tambahan untuk upload PDF Penetapan Bertanda Tangan
+  documentStorageKey?: string;
+  documentHash?: string;
+  documentFilename?: string;
+  documentSizeBytes?: number;
+  documentContentType?: string;
+  documentUploadedAt?: string;
+  documentUploadedBy?: string;
 }
 
 export interface AppealPresenceRecord {

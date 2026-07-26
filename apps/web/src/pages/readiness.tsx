@@ -41,12 +41,8 @@ const CHECKLIST_TEMPLATES: Record<
     { code: 'DOCUMENTS_READY', label: 'Dokumen dakwaan/tuntutan/bukti tersedia', required: true }
   ],
   CORRECTIONS: [
-    {
-      code: 'DEFENDANT_VERIFIED',
-      label: 'Verifikasi identitas terdakwa (SOP 10.7)',
-      required: true
-    },
-    { code: 'ROOM_INSPECTED', label: 'Inspeksi sterilitas ruangan (SOP 10.7)', required: true },
+    { code: 'DEFENDANT_VERIFIED', label: 'Verifikasi identitas terdakwa', required: true },
+    { code: 'ROOM_INSPECTED', label: 'Inspeksi sterilitas ruangan', required: true },
     { code: 'ESCORT_OFFICER_READY', label: 'Petugas pendamping siap', required: true }
   ]
 };
@@ -169,7 +165,7 @@ export function ReadinessPage() {
       {allReady && (
         <AlertBanner
           variant="success"
-          message="Semua instansi sudah siap. Ruang virtual dapat diprovisioning oleh Operator TI."
+          message="Semua instansi sudah siap. Ruang virtual dapat disiapkan oleh Operator TI."
           className="mb-4"
         />
       )}
@@ -208,7 +204,7 @@ export function ReadinessPage() {
                       className="flex items-center justify-between rounded-lg border p-3"
                     >
                       <span className="text-sm">{ORG_LABEL[org]}</span>
-                      <Badge variant="outline">MISSING</Badge>
+                      <Badge variant="outline">KOSONG</Badge>
                     </div>
                   ))
                 : organizations.map((item) => (
@@ -220,7 +216,11 @@ export function ReadinessPage() {
                         {ORG_LABEL[item.organizationType] ?? item.organizationType}
                       </span>
                       <Badge variant={item.status === 'READY' ? 'success' : 'warning'}>
-                        {item.status}
+                        {item.status === 'READY'
+                          ? 'SIAP'
+                          : item.status === 'MISSING'
+                            ? 'KOSONG'
+                            : item.status}
                       </Badge>
                     </div>
                   ))}
@@ -277,7 +277,7 @@ export function ReadinessPage() {
                   </>
                 )}
                 <Button onClick={submit} className="w-full">
-                  Submit Kesiapan {ORG_LABEL[myOrgType]}
+                  Kirim Kesiapan {ORG_LABEL[myOrgType]}
                 </Button>
               </div>
             ) : (
@@ -285,7 +285,7 @@ export function ReadinessPage() {
               <EmptyState
                 icon={ClipboardCheck}
                 title="Tidak ada aksi untuk persona ini"
-                description={`Persona "${persona}" tidak memiliki aksi kesiapan. Gunakan persona court-clerk, prosecutor, atau corrections untuk submit kesiapan.`}
+                description={`Persona "${persona}" tidak memiliki aksi kesiapan. Gunakan persona Panitera, Penuntut Umum, atau Petugas Pemasyarakatan untuk mengirim kesiapan.`}
                 className="mt-2"
               />
             )}
@@ -301,7 +301,7 @@ export function ReadinessPage() {
             <div className="space-y-3">
               {[
                 {
-                  org: 'Pengadilan (court-clerk)',
+                  org: 'Pengadilan (Panitera)',
                   items: [
                     'Penetapan elektronik tersedia dan sah',
                     'Ruang sidang virtual disiapkan',
@@ -309,7 +309,7 @@ export function ReadinessPage() {
                   ]
                 },
                 {
-                  org: 'Kejaksaan (prosecutor)',
+                  org: 'Kejaksaan (Penuntut Umum)',
                   items: [
                     'Penuntut Umum siap hadir',
                     'Dokumen dakwaan/tuntutan tersedia',
@@ -317,7 +317,7 @@ export function ReadinessPage() {
                   ]
                 },
                 {
-                  org: 'Pemasyarakatan (corrections)',
+                  org: 'Pemasyarakatan (Petugas Lapas/Rutan)',
                   items: [
                     'Verifikasi identitas terdakwa ✓',
                     'Inspeksi sterilitas ruangan ✓',

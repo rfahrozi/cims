@@ -114,16 +114,18 @@ export function SchedulingPage() {
 
   const historyQuery = useQuery({
     queryKey: ['schedule-history', hearingId],
-    queryFn: () => api<ScheduleHistoryItem[]>(`/hearings/${hearingId}/schedule-history`),
+    queryFn: () => api<{ items: ScheduleHistoryItem[] }>(`/hearings/${hearingId}/schedule-history`),
     enabled: Boolean(hearingId)
   });
 
-  // Hydrate agendaItems state with fetched data if not yet edited
+  // Helper untuk mendapatkan array data yang aman
+  const historyData = Array.isArray(historyQuery.data?.items) ? historyQuery.data.items : [];
+  const agendaData = Array.isArray(agendaQuery.data) ? agendaQuery.data : [];
 
   useEffect(() => {
-    if (Array.isArray(agendaQuery.data) && agendaQuery.data.length > 0) {
+    if (agendaData.length > 0) {
       setAgendaItems(
-        agendaQuery.data.map((i) => ({
+        agendaData.map((i: AgendaItem) => ({
           itemType: i.itemType,
           itemDescription: i.itemDescription,
           estimatedDurationMinutes: i.estimatedDurationMinutes
@@ -248,9 +250,9 @@ export function SchedulingPage() {
           <TabsTrigger value="history">
             <History className="mr-2 h-4 w-4" />
             Riwayat Perubahan
-            {(historyQuery.data?.filter((h) => h.status === 'SUPERSEDED').length ?? 0) > 0 && (
+            {historyData.filter((h) => h.status === 'SUPERSEDED').length > 0 && (
               <span className="ml-2 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-700">
-                {historyQuery.data!.filter((h) => h.status === 'SUPERSEDED').length}
+                {historyData.filter((h) => h.status === 'SUPERSEDED').length}
               </span>
             )}
           </TabsTrigger>
@@ -585,7 +587,7 @@ export function SchedulingPage() {
               </CardHeader>
               <CardContent>
                 {agendaQuery.isLoading && <p className="text-sm text-slate-400">Memuat...</p>}
-                {!agendaQuery.isLoading && (agendaQuery.data || []).length === 0 && (
+                {!agendaQuery.isLoading && agendaData.length === 0 && (
                   <EmptyState
                     icon={ListTodo}
                     title="Belum ada agenda"
@@ -593,7 +595,7 @@ export function SchedulingPage() {
                   />
                 )}
                 <div className="space-y-3">
-                  {(Array.isArray(agendaQuery.data) ? agendaQuery.data : []).map((item) => (
+                  {agendaData.map((item: AgendaItem) => (
                     <div
                       key={item.id}
                       className="flex items-center justify-between rounded-lg border px-4 py-3"
@@ -628,14 +630,14 @@ export function SchedulingPage() {
               </div>
               <CardDescription>
                 Semua versi jadwal — aktif dan yang telah digantikan (SUPERSEDED). Setiap perubahan
-                jadwal wajib menyimpan alasan perubahan sesuai SOP.
+                jadwal wajib menyimpan alasan perubahan sesuai ketentuan.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {historyQuery.isLoading && (
                 <p className="text-sm text-slate-400">Memuat riwayat jadwal...</p>
               )}
-              {!historyQuery.isLoading && (historyQuery.data ?? []).length === 0 && (
+              {!historyQuery.isLoading && historyData.length === 0 && (
                 <EmptyState
                   icon={History}
                   title="Belum ada riwayat jadwal"
@@ -643,7 +645,7 @@ export function SchedulingPage() {
                 />
               )}
               <div className="space-y-3">
-                {(historyQuery.data ?? []).map((item) => (
+                {historyData.map((item: ScheduleHistoryItem) => (
                   <div
                     key={item.id}
                     className={`rounded-lg border p-4 ${

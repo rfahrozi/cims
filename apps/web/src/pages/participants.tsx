@@ -235,10 +235,7 @@ export function ParticipantsPage() {
                   onChange={(e) => setProtected(e.target.checked)}
                   className="rounded"
                 />
-                <span>
-                  Identitas dilindungi{' '}
-                  <span className="font-normal text-slate-500">(SOP 10.9)</span>
-                </span>
+                <span>Identitas dilindungi</span>
               </label>
               {protectedIdentity && (
                 <div className="space-y-1.5 pl-5">
@@ -283,7 +280,7 @@ export function ParticipantsPage() {
 
             <div className="space-y-3 rounded-lg border border-blue-100 bg-blue-50/50 p-3">
               <div className="space-y-1.5">
-                <Label className="text-xs text-blue-900">Lokasi Fisik Peserta (SOP 10.8)</Label>
+                <Label className="text-xs text-blue-900">Lokasi Fisik Peserta</Label>
                 <Select value={locationType} onValueChange={setLocationType}>
                   <SelectTrigger className="h-8 text-sm">
                     <SelectValue />
@@ -323,8 +320,8 @@ export function ParticipantsPage() {
                       className="h-8 text-sm border-amber-300"
                     />
                     <p className="text-[11px] text-amber-600 leading-tight">
-                      Sesuai SOP 10.8, Advokat harus berada di lokasi yang sama dengan terdakwa,
-                      kecuali ada penetapan.
+                      Advokat harus berada di lokasi yang sama dengan terdakwa, kecuali ada
+                      penetapan.
                     </p>
                   </div>
                 )}

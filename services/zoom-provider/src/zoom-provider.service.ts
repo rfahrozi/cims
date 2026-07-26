@@ -239,6 +239,9 @@ export class ZoomProviderService implements OnApplicationShutdown {
     const start = new Date(input.start_at);
     const end = new Date(input.end_at);
     const duration = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 60_000));
+    // Zoom API requires ISO 8601 UTC format (yyyy-MM-ddTHH:mm:ssZ).
+    // Normalise to toISOString() so any timezone-offset input is converted correctly.
+    const startTimeUtc = start.toISOString();
     const response = await this.fetchWithTimeout(
       `https://api.zoom.us/v2/users/${encodeURIComponent(this.hostUserId!)}/meetings`,
       {
@@ -252,7 +255,7 @@ export class ZoomProviderService implements OnApplicationShutdown {
           topic: `CIMS ${input.hearing_reference}`,
           agenda: `CIMS hearing reference: ${input.hearing_reference}`,
           type: 2,
-          start_time: input.start_at,
+          start_time: startTimeUtc,
           duration,
           timezone: 'UTC',
           settings: {

@@ -1,8 +1,12 @@
 import { useState, type ChangeEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Bell, BellRing, CheckCircle2, Clock } from 'lucide-react';
 import { api, getPersona } from '@/lib/api';
+import { errorMessage } from '@/lib/error-messages';
 import { useActiveHearing } from '@/lib/hearing-context';
 import { PageHeader } from '@/components/page-header';
+import { AlertBanner } from '@/components/alert-banner';
+import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +25,10 @@ type Notice = {
 export function NoticesPage() {
   const { hearingId } = useActiveHearing();
   const client = useQueryClient();
-  const [output, setOutput] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loadingCreate, setLoadingCreate] = useState(false);
+  const [loadingAction, setLoadingAction] = useState('');
   const [reference, setReference] = useState('PGL-EL/001/2026');
   const query = useQuery({
     queryKey: ['notices', hearingId],
@@ -32,8 +39,11 @@ export function NoticesPage() {
       }>(`/hearings/${hearingId}/notices`)
   });
   async function create() {
+    setLoadingCreate(true);
+    setSuccessMsg('');
+    setErrorMsg('');
     try {
-      const data = await api<Notice>(`/hearings/${hearingId}/notices`, {
+      await api<Notice>(`/hearings/${hearingId}/notices`, {
         method: 'POST',
         body: JSON.stringify({
           notice_type: 'AGENDA_SIDANG',
@@ -61,44 +71,79 @@ export function NoticesPage() {
           ]
         })
       });
-      setOutput(JSON.stringify(data, null, 2));
+      setSuccessMsg('Pemberitahuan berhasil dibuat dan siap dikirim.');
       await client.invalidateQueries({ queryKey: ['notices', hearingId] });
     } catch (error) {
-      setOutput(String(error));
+      setErrorMsg(errorMessage(error));
+    } finally {
+      setLoadingCreate(false);
     }
   }
-  async function action(path: string, body?: unknown) {
+
+  async function action(key: string, path: string, label: string, body?: unknown) {
+    setLoadingAction(key);
+    setSuccessMsg('');
+    setErrorMsg('');
     try {
-      const data = await api(path, {
+      await api(path, {
         method: 'POST',
         body: body ? JSON.stringify(body) : undefined
       });
-      setOutput(JSON.stringify(data, null, 2));
+      setSuccessMsg(label);
       await client.invalidateQueries({ queryKey: ['notices', hearingId] });
     } catch (error) {
-      setOutput(String(error));
+      setErrorMsg(errorMessage(error));
+    } finally {
+      setLoadingAction('');
     }
   }
-  const latest = query.data?.items[0];
+  const latest = query.data?.items?.[0];
+  const gate = query.data?.gate;
+
   return (
     <>
       <PageHeader
         title="Pemberitahuan & Tanda Terima"
-        description="Migrasi TypeScript untuk pemberitahuan resmi, bukti pengiriman, dan tanda terima."
+        description="Kirim pemberitahuan resmi kepada semua pihak dan tunggu tanda terima (acknowledgment) sebelum lanjut ke tahap kesiapan."
       />
+
+      {successMsg && (
+        <AlertBanner
+          variant="success"
+          message={successMsg}
+          onDismiss={() => setSuccessMsg('')}
+          className="mb-4"
+        />
+      )}
+      {errorMsg && (
+        <AlertBanner
+          variant="error"
+          message={errorMsg}
+          onDismiss={() => setErrorMsg('')}
+          className="mb-4"
+        />
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
         <div className="space-y-5">
           <Card>
             <CardHeader>
-              <CardTitle>Buat pemberitahuan</CardTitle>
+              <CardTitle>Buat Pemberitahuan</CardTitle>
               <CardDescription>
-                Persona Panitera atau Penuntut Umum diperlukan untuk membuat dan mengirim.
+                Panitera atau Penuntut Umum berwenang membuat dan mengirim pemberitahuan resmi
+                sesuai SOP I.1.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Referensi resmi</Label>
+                <Label htmlFor="official_reference">
+                  Referensi resmi{' '}
+                  <span className="text-red-500" aria-hidden="true">
+                    *
+                  </span>
+                </Label>
                 <Input
+                  id="official_reference"
                   value={reference}
                   onChange={(event: ChangeEvent<HTMLInputElement>) =>
                     setReference(event.target.value)
@@ -110,42 +155,63 @@ export function NoticesPage() {
                 <Textarea
                   value="Agenda persidangan elektronik telah ditetapkan dan wajib dikonfirmasi oleh penerima."
                   readOnly
+                  className="bg-slate-50 text-slate-600"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={create}>Buat notice</Button>
+                <Button onClick={create} disabled={loadingCreate}>
+                  {loadingCreate ? 'Membuat…' : 'Buat Pemberitahuan'}
+                </Button>
                 <Button
                   variant="secondary"
-                  disabled={!latest}
-                  onClick={() => latest && action(`/notices/${latest.id}/send`)}
+                  disabled={!latest || loadingAction === 'send'}
+                  onClick={() =>
+                    latest &&
+                    action('send', `/notices/${latest.id}/send`, 'Pemberitahuan berhasil dikirim.')
+                  }
                 >
-                  Kirim
+                  {loadingAction === 'send' ? 'Mengirim…' : 'Kirim'}
                 </Button>
                 <Button
                   variant="outline"
-                  disabled={!latest}
+                  disabled={!latest || loadingAction === 'ack'}
                   onClick={() =>
                     latest &&
-                    action(`/notices/${latest.id}/acknowledge`, {
-                      receipt_reference: `ACK-${getPersona()}-${Date.now()}`,
-                      method: 'IN_APP'
-                    })
+                    action(
+                      'ack',
+                      `/notices/${latest.id}/acknowledge`,
+                      'Acknowledgment berhasil dicatat.',
+                      {
+                        receipt_reference: `ACK-${getPersona()}-${Date.now()}`,
+                        method: 'IN_APP'
+                      }
+                    )
                   }
                 >
-                  Acknowledgment persona aktif
+                  {loadingAction === 'ack' ? 'Memproses…' : 'Acknowledgment Persona Aktif'}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
-              <CardTitle>Daftar pemberitahuan</CardTitle>
+              <CardTitle>Daftar Pemberitahuan</CardTitle>
               <CardDescription>
-                Untuk menyelesaikan gate, ganti persona ke Penuntut Umum lalu Pemasyarakatan dan
-                lakukan acknowledgment.
+                Untuk menyelesaikan gate, setiap penerima wajib melakukan acknowledgment.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {query.isLoading && (
+                <p className="py-4 text-center text-sm text-slate-400">Memuat…</p>
+              )}
+              {!query.isLoading && (!query.data?.items || query.data.items.length === 0) && (
+                <EmptyState
+                  icon={Bell}
+                  title="Belum ada pemberitahuan"
+                  description="Buat pemberitahuan resmi terlebih dahulu menggunakan form di atas."
+                />
+              )}
               {query.data?.items?.map((item: Notice) => (
                 <div key={item.id} className="rounded-lg border p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -154,39 +220,86 @@ export function NoticesPage() {
                       <div className="text-xs text-slate-500">{item.officialReference}</div>
                     </div>
                     <Badge variant={item.status === 'ACKNOWLEDGED' ? 'success' : 'warning'}>
-                      {item.status}
+                      {item.status === 'ACKNOWLEDGED' ? 'Dikonfirmasi' : item.status}
                     </Badge>
                   </div>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {(item.recipients || []).map((recipient: Notice['recipients'][number]) => (
                       <div key={recipient.id} className="rounded-md bg-slate-50 p-3 text-sm">
-                        <div>{recipient.recipientName}</div>
+                        <div className="font-medium text-slate-700">{recipient.recipientName}</div>
                         <Badge
                           variant={recipient.status === 'ACKNOWLEDGED' ? 'success' : 'outline'}
+                          className="mt-1"
                         >
-                          {recipient.status}
+                          {recipient.status === 'ACKNOWLEDGED' ? '✓ Dikonfirmasi' : 'Menunggu'}
                         </Badge>
                       </div>
                     ))}
                   </div>
                 </div>
-              )) ?? 'Belum ada notice.'}
+              ))}
             </CardContent>
           </Card>
         </div>
+
+        {/* ── Panel kanan: Gate Status ── */}
         <Card>
           <CardHeader>
-            <CardTitle>Gate & respons</CardTitle>
+            <div className="flex items-center gap-2">
+              {gate?.ready ? (
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              ) : (
+                <Clock className="h-5 w-5 text-amber-500" />
+              )}
+              <CardTitle>Status Gate Pemberitahuan</CardTitle>
+            </div>
             <CardDescription>
-              {query.data?.gate.ready
-                ? 'Gate notice sudah terpenuhi.'
-                : 'Gate notice belum terpenuhi.'}
+              {gate?.ready
+                ? 'Semua pemberitahuan sudah dikonfirmasi. Gate terpenuhi.'
+                : 'Menunggu acknowledgment dari semua penerima.'}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <pre className="min-h-96 overflow-auto rounded-lg bg-slate-950 p-4 text-xs text-blue-100">
-              {output || JSON.stringify(query.data, null, 2)}
-            </pre>
+          <CardContent className="space-y-4">
+            {gate && (
+              <div className="space-y-3">
+                <div
+                  className={`rounded-lg p-4 ${gate.ready ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}
+                >
+                  <p
+                    className={`text-sm font-semibold ${gate.ready ? 'text-green-800' : 'text-amber-800'}`}
+                  >
+                    {gate.acknowledgedCount} dari {gate.requiredAcknowledgmentCount} pemberitahuan
+                    dikonfirmasi
+                  </p>
+                  <p className={`mt-1 text-xs ${gate.ready ? 'text-green-700' : 'text-amber-700'}`}>
+                    {gate.ready
+                      ? 'Silakan lanjut ke tahap Kesiapan Instansi.'
+                      : 'Minta setiap instansi untuk melakukan acknowledgment via tombol di atas.'}
+                  </p>
+                </div>
+                <div className="rounded-lg border bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                    Panduan Acknowledgment
+                  </p>
+                  <ol className="space-y-1 text-xs text-slate-600 list-decimal list-inside">
+                    <li>
+                      Ganti persona ke <strong>Penuntut Umum</strong> → klik Acknowledgment
+                    </li>
+                    <li>
+                      Ganti persona ke <strong>Pemasyarakatan</strong> → klik Acknowledgment
+                    </li>
+                    <li>Gate akan terpenuhi otomatis setelah semua pihak konfirmasi</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+            {!gate && !query.isLoading && (
+              <EmptyState
+                icon={BellRing}
+                title="Belum ada data gate"
+                description="Buat pemberitahuan terlebih dahulu untuk melihat status gate."
+              />
+            )}
           </CardContent>
         </Card>
       </div>

@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, getPersona } from '@/lib/api';
+import { errorMessage } from '@/lib/error-messages';
 import { useActiveHearing, type HearingSummary } from '@/lib/hearing-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PageHeader } from '@/components/page-header';
+import { AlertBanner } from '@/components/alert-banner';
 import {
   BellRing,
   Building2,
+  CalendarDays,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Download,
   FileWarning,
@@ -40,6 +45,290 @@ type SlaReportItem = {
   ackDeadline: string;
   overdueMinutes: number;
 };
+
+type CalendarEvent = {
+  id: string;
+  hearing_id: string;
+  case_number: string;
+  case_title?: string;
+  hearing_type: string;
+  start_at: string;
+  end_at: string;
+  resources: Array<{ resourceType: string; resourceId: string; requirement: string }>;
+};
+
+// ── Helper: rentang tanggal bulan ─────────────────────────────────────────
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+function getFirstDayOfMonth(year: number, month: number) {
+  // 0=Sun→jadikan 1=Sen sebagai hari pertama
+  const d = new Date(year, month, 1).getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+const BULAN_ID = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember'
+];
+const HARI_SHORT = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+// ── Komponen kalender mini ─────────────────────────────────────────────────
+
+function MiniCalendar() {
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDate, setSelectedDate] = useState<string | null>(today.toISOString().slice(0, 10));
+
+  // Fetch kalender bulan ini + bulan depan agar seamless saat navigasi
+  const fromDate = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-01`;
+  const lastDay = getDaysInMonth(viewYear, viewMonth);
+  const toDate = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const calQuery = useQuery({
+    queryKey: ['dashboard-calendar', fromDate, toDate],
+    queryFn: () =>
+      api<CalendarEvent[]>(`/calendar?from=${fromDate}T00:00:00Z&to=${toDate}T23:59:59Z`),
+    staleTime: 5 * 60 * 1000
+  });
+
+  const events = Array.isArray(calQuery.data) ? calQuery.data : [];
+
+  // Kelompokkan per tanggal → { 'YYYY-MM-DD': CalendarEvent[] }
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, CalendarEvent[]> = {};
+    for (const ev of events) {
+      const d = ev.start_at.slice(0, 10);
+      if (!map[d]) map[d] = [];
+      map[d].push(ev);
+    }
+    return map;
+  }, [events]);
+
+  const daysInMonth = getDaysInMonth(viewYear, viewMonth);
+  const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+  const todayStr = today.toISOString().slice(0, 10);
+
+  function prevMonth() {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else setViewMonth((m) => m - 1);
+  }
+  function nextMonth() {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else setViewMonth((m) => m + 1);
+  }
+
+  const selectedEvents = selectedDate ? (eventsByDate[selectedDate] ?? []) : [];
+
+  // Warna dot per jumlah sidang
+  function dotColor(count: number) {
+    if (count >= 3) return 'bg-rose-500';
+    if (count === 2) return 'bg-amber-500';
+    return 'bg-blue-500';
+  }
+
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3 bg-[#0b2a4a] text-white rounded-t-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-blue-300" />
+            <CardTitle className="text-base text-white">Kalender Persidangan</CardTitle>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={prevMonth}
+              aria-label="Bulan sebelumnya"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-blue-200 hover:bg-white/10 transition"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="min-w-30 text-center text-sm font-semibold text-white">
+              {BULAN_ID[viewMonth]} {viewYear}
+            </span>
+            <button
+              onClick={nextMonth}
+              aria-label="Bulan berikutnya"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-blue-200 hover:bg-white/10 transition"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <CardDescription className="text-blue-200 text-xs mt-1">
+          {events.length > 0
+            ? `${events.length} sidang terjadwal bulan ini`
+            : 'Tidak ada sidang bulan ini'}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="p-0">
+        {/* ── Grid kalender ── */}
+        <div className="p-4">
+          {/* Header hari */}
+          <div className="mb-2 grid grid-cols-7 text-center">
+            {HARI_SHORT.map((h) => (
+              <div
+                key={h}
+                className="py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wide"
+              >
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {/* Sel hari */}
+          <div className="grid grid-cols-7 gap-y-1">
+            {/* Offset kosong sebelum hari pertama */}
+            {Array.from({ length: firstDay }).map((_, i) => (
+              <div key={`blank-${i}`} />
+            ))}
+
+            {Array.from({ length: daysInMonth }).map((_, i) => {
+              const day = i + 1;
+              const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const isToday = dateStr === todayStr;
+              const isSelected = dateStr === selectedDate;
+              const dayEvents = eventsByDate[dateStr] ?? [];
+              const hasEvents = dayEvents.length > 0;
+
+              return (
+                <button
+                  key={dateStr}
+                  onClick={() => setSelectedDate(dateStr)}
+                  className={`
+                    relative flex flex-col items-center justify-start rounded-lg py-1.5 text-sm font-medium transition-all
+                    ${
+                      isSelected
+                        ? 'bg-[#0b2a4a] text-white shadow-md'
+                        : isToday
+                          ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-300'
+                          : hasEvents
+                            ? 'hover:bg-slate-100 text-slate-700'
+                            : 'hover:bg-slate-50 text-slate-500'
+                    }
+                  `}
+                >
+                  <span className="leading-none">{day}</span>
+                  {hasEvents && (
+                    <span
+                      className={`mt-1 h-1.5 w-1.5 rounded-full ${isSelected ? 'bg-blue-300' : dotColor(dayEvents.length)}`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Legenda dot ── */}
+        <div className="flex items-center gap-4 border-t px-4 py-2">
+          {[
+            { color: 'bg-blue-500', label: '1 sidang' },
+            { color: 'bg-amber-500', label: '2 sidang' },
+            { color: 'bg-rose-500', label: '3+ sidang' }
+          ].map(({ color, label }) => (
+            <div key={label} className="flex items-center gap-1.5 text-[10px] text-slate-400">
+              <span className={`h-2 w-2 rounded-full ${color}`} />
+              {label}
+            </div>
+          ))}
+          {calQuery.isLoading && (
+            <span className="ml-auto text-[10px] text-slate-400 animate-pulse">Memuat…</span>
+          )}
+        </div>
+
+        {/* ── Daftar sidang tanggal terpilih ── */}
+        <div className="border-t bg-slate-50">
+          <div className="px-4 py-2.5">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              {selectedDate
+                ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })
+                : 'Pilih tanggal'}
+            </p>
+          </div>
+
+          {selectedEvents.length === 0 ? (
+            <div className="px-4 pb-4 text-center">
+              <p className="text-xs text-slate-400">Tidak ada sidang pada tanggal ini.</p>
+            </div>
+          ) : (
+            <div className="space-y-2 px-4 pb-4">
+              {selectedEvents.map((ev) => {
+                const startTime = new Date(ev.start_at).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Asia/Jakarta'
+                });
+                const endTime = new Date(ev.end_at).toLocaleTimeString('id-ID', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  timeZone: 'Asia/Jakarta'
+                });
+                return (
+                  <div
+                    key={ev.id}
+                    className="flex items-start gap-3 rounded-xl border border-blue-100 bg-white p-3 shadow-sm"
+                  >
+                    {/* Strip waktu */}
+                    <div className="flex w-14 shrink-0 flex-col items-center rounded-lg bg-blue-50 py-1.5 text-center">
+                      <span className="text-[11px] font-bold text-blue-700">{startTime}</span>
+                      <span className="text-[9px] text-blue-400">—</span>
+                      <span className="text-[11px] font-bold text-blue-700">{endTime}</span>
+                    </div>
+                    {/* Detail */}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-800">
+                        {ev.case_number}
+                      </p>
+                      {ev.case_title && (
+                        <p className="truncate text-[11px] text-slate-500">{ev.case_title}</p>
+                      )}
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                          {ev.hearing_type}
+                        </span>
+                        {ev.resources.slice(0, 2).map((r, i) => (
+                          <span
+                            key={i}
+                            className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700"
+                          >
+                            {r.resourceId}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 // ── Pemetaan persona ke nama peran + instansi ─────────────────────────────
 
@@ -118,6 +407,17 @@ function StatCard({
 
 // ── Halaman utama ─────────────────────────────────────────────────────────
 
+// ── Helper: mapping next_gate ke bahasa Indonesia ─────────────────────────
+const GATE_LABEL: Record<string, string> = {
+  HEARING_DATA: 'Data Persidangan',
+  JUDICIAL_DETERMINATION: 'Penetapan Hakim',
+  SCHEDULE: 'Jadwal Sidang',
+  NOTICE: 'Pemberitahuan',
+  READINESS: 'Kesiapan Instansi',
+  VIRTUAL_SESSION: 'Ruang Virtual',
+  COMPLETED: 'Selesai'
+};
+
 export function DashboardPage() {
   const { hearingId, hearing, hearings } = useActiveHearing();
   const persona = getPersona();
@@ -169,9 +469,11 @@ export function DashboardPage() {
   const completedHearings = hearings.filter((h) => h.state === 'COMPLETED').length;
 
   const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   async function handleExport() {
     setExporting(true);
+    setExportError('');
     const token = localStorage.getItem('cims_token');
     const currentPersona = getPersona();
 
@@ -186,7 +488,7 @@ export function DashboardPage() {
         }
       );
 
-      if (!response.ok) throw new Error('Gagal mengunduh laporan SLA');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -198,8 +500,7 @@ export function DashboardPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
-      console.error('Export failed', err);
-      alert('Gagal mengekspor laporan. Terlalu banyak permintaan atau terjadi kesalahan server.');
+      setExportError(errorMessage(err));
     } finally {
       setExporting(false);
     }
@@ -211,6 +512,15 @@ export function DashboardPage() {
         title={`Dashboard — ${meta.roleName}`}
         description="Ringkasan tugas operasional persidangan elektronik hari ini berdasarkan peran dan kewenangan Anda."
       />
+
+      {exportError && (
+        <AlertBanner
+          variant="error"
+          message={exportError}
+          onDismiss={() => setExportError('')}
+          className="mb-4"
+        />
+      )}
 
       {/* ── Badge instansi ── */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -245,7 +555,7 @@ export function DashboardPage() {
             </Button>
           </div>
           <p className="mt-1 text-sm text-red-700">
-            Terdapat pemberitahuan resmi yang belum di-acknowledge melewati batas waktu (SOP 11).
+            Terdapat pemberitahuan resmi yang belum di-acknowledge melewati batas waktu.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {slaQuery.data.slice(0, 3).map((item) => (
@@ -363,12 +673,33 @@ export function DashboardPage() {
               icon={CheckCircle2}
             />
             <StatCard
-              label="Verifikasi Identitas"
-              value="Cek Readiness"
-              color="amber"
+              label="Status Kesiapan"
+              value={
+                !hearingId
+                  ? 'Pilih perkara'
+                  : gate.isLoading
+                    ? 'Memuat…'
+                    : gate.data?.readiness?.ready
+                      ? 'Kesiapan Terpenuhi'
+                      : 'Belum Siap'
+              }
+              color={gate.data?.readiness?.ready ? 'emerald' : hearingId ? 'amber' : 'slate'}
               icon={FileWarning}
             />
-            <StatCard label="Status Ruangan" value="Cek Readiness" color="amber" icon={Building2} />
+            <StatCard
+              label="Verifikasi Identitas"
+              value={
+                !hearingId
+                  ? 'Pilih perkara'
+                  : gate.isLoading
+                    ? 'Memuat…'
+                    : gate.data?.readiness?.ready
+                      ? 'Terverifikasi'
+                      : 'Perlu Verifikasi'
+              }
+              color={gate.data?.readiness?.ready ? 'emerald' : hearingId ? 'amber' : 'slate'}
+              icon={Building2}
+            />
           </>
         )}
 
@@ -407,14 +738,18 @@ export function DashboardPage() {
         )}
       </div>
 
-      {/* ── Workflow Gate + Daftar Perkara ── */}
-      <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1fr]">
+      {/* ── Workflow Gate + Daftar Perkara + Kalender ── */}
+      <div className="mt-5 grid gap-5 xl:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Workflow Gate — Perkara Aktif</CardTitle>
             <CardDescription>
-              Persidangan: <strong>{hearing?.caseNumber ?? hearingId}</strong>. Next gate:{' '}
-              <Badge variant="outline">{gate.data?.next_gate ?? 'Memuat…'}</Badge>
+              Persidangan: <strong>{hearing?.caseNumber ?? hearingId}</strong>. Tahap selanjutnya:{' '}
+              <Badge variant="outline">
+                {gate.data?.next_gate
+                  ? (GATE_LABEL[gate.data.next_gate] ?? gate.data.next_gate)
+                  : 'Memuat…'}
+              </Badge>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -447,7 +782,7 @@ export function DashboardPage() {
                       >
                         <span className="text-sm">{label}</span>
                         <Badge variant={done ? 'success' : 'outline'}>
-                          {done ? 'PASS' : 'PENDING'}
+                          {done ? 'SELESAI' : 'TERTUNDA'}
                         </Badge>
                       </div>
                     ))}
@@ -500,6 +835,9 @@ export function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* ── Kalender Persidangan ── */}
+        <MiniCalendar />
       </div>
     </>
   );

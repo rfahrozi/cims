@@ -61,7 +61,7 @@ export function CalendarPage() {
     <>
       <PageHeader
         title="Kalender Sidang (Lintas Instansi)"
-        description="Tampilan jadwal aktif dari seluruh persidangan yang dapat diakses oleh Anda. (SOP 10.3 / H-04)"
+        description="Tampilan jadwal aktif dari seluruh persidangan yang dapat diakses oleh Anda."
       />
 
       <Card className="mb-5 bg-white shadow-sm border-blue-100">

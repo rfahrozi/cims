@@ -172,7 +172,7 @@ export function HearingControlPage() {
       {/* Banner khusus DOCUMENTATION_PENDING */}
       {isDocPending && (
         <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-          <FileWarning className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+          <FileWarning className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
           <div className="flex-1">
             <p className="font-semibold text-amber-800">Dokumentasi Sidang Belum Lengkap</p>
             <p className="mt-0.5 text-sm text-amber-700">
@@ -183,7 +183,7 @@ export function HearingControlPage() {
           </div>
           <Button
             size="sm"
-            className="flex-shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
+            className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
             onClick={() => directAction('complete-documentation')}
           >
             <FileCheck2 className="mr-1.5 h-4 w-4" />

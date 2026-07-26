@@ -496,7 +496,34 @@ export class InMemoryStore {
   readonly organizations: OrganizationRecord[] = [
     { id: 'court-demo', name: 'Pengadilan Negeri Demo', type: 'COURT' },
     { id: 'prosecution-demo', name: 'Kejaksaan Negeri Demo', type: 'PROSECUTION' },
-    { id: 'corrections-demo', name: 'Rutan Demo', type: 'CORRECTIONS' }
+    { id: 'corrections-demo', name: 'Rutan Demo', type: 'CORRECTIONS' },
+    { id: 'kejati-kepri', name: 'Kejaksaan Tinggi Kepulauan Riau', type: 'PROSECUTION' },
+    { id: 'kejari-tanjungpinang', name: 'Kejaksaan Negeri Tanjungpinang', type: 'PROSECUTION' },
+    { id: 'kejari-batam', name: 'Kejaksaan Negeri Batam', type: 'PROSECUTION' },
+    { id: 'kejari-bintan', name: 'Kejaksaan Negeri Bintan', type: 'PROSECUTION' },
+    { id: 'kejari-lingga', name: 'Kejaksaan Negeri Lingga', type: 'PROSECUTION' },
+    { id: 'kejari-karimun', name: 'Kejaksaan Negeri Karimun', type: 'PROSECUTION' },
+    { id: 'kejari-natuna', name: 'Kejaksaan Negeri Natuna', type: 'PROSECUTION' },
+    { id: 'kejari-anambas', name: 'Kejaksaan Negeri Kepulauan Anambas', type: 'PROSECUTION' },
+    { id: 'cabjari-moro', name: 'Cabang Kejaksaan Negeri Karimun di Moro', type: 'PROSECUTION' },
+    {
+      id: 'cabjari-tanjungbatu',
+      name: 'Cabang Kejaksaan Negeri Karimun di Tanjungbatu',
+      type: 'PROSECUTION'
+    },
+    { id: 'lapas-batam', name: 'Lapas Kelas IIA Batam', type: 'CORRECTIONS' },
+    { id: 'lapas-tanjungpinang', name: 'Lapas Kelas IIA Tanjungpinang', type: 'CORRECTIONS' },
+    { id: 'lapas-perempuan-batam', name: 'Lapas Perempuan Kelas IIB Batam', type: 'CORRECTIONS' },
+    {
+      id: 'lapas-narkotika-tanjungpinang',
+      name: 'Lapas Narkotika Kelas IIA Tanjungpinang',
+      type: 'CORRECTIONS'
+    },
+    { id: 'lapas-dabo-singkep', name: 'Lapas Kelas III Dabo Singkep', type: 'CORRECTIONS' },
+    { id: 'lpka-batam', name: 'LPKA Kelas II Batam', type: 'CORRECTIONS' },
+    { id: 'rutan-tanjungpinang', name: 'Rutan Kelas I Tanjungpinang', type: 'CORRECTIONS' },
+    { id: 'rutan-batam', name: 'Rutan Kelas IIA Batam', type: 'CORRECTIONS' },
+    { id: 'rutan-karimun', name: 'Rutan Kelas IIB Tanjung Balai Karimun', type: 'CORRECTIONS' }
   ];
   readonly hearingAssignments: HearingAssignmentRecord[] = [
     { hearingId: 'hearing-demo-001', organizationId: 'court-demo' },

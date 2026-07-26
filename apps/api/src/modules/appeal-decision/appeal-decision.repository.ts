@@ -18,6 +18,31 @@ import { PersistenceModeService } from '../../infrastructure/persistence/databas
 import { PgPoolService } from '../../infrastructure/persistence/database/pg-pool.service.js';
 import { InMemoryStore } from '../../infrastructure/workflow-support/in-memory.store.js';
 
+// Kolom yang selalu di-SELECT untuk appeal_decision_readings (termasuk kolom SEMA No.2/2026)
+const READING_COLS = `
+  id, hearing_id, version, scheduled_at::text, display_timezone, delivery_mode,
+  determination_reference, virtual_session_reference, open_to_public, status,
+  read_at::text, cassation_deadline_at::text, cassation_deadline_note,
+  reschedule_reason, created_by, created_at::text, updated_at::text, row_version,
+  zoom_join_url, zoom_password, court_name, penetapan_city, penetapan_number,
+  hakim_ketua, hakim_anggota, panitera_pengganti, penuntut_umum,
+  deliberation_date::text
+`.trim();
+
+// Kolom yang selalu di-SELECT untuk appeal_notice_steps (termasuk kolom dokumen 0017)
+const NOTICE_STEP_COLS = `
+  id, reading_id, step_code, sender_organization_id, recipient_reference, recipient_name,
+  channel, official_reference, status, sent_at::text, delivered_at::text,
+  acknowledged_at::text, receipt_reference, created_by, created_at::text,
+  document_storage_key, document_hash, document_filename, document_size_bytes,
+  document_content_type, document_uploaded_at::text, document_uploaded_by
+`.trim();
+
+/** Data reading diperkaya dengan providerSessionReference dari virtual_sessions */
+export interface AppealReadingWithSession extends AppealDecisionReading {
+  providerSessionReference?: string; // Zoom Meeting ID dari virtual_sessions
+}
+
 @Injectable()
 export class AppealDecisionRepository {
   constructor(
@@ -38,6 +63,17 @@ export class AppealDecisionRepository {
       virtualSessionReference?: string;
       openToPublic: boolean;
       createdBy: string;
+      // Kolom SEMA No. 2/2026
+      courtName?: string;
+      penetapanCity?: string;
+      penetapanNumber?: string;
+      zoomJoinUrl?: string;
+      zoomPassword?: string;
+      hakimKetua?: string;
+      hakimAnggota?: string[];
+      paniterapengganti?: string;
+      penuntutUmum?: string;
+      deliberationDate?: string;
     },
     user: CurrentUser
   ): Promise<AppealDecisionReading> {
@@ -74,13 +110,13 @@ export class AppealDecisionRepository {
       const row = (
         await client.query(
           `insert into appeal_decision_readings
-           (hearing_id,version,scheduled_at,display_timezone,delivery_mode,
-            determination_reference,virtual_session_reference,open_to_public,created_by)
-         values($1,$2,$3,$4,$5,$6,$7,$8,$9)
-         returning id,hearing_id,version,scheduled_at::text,display_timezone,delivery_mode,
-                   determination_reference,virtual_session_reference,open_to_public,status,
-                   read_at::text,cassation_deadline_at::text,cassation_deadline_note,
-                   reschedule_reason,created_by,created_at::text,updated_at::text,row_version`,
+           (hearing_id, version, scheduled_at, display_timezone, delivery_mode,
+            determination_reference, virtual_session_reference, open_to_public, created_by,
+            court_name, penetapan_city, penetapan_number,
+            zoom_join_url, zoom_password, hakim_ketua, hakim_anggota,
+            panitera_pengganti, penuntut_umum, deliberation_date)
+         values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+         returning ${READING_COLS}`,
           [
             input.hearingId,
             version,
@@ -90,7 +126,17 @@ export class AppealDecisionRepository {
             input.determinationReference,
             input.virtualSessionReference ?? null,
             input.openToPublic,
-            input.createdBy
+            input.createdBy,
+            input.courtName ?? null,
+            input.penetapanCity ?? null,
+            input.penetapanNumber ?? null,
+            input.zoomJoinUrl ?? null,
+            input.zoomPassword ?? null,
+            input.hakimKetua ?? null,
+            input.hakimAnggota ?? null,
+            input.paniterapengganti ?? null,
+            input.penuntutUmum ?? null,
+            input.deliberationDate ?? null
           ]
         )
       ).rows[0];
@@ -107,6 +153,17 @@ export class AppealDecisionRepository {
       determinationReference?: string;
       virtualSessionReference?: string;
       updatedBy: string;
+      // Kolom SEMA No. 2/2026 — diperbarui jika diisi
+      courtName?: string;
+      penetapanCity?: string;
+      penetapanNumber?: string;
+      zoomJoinUrl?: string;
+      zoomPassword?: string;
+      hakimKetua?: string;
+      hakimAnggota?: string[];
+      paniterapengganti?: string;
+      penuntutUmum?: string;
+      deliberationDate?: string;
     },
     user: CurrentUser
   ): Promise<AppealDecisionReading> {
@@ -138,19 +195,36 @@ export class AppealDecisionRepository {
             set scheduled_at=$2, delivery_mode=$3, reschedule_reason=$4,
                 determination_reference=coalesce($5,determination_reference),
                 virtual_session_reference=coalesce($6,virtual_session_reference),
+                court_name=coalesce($7,court_name),
+                penetapan_city=coalesce($8,penetapan_city),
+                penetapan_number=coalesce($9,penetapan_number),
+                zoom_join_url=coalesce($10,zoom_join_url),
+                zoom_password=coalesce($11,zoom_password),
+                hakim_ketua=coalesce($12,hakim_ketua),
+                hakim_anggota=coalesce($13,hakim_anggota),
+                panitera_pengganti=coalesce($14,panitera_pengganti),
+                penuntut_umum=coalesce($15,penuntut_umum),
+                deliberation_date=coalesce($16,deliberation_date),
                 row_version=row_version+1, updated_at=now()
           where id=$1 and status='SCHEDULED'
-         returning id,hearing_id,version,scheduled_at::text,display_timezone,delivery_mode,
-                   determination_reference,virtual_session_reference,open_to_public,status,
-                   read_at::text,cassation_deadline_at::text,cassation_deadline_note,
-                   reschedule_reason,created_by,created_at::text,updated_at::text,row_version`,
+         returning ${READING_COLS}`,
           [
             id,
             input.scheduledAt,
             input.deliveryMode,
             input.rescheduleReason,
             input.determinationReference ?? null,
-            input.virtualSessionReference ?? null
+            input.virtualSessionReference ?? null,
+            input.courtName ?? null,
+            input.penetapanCity ?? null,
+            input.penetapanNumber ?? null,
+            input.zoomJoinUrl ?? null,
+            input.zoomPassword ?? null,
+            input.hakimKetua ?? null,
+            input.hakimAnggota ?? null,
+            input.paniterapengganti ?? null,
+            input.penuntutUmum ?? null,
+            input.deliberationDate ?? null
           ]
         )
       ).rows[0];
@@ -188,10 +262,7 @@ export class AppealDecisionRepository {
             set status='READ', read_at=$2, cassation_deadline_at=coalesce($3,cassation_deadline_at),
                 row_version=row_version+1, updated_at=now()
           where id=$1 and status='SCHEDULED'
-         returning id,hearing_id,version,scheduled_at::text,display_timezone,delivery_mode,
-                   determination_reference,virtual_session_reference,open_to_public,status,
-                   read_at::text,cassation_deadline_at::text,cassation_deadline_note,
-                   reschedule_reason,created_by,created_at::text,updated_at::text,row_version`,
+         returning ${READING_COLS}`,
           [id, readAt, cassationDeadlineAt ?? null]
         )
       ).rows[0];
@@ -211,10 +282,7 @@ export class AppealDecisionRepository {
     return this.pg.transactionAs(user, async (client) => {
       const rows = (
         await client.query(
-          `select id,hearing_id,version,scheduled_at::text,display_timezone,delivery_mode,
-                determination_reference,virtual_session_reference,open_to_public,status,
-                read_at::text,cassation_deadline_at::text,cassation_deadline_note,
-                reschedule_reason,created_by,created_at::text,updated_at::text,row_version
+          `select ${READING_COLS}
            from appeal_decision_readings where hearing_id=$1 order by version desc`,
           [hearingId]
         )
@@ -231,17 +299,50 @@ export class AppealDecisionRepository {
     }
     return this.pg.transactionAs(user, async (client) => {
       const row = (
+        await client.query(`select ${READING_COLS} from appeal_decision_readings where id=$1`, [id])
+      ).rows[0];
+      if (!row) throw new DomainError('APPEAL_READING_NOT_FOUND', 'Appeal reading not found.', 404);
+      return this.mapReading(row);
+    });
+  }
+
+  /**
+   * Ambil reading + providerSessionReference dari virtual_sessions (Zoom Meeting ID).
+   * Digunakan saat generate Surat Penetapan untuk mendapatkan Link Zoom otomatis.
+   */
+  async getWithSession(id: string, user: CurrentUser): Promise<AppealReadingWithSession> {
+    if (!this.mode.postgres) {
+      const r = this.memStore().readings.find((x) => x.id === id);
+      if (!r) throw new DomainError('APPEAL_READING_NOT_FOUND', 'Appeal reading not found.', 404);
+      return { ...r, providerSessionReference: undefined };
+    }
+    return this.pg.transactionAs(user, async (client) => {
+      const row = (
         await client.query(
-          `select id,hearing_id,version,scheduled_at::text,display_timezone,delivery_mode,
-                determination_reference,virtual_session_reference,open_to_public,status,
-                read_at::text,cassation_deadline_at::text,cassation_deadline_note,
-                reschedule_reason,created_by,created_at::text,updated_at::text,row_version
-           from appeal_decision_readings where id=$1`,
+          `select r.${READING_COLS.replace(/\n/g, '\n  r.')},
+                  vs.provider_session_reference
+           from appeal_decision_readings r
+           left join virtual_sessions vs
+             on vs.hearing_id = r.hearing_id
+             and vs.state = 'READY'
+             and (
+               r.virtual_session_reference is null
+               or vs.id::text = r.virtual_session_reference
+             )
+           where r.id = $1
+           order by vs.created_at desc
+           limit 1`,
           [id]
         )
       ).rows[0];
       if (!row) throw new DomainError('APPEAL_READING_NOT_FOUND', 'Appeal reading not found.', 404);
-      return this.mapReading(row);
+      const reading = this.mapReading(row);
+      return {
+        ...reading,
+        providerSessionReference: row.provider_session_reference
+          ? String(row.provider_session_reference)
+          : undefined
+      };
     });
   }
 
@@ -277,9 +378,7 @@ export class AppealDecisionRepository {
            (reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
             channel,official_reference,created_by)
          values($1,$2,$3,$4,$5,$6,$7,$8)
-         returning id,reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
-                   channel,official_reference,status,sent_at::text,delivered_at::text,
-                   acknowledged_at::text,receipt_reference,created_by,created_at::text`,
+         returning ${NOTICE_STEP_COLS}`,
           [
             input.readingId,
             input.stepCode,
@@ -326,9 +425,7 @@ export class AppealDecisionRepository {
                 receipt_reference=coalesce($3,receipt_reference),
                 updated_at=now()
           where id=$1
-         returning id,reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
-                   channel,official_reference,status,sent_at::text,delivered_at::text,
-                   acknowledged_at::text,receipt_reference,created_by,created_at::text`,
+         returning ${NOTICE_STEP_COLS}`,
           [id, status, receiptReference ?? null]
         )
       ).rows[0];
@@ -347,9 +444,7 @@ export class AppealDecisionRepository {
     return this.pg.transactionAs(user, async (client) => {
       const row = (
         await client.query(
-          `select id,reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
-                channel,official_reference,status,sent_at::text,delivered_at::text,
-                acknowledged_at::text,receipt_reference,created_by,created_at::text
+          `select ${NOTICE_STEP_COLS}
            from appeal_notice_steps where id=$1`,
           [stepId]
         )
@@ -366,14 +461,69 @@ export class AppealDecisionRepository {
     return this.pg.transactionAs(user, async (client) => {
       const rows = (
         await client.query(
-          `select id,reading_id,step_code,sender_organization_id,recipient_reference,recipient_name,
-                channel,official_reference,status,sent_at::text,delivered_at::text,
-                acknowledged_at::text,receipt_reference,created_by,created_at::text
+          `select ${NOTICE_STEP_COLS}
            from appeal_notice_steps where reading_id=$1 order by created_at`,
           [readingId]
         )
       ).rows;
       return rows.map((r) => this.mapNoticeStep(r));
+    });
+  }
+
+  /**
+   * Lampirkan metadata dokumen PDF Penetapan bertanda tangan ke notice step.
+   * Dipanggil setelah file berhasil diupload ke EvidenceStorageGateway.
+   */
+  async attachDocument(
+    stepId: string,
+    doc: {
+      storageKey: string;
+      hash: string;
+      filename: string;
+      sizeBytes: number;
+      contentType: string;
+      uploadedBy: string;
+    },
+    user: CurrentUser
+  ): Promise<AppealNoticeStep> {
+    if (!this.mode.postgres) {
+      const s = this.memStore().noticeSteps.find((x) => x.id === stepId);
+      if (!s) throw new DomainError('APPEAL_NOTICE_STEP_NOT_FOUND', 'Notice step not found.', 404);
+      Object.assign(s, {
+        documentStorageKey: doc.storageKey,
+        documentHash: doc.hash,
+        documentFilename: doc.filename,
+        documentSizeBytes: doc.sizeBytes,
+        documentContentType: doc.contentType,
+        documentUploadedAt: new Date().toISOString(),
+        documentUploadedBy: doc.uploadedBy
+      });
+      return s;
+    }
+    return this.pg.transactionAs(user, async (client) => {
+      const row = (
+        await client.query(
+          `update appeal_notice_steps
+              set document_storage_key=$2, document_hash=$3, document_filename=$4,
+                  document_size_bytes=$5, document_content_type=$6,
+                  document_uploaded_at=now(), document_uploaded_by=$7,
+                  updated_at=now()
+            where id=$1
+           returning ${NOTICE_STEP_COLS}`,
+          [
+            stepId,
+            doc.storageKey,
+            doc.hash,
+            doc.filename,
+            doc.sizeBytes,
+            doc.contentType,
+            doc.uploadedBy
+          ]
+        )
+      ).rows[0];
+      if (!row)
+        throw new DomainError('APPEAL_NOTICE_STEP_NOT_FOUND', 'Notice step not found.', 404);
+      return this.mapNoticeStep(row);
     });
   }
 
@@ -610,7 +760,20 @@ export class AppealDecisionRepository {
       createdBy: String(r.created_by),
       createdAt: String(r.created_at),
       updatedAt: String(r.updated_at),
-      rowVersion: Number(r.row_version)
+      rowVersion: Number(r.row_version),
+      // Kolom SEMA No. 2/2026 — untuk generate Surat Penetapan
+      zoomJoinUrl: r.zoom_join_url ? String(r.zoom_join_url) : undefined,
+      zoomPassword: r.zoom_password ? String(r.zoom_password) : undefined,
+      courtName: r.court_name ? String(r.court_name) : undefined,
+      penetapanCity: r.penetapan_city ? String(r.penetapan_city) : undefined,
+      penetapanNumber: r.penetapan_number ? String(r.penetapan_number) : undefined,
+      hakimKetua: r.hakim_ketua ? String(r.hakim_ketua) : undefined,
+      hakimAnggota: Array.isArray(r.hakim_anggota)
+        ? (r.hakim_anggota as unknown[]).map(String)
+        : undefined,
+      paniterapengganti: r.panitera_pengganti ? String(r.panitera_pengganti) : undefined,
+      penuntutUmum: r.penuntut_umum ? String(r.penuntut_umum) : undefined,
+      deliberationDate: r.deliberation_date ? String(r.deliberation_date) : undefined
     };
   }
 
@@ -630,7 +793,15 @@ export class AppealDecisionRepository {
       acknowledgedAt: r.acknowledged_at ? String(r.acknowledged_at) : undefined,
       receiptReference: r.receipt_reference ? String(r.receipt_reference) : undefined,
       createdBy: String(r.created_by),
-      createdAt: String(r.created_at)
+      createdAt: String(r.created_at),
+      // Kolom dokumen Penetapan bertanda tangan (0017)
+      documentStorageKey: r.document_storage_key ? String(r.document_storage_key) : undefined,
+      documentHash: r.document_hash ? String(r.document_hash) : undefined,
+      documentFilename: r.document_filename ? String(r.document_filename) : undefined,
+      documentSizeBytes: r.document_size_bytes ? Number(r.document_size_bytes) : undefined,
+      documentContentType: r.document_content_type ? String(r.document_content_type) : undefined,
+      documentUploadedAt: r.document_uploaded_at ? String(r.document_uploaded_at) : undefined,
+      documentUploadedBy: r.document_uploaded_by ? String(r.document_uploaded_by) : undefined
     };
   }
 

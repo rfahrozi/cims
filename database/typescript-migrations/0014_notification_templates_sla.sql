@@ -11,7 +11,7 @@ create table if not exists notification_templates (
   subject       text not null,
   message_body  text not null,
   is_active     boolean not null default true,
-  updated_by    text references users(id),
+  updated_by    text,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
   unique (notice_type, channel)
@@ -31,7 +31,7 @@ create table if not exists sla_configs (
   ack_deadline_hours   integer not null default 24 check (ack_deadline_hours > 0),
   reminder_hours       integer[] not null default '{}',
   is_active            boolean not null default true,
-  updated_by           text references users(id),
+  updated_by           text,
   created_at           timestamptz not null default now(),
   updated_at           timestamptz not null default now()
 );

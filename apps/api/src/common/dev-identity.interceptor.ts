@@ -45,7 +45,7 @@ const governanceManagePermissions = [
   'access-review.manage'
 ];
 const hearingAssignments = ['hearing-demo-001'];
-const personas: Record<string, CurrentUser> = {
+export const personas: Record<string, CurrentUser> = {
   'substitute-clerk': {
     id: 'substitute-clerk-demo',
     name: 'Panitera Pengganti Demo',

@@ -3,8 +3,8 @@
 -- Memudahkan pengaturan multi-agenda per sesi (terutama untuk Saksi/Ahli).
 
 ALTER TABLE hearing_participants
-  ADD COLUMN agenda_item_id text REFERENCES hearing_agenda_items(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS agenda_item_id text REFERENCES hearing_agenda_items(id) ON DELETE SET NULL;
 
 COMMENT ON COLUMN hearing_participants.agenda_item_id IS 'Tautan ke agenda spesifik (khususnya untuk peran WITNESS/EXPERT)';
 
-CREATE INDEX idx_participant_agenda ON hearing_participants(agenda_item_id) WHERE agenda_item_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_participant_agenda ON hearing_participants(agenda_item_id) WHERE agenda_item_id IS NOT NULL;

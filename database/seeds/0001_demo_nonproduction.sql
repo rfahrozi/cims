@@ -9,7 +9,26 @@ insert into organizations(id, organization_code, name, organization_type, active
 values
   ('court-demo',       'PN-DEMO',     'Pengadilan Negeri Demo',    'COURT',       true),
   ('prosecution-demo', 'KEJARI-DEMO', 'Kejaksaan Negeri Demo',     'PROSECUTION', true),
-  ('corrections-demo', 'RUTAN-DEMO',  'Rutan Demo',                'CORRECTIONS', true)
+  ('corrections-demo', 'RUTAN-DEMO',  'Rutan Demo',                'CORRECTIONS', true),
+  ('kejati-kepri', 'KEJATI-KEPRI', 'Kejaksaan Tinggi Kepulauan Riau', 'PROSECUTION', true),
+  ('kejari-tanjungpinang', 'KEJARI-TPI', 'Kejaksaan Negeri Tanjungpinang', 'PROSECUTION', true),
+  ('kejari-batam', 'KEJARI-BTM', 'Kejaksaan Negeri Batam', 'PROSECUTION', true),
+  ('kejari-bintan', 'KEJARI-BTN', 'Kejaksaan Negeri Bintan', 'PROSECUTION', true),
+  ('kejari-lingga', 'KEJARI-LGA', 'Kejaksaan Negeri Lingga', 'PROSECUTION', true),
+  ('kejari-karimun', 'KEJARI-KRM', 'Kejaksaan Negeri Karimun', 'PROSECUTION', true),
+  ('kejari-natuna', 'KEJARI-NTN', 'Kejaksaan Negeri Natuna', 'PROSECUTION', true),
+  ('kejari-anambas', 'KEJARI-ANB', 'Kejaksaan Negeri Kepulauan Anambas', 'PROSECUTION', true),
+  ('cabjari-moro', 'CABJARI-MRO', 'Cabang Kejaksaan Negeri Karimun di Moro', 'PROSECUTION', true),
+  ('cabjari-tanjungbatu', 'CABJARI-TBT', 'Cabang Kejaksaan Negeri Karimun di Tanjungbatu', 'PROSECUTION', true),
+  ('lapas-batam', 'LAPAS-BTM', 'Lapas Kelas IIA Batam', 'CORRECTIONS', true),
+  ('lapas-tanjungpinang', 'LAPAS-TPI', 'Lapas Kelas IIA Tanjungpinang', 'CORRECTIONS', true),
+  ('lapas-perempuan-batam', 'LAPAS-PR-BTM', 'Lapas Perempuan Kelas IIB Batam', 'CORRECTIONS', true),
+  ('lapas-narkotika-tanjungpinang', 'LAPAS-N-TPI', 'Lapas Narkotika Kelas IIA Tanjungpinang', 'CORRECTIONS', true),
+  ('lapas-dabo-singkep', 'LAPAS-DBS', 'Lapas Kelas III Dabo Singkep', 'CORRECTIONS', true),
+  ('lpka-batam', 'LPKA-BTM', 'LPKA Kelas II Batam', 'CORRECTIONS', true),
+  ('rutan-tanjungpinang', 'RUTAN-TPI', 'Rutan Kelas I Tanjungpinang', 'CORRECTIONS', true),
+  ('rutan-batam', 'RUTAN-BTM', 'Rutan Kelas IIA Batam', 'CORRECTIONS', true),
+  ('rutan-karimun', 'RUTAN-KRM', 'Rutan Kelas IIB Tanjung Balai Karimun', 'CORRECTIONS', true)
 on conflict (id) do update
   set name = excluded.name,
       organization_type = excluded.organization_type,

@@ -1,28 +1,5 @@
-import { useState } from 'react';
-import { Navigate, NavLink, Route, Routes } from 'react-router-dom';
-import {
-  BellRing,
-  CalendarDays,
-  ClipboardCheck,
-  FilePenLine,
-  Gavel,
-  LayoutDashboard,
-  Scale,
-  ShieldAlert,
-  ShieldCheck,
-  UserRoundCheck,
-  UsersRound,
-  Video,
-  BookOpen,
-  RefreshCw,
-  Menu,
-  X
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { PersonaSwitcher } from '@/components/persona-switcher';
-import { HearingSelector } from '@/components/hearing-selector';
-import { ActiveHearingBar } from '@/components/active-hearing-bar'; // QW-05
+import { Navigate, Route, Routes } from 'react-router-dom';
+
 import { DashboardPage } from '@/pages/dashboard';
 import { HearingIntakePage } from '@/pages/hearing-intake';
 import { DeterminationPage } from '@/pages/determination';
@@ -36,174 +13,61 @@ import { ConsultationPage } from '@/pages/consultation';
 import { AttendancePage } from '@/pages/attendance';
 import { ParticipantsPage } from '@/pages/participants';
 import { AppealDecisionPage } from '@/pages/appeal-decision';
-// MVP-3: Menu teknis disembunyikan dari pengguna operasional.
-// Route tetap terdaftar agar developer bisa akses via URL langsung.
 import { ReconciliationPage } from '@/pages/reconciliation';
 import { OperationsPage } from '@/pages/operations';
 import { GovernancePage } from '@/pages/governance';
 import { ZoomPage } from '@/pages/zoom';
 import { MigrationPage } from '@/pages/migration';
-import { AdminConfigPage } from '@/pages/admin-config'; // GAP-01 — Admin console
-import { AuditLogPage } from '@/pages/audit-log'; // GAP-07 — Audit Log Viewer
-
+import { AdminConfigPage } from '@/pages/admin-config';
+import { UserManagementPage } from '@/pages/user-management';
+import { AuditLogPage } from '@/pages/audit-log';
 import { CalendarPage } from '@/pages/calendar';
+import { LandingPage } from '@/pages/landing';
+import { LoginPage } from '@/pages/login';
 
-import { ErrorBoundary } from '@/components/error-boundary';
-import { OnboardingWizard } from '@/components/onboarding-wizard'; // GAP-08 Onboarding Wizard
-import { useAppNotifications } from '@/lib/use-app-notifications'; // M-08/CU-04 Realtime SSE
-
-// ── Menu utama — ditampilkan ke semua pengguna operasional ──────────────────
-// Urutan mengikuti alur kerja sidang elektronik (SOP 10.1 s/d 10.15)
-const nav = [
-  ['/dashboard', 'Dashboard', LayoutDashboard],
-  ['/calendar', 'Kalender Lintas Instansi', CalendarDays], // H-04
-  ['/hearing-intake', 'Data Persidangan', FilePenLine],
-  ['/determination', 'Penetapan Hakim', Scale],
-  ['/scheduling', 'Jadwal Sidang', CalendarDays],
-  ['/notices', 'Pemberitahuan', BellRing],
-  ['/readiness', 'Kesiapan', ClipboardCheck],
-  ['/virtual-session', 'Ruang Virtual', Video],
-  ['/hearing-control', 'Kontrol Sidang', Gavel],
-  ['/participants', 'Peserta', UsersRound],
-  ['/attendance', 'Kehadiran', UserRoundCheck],
-  ['/consultation', 'Konsultasi Privat', ShieldCheck],
-  ['/incidents', 'Insiden', ShieldAlert],
-  ['/appeal-decision', 'Putusan Banding', BookOpen],
-  ['/reconciliation', 'Rekonsiliasi (SIPP)', RefreshCw] // EPIC-01
-] as const;
-
-// ── Menu admin/teknis — DISEMBUNYIKAN dari sidebar MVP ─────────────────────
-// Masih bisa diakses via URL langsung oleh developer/admin.
-// - /operations      : Outbox dan migration posture (hanya relevan untuk tim teknis)
-// - /governance      : Legal hold, retention, evidence export (post-MVP)
-// - /zoom            : Zoom admin panel langsung (bypass gate, hanya untuk dev)
-// - /migration       : Status migrasi teknis (hanya relevan untuk tim teknis)
+import { AppLayout } from '@/components/app-layout';
+import { useAppNotifications } from '@/lib/use-app-notifications';
 
 export default function App() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   // M-08/CU-04: Mengaktifkan kapabilitas Realtime SSE
   useAppNotifications();
 
   return (
-    <div className="min-h-screen bg-[#f4f7fb] md:grid md:grid-cols-[280px_1fr]">
-      {/* ── GAP-08 Onboarding Wizard Global ── */}
-      <OnboardingWizard />
+    <Routes>
+      {/* ── RUTE PUBLIK (Tanpa Sidebar) ── */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
 
-      {/* ── CU-08: Overlay backdrop untuk mobile ── */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+      {/* ── RUTE APLIKASI (Dengan Sidebar) ── */}
+      <Route element={<AppLayout />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/hearing-intake" element={<HearingIntakePage />} />
+        <Route path="/determination" element={<DeterminationPage />} />
+        <Route path="/scheduling" element={<SchedulingPage />} />
+        <Route path="/notices" element={<NoticesPage />} />
+        <Route path="/readiness" element={<ReadinessPage />} />
+        <Route path="/virtual-session" element={<VirtualSessionPage />} />
+        <Route path="/hearing-control" element={<HearingControlPage />} />
+        <Route path="/participants" element={<ParticipantsPage />} />
+        <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/consultation" element={<ConsultationPage />} />
+        <Route path="/incidents" element={<IncidentsPage />} />
+        <Route path="/appeal-decision" element={<AppealDecisionPage />} />
 
-      {/* ── Sidebar dengan transisi transform untuk mobile ── */}
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-[280px] overflow-y-auto bg-[#0b2a4a] p-5 text-white transition-transform duration-300 md:static md:translate-x-0 md:min-h-screen',
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-2xl font-black">CIMS</div>
-            <div className="mt-1 text-xs text-blue-200">Koordinasi Persidangan Elektronik</div>
-          </div>
-          <button
-            className="md:hidden p-1 rounded hover:bg-white/10"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+        {/* Route Admin/Teknis */}
+        <Route path="/reconciliation" element={<ReconciliationPage />} />
+        <Route path="/operations" element={<OperationsPage />} />
+        <Route path="/governance" element={<GovernancePage />} />
+        <Route path="/zoom" element={<ZoomPage />} />
+        <Route path="/migration" element={<MigrationPage />} />
+        <Route path="/admin" element={<AdminConfigPage />} />
+        <Route path="/user-management" element={<UserManagementPage />} />
+        <Route path="/audit" element={<AuditLogPage />} />
 
-        <nav className="mt-8 space-y-1">
-          {nav.map(([to, label, Icon]) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }: { isActive: boolean }) =>
-                cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-blue-100 transition hover:bg-white/10',
-                  isActive && 'bg-white/15 text-white'
-                )
-              }
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="mt-6 space-y-3">
-          <PersonaSwitcher />
-          <HearingSelector />
-        </div>
-        <div className="mt-4 rounded-lg border border-white/15 bg-white/5 p-3 text-xs text-blue-100">
-          <div className="flex items-center gap-2 font-semibold">
-            <ShieldCheck className="h-4 w-4" /> Alur Sidang Elektronik
-          </div>
-          <p className="mt-2 leading-5">
-            Data Perkara → Penetapan → Jadwal → Pemberitahuan → Kesiapan → Ruang Virtual → Sidang
-          </p>
-        </div>
-      </aside>
-
-      <main className="min-w-0 p-5 md:p-8 flex-1 w-full max-w-[100vw]">
-        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            {/* CU-08: Hamburger button */}
-            <button
-              className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[#0b2a4a]">
-                Court Intelligence Management System
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Koordinasi persidangan pidana elektronik lintas instansi
-              </p>
-            </div>
-          </div>
-          <Badge variant="success" className="shrink-0">
-            v0.20.0 MVP
-          </Badge>
-        </header>
-        {/* QW-05: Hearing selector prominent di area konten utama */}
-        <ActiveHearingBar />
-        <ErrorBoundary>
-          <Routes>
-            {/* ── Alur utama sidang elektronik ── */}
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/hearing-intake" element={<HearingIntakePage />} />
-            <Route path="/determination" element={<DeterminationPage />} />
-            <Route path="/scheduling" element={<SchedulingPage />} />
-            <Route path="/notices" element={<NoticesPage />} />
-            <Route path="/readiness" element={<ReadinessPage />} />
-            <Route path="/virtual-session" element={<VirtualSessionPage />} />
-            <Route path="/hearing-control" element={<HearingControlPage />} />
-            <Route path="/participants" element={<ParticipantsPage />} />
-            <Route path="/attendance" element={<AttendancePage />} />
-            <Route path="/consultation" element={<ConsultationPage />} />
-            <Route path="/incidents" element={<IncidentsPage />} />
-            <Route path="/appeal-decision" element={<AppealDecisionPage />} />
-            {/* ── Admin/teknis — route aktif, tidak di sidebar ── */}
-            <Route path="/reconciliation" element={<ReconciliationPage />} />
-            <Route path="/operations" element={<OperationsPage />} />
-            <Route path="/governance" element={<GovernancePage />} />
-            <Route path="/zoom" element={<ZoomPage />} />
-            <Route path="/migration" element={<MigrationPage />} />
-            <Route path="/admin" element={<AdminConfigPage />} />
-            <Route path="/audit" element={<AuditLogPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </ErrorBoundary>
-      </main>
-    </div>
+        {/* Fallback di dalam AppLayout */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Route>
+    </Routes>
   );
 }

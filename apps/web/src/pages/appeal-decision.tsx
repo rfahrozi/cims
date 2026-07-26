@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { api, apiUploadFile, documentUrl } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +35,15 @@ interface AppealReading {
   cassationDeadlineNote?: string;
   rescheduleReason?: string;
   openToPublic: boolean;
+  // Kolom SEMA No. 2/2026
+  courtName?: string;
+  penetapanNumber?: string;
+  hakimKetua?: string;
+  hakimAnggota?: string[];
+  paniterapengganti?: string;
+  penuntutUmum?: string;
+  zoomJoinUrl?: string;
+  zoomPassword?: string;
 }
 
 interface NoticeStep {
@@ -46,6 +55,12 @@ interface NoticeStep {
   status: string;
   sentAt?: string;
   acknowledgedAt?: string;
+  // Kolom dokumen Penetapan bertanda tangan
+  documentFilename?: string;
+  documentSizeBytes?: number;
+  documentUploadedAt?: string;
+  documentUploadedBy?: string;
+  documentContentType?: string;
 }
 
 interface PresenceRecord {
@@ -62,6 +77,14 @@ const statusVariant = (s: AppealReadingStatus) => {
   if (s === 'SCHEDULED') return 'warning';
   if (s === 'POSTPONED') return 'destructive';
   return 'outline';
+};
+
+// ── Mapping bahasa ───────────────────────────────────────────────────────────────
+const STEP_LABELS: Record<string, string> = {
+  PT_TO_PROSECUTION: 'PT ke Kejaksaan',
+  PROSECUTION_TO_CORRECTIONS: 'Kejaksaan ke Pemasyarakatan',
+  CORRECTIONS_TO_DEFENDANT: 'Pemasyarakatan ke Terdakwa',
+  PROSECUTION_TO_ADVOCATE: 'Kejaksaan ke Advokat'
 };
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -89,6 +112,29 @@ export function AppealDecisionPage() {
   const [presenceRole, setPresenceRole] = useState<'DEFENDANT' | 'PROSECUTOR'>('DEFENDANT');
   const [presenceName, setPresenceName] = useState('Terdakwa Demo');
   const [attendanceStatus, setAttendanceStatus] = useState<'PRESENT' | 'ABSENT'>('PRESENT');
+
+  // Form states — Data Majelis Hakim (SEMA No. 2/2026)
+  const [courtName, setCourtName] = useState('Pengadilan Tinggi ...');
+  const [penetapanNumber, setPenetapanNumber] = useState('');
+  const [hakimKetua, setHakimKetua] = useState('');
+  const [hakimAnggota, setHakimAnggota] = useState(''); // comma-separated
+  const [paniterapengganti, setPaniterapengganti] = useState('');
+  const [penuntutUmum, setPenuntutUmum] = useState('');
+  const [zoomJoinUrl, setZoomJoinUrl] = useState('');
+  const [zoomPassword, setZoomPassword] = useState('');
+
+  // Helper: buka dokumen penetapan di tab baru
+  const openPenetapan = (readingId: string, docType: string) => {
+    const base = import.meta.env.VITE_API_URL ?? '/api/v1';
+    window.open(
+      `${base}/appeal-decisions/${readingId}/penetapan-document?document_type=${docType}`,
+      '_blank'
+    );
+  };
+
+  // Ref untuk hidden file input per step — keyed by stepId
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [uploadingStep, setUploadingStep] = useState<string | null>(null);
 
   // Queries
   const readingsQuery = useQuery({
@@ -130,13 +176,13 @@ export function AppealDecisionPage() {
     <>
       <PageHeader
         title="Pembacaan Putusan Tingkat Banding"
-        description="SOP 10.15 — berlaku mulai 1 Agustus 2026. Pengelolaan jadwal, rantai pemberitahuan, kehadiran, petikan, dan transmisi berkas."
+        description="Pengelolaan jadwal pembacaan putusan tingkat banding, rantai pemberitahuan, kehadiran, petikan, dan transmisi berkas."
       />
 
       {/* ── Status bar ── */}
       <div className="mb-5 grid gap-3 sm:grid-cols-4">
         {[
-          { label: 'Hearing ID', value: hearingId || '—' },
+          { label: 'ID Persidangan', value: hearingId || '—' },
           {
             label: 'Jadwal aktif',
             value: latestScheduled
@@ -182,14 +228,15 @@ export function AppealDecisionPage() {
                 <CardHeader>
                   <CardTitle>Buat / Perbarui Jadwal Pembacaan</CardTitle>
                   <CardDescription>
-                    Penetapan Majelis Hakim PT menentukan tanggal, waktu, dan cara pembacaan
-                    putusan.
+                    Penetapan Majelis Hakim PT menentukan tanggal, waktu, dan cara pembacaan putusan
+                    sesuai SEMA No. 2 Tahun 2026.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Jadwal & mode */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Tanggal & Waktu Pembacaan</Label>
+                      <Label>Tanggal &amp; Waktu Pembacaan</Label>
                       <Input
                         type="datetime-local"
                         value={scheduledAt}
@@ -221,6 +268,100 @@ export function AppealDecisionPage() {
                       />
                     </div>
                   </div>
+
+                  {/* ── Data Majelis Hakim untuk Surat Penetapan (SEMA No. 2/2026) ── */}
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 space-y-3">
+                    <p className="text-sm font-semibold text-blue-800">
+                      📄 Data Surat Penetapan — SEMA No. 2 Tahun 2026
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      Digunakan untuk generate Surat Penetapan resmi. Semua field opsional — bisa
+                      dikosongkan dan diisi saat reschedule.
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nama Pengadilan Tinggi</Label>
+                        <Input
+                          value={courtName}
+                          onChange={(e) => setCourtName(e.target.value)}
+                          placeholder="Pengadilan Tinggi Jakarta"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nomor Penetapan Resmi</Label>
+                        <Input
+                          value={penetapanNumber}
+                          onChange={(e) => setPenetapanNumber(e.target.value)}
+                          placeholder="001/PID.SUS/2026/PT.DKI"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nama Hakim Ketua</Label>
+                        <Input
+                          value={hakimKetua}
+                          onChange={(e) => setHakimKetua(e.target.value)}
+                          placeholder="Nama lengkap Hakim Ketua"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Hakim Anggota (pisah koma)</Label>
+                        <Input
+                          value={hakimAnggota}
+                          onChange={(e) => setHakimAnggota(e.target.value)}
+                          placeholder="Hakim A, Hakim B"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Panitera Pengganti</Label>
+                        <Input
+                          value={paniterapengganti}
+                          onChange={(e) => setPaniterapengganti(e.target.value)}
+                          placeholder="Nama Panitera Pengganti"
+                          className="text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Nama Penuntut Umum (Jaksa)</Label>
+                        <Input
+                          value={penuntutUmum}
+                          onChange={(e) => setPenuntutUmum(e.target.value)}
+                          placeholder="Nama Jaksa sesuai BAP"
+                          className="text-sm"
+                        />
+                      </div>
+                      {/* Link Zoom — hanya tampil jika ELEKTRONIK atau HYBRID */}
+                      {(deliveryMode === 'ELEKTRONIK' || deliveryMode === 'HYBRID') && (
+                        <>
+                          <div className="space-y-1">
+                            <Label className="text-xs">
+                              Link Zoom (manual — opsional jika virtual session sudah ada)
+                            </Label>
+                            <Input
+                              value={zoomJoinUrl}
+                              onChange={(e) => setZoomJoinUrl(e.target.value)}
+                              placeholder="https://zoom.us/j/..."
+                              className="text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Password Zoom (opsional)</Label>
+                            <Input
+                              value={zoomPassword}
+                              onChange={(e) => setZoomPassword(e.target.value)}
+                              placeholder="Password meeting"
+                              className="text-sm"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tombol aksi utama */}
                   <div className="flex flex-wrap gap-2">
                     <Button
                       onClick={() =>
@@ -231,7 +372,20 @@ export function AppealDecisionPage() {
                               hearing_id: hearingId,
                               scheduled_at: new Date(scheduledAt).toISOString(),
                               delivery_mode: deliveryMode,
-                              determination_reference: detRef
+                              determination_reference: detRef,
+                              court_name: courtName || undefined,
+                              penetapan_number: penetapanNumber || undefined,
+                              hakim_ketua: hakimKetua || undefined,
+                              hakim_anggota: hakimAnggota
+                                ? hakimAnggota
+                                    .split(',')
+                                    .map((s) => s.trim())
+                                    .filter(Boolean)
+                                : undefined,
+                              panitera_pengganti: paniterapengganti || undefined,
+                              penuntut_umum: penuntutUmum || undefined,
+                              zoom_join_url: zoomJoinUrl || undefined,
+                              zoom_password: zoomPassword || undefined
                             })
                           })
                         )
@@ -255,6 +409,75 @@ export function AppealDecisionPage() {
                       </Button>
                     )}
                   </div>
+
+                  {/* ── Tombol Cetak Surat Penetapan ── */}
+                  {latestScheduled && (
+                    <div className="rounded-lg border border-green-200 bg-green-50 p-4 space-y-2">
+                      <p className="text-sm font-semibold text-green-800">
+                        🖨️ Cetak Surat Penetapan (SEMA No. 2 Tahun 2026)
+                      </p>
+                      <p className="text-xs text-green-700">
+                        Dokumen terbuka di tab baru, dialog cetak muncul otomatis. Simpan sebagai
+                        PDF via &ldquo;Print to PDF&rdquo; browser.
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-400 text-green-800 hover:bg-green-100"
+                          onClick={() => openPenetapan(latestScheduled.id, 'PEMBERITAHUAN')}
+                        >
+                          Template I — Pemberitahuan Sidang
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-400 text-green-800 hover:bg-green-100"
+                          disabled={latestScheduled.version < 2}
+                          title={
+                            latestScheduled.version < 2
+                              ? 'Hanya tersedia setelah reschedule'
+                              : undefined
+                          }
+                          onClick={() => openPenetapan(latestScheduled.id, 'PERUBAHAN_TANGGAL')}
+                        >
+                          Template II — Perubahan Tanggal
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-400 text-green-800 hover:bg-green-100"
+                          disabled={latestScheduled.status !== 'READ'}
+                          title={
+                            latestScheduled.status !== 'READ'
+                              ? 'Tersedia setelah status READ'
+                              : undefined
+                          }
+                          onClick={() => openPenetapan(latestScheduled.id, 'PARAGRAF_PENUTUP_SAMA')}
+                        >
+                          Template III.1 — Paragraf Penutup (Sama)
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-green-400 text-green-800 hover:bg-green-100"
+                          disabled={latestScheduled.status !== 'READ'}
+                          title={
+                            latestScheduled.status !== 'READ'
+                              ? 'Tersedia setelah status READ'
+                              : undefined
+                          }
+                          onClick={() =>
+                            openPenetapan(latestScheduled.id, 'PARAGRAF_PENUTUP_BERBEDA')
+                          }
+                        >
+                          Template III.2 — Paragraf Penutup (Berbeda)
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tandai READ */}
                   {latestScheduled && (
                     <div className="space-y-2 border-t pt-4">
                       <Label>Waktu Aktual Pembacaan (untuk tandai READ)</Label>
@@ -284,7 +507,7 @@ export function AppealDecisionPage() {
                 <CardHeader>
                   <CardTitle>Rantai Pemberitahuan</CardTitle>
                   <CardDescription>
-                    PT → Kejaksaan → Pemasyarakatan → Terdakwa & Advokat (SOP 10.15 poin 3–6)
+                    PT → Kejaksaan → Pemasyarakatan → Terdakwa & Advokat
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -314,46 +537,150 @@ export function AppealDecisionPage() {
                         'CORRECTIONS_TO_DEFENDANT',
                         'PROSECUTION_TO_ADVOCATE'
                       ] as const
-                    ).map((step) => (
-                      <div
-                        key={step}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="text-sm">
-                          <div className="font-medium">{step.replace(/_/g, ' ')}</div>
-                          <div className="text-xs text-slate-500">
-                            {(Array.isArray(stepsQuery.data) ? stepsQuery.data : []).find(
-                              (s) => s.stepCode === step
-                            )?.status ?? 'BELUM DIBUAT'}
+                    ).map((step) => {
+                      const stepData = (Array.isArray(stepsQuery.data) ? stepsQuery.data : []).find(
+                        (s) => s.stepCode === step
+                      );
+                      const hasDoc = Boolean(stepData?.documentFilename);
+                      const isUploading = uploadingStep === stepData?.id;
+
+                      return (
+                        <div key={step} className="rounded-lg border p-3 space-y-2">
+                          {/* Baris atas: label + status + tombol kirim */}
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm">
+                              <div className="font-medium">
+                                {STEP_LABELS[step] ?? step.replace(/_/g, ' ')}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                {stepData?.status ?? 'BELUM DIBUAT'}
+                                {stepData?.sentAt && (
+                                  <span className="ml-1 text-slate-400">
+                                    · {new Date(stepData.sentAt).toLocaleDateString('id-ID')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                call(() =>
+                                  api(`/appeal-decisions/${activeReadingId}/notice-steps`, {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                      step_code: step,
+                                      sender_organization_id: 'court-demo',
+                                      recipient_reference: 'prosecution-demo',
+                                      recipient_name: step.includes('PROSECUTION')
+                                        ? 'Penuntut Umum'
+                                        : step.includes('CORRECTIONS')
+                                          ? 'Petugas Pemasyarakatan'
+                                          : 'Advokat Demo',
+                                      channel: 'OFFICIAL',
+                                      official_reference: `PMBRT-BANDING/${step}/${Date.now()}`
+                                    })
+                                  })
+                                )
+                              }
+                            >
+                              {stepData ? 'Kirim Ulang' : 'Kirim'}
+                            </Button>
                           </div>
+
+                          {/* Baris bawah: dokumen Penetapan bertanda tangan */}
+                          {stepData && (
+                            <div className="border-t pt-2 flex items-center justify-between gap-2 flex-wrap">
+                              {hasDoc ? (
+                                /* Dokumen sudah ada — tampilkan info + tombol lihat */
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                    📄 {stepData.documentFilename}
+                                  </span>
+                                  {stepData.documentSizeBytes && (
+                                    <span className="text-xs text-slate-400">
+                                      {(stepData.documentSizeBytes / 1024).toFixed(0)} KB
+                                    </span>
+                                  )}
+                                  {stepData.documentUploadedAt && (
+                                    <span className="text-xs text-slate-400">
+                                      ·{' '}
+                                      {new Date(stepData.documentUploadedAt).toLocaleDateString(
+                                        'id-ID'
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-xs text-slate-400 italic">
+                                  Belum ada dokumen Penetapan bertanda tangan
+                                </span>
+                              )}
+
+                              <div className="flex items-center gap-1 ml-auto">
+                                {hasDoc && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-blue-700 border-blue-300 hover:bg-blue-50"
+                                    onClick={() =>
+                                      window.open(
+                                        documentUrl(
+                                          `/appeal-decisions/notice-steps/${stepData.id}/document`
+                                        ),
+                                        '_blank'
+                                      )
+                                    }
+                                  >
+                                    👁 Lihat
+                                  </Button>
+                                )}
+                                {/* Hidden file input — satu per step */}
+                                <input
+                                  type="file"
+                                  accept=".pdf,image/jpeg,image/png"
+                                  className="hidden"
+                                  ref={(el) => {
+                                    fileInputRefs.current[stepData.id] = el;
+                                  }}
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    setUploadingStep(stepData.id);
+                                    try {
+                                      await call(() =>
+                                        apiUploadFile(
+                                          `/appeal-decisions/notice-steps/${stepData.id}/document`,
+                                          file
+                                        )
+                                      );
+                                    } finally {
+                                      setUploadingStep(null);
+                                      // Reset input agar file yang sama bisa diupload ulang
+                                      if (fileInputRefs.current[stepData.id])
+                                        fileInputRefs.current[stepData.id]!.value = '';
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-green-700 border-green-300 hover:bg-green-50"
+                                  disabled={isUploading}
+                                  onClick={() => fileInputRefs.current[stepData.id]?.click()}
+                                >
+                                  {isUploading
+                                    ? '⏳ Mengupload...'
+                                    : hasDoc
+                                      ? '🔄 Ganti'
+                                      : '📎 Upload Penetapan'}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            call(() =>
-                              api(`/appeal-decisions/${activeReadingId}/notice-steps`, {
-                                method: 'POST',
-                                body: JSON.stringify({
-                                  step_code: step,
-                                  sender_organization_id: 'court-demo',
-                                  recipient_reference: 'prosecution-demo',
-                                  recipient_name: step.includes('PROSECUTION')
-                                    ? 'Penuntut Umum'
-                                    : step.includes('CORRECTIONS')
-                                      ? 'Petugas Pemasyarakatan'
-                                      : 'Advokat Demo',
-                                  channel: 'OFFICIAL',
-                                  official_reference: `PMBRT-BANDING/${step}/${Date.now()}`
-                                })
-                              })
-                            )
-                          }
-                        >
-                          Kirim
-                        </Button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -365,8 +692,7 @@ export function AppealDecisionPage() {
                 <CardHeader>
                   <CardTitle>Catat Kehadiran</CardTitle>
                   <CardDescription>
-                    Rekam hadir/tidak hadir untuk berita acara dan paragraf penutup putusan (SOP
-                    10.15 poin 7)
+                    Rekam hadir/tidak hadir untuk berita acara dan paragraf penutup putusan.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -459,8 +785,7 @@ export function AppealDecisionPage() {
                 <CardHeader>
                   <CardTitle>Unggah Petikan Putusan</CardTitle>
                   <CardDescription>
-                    Petikan wajib diunggah pada hari yang sama dengan pembacaan putusan (SOP 10.15
-                    poin 8)
+                    Petikan wajib diunggah pada hari yang sama dengan pembacaan putusan.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -509,8 +834,7 @@ export function AppealDecisionPage() {
                 <CardHeader>
                   <CardTitle>Transmisi ke Pengadilan Tingkat Pertama</CardTitle>
                   <CardDescription>
-                    Salinan putusan dan berkas perkara wajib disampaikan dalam 7 hari (SOP 10.15
-                    poin 9)
+                    Salinan putusan dan berkas perkara wajib disampaikan dalam 7 hari.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

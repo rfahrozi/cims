@@ -6,11 +6,12 @@ import { HearingsModule } from '../hearings/hearings.module.js';
 import { AppealDecisionController } from './appeal-decision.controller.js';
 import { AppealDecisionRepository } from './appeal-decision.repository.js';
 import { AppealDecisionService } from './appeal-decision.service.js';
+import { PenetapanDocumentService } from './penetapan-document.service.js';
 
 @Module({
   imports: [PersistenceModule, ObservabilityModule, WorkflowSupportModule, HearingsModule],
   controllers: [AppealDecisionController],
-  providers: [AppealDecisionService, AppealDecisionRepository],
+  providers: [AppealDecisionService, AppealDecisionRepository, PenetapanDocumentService],
   exports: [AppealDecisionService]
 })
 export class AppealDecisionModule {}

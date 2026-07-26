@@ -29,6 +29,7 @@ Sistem ini didesain 100% mematuhi **SOP/CIMS/PPE/001/2026**.
 | Alur 7 langkah inti            | ✅ **100% Selesai** | Intake → Penetapan → Jadwal → Notifikasi → Kesiapan → Ruang Virtual → Kontrol Sidang |
 | Docker Preproduction           | ✅ **Siap**         | `docker compose up` berjalan end-to-end                                              |
 | Putusan Banding (SOP 10.15)    | ✅ **Selesai**      | Deadline 1 Agustus 2026 terpenuhi                                                    |
+| Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: HTML renderable penetapan + file upload PDF bertanda tangan         |
 | Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                  |
 | Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan                                                |
 | Notification Template          | ✅ **Selesai**      | 16 template default per jenis × channel, editable admin                              |

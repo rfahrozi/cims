@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DomainError } from '@cims/domain';
 import { randomUUID } from 'node:crypto';
 import { CircuitBreakerService } from './circuit-breaker.service.js';
 
 @Injectable()
-export class VideoProviderGateway {
+export class VideoProviderGateway implements OnApplicationBootstrap {
   private readonly timeoutMs: number;
   constructor(
     private readonly config: ConfigService,
@@ -14,6 +14,18 @@ export class VideoProviderGateway {
     this.timeoutMs = Number(
       (config && config.get ? config.get<string>('VIDEO_PROVIDER_TIMEOUT_MS') : undefined) ?? 15_000
     );
+  }
+
+  onApplicationBootstrap(): void {
+    // Guard: prevent MOCK mode from running in production.
+    // Set VIDEO_PROVIDER_MODE=HTTP in all non-development environments.
+    const nodeEnv = this.config?.get<string>('NODE_ENV') ?? 'development';
+    if (this.mode === 'MOCK' && nodeEnv === 'production') {
+      throw new Error(
+        'VIDEO_PROVIDER_MODE=MOCK is not allowed in production. ' +
+          'Set VIDEO_PROVIDER_MODE=HTTP and VIDEO_PROVIDER_URL to the zoom-provider service URL.'
+      );
+    }
   }
 
   capability(): { mode: 'MOCK' | 'HTTP'; configured: boolean } {

@@ -5,15 +5,23 @@ import {
   isAppealSameDayCompliant,
   isAppealSevenDayCompliant
 } from '@cims/domain';
+import { createHash } from 'node:crypto';
 import { requireRoles } from '../../common/authorization.js';
 import type { CurrentUser } from '../../common/current-user.decorator.js';
 import { AuditService } from '../../infrastructure/observability/audit.service.js';
 import { CoreWorkflowRepository } from '../../infrastructure/persistence/repositories/core-workflow.repository.js';
+import { EvidenceStorageGateway } from '../../infrastructure/integration/evidence-storage.gateway.js';
 import { AppealDecisionRepository } from './appeal-decision.repository.js';
+import {
+  PenetapanDocumentService,
+  VALID_DOCUMENT_TYPES,
+  type PenetapanDocumentType
+} from './penetapan-document.service.js';
 import type {
   AcknowledgeNoticeStepDto,
   CreateAppealReadingDto,
   CreateNoticeStepDto,
+  GeneratePenetapanDto,
   MarkReadDto,
   PublishExcerptDto,
   RecordPresenceDto,
@@ -21,12 +29,20 @@ import type {
   TransmitDto
 } from './dto.js';
 
+/** MIME types yang diizinkan untuk upload dokumen Penetapan */
+const ALLOWED_CONTENT_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png']);
+
+/** Batas ukuran file upload: 10 MB */
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
 @Injectable()
 export class AppealDecisionService {
   constructor(
     private readonly repository: AppealDecisionRepository,
     private readonly core: CoreWorkflowRepository,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
+    private readonly penetapanDocument: PenetapanDocumentService,
+    private readonly evidenceStorage: EvidenceStorageGateway
   ) {}
 
   // ── Readings ──────────────────────────────────────────────────────────────
@@ -44,7 +60,18 @@ export class AppealDecisionService {
         determinationReference: dto.determination_reference,
         virtualSessionReference: dto.virtual_session_reference,
         openToPublic: dto.open_to_public !== false,
-        createdBy: user.id
+        createdBy: user.id,
+        // Kolom SEMA No. 2/2026
+        courtName: dto.court_name,
+        penetapanCity: dto.penetapan_city,
+        penetapanNumber: dto.penetapan_number,
+        zoomJoinUrl: dto.zoom_join_url,
+        zoomPassword: dto.zoom_password,
+        hakimKetua: dto.hakim_ketua,
+        hakimAnggota: dto.hakim_anggota,
+        paniterapengganti: dto.panitera_pengganti,
+        penuntutUmum: dto.penuntut_umum,
+        deliberationDate: dto.deliberation_date
       },
       user
     );
@@ -88,7 +115,18 @@ export class AppealDecisionService {
         rescheduleReason: dto.reschedule_reason,
         determinationReference: dto.determination_reference,
         virtualSessionReference: dto.virtual_session_reference,
-        updatedBy: user.id
+        updatedBy: user.id,
+        // Kolom SEMA No. 2/2026 — diperbarui jika diisi
+        courtName: dto.court_name,
+        penetapanCity: dto.penetapan_city,
+        penetapanNumber: dto.penetapan_number,
+        zoomJoinUrl: dto.zoom_join_url,
+        zoomPassword: dto.zoom_password,
+        hakimKetua: dto.hakim_ketua,
+        hakimAnggota: dto.hakim_anggota,
+        paniterapengganti: dto.panitera_pengganti,
+        penuntutUmum: dto.penuntut_umum,
+        deliberationDate: dto.deliberation_date
       },
       user
     );
@@ -396,5 +434,224 @@ export class AppealDecisionService {
     );
 
     return transmission;
+  }
+
+  // ── Upload & Download Dokumen Penetapan Bertanda Tangan ───────────────────
+
+  /**
+   * Upload PDF Surat Penetapan yang telah ditandatangani dan dicap oleh Panitera.
+   * File disimpan ke EvidenceStorageGateway (LOCAL/S3/HTTP sesuai konfigurasi).
+   * Metadata (hash, filename, size) disimpan ke kolom document_* di appeal_notice_steps.
+   *
+   * Setelah upload, Kejaksaan dan pihak terkait dapat mengakses dokumen via
+   * downloadNoticeStepDocument() tanpa perlu pengiriman manual.
+   */
+  async uploadNoticeStepDocument(
+    user: CurrentUser,
+    stepId: string,
+    fileBuffer: Buffer,
+    filename: string,
+    contentType: string,
+    correlationId?: string
+  ) {
+    requireRoles(user, ['COURT_CLERK', 'SUBSTITUTE_CLERK']);
+
+    // Validasi ukuran file
+    if (fileBuffer.length === 0)
+      throw new DomainError('DOCUMENT_EMPTY', 'File tidak boleh kosong.', 400);
+    if (fileBuffer.length > MAX_FILE_SIZE_BYTES)
+      throw new DomainError(
+        'DOCUMENT_TOO_LARGE',
+        `Ukuran file maksimal adalah ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.`,
+        400,
+        { sizeBytes: fileBuffer.length, maxBytes: MAX_FILE_SIZE_BYTES }
+      );
+
+    // Validasi content type
+    const normalizedContentType = contentType.split(';')[0].trim().toLowerCase();
+    if (!ALLOWED_CONTENT_TYPES.has(normalizedContentType))
+      throw new DomainError(
+        'DOCUMENT_TYPE_NOT_ALLOWED',
+        'Hanya file PDF, JPEG, atau PNG yang diizinkan.',
+        400,
+        { contentType, allowed: [...ALLOWED_CONTENT_TYPES] }
+      );
+
+    // Validasi filename
+    const safeFilename = filename.trim() || `penetapan-${stepId}.pdf`;
+
+    // Cek notice step ada dan user berhak akses
+    const step = await this.repository.getNoticeStepById(stepId, user);
+
+    // Hitung SHA-256 hash untuk integritas
+    const hash = createHash('sha256').update(fileBuffer).digest('hex');
+
+    // Object key: termasuk stepId agar tidak collision + timestamp untuk versi baru
+    const ext = safeFilename.includes('.') ? safeFilename.split('.').pop() : 'bin';
+    const objectKey = `appeal-notice-steps/${stepId}/penetapan-${Date.now()}.${ext}`;
+
+    // Upload ke evidence storage
+    await this.evidenceStorage.putBuffer(
+      objectKey,
+      fileBuffer,
+      hash,
+      normalizedContentType,
+      correlationId
+    );
+
+    // Simpan metadata ke DB
+    const updated = await this.repository.attachDocument(
+      stepId,
+      {
+        storageKey: objectKey,
+        hash,
+        filename: safeFilename,
+        sizeBytes: fileBuffer.length,
+        contentType: normalizedContentType,
+        uploadedBy: user.id
+      },
+      user
+    );
+
+    await this.audit.append(
+      {
+        eventType: 'APPEAL_PENETAPAN_UPLOADED',
+        objectType: 'HEARING',
+        objectId: step.readingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          step_id: stepId,
+          step_code: step.stepCode,
+          filename: safeFilename,
+          size_bytes: fileBuffer.length,
+          content_type: normalizedContentType,
+          object_hash: hash,
+          object_key: objectKey
+        }
+      },
+      user
+    );
+
+    return updated;
+  }
+
+  /**
+   * Download PDF Surat Penetapan bertanda tangan dari evidence storage.
+   * Dapat diakses oleh Kejaksaan, Panitera, Hakim, dan Pemasyarakatan
+   * yang terdaftar di rantai pemberitahuan sidang yang sama.
+   */
+  async downloadNoticeStepDocument(
+    user: CurrentUser,
+    stepId: string,
+    correlationId?: string
+  ): Promise<{ bytes: Buffer; filename: string; contentType: string; sizeBytes: number }> {
+    requireRoles(user, [
+      'COURT_CLERK',
+      'SUBSTITUTE_CLERK',
+      'PROSECUTOR',
+      'JUDGE',
+      'CORRECTIONS',
+      'LIAISON_OFFICER'
+    ]);
+
+    // Cek step ada dan user berhak akses (RLS via transactionAs)
+    const step = await this.repository.getNoticeStepById(stepId, user);
+
+    if (!step.documentStorageKey)
+      throw new DomainError(
+        'DOCUMENT_NOT_UPLOADED',
+        'Dokumen Penetapan belum diupload untuk langkah pemberitahuan ini.',
+        404
+      );
+
+    // Ambil file dari evidence storage
+    const { bytes, contentType, sizeBytes } = await this.evidenceStorage.getBuffer(
+      step.documentStorageKey,
+      correlationId
+    );
+
+    await this.audit.append(
+      {
+        eventType: 'APPEAL_PENETAPAN_DOWNLOADED',
+        objectType: 'HEARING',
+        objectId: step.readingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          step_id: stepId,
+          step_code: step.stepCode,
+          filename: step.documentFilename,
+          size_bytes: sizeBytes
+        }
+      },
+      user
+    );
+
+    return {
+      bytes,
+      filename: step.documentFilename ?? 'penetapan.pdf',
+      contentType: step.documentContentType ?? contentType,
+      sizeBytes
+    };
+  }
+
+  // ── Generate Surat Penetapan HTML (SEMA No. 2/2026) ──────────────────────
+
+  /**
+   * Generate dokumen HTML Surat Penetapan sesuai Format Baku Lampiran SEMA No. 2/2026.
+   * Mengembalikan HTML string siap dikirim ke browser sebagai text/html.
+   *
+   * Sumber Link Zoom (fallback bertingkat):
+   *   1. virtual_sessions.provider_session_reference → https://zoom.us/j/{id}
+   *   2. appeal_readings.zoom_join_url (input manual)
+   *   3. Placeholder "[Tautan akan disampaikan terpisah]"
+   */
+  async generatePenetapan(
+    user: CurrentUser,
+    readingId: string,
+    dto: GeneratePenetapanDto,
+    correlationId?: string
+  ): Promise<{ html: string; documentType: string; readingId: string }> {
+    requireRoles(user, ['COURT_CLERK', 'JUDGE', 'SUBSTITUTE_CLERK']);
+
+    if (!VALID_DOCUMENT_TYPES.includes(dto.document_type as PenetapanDocumentType)) {
+      throw new DomainError(
+        'INVALID_DOCUMENT_TYPE',
+        `document_type harus salah satu dari: ${VALID_DOCUMENT_TYPES.join(', ')}`,
+        400
+      );
+    }
+
+    const readingWithSession = await this.repository.getWithSession(readingId, user);
+
+    const html = this.penetapanDocument.render(
+      readingWithSession,
+      dto.document_type as PenetapanDocumentType,
+      readingWithSession.providerSessionReference
+    );
+
+    await this.audit.append(
+      {
+        eventType: 'APPEAL_PENETAPAN_GENERATED',
+        objectType: 'HEARING',
+        objectId: readingWithSession.hearingId,
+        actorUserId: user.id,
+        actorOrganizationId: user.organizationId,
+        correlationId,
+        payload: {
+          appeal_reading_id: readingId,
+          document_type: dto.document_type,
+          delivery_mode: readingWithSession.deliveryMode,
+          has_zoom_session: Boolean(readingWithSession.providerSessionReference),
+          has_manual_zoom_url: Boolean(readingWithSession.zoomJoinUrl)
+        }
+      },
+      user
+    );
+
+    return { html, documentType: dto.document_type, readingId };
   }
 }

@@ -135,7 +135,7 @@ export function ReconciliationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Hearing ID (Perkara Aktif)</Label>
+              <Label>ID Persidangan (Perkara Aktif)</Label>
               <div className="mt-1 rounded-lg border bg-slate-50 px-3 py-2 text-sm font-mono text-slate-700">
                 {hearingId}
               </div>
@@ -147,11 +147,11 @@ export function ReconciliationPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {['SIPP', 'E-BERPADU', 'OFFICIAL_CASE_SYSTEM'].map((item) => (
-                    <SelectItem key={item} value={item}>
-                      {item}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="SIPP">SIPP</SelectItem>
+                  <SelectItem value="E-BERPADU">E-BERPADU</SelectItem>
+                  <SelectItem value="OFFICIAL_CASE_SYSTEM">
+                    Sistem Perkara Resmi Nasional
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -185,7 +185,7 @@ export function ReconciliationPage() {
               melakukan sinkronisasi untuk menimpa data lokal.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+          <CardContent className="space-y-4 max-h-150 overflow-y-auto pr-2">
             {query.isLoading && <p className="text-sm text-slate-400">Memuat riwayat...</p>}
 
             {!query.isLoading && (!query.data?.items || query.data.items.length === 0) && (

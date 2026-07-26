@@ -65,7 +65,7 @@ export function DeterminationPage() {
     <>
       <PageHeader
         title="Penetapan Hakim"
-        description="Gerbang wajib sebelum penjadwalan dan ruang virtual (SOP 10.2). Hakim harus menetapkan mode persidangan."
+        description="Gerbang wajib sebelum penjadwalan dan ruang virtual. Hakim harus menetapkan mode persidangan."
       />
 
       <AlertBanner message={error} onDismiss={() => setError(null)} className="mb-4" />

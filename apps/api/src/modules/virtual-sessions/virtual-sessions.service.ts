@@ -91,7 +91,15 @@ export class VirtualSessionsService {
       user
     );
 
-    if (this.mode.postgres || session.state === 'READY') return session;
+    if (this.mode.postgres || session.state === 'READY') {
+      // POSTGRES mode: provisioning is handled asynchronously by the outbox worker
+      // (apps/worker.Dockerfile → apps/api/dist/worker.js).  The worker polls
+      // outbox_events for VIRTUAL_SESSION_PROVISION_REQUESTED, calls the video
+      // provider, and invokes repository.markReady() / markFailed() out-of-band.
+      // The caller should poll GET /hearings/:id/virtual-session until state=READY.
+      // READY short-circuit: session was already provisioned by a previous call.
+      return session;
+    }
 
     try {
       const providerSession = await this.provider.createSession(

@@ -3,7 +3,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Database, FilePenLine, Plus, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
 import { api, getPersona } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
+import { errorMessage } from '@/lib/error-messages';
 import { PageHeader } from '@/components/page-header';
+import { AlertBanner } from '@/components/alert-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,10 +65,49 @@ const initialDefendant = (): DefendantForm => ({
   custody_status: 'NOT_DETAINED'
 });
 
+const CUSTODY_LABEL: Record<string, string> = {
+  DETAINED: 'Ditahan',
+  NOT_DETAINED: 'Tidak Ditahan',
+  UNKNOWN: 'Tidak Diketahui',
+  MIXED: 'Campuran'
+};
+
+const CLASS_LABEL: Record<string, string> = {
+  GENERAL_CRIMINAL: 'Pidana Umum',
+  SPECIAL_CRIMINAL: 'Pidana Khusus'
+};
+
+/** Tombol impor SIPP dengan local loading state — terpisah agar tidak re-render form utama */
+function ImportSimulationButton({ onSuccess }: { onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  async function handleImport() {
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 800)); // simulasi delay network
+    setLoading(false);
+    onSuccess();
+  }
+  return (
+    <Button onClick={handleImport} disabled={loading} className="w-full">
+      <Database className="mr-2 h-4 w-4" />
+      {loading ? 'Mengambil data dari SIPP…' : 'Import ke CIMS'}
+    </Button>
+  );
+}
+
+const INTAKE_STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Draf',
+  SUBMITTED: 'Menunggu Review',
+  ACTIVE: 'Aktif',
+  RETURNED: 'Dikembalikan'
+};
+
 export function HearingIntakePage() {
   const queryClient = useQueryClient();
   const { setHearingId } = useActiveHearing();
-  const [output, setOutput] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loadingDraft, setLoadingDraft] = useState(false);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [form, setForm] = useState({
     case_number: '',
     official_case_reference: '',
@@ -135,23 +176,34 @@ export function HearingIntakePage() {
   }
 
   async function createDraft() {
+    setLoadingDraft(true);
+    setSuccessMsg('');
+    setErrorMsg('');
     try {
       const data = await api<IntakeRecord>('/hearing-intake/manual', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      setOutput(JSON.stringify(data, null, 2));
+      setSuccessMsg(
+        `Draf perkara "${data.caseNumber}" berhasil disimpan. Pilih perkara di bawah untuk melanjutkan.`
+      );
       setHearingId(data.id);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['hearing-intake-list'] }),
         queryClient.invalidateQueries({ queryKey: ['hearings'] })
       ]);
     } catch (error) {
-      setOutput(String(error));
+      setErrorMsg(errorMessage(error));
+    } finally {
+      setLoadingDraft(false);
     }
   }
 
   async function action(id: string, name: 'submit' | 'activate' | 'return' | 'reopen') {
+    const actionKey = `${id}-${name}`;
+    setLoadingAction(actionKey);
+    setSuccessMsg('');
+    setErrorMsg('');
     try {
       const body =
         name === 'return'
@@ -159,18 +211,26 @@ export function HearingIntakePage() {
               reason: 'Data dikembalikan kepada Panitera Pengganti untuk dilengkapi.'
             })
           : undefined;
-      const data = await api<IntakeRecord>(`/hearing-intake/manual/${id}/${name}`, {
+      await api<IntakeRecord>(`/hearing-intake/manual/${id}/${name}`, {
         method: 'POST',
         body
       });
-      setOutput(JSON.stringify(data, null, 2));
+      const actionLabel: Record<string, string> = {
+        submit: 'diajukan untuk review',
+        activate: 'diaktifkan',
+        return: 'dikembalikan untuk perbaikan',
+        reopen: 'dibuka kembali'
+      };
+      setSuccessMsg(`Perkara berhasil ${actionLabel[name]}.`);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['hearing-intake-list'] }),
         queryClient.invalidateQueries({ queryKey: ['hearings'] }),
         queryClient.invalidateQueries({ queryKey: ['gate', id] })
       ]);
     } catch (error) {
-      setOutput(String(error));
+      setErrorMsg(errorMessage(error));
+    } finally {
+      setLoadingAction(null);
     }
   }
 
@@ -181,10 +241,27 @@ export function HearingIntakePage() {
         description="Input manual oleh Panitera Pengganti sebagai sumber data awal, atau impor referensi dari sistem administrasi resmi (SIPP)."
       />
 
+      {successMsg && (
+        <AlertBanner
+          variant="success"
+          message={successMsg}
+          onDismiss={() => setSuccessMsg('')}
+          className="mb-4"
+        />
+      )}
+      {errorMsg && (
+        <AlertBanner
+          variant="error"
+          message={errorMsg}
+          onDismiss={() => setErrorMsg('')}
+          className="mb-4"
+        />
+      )}
+
       <Tabs defaultValue="manual" className="space-y-5">
         <TabsList>
           <TabsTrigger value="manual">Input Manual</TabsTrigger>
-          <TabsTrigger value="import">Impor dari SIPP (EPIC-01)</TabsTrigger>
+          <TabsTrigger value="import">Impor dari SIPP</TabsTrigger>
         </TabsList>
 
         <TabsContent value="manual" className="space-y-5">
@@ -193,23 +270,30 @@ export function HearingIntakePage() {
               <CardHeader>
                 <CardTitle>Formulir Panitera Pengganti</CardTitle>
                 <CardDescription>
-                  Data tersimpan sebagai DRAFT dan belum membuka gate determination sebelum direviu
+                  Data tersimpan sebagai draf dan belum membuka gate determination sebelum direviu
                   serta diaktifkan.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <section className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Nomor perkara</Label>
+                    <Label htmlFor="case_number">
+                      Nomor perkara{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Input
+                      id="case_number"
                       value={form.case_number}
                       onChange={(e) => setForm({ ...form, case_number: e.target.value })}
                       placeholder="123/Pid.Sus/2026/PN ..."
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Referensi resmi sementara</Label>
+                    <Label htmlFor="official_case_reference">Referensi resmi sementara</Label>
                     <Input
+                      id="official_case_reference"
                       value={form.official_case_reference}
                       onChange={(e) =>
                         setForm({ ...form, official_case_reference: e.target.value })
@@ -218,12 +302,17 @@ export function HearingIntakePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Klasifikasi</Label>
+                    <Label htmlFor="case_classification">
+                      Klasifikasi{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Select
                       value={form.case_classification}
                       onValueChange={(value) => setForm({ ...form, case_classification: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="case_classification">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -231,22 +320,29 @@ export function HearingIntakePage() {
                           refs.data?.caseClassifications ?? ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL']
                         ).map((item) => (
                           <SelectItem key={item} value={item}>
-                            {item}
+                            {CLASS_LABEL[item] ?? item}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Kode jenis perkara</Label>
+                    <Label htmlFor="case_type_code">Kode jenis perkara</Label>
                     <Input
+                      id="case_type_code"
                       value={form.case_type_code}
                       onChange={(e) => setForm({ ...form, case_type_code: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label>Judul singkat perkara</Label>
+                    <Label htmlFor="case_title">
+                      Judul singkat perkara{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Input
+                      id="case_title"
                       value={form.case_title}
                       onChange={(e) => setForm({ ...form, case_title: e.target.value })}
                       placeholder="Penuntut Umum melawan ..."
@@ -256,12 +352,17 @@ export function HearingIntakePage() {
 
                 <section className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Agenda persidangan</Label>
+                    <Label htmlFor="hearing_type">
+                      Agenda persidangan{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Select
                       value={form.hearing_type}
                       onValueChange={(value) => setForm({ ...form, hearing_type: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="hearing_type">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -274,8 +375,9 @@ export function HearingIntakePage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Urutan persidangan</Label>
+                    <Label htmlFor="hearing_sequence">Urutan persidangan</Label>
                     <Input
+                      id="hearing_sequence"
                       type="number"
                       min={1}
                       max={999}
@@ -286,12 +388,17 @@ export function HearingIntakePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Pengadilan</Label>
+                    <Label htmlFor="court_organization_id">
+                      Pengadilan{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Select
                       value={form.court_organization_id}
                       onValueChange={(value) => setForm({ ...form, court_organization_id: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="court_organization_id">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -304,14 +411,19 @@ export function HearingIntakePage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Kejaksaan</Label>
+                    <Label htmlFor="prosecution_organization_id">
+                      Kejaksaan{' '}
+                      <span className="text-red-500" aria-hidden="true">
+                        *
+                      </span>
+                    </Label>
                     <Select
                       value={form.prosecution_organization_id}
                       onValueChange={(value) =>
                         setForm({ ...form, prosecution_organization_id: value })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="prosecution_organization_id">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -324,34 +436,34 @@ export function HearingIntakePage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Status penahanan keseluruhan</Label>
+                    <Label htmlFor="defendant_custody_status">Status penahanan keseluruhan</Label>
                     <Select
                       value={form.defendant_custody_status}
                       onValueChange={(value) =>
                         setForm({ ...form, defendant_custody_status: value })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="defendant_custody_status">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {(refs.data?.custodyStatuses ?? []).map((item) => (
                           <SelectItem key={item} value={item}>
-                            {item}
+                            {CUSTODY_LABEL[item] ?? item}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Rutan atau Lapas</Label>
+                    <Label htmlFor="corrections_organization_id">Rutan atau Lapas</Label>
                     <Select
                       value={form.corrections_organization_id}
                       onValueChange={(value) =>
                         setForm({ ...form, corrections_organization_id: value })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger id="corrections_organization_id">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -391,21 +503,28 @@ export function HearingIntakePage() {
                       className="grid gap-3 rounded-xl border bg-slate-50 p-4 md:grid-cols-2"
                     >
                       <div className="space-y-2">
-                        <Label>Nama terdakwa {index + 1}</Label>
+                        <Label htmlFor={`defendant_name_${index}`}>
+                          Nama terdakwa {index + 1}{' '}
+                          <span className="text-red-500" aria-hidden="true">
+                            *
+                          </span>
+                        </Label>
                         <Input
+                          id={`defendant_name_${index}`}
                           value={defendant.display_name}
                           onChange={(e) => updateDefendant(index, { display_name: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Alias</Label>
+                        <Label htmlFor={`defendant_alias_${index}`}>Alias</Label>
                         <Input
+                          id={`defendant_alias_${index}`}
                           value={defendant.alias}
                           onChange={(e) => updateDefendant(index, { alias: e.target.value })}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Status penahanan</Label>
+                        <Label htmlFor={`defendant_custody_${index}`}>Status penahanan</Label>
                         <Select
                           value={defendant.custody_status}
                           onValueChange={(value) =>
@@ -414,21 +533,25 @@ export function HearingIntakePage() {
                             })
                           }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger id={`defendant_custody_${index}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {['DETAINED', 'NOT_DETAINED', 'UNKNOWN'].map((item) => (
                               <SelectItem key={item} value={item}>
-                                {item}
+                                {CUSTODY_LABEL[item] ?? item}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className="flex items-end justify-between gap-3">
-                        <label className="flex items-center gap-2 pb-2 text-sm">
+                        <label
+                          htmlFor={`defendant_protected_${index}`}
+                          className="flex items-center gap-2 pb-2 text-sm cursor-pointer"
+                        >
                           <input
+                            id={`defendant_protected_${index}`}
                             type="checkbox"
                             checked={defendant.protected_identity}
                             onChange={(e) =>
@@ -442,6 +565,7 @@ export function HearingIntakePage() {
                             type="button"
                             size="sm"
                             variant="ghost"
+                            aria-label={`Hapus terdakwa ${index + 1}`}
                             onClick={() =>
                               setForm({
                                 ...form,
@@ -460,30 +584,43 @@ export function HearingIntakePage() {
                 </section>
 
                 <div className="space-y-2">
-                  <Label>Catatan internal</Label>
+                  <Label htmlFor="notes">Catatan internal</Label>
                   <Textarea
+                    id="notes"
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   />
                 </div>
+                <p className="text-xs text-slate-400">
+                  Kolom bertanda <span className="text-red-500">*</span> wajib diisi.
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={createDraft}>
+                  <Button onClick={createDraft} disabled={loadingDraft}>
                     <FilePenLine className="mr-2 h-4 w-4" />
-                    Simpan DRAFT
+                    {loadingDraft ? 'Menyimpan…' : 'Simpan Draf'}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() =>
                       setForm({
-                        ...form,
                         case_number: '',
+                        official_case_reference: '',
+                        case_classification: 'SPECIAL_CRIMINAL',
+                        case_type_code: 'PID.SUS',
                         case_title: '',
+                        hearing_type: 'PEMERIKSAAN_SAKSI',
+                        hearing_sequence: 1,
+                        court_organization_id: 'court-demo',
+                        prosecution_organization_id: 'prosecution-demo',
+                        corrections_organization_id: 'corrections-demo',
+                        defendant_custody_status: 'NOT_DETAINED',
+                        notes: '',
                         defendants: [initialDefendant()]
                       })
                     }
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Reset
+                    Atur Ulang
                   </Button>
                 </div>
               </CardContent>
@@ -493,78 +630,105 @@ export function HearingIntakePage() {
           <div className="space-y-5">
             <Card>
               <CardHeader>
-                <CardTitle>Daftar intake</CardTitle>
+                <CardTitle>Daftar Data Persidangan</CardTitle>
                 <CardDescription>
-                  Maker: Panitera Pengganti. Checker: Panitera berwenang.
+                  Maker: Panitera Pengganti · Checker: Panitera berwenang (SOP I.1)
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {intake.data?.items?.map((item) => (
-                  <div key={item.id} className="rounded-xl border p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <button className="text-left" onClick={() => setHearingId(item.id)}>
-                        <div className="font-semibold text-[#0b2a4a]">{item.caseNumber}</div>
-                        <div className="text-xs text-slate-500">
-                          #{item.hearingSequence} · {item.type} · {item.defendants.length} terdakwa
-                        </div>
-                      </button>
-                      <Badge
-                        variant={
-                          item.intakeStatus === 'ACTIVE'
-                            ? 'success'
-                            : item.intakeStatus === 'RETURNED'
-                              ? 'destructive'
-                              : 'warning'
-                        }
-                      >
-                        {item.intakeStatus}
-                      </Badge>
-                    </div>
-                    {item.returnReason && (
-                      <p className="mt-2 rounded-md bg-rose-50 p-2 text-xs text-rose-700">
-                        {item.returnReason}
-                      </p>
-                    )}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {['DRAFT', 'RETURNED'].includes(item.intakeStatus) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            action(item.id, item.intakeStatus === 'RETURNED' ? 'reopen' : 'submit')
+                {intake.isLoading && (
+                  <p className="py-6 text-center text-sm text-slate-400">Memuat data…</p>
+                )}
+                {!intake.isLoading && (!intake.data?.items || intake.data.items.length === 0) && (
+                  <div className="rounded-xl border border-dashed p-8 text-center">
+                    <FilePenLine className="mx-auto mb-3 h-8 w-8 text-slate-300" />
+                    <p className="font-medium text-slate-600">Belum ada data persidangan</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Isi formulir di atas dan klik "Simpan Draf" untuk memulai.
+                    </p>
+                  </div>
+                )}
+                {intake.data?.items?.map((item) => {
+                  const actionKey = `${item.id}-submit`;
+                  return (
+                    <div key={item.id} className="rounded-xl border p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <button
+                          className="text-left"
+                          onClick={() => setHearingId(item.id)}
+                          aria-label={`Pilih perkara ${item.caseNumber}`}
+                        >
+                          <div className="font-semibold text-[#0b2a4a]">{item.caseNumber}</div>
+                          <div className="text-xs text-slate-500">
+                            #{item.hearingSequence} · {item.type} · {item.defendants.length}{' '}
+                            terdakwa
+                          </div>
+                        </button>
+                        <Badge
+                          variant={
+                            item.intakeStatus === 'ACTIVE'
+                              ? 'success'
+                              : item.intakeStatus === 'RETURNED'
+                                ? 'destructive'
+                                : 'warning'
                           }
                         >
-                          {item.intakeStatus === 'RETURNED' ? 'Buka kembali' : 'Ajukan review'}
-                        </Button>
+                          {INTAKE_STATUS_LABEL[item.intakeStatus] ?? item.intakeStatus}
+                        </Badge>
+                      </div>
+                      {item.returnReason && (
+                        <p className="mt-2 rounded-md bg-rose-50 p-2 text-xs text-rose-700">
+                          <strong>Catatan pengembalian:</strong> {item.returnReason}
+                        </p>
                       )}
-                      {item.intakeStatus === 'SUBMITTED' && canReview && (
-                        <>
-                          <Button size="sm" onClick={() => action(item.id, 'activate')}>
-                            <ShieldCheck className="mr-1 h-4 w-4" />
-                            Aktifkan
-                          </Button>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {['DRAFT', 'RETURNED'].includes(item.intakeStatus) && (
                           <Button
                             size="sm"
-                            variant="destructive"
-                            onClick={() => action(item.id, 'return')}
+                            variant="outline"
+                            disabled={
+                              loadingAction === `${item.id}-submit` ||
+                              loadingAction === `${item.id}-reopen`
+                            }
+                            onClick={() =>
+                              action(
+                                item.id,
+                                item.intakeStatus === 'RETURNED' ? 'reopen' : 'submit'
+                              )
+                            }
                           >
-                            Kembalikan
+                            {loadingAction === `${item.id}-submit` ||
+                            loadingAction === `${item.id}-reopen`
+                              ? 'Memproses…'
+                              : item.intakeStatus === 'RETURNED'
+                                ? 'Buka kembali'
+                                : 'Ajukan review'}
                           </Button>
-                        </>
-                      )}
+                        )}
+                        {item.intakeStatus === 'SUBMITTED' && canReview && (
+                          <>
+                            <Button
+                              size="sm"
+                              disabled={loadingAction === `${item.id}-activate`}
+                              onClick={() => action(item.id, 'activate')}
+                            >
+                              <ShieldCheck className="mr-1 h-4 w-4" />
+                              {loadingAction === `${item.id}-activate` ? 'Memproses…' : 'Aktifkan'}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              disabled={loadingAction === `${item.id}-return`}
+                              onClick={() => action(item.id, 'return')}
+                            >
+                              {loadingAction === `${item.id}-return` ? 'Memproses…' : 'Kembalikan'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )) ?? 'Belum ada data.'}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Respons API</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="max-h-[420px] overflow-auto rounded-lg bg-slate-950 p-4 text-xs text-blue-100">
-                  {output || 'Belum ada aksi.'}
-                </pre>
+                  );
+                })}
               </CardContent>
             </Card>
           </div>
@@ -581,21 +745,26 @@ export function HearingIntakePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-                <strong>Mode Simulasi UAT Aktif:</strong> Saat ini sistem terhubung dengan MOCK
-                Gateway. Apapun nomor perkara yang Anda masukkan, sistem akan menyimulasikan
-                penarikan data yang sukses seolah-olah data ditarik dari SIPP riil.
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <strong>⚠ Mode Simulasi UAT:</strong> Sistem terhubung ke MOCK Gateway. Data yang
+                ditarik bersifat simulasi dan tidak berasal dari SIPP riil. Cocok untuk keperluan
+                pelatihan dan UAT lintas instansi.
               </div>
 
               <div className="space-y-2">
-                <Label>Nomor Registrasi / ID Perkara SIPP</Label>
-                <Input placeholder="Misal: 123/Pid.B/2026/PN Jkt.Pst" />
+                <Label htmlFor="sipp_case_number">
+                  Nomor Registrasi / ID Perkara SIPP{' '}
+                  <span className="text-red-500" aria-hidden="true">
+                    *
+                  </span>
+                </Label>
+                <Input id="sipp_case_number" placeholder="Misal: 123/Pid.B/2026/PN Jkt.Pst" />
               </div>
 
               <div className="space-y-2">
-                <Label>Sistem Sumber</Label>
+                <Label htmlFor="sipp_source">Sistem Sumber</Label>
                 <Select defaultValue="SIPP">
-                  <SelectTrigger>
+                  <SelectTrigger id="sipp_source">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -605,25 +774,13 @@ export function HearingIntakePage() {
                 </Select>
               </div>
 
-              <Button
-                onClick={() =>
-                  setOutput(
-                    'Simulasi Tarik Data Berhasil: Data perkara berhasil direplikasi ke tabel intake CIMS dengan status DRAFT. Anda dapat memeriksanya di Tab "Input Manual". (Mode: MOCK)'
+              <ImportSimulationButton
+                onSuccess={() =>
+                  setSuccessMsg(
+                    'Simulasi impor berhasil. Data perkara telah ditambahkan dengan status "Draf". Periksa di tab Input Manual.'
                   )
                 }
-                className="w-full"
-              >
-                <Database className="mr-2 h-4 w-4" /> Import ke CIMS
-              </Button>
-
-              {output && output.includes('Simulasi Tarik Data Berhasil') && (
-                <div className="mt-4">
-                  <Label className="text-xs text-slate-500">Hasil Import</Label>
-                  <pre className="mt-1 rounded-lg bg-emerald-950 p-3 text-[11px] font-mono text-emerald-300">
-                    {output}
-                  </pre>
-                </div>
-              )}
+              />
             </CardContent>
           </Card>
         </TabsContent>

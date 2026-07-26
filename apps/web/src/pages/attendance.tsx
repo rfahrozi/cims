@@ -51,7 +51,7 @@ export function AttendancePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {query.data?.events.map((e) => (
+              {(query.data?.events || []).map((e) => (
                 <TableRow key={e.id}>
                   <TableCell>{new Date(e.occurredAt).toLocaleString('id-ID')}</TableCell>
                   <TableCell className="font-mono text-xs">{e.participantId}</TableCell>

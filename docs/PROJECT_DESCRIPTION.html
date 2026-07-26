@@ -401,7 +401,7 @@
     <div class="container">
       <header>
         <div class="version-badge">v0.20.0 — Preproduction</div>
-        <div class="updated-badge">Diperbarui: 26 Juli 2026</div>
+        <div class="updated-badge">Diperbarui: 26 Juli 2026 (rev.2)</div>
         <h1>CIMS</h1>
         <p>
           Court Intelligence Management System &mdash; Sistem Koordinasi Persidangan Pidana
@@ -441,6 +441,7 @@
           <span class="status-chip chip-ok">✅ Docker Preproduction Lokal — Siap</span>
           <span class="status-chip chip-ok">✅ Alur 7 Langkah Inti — 100% Selesai</span>
           <span class="status-chip chip-ok">✅ Brevo Email Adapter — Aktif</span>
+          <span class="status-chip chip-ok">✅ MinIO S3 Evidence Storage — Aktif</span>
           <span class="status-chip chip-ok">✅ Admin Console — Tersedia</span>
           <span class="status-chip chip-ok"
             >✅ UAT Lintas Instansi — Skenario Siap (Sprint 14-15)</span
@@ -566,7 +567,7 @@
             </tr>
             <tr>
               <td><strong>Database</strong></td>
-              <td>PostgreSQL 17, 14 migration files</td>
+              <td>PostgreSQL 17, 21 migration files (6 legacy + 15 typescript)</td>
               <td>Persistent store + audit log + outbox queue</td>
             </tr>
             <tr>
@@ -580,14 +581,30 @@
               <td>Pengiriman email via Brevo API; stub WhatsApp/SMS/IN_APP siap disambung</td>
             </tr>
             <tr>
+              <td><strong>Evidence Storage</strong> <span class="new-tag">BARU</span></td>
+              <td>MinIO S3-compatible (port 9000/9001)</td>
+              <td>
+                Penyimpanan berkas bukti sidang dan dokumen Penetapan bertanda tangan; S3-mode di
+                preproduction via MinIO lokal
+              </td>
+            </tr>
+            <tr>
               <td><strong>Secrets</strong></td>
               <td>Docker Secrets (file-based)</td>
-              <td>15 secret files termasuk Brevo API key dan WhatsApp API key</td>
+              <td>17 secret files: Zoom (4), Brevo, WhatsApp, S3, DB, audit keys, dll.</td>
             </tr>
             <tr>
               <td><strong>Auth (Preproduction)</strong></td>
               <td>DEV mode — persona switcher header</td>
               <td>Simulasi 10 role tanpa OIDC server; production butuh Keycloak</td>
+            </tr>
+            <tr>
+              <td><strong>Deploy Lokal</strong></td>
+              <td><code>docker-compose.preproduction.yml</code></td>
+              <td>
+                Stack lengkap: API + Worker + Web + Zoom + Brevo + MinIO (AUTH_MODE=DEV, Swagger
+                aktif)
+              </td>
             </tr>
           </tbody>
         </table>
@@ -600,27 +617,83 @@
         </p>
 
         <div class="card" style="margin-top: 20px; overflow-x: auto; background: white">
-          <div class="mermaid">
-            stateDiagram-v2 direction TB state "1. Input Data Perkara" as S1 state "2. Penetapan
-            Hakim" as S2 state "3. Jadwal & Agenda" as S3 state "4. Pemberitahuan & ACK" as S4 state
-            "5. Checklist Kesiapan" as S5 state "6. Registrasi & Ruang Virtual" as S6 state "7.
-            Kontrol Sidang" as S7 state "Dokumentasi & Pasca Sidang" as S8 [*] --> DRAFT state
-            "Pembuatan Kasus" as C1 { DRAFT --> SUBMITTED : Panitera Pengganti (Maker) SUBMITTED -->
-            ACTIVE_INTAKE : Panitera (Checker) SUBMITTED --> DRAFT : Revisi } C1 --> S1 S1 --> S2 :
-            Hard Gate S2 --> S3 : Jika APPROVED state "Otorisasi Sidang" as C2 { S2 --> REJECTED :
-            Hakim Menolak } S3 --> S4 state "Koordinasi Multi-Instansi" as C3 { S4 --> SENT_NOTICE :
-            Outbox Worker → Brevo/WA SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan ACKNOWLEDGED
-            --> S5 : Hard Gate state "Kesiapan" as Readiness { VERIFY_ID --> ROOM_INSPECT : Rutan
-            (Terdakwa) ROOM_INSPECT --> SUBMIT_RUTAN SUBMIT_JAKSA SUBMIT_PENGADILAN } } S5 --> S6 :
-            Hard Gate state "Virtual Session" as C4 { S6 --> PROVISIONING : IT Operator PROVISIONING
-            --> READY : Zoom / WebEx Adapter } S6 --> S7 : Hard Gate state "Sidang Berlangsung" as
-            C5 { S7 --> STARTED : Hakim STARTED --> SUSPENDED : Skors SUSPENDED --> STARTED : Lanjut
-            STARTED --> ENDED : Hakim Tutup ENDED --> DOCUMENTATION_PENDING : Flag Dok. Tertunda
-            DOCUMENTATION_PENDING --> ENDED : Selesai Dok. STARTED --> POSTPONED : Ditunda } C5 -->
-            S8 S8 --> [*] note right of C3 : Jika terjadi Mutasi Tahanan,\nalur akan terputus &
-            dikembalikan ke\nChecklist Kesiapan Rutan tujuan. note right of C5 : Segala Insiden
-            CRITICAL/HIGH\nakan otomatis men-trigger\nstatus SUSPENDED.
-          </div>
+          <pre class="mermaid">
+stateDiagram-v2
+  direction TB
+
+  state "1. Input Data Perkara" as S1
+  state "2. Penetapan Hakim" as S2
+  state "3. Jadwal & Agenda" as S3
+  state "4. Pemberitahuan & ACK" as S4
+  state "5. Checklist Kesiapan" as S5
+  state "6. Ruang Virtual" as S6
+  state "7. Kontrol Sidang" as S7
+  state "Dokumentasi & Pasca Sidang" as S8
+
+  [*] --> DRAFT
+
+  state "Pembuatan Kasus" as C1 {
+    DRAFT --> SUBMITTED : Panitera Pengganti (Maker)
+    SUBMITTED --> ACTIVE_INTAKE : Panitera (Checker)
+    SUBMITTED --> DRAFT : Revisi
+  }
+
+  C1 --> S1
+  S1 --> S2 : Hard Gate
+
+  state "Otorisasi Sidang" as C2 {
+    S2 --> REJECTED : Hakim Menolak
+  }
+
+  S2 --> S3 : Jika APPROVED
+
+  state "Koordinasi Multi-Instansi" as C3 {
+    S3 --> SENT_NOTICE : Outbox Worker - Brevo/WA
+    SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan
+
+    state "Kesiapan" as Readiness {
+      VERIFY_ID --> ROOM_INSPECT : Rutan (Terdakwa)
+      ROOM_INSPECT --> SUBMIT_RUTAN
+      SUBMIT_JAKSA --> SUBMIT_JAKSA
+      SUBMIT_PENGADILAN --> SUBMIT_PENGADILAN
+    }
+
+    ACKNOWLEDGED --> S5 : Hard Gate
+  }
+
+  S5 --> S6 : Hard Gate
+
+  state "Virtual Session" as C4 {
+    S6 --> PROVISIONING : IT Operator
+    PROVISIONING --> READY : Zoom / WebEx Adapter
+  }
+
+  S6 --> S7 : Hard Gate
+
+  state "Sidang Berlangsung" as C5 {
+    S7 --> STARTED : Hakim
+    STARTED --> SUSPENDED : Skors
+    SUSPENDED --> STARTED : Lanjut
+    STARTED --> ENDED : Hakim Tutup
+    ENDED --> DOCUMENTATION_PENDING : Flag Dok. Tertunda
+    DOCUMENTATION_PENDING --> ENDED : Selesai Dok.
+    STARTED --> POSTPONED : Ditunda
+  }
+
+  C5 --> S8
+  S8 --> [*]
+
+  note right of C3
+    Jika terjadi Mutasi Tahanan,
+    alur akan terputus dan dikembalikan
+    ke Checklist Kesiapan Rutan tujuan.
+  end note
+
+  note right of C5
+    Insiden CRITICAL/HIGH otomatis
+    men-trigger status SUSPENDED.
+  end note
+          </pre>
         </div>
 
         <div class="workflow">
@@ -856,15 +929,38 @@
           re-inspeksi ruangan, dan re-verifikasi identitas di Lapas tujuan baru.
         </p>
 
-        <h3>C. Pembacaan Putusan Tingkat Banding (SOP 10.15) — Berlaku 1 Agustus 2026</h3>
+        <h3>
+          C. Pembacaan Putusan Tingkat Banding (SOP 10.15 &amp; SEMA No. 2/2026)
+          <span class="new-tag">BARU</span>
+        </h3>
         <p>
-          Modul spesifik untuk pengelolaan putusan banding. Alurnya meliputi: Pengadilan Tinggi
-          menetapkan jadwal &rarr; Rantai Pemberitahuan Khusus 4 langkah (PT ke Kejaksaan ke Rutan
-          ke Terdakwa) dengan ACK per-langkah &rarr; Rekam Kehadiran Para Pihak
-          (langsung/elektronik) &rarr; <strong>Publikasi Petikan Putusan</strong> (kepatuhan
-          Same-day Compliant dihitung otomatis) &rarr; Transmisi Berkas ke PT Tingkat 1 (maks. 7
-          Hari, kepatuhan terlacak).
+          Modul spesifik untuk pengelolaan putusan banding sesuai kewajiban SEMA No. 2 Tahun 2026
+          (berlaku 1 Agustus 2026). Fitur utamanya meliputi:
         </p>
+        <ul>
+          <li>
+            <strong>Generate HTML Surat Penetapan:</strong> Format baku sesuai Lampiran SEMA
+            (Pemberitahuan, Perubahan Tanggal, dan Paragraf Penutup). CIMS otomatis menyematkan Link
+            Zoom (fallback bertingkat) jika sidang ber-mode ELEKTRONIK. Panitera dapat langsung
+            mencetak dari browser.
+          </li>
+          <li>
+            <strong>Upload Penetapan Bertanda Tangan:</strong> Setelah Panitera mencetak, meneken,
+            dan memberi cap pada Surat Penetapan, mereka wajib mengupload kembali PDF pindaiannya ke
+            CIMS (max 10MB, diamankan SHA-256 hash dan tersimpan di
+            <code>EvidenceStorageGateway</code>).
+          </li>
+          <li>
+            <strong>Akses Dokumen Lintas Instansi:</strong> Kejaksaan dan pihak terkait dapat
+            langsung melihat/mengunduh (<code>inline view</code>) dokumen Surat Penetapan resmi yang
+            telah diupload dari Tab Pemberitahuan tanpa harus menerima email manual.
+          </li>
+          <li>
+            <strong>Kepatuhan Petikan &amp; Transmisi:</strong> Penghitungan kepatuhan publikasi
+            petikan putusan hari yang sama (<em>Same-day Compliant</em>) dan transmisi berkas 7 hari
+            ke PN pemutus (<em>7-day Compliant</em>).
+          </li>
+        </ul>
 
         <h3>D. Pejabat Penghubung (Liaison Officer)</h3>
         <p>
@@ -1046,65 +1142,150 @@
         </table>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
-        <h2>9. Roadmap Fase Selanjutnya</h2>
+        <h2>9. Status Sprint &amp; Roadmap</h2>
 
+        <div class="info-box">
+          <strong>Posisi saat ini (26 Juli 2026):</strong> v0.20.0 berada di antara Sprint 14–15.
+          Semua modul fungsional inti sudah diimplementasi. Fokus aktif: menyelesaikan blocker
+          teknis build/runtime, OIDC live, lalu SIT end-to-end dan UAT lintas instansi.
+        </div>
+
+        <!-- Sprint selesai -->
+        <h3>✅ Sprint 0–13 — Selesai</h3>
         <div class="grid-2">
           <div class="card">
-            <h4>Sprint 11–12 — Security &amp; Reporting</h4>
+            <h4>Sprint 0–8 — Core Workflow</h4>
             <ul>
-              <li>MFA via Keycloak untuk role sensitif</li>
-              <li>OIDC production integration (AUTH_MODE=OIDC)</li>
-              <li>Export laporan periodik (CSV/PDF)</li>
-              <li>Field encryption key rotation (M-09)</li>
-              <li>DLP dasar — rate limiting per endpoint sensitif (M-10)</li>
+              <li>✅ Hearing intake (maker-checker)</li>
+              <li>✅ Penetapan hakim &amp; hard gate determination</li>
+              <li>✅ Penjadwalan + conflict check engine</li>
+              <li>✅ Notifikasi resmi &amp; acknowledgment tracking</li>
+              <li>✅ Readiness checklist lintas instansi</li>
+              <li>✅ Virtual session (Zoom adapter) &amp; 5 logical rooms</li>
+              <li>✅ Hearing control — START/SUSPEND/RESUME/END</li>
             </ul>
           </div>
           <div class="card">
-            <h4>Sprint 13–14 — UAT &amp; Hardening</h4>
+            <h4>Sprint 9–10 — Evidence, Incidents &amp; Continuity</h4>
             <ul>
-              <li>SIT end-to-end seluruh workflow</li>
-              <li>UAT lintas peran (Hakim, Panitera, Jaksa, Pemasyarakatan)</li>
-              <li>Portal per instansi — dashboard khusus (M-07)</li>
-              <li>Notifikasi push in-app reminder H-7, H-1, H-30min (M-08)</li>
-              <li>Defect burn down &amp; controlled limitation register</li>
+              <li>✅ Evidence storage (S3/MinIO)</li>
+              <li>✅ Insiden teknis, siber &amp; force majeure (SOP 10.11–10.13)</li>
+              <li>✅ Immutable audit log (HMAC chaining)</li>
+              <li>✅ Circuit breaker untuk dependency eksternal (Zoom)</li>
+              <li>✅ Outbox worker — Brevo email delivery</li>
             </ul>
           </div>
           <div class="card">
-            <h4>Sprint 15–16 — Release v1.0</h4>
+            <h4>Sprint 11–12 — Security &amp; Governance <span class="new-tag">SELESAI</span></h4>
+            <ul>
+              <li>✅ MFA enforcement via OIDC claim (<code>amr</code>/<code>acr</code>)</li>
+              <li>✅ DLP — rate limiting endpoint sensitif (M-10)</li>
+              <li>✅ Field encryption key rotation (M-09)</li>
+              <li>✅ Legal hold + retention preview (maker-checker)</li>
+              <li>✅ Evidence export &amp; access review campaign</li>
+              <li>✅ Admin console — template notifikasi &amp; SLA config (GAP-01/02/06)</li>
+              <li>✅ Prometheus metrics endpoint (protected)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>Sprint 13 — Modul Lanjutan <span class="new-tag">SELESAI</span></h4>
+            <ul>
+              <li>✅ Appeal Decision — putusan banding (SOP 10.15, berlaku 1 Agustus 2026)</li>
+              <li>✅ Liaison Officer — koordinasi lintas instansi (C-05)</li>
+              <li>✅ Custody — mutasi/perpindahan tahanan (C-06, SOP 10.14)</li>
+              <li>✅ Realtime SSE — notifikasi push in-app (M-08)</li>
+              <li>✅ Reconciliation — rekonsiliasi data vs SIPP</li>
+              <li>✅ Penautan peserta ke agenda spesifik — <code>agenda_item_id</code> (M-06)</li>
+              <li>✅ SIT scenarios v0.20.0 — dokumen tersedia</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sprint aktif -->
+        <h3 style="margin-top: 32px">
+          🔄 Sprint 14–15 — SIT, UAT &amp; Production Hardening <em>(Aktif)</em>
+        </h3>
+        <div class="grid-2">
+          <div class="card" style="border-left: 3px solid var(--warning)">
+            <h4>Blocker Teknis yang Harus Diselesaikan</h4>
+            <ul>
+              <li>
+                ⚠️ <strong>OIDC live</strong> — autentikasi masih DEV stub (hardcoded users, OTP
+                <code>123456</code>); perlu integrasi Keycloak nyata
+              </li>
+              <li>
+                ⚠️ <strong>npm package lock</strong> — registry timeout saat build produksi
+                (blocked)
+              </li>
+              <li>
+                ⚠️ <strong>Full framework build</strong> — Nest CLI dependency belum tersedia di CI
+              </li>
+              <li>⚠️ <strong>PostgreSQL smoke test</strong> — disiapkan, belum dijalankan</li>
+              <li>
+                ⚠️ <strong>Docker/Kubernetes runtime validation</strong> — environment unavailable
+              </li>
+            </ul>
+          </div>
+          <div class="card" style="border-left: 3px solid var(--warning)">
+            <h4>Eksekusi SIT &amp; UAT</h4>
+            <ul>
+              <li>
+                🔄 SIT end-to-end seluruh 7 langkah workflow — skenario sudah dibuat, belum
+                dieksekusi
+              </li>
+              <li>🔄 UAT lintas peran — Hakim, Panitera, Jaksa, Pemasyarakatan</li>
+              <li>
+                🔄 Compliance dashboard — KPI penuh (partial: modul ada, business logic terpisah
+                belum)
+              </li>
+              <li>🔄 Defect burn down &amp; controlled limitation register</li>
+              <li>🔄 Operational runbook &amp; panduan admin final</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Sprint akhir -->
+        <h3 style="margin-top: 32px">⏳ Sprint 16 — Release v1.0</h3>
+        <div class="grid-2">
+          <div class="card">
+            <h4>Go-Live v1.0</h4>
             <ul>
               <li>Release Candidate + go-live checklist</li>
-              <li>Operational runbook &amp; admin guide final</li>
               <li>Training material lintas instansi</li>
               <li>Hypercare 2 minggu pasca go-live</li>
               <li>Improvement backlog pasca v1.0</li>
             </ul>
           </div>
           <div class="card">
-            <h4>Fase Berikutnya (Post v1.0)</h4>
+            <h4>Post v1.0 — Backlog</h4>
             <ul>
-              <li>WhatsApp provider sambung ke platform nyata (360dialog/Twilio)</li>
-              <li>Integrasi live SIPP / e-Berpadu (reconciliation)</li>
+              <li>WhatsApp provider — sambung ke platform nyata (360dialog/Twilio)</li>
+              <li>
+                Integrasi live SIPP / e-Berpadu (data sudah direkonsiliasi, live gateway belum)
+              </li>
               <li>Analytics dashboard — tren kepatuhan bulanan</li>
-              <li>AI features (draft notifikasi, prediksi konflik) — governance dulu</li>
-              <li>Notifikasi in-app WebSocket/SSE real-time</li>
+              <li>AI features (draft notifikasi, prediksi konflik) — setelah governance selesai</li>
+              <li>WebSocket real-time (SSE stub sudah ada, upgrade ke WebSocket)</li>
             </ul>
           </div>
         </div>
 
         <div class="success-box" style="margin-top: 30px">
           <strong>Keputusan Go/No-Go (26 Juli 2026):</strong><br />
-          ✅ <strong>GO</strong> untuk pilot internal Docker lokal (AUTH_MODE=DEV, data demo)<br />
-          ⚠️ <strong>CONDITIONAL GO</strong> untuk pilot lintas instansi — setelah Sprint 11
-          selesai<br />
-          ⛔ <strong>NO-GO</strong> untuk Production v1.0 — menunggu MFA, OIDC, SIT, dan UAT formal
+          ✅ <strong>GO</strong> — Pilot internal Docker lokal
+          (<code>docker-compose.preproduction.yml</code>, AUTH_MODE=DEV, data demo)<br />
+          ⚠️ <strong>CONDITIONAL GO</strong> — Pilot UAT lintas instansi, setelah blocker build
+          &amp; OIDC live diselesaikan<br />
+          ⛔ <strong>NO-GO</strong> — Production v1.0, menunggu: OIDC live, npm build clean,
+          PostgreSQL smoke test, Docker runtime validation, SIT &amp; UAT formal lulus
         </div>
       </div>
       <!-- /content -->
 
       <div class="footer">
         CIMS v0.20.0 &mdash; Dokumen Arsitektur &amp; Operasional &mdash; Diperbarui 26 Juli 2026<br />
-        Implementasi Kepatuhan SOP/CIMS/PPE/001/2026 &bull; 14 Database Migrations &bull; 16
-        Notification Templates &bull; 10 Roles
+        Implementasi Kepatuhan SOP/CIMS/PPE/001/2026 &bull; 23 Database Migrations &bull; 16
+        Notification Templates &bull; 10 Roles &bull; 17 Docker Secrets
       </div>
     </div>
   </body>

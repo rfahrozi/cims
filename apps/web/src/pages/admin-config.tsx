@@ -366,6 +366,10 @@ export function AdminConfigPage() {
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="zoom">
+            <Settings2 className="mr-2 h-4 w-4" />
+            Akun Zoom
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Tab Template Notifikasi ── */}
@@ -469,6 +473,58 @@ export function AdminConfigPage() {
                   worker berjalan.
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── Tab Pengaturan Zoom ── */}
+        <TabsContent value="zoom">
+          <Card>
+            <CardHeader>
+              <CardTitle>Konfigurasi Akun Zoom (Provider)</CardTitle>
+              <CardDescription>
+                Pengaturan kunci autentikasi Zoom Server-to-Server OAuth untuk provisi ruang virtual
+                (SOP 10.6). Pada lingkungan Preproduction ini, parameter dibaca dari file secret
+                Docker.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Account ID</Label>
+                  <Input value="*** HIDDEN ***" disabled />
+                  <p className="text-[11px] text-slate-500">
+                    ID Akun korporat Zoom yang memiliki lisensi aktif.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Host User ID</Label>
+                  <Input value="*** HIDDEN ***" disabled />
+                  <p className="text-[11px] text-slate-500">
+                    Alamat email / ID akun Zoom admin yang akan bertindak sebagai Host untuk semua
+                    meeting.
+                  </p>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Client ID (Server-to-Server OAuth)</Label>
+                  <Input value="*** HIDDEN ***" disabled />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Client Secret</Label>
+                  <Input type="password" value="********************************" disabled />
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg bg-blue-50 p-4 border border-blue-100">
+                <h4 className="text-sm font-semibold text-blue-800 mb-2">Informasi</h4>
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  Konfigurasi autentikasi Zoom diatur secara *stateless* pada Docker deployment
+                  melalui mekanisme rahasia Docker (`/run/secrets/zoom_client_id`, dsb.). Anda tidak
+                  dapat mengubah nilainya dari antarmuka ini. Jika perlu mengganti akun Zoom,
+                  hubungi System Administrator untuk mengubah file <code>secrets/zoom_*.txt</code>{' '}
+                  pada *deployment environment* lalu merestart service <code>zoom-provider</code>.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

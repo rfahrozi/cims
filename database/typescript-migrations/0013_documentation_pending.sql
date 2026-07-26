@@ -22,10 +22,10 @@ alter table hearing_runtime
 
 -- 2. Tambah kolom untuk mencatat siapa yang menandai dan kapan
 alter table hearing_runtime
-  add column if not exists documentation_flagged_by  uuid references users(id),
+  add column if not exists documentation_flagged_by  text,
   add column if not exists documentation_flagged_at  timestamptz,
   add column if not exists documentation_flagged_note text,
-  add column if not exists documentation_completed_by uuid references users(id),
+  add column if not exists documentation_completed_by text,
   add column if not exists documentation_completed_at timestamptz;
 
 -- 3. Tambah event type baru ke hearing_control_events (append-only — tidak perlu constraint)

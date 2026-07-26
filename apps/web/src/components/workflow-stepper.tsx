@@ -39,7 +39,7 @@ export function WorkflowStepper() {
 
   const { data: gate } = useQuery({
     queryKey: ['hearing-gate', hearingId],
-    queryFn: () => api<GateData>(`/hearings/${hearingId}/gate`),
+    queryFn: () => api<GateData>(`/hearings/${hearingId}/gate-status`),
     enabled: Boolean(hearingId),
     refetchInterval: 15_000 // refresh tiap 15 detik
   });
