@@ -457,6 +457,48 @@
 
         <div class="grid-3">
           <div class="card">
+            <h2>Catatan Pembaruan: Rilis v1.0.0 (Production Ready)</h2>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-value">Sprint 1</div>
+                <div class="metric-label">Production Gates & IAM Hardening</div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--text-muted)">
+                  Implementasi Centralized Environment Validator untuk memblokir mode DEV/MOCK di
+                  production. Pengetatan <em>Auth Guard</em> dan
+                  <em>OIDC Token Verifier</em> (MFA/ACR/AMR validation).
+                </p>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">Sprint 2</div>
+                <div class="metric-label">Integration & Webhook Protection</div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--text-muted)">
+                  Implementasi Sandbox HTTP Mode untuk Notifikasi & Sistem Resmi. Proteksi
+                  <em>Anti-Replay</em> dan validasi <em>HMAC-SHA256 Signature</em> pada Webhook
+                  Provider (Zoom).
+                </p>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">Sprint 3</div>
+                <div class="metric-label">Compliance Runtime & Data Privacy</div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--text-muted)">
+                  Enforcement <em>same-day publication</em> & <em>7-day transmission</em> untuk
+                  Putusan. Penerapan <em>Masking PII</em> (Perlindungan Identitas) bagi Anak dan
+                  Saksi Mahkota sesuai SOP.
+                </p>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value">Sprint 4 & 5</div>
+                <div class="metric-label">Observability & Docker Deployment</div>
+                <p style="font-size: 0.85rem; margin-top: 10px; color: var(--text-muted)">
+                  Instrumentasi <em>Metrics Interceptor</em> (API Latency & Worker Throughput).
+                  Pemisahan arsitektur <em>Docker Compose</em> (Lokal vs VPS) dengan
+                  <em>Nginx Reverse Proxy Ready</em>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
             <h4>Domain-Driven Design</h4>
             <p>
               Logika hukum dipisahkan dari <em>framework</em> dan database. Semua aturan bisnis
