@@ -52,9 +52,9 @@ on conflict (id) do update
 -- Perkara A: Status DRAFT — untuk mulai dari langkah 1
 insert into hearings(id, case_id, case_number, hearing_type, state, official_case_reference, hearing_sequence, intake_status, data_source, court_organization_id, prosecution_organization_id, corrections_organization_id, created_by, updated_by)
 values
-  ('hearing-demo-001', 'case-demo-001', '123/Pid.Sus/2026/PN.Demo', 'PEMERIKSAAN_SAKSI',  'DRAFT', 'SIPP-DEMO-001', 1, 'ACTIVE', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
-  ('hearing-demo-002', 'case-demo-002', '456/Pid.B/2026/PN.Demo',   'PEMERIKSAAN_AHLI',   'DRAFT', 'SIPP-DEMO-002', 2, 'ACTIVE', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
-  ('hearing-demo-003', 'case-demo-003', '789/Pid.Sus/2026/PN.Demo', 'PEMBACAAN_PUTUSAN',  'DRAFT', 'SIPP-DEMO-003', 3, 'ACTIVE', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system')
+  ('hearing-demo-001', 'case-demo-001', '123/Pid.Sus/2026/PN.Demo', 'PEMERIKSAAN_SAKSI',  'NOT_READY', 'SIPP-DEMO-001', 1, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
+  ('hearing-demo-002', 'case-demo-002', '456/Pid.B/2026/PN.Demo',   'PEMERIKSAAN_AHLI',   'NOT_READY', 'SIPP-DEMO-002', 2, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
+  ('hearing-demo-003', 'case-demo-003', '789/Pid.Sus/2026/PN.Demo', 'PEMBACAAN_PUTUSAN',  'NOT_READY', 'SIPP-DEMO-003', 3, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system')
 on conflict (id) do update
   set case_number    = excluded.case_number,
       hearing_type   = excluded.hearing_type,
@@ -85,7 +85,66 @@ on conflict do nothing;
 -- Di DEV mode dengan PersonaSwitcher, user dibuat secara in-memory oleh DevIdentityInterceptor.
 
 -- =============================================================================
--- 5. Verifikasi seed berhasil
+-- 5. Susunan Majelis Hakim Demo
+-- =============================================================================
+-- Hakim Ketua selalu urutan pertama (sequence 1).
+-- Hakim Anggota urutan berikutnya sesuai komposisi Majelis.
+-- user_id merujuk ke NIP persona DEV riil.
+--
+-- Komposisi Majelis untuk masing-masing perkara demo:
+--   hearing-demo-001 (Pemeriksaan Saksi)  : 3 Hakim (Arifin + Zulfahmi + Eliwarti)
+--   hearing-demo-002 (Pemeriksaan Ahli)   : 3 Hakim (Wendra + Estiono + Bagus)
+--   hearing-demo-003 (Pembacaan Putusan)  : 3 Hakim (Elfian + Morgan + Dahlia)
+
+insert into hearing_user_assignments(hearing_id, user_id, assignment_role, active)
+values
+  -- Perkara 001: 123/Pid.Sus/2026/PN.Demo — Pemeriksaan Saksi
+  ('hearing-demo-001', '196005031988041001', 'HAKIM_KETUA',    true),
+  ('hearing-demo-001', '196105171988031008', 'HAKIM_ANGGOTA',  true),
+  ('hearing-demo-001', '196303121985032003', 'HAKIM_ANGGOTA',  true),
+
+  -- Perkara 002: 456/Pid.B/2026/PN.Demo — Pemeriksaan Ahli
+  ('hearing-demo-002', '196506301992121001', 'HAKIM_KETUA',    true),
+  ('hearing-demo-002', '196503151992121001', 'HAKIM_ANGGOTA',  true),
+  ('hearing-demo-002', '196308261988031003', 'HAKIM_ANGGOTA',  true),
+
+  -- Perkara 003: 789/Pid.Sus/2026/PN.Demo — Pembacaan Putusan
+  ('hearing-demo-003', '196512111992121001', 'HAKIM_KETUA',    true),
+  ('hearing-demo-003', '196209221992121001', 'HAKIM_ANGGOTA',  true),
+  ('hearing-demo-003', '196301101991032002', 'HAKIM_ANGGOTA',  true)
+on conflict (hearing_id, user_id) do update
+  set assignment_role = excluded.assignment_role,
+      active          = excluded.active;
+
+-- =============================================================================
+-- 6. Susunan Panitera Demo
+-- =============================================================================
+-- Panitera (COURT_CLERK): SAPTA PUTRA, S.H. — NIP 196809011996031001
+-- Panitera Pengganti (SUBSTITUTE_CLERK):
+--   1. AGUSMAN, S.H., M.H.     — NIP 196908201993031005
+--   2. NURLAILI, S.H., M.H.    — NIP 196505281994032001
+--   3. SYAIFUL ISLAMI, S.H.    — NIP 198409022009041004
+--   4. SUPRIADI, S.H.          — NIP 196511281993031003
+
+insert into hearing_user_assignments(hearing_id, user_id, assignment_role, active)
+values
+  -- Perkara 001 — Panitera & Panitera Pengganti
+  ('hearing-demo-001', '196809011996031001', 'PANITERA',           true),
+  ('hearing-demo-001', '196908201993031005', 'PANITERA_PENGGANTI', true),
+
+  -- Perkara 002 — Panitera & Panitera Pengganti
+  ('hearing-demo-002', '196809011996031001', 'PANITERA',           true),
+  ('hearing-demo-002', '196505281994032001', 'PANITERA_PENGGANTI', true),
+
+  -- Perkara 003 — Panitera & Panitera Pengganti
+  ('hearing-demo-003', '196809011996031001', 'PANITERA',           true),
+  ('hearing-demo-003', '198409022009041004', 'PANITERA_PENGGANTI', true)
+on conflict (hearing_id, user_id) do update
+  set assignment_role = excluded.assignment_role,
+      active          = excluded.active;
+
+-- =============================================================================
+-- 7. Verifikasi seed berhasil
 -- =============================================================================
 do $$
 declare

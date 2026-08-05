@@ -88,11 +88,14 @@ export const NOTICE_TYPES: readonly NoticeType[] = [
 export type HearingMode = 'LANGSUNG' | 'ELEKTRONIK' | 'HYBRID';
 
 export interface NoticeGateInput {
-  notices: Array<{ id: string; status: NoticeStatus }>;
+  scheduleStartAt: string;
+  notices: Array<{ id: string; status: NoticeStatus; type?: NoticeType }>;
   recipients: Array<{
     noticeId: string;
+    organizationType?: OrganizationType;
     requiredAck: boolean;
     status: NoticeRecipientStatus;
+    deliveredAt?: string;
   }>;
 }
 
@@ -107,6 +110,7 @@ export type OrganizationType = 'COURT' | 'PROSECUTION' | 'CORRECTIONS';
 export type ReadinessStatus = 'READY' | 'NOT_READY';
 
 export interface ReadinessGateInput {
+  scheduleStartAt: string;
   requiredOrganizationTypes: OrganizationType[];
   submissions: Array<{
     organizationType: OrganizationType;
@@ -119,8 +123,9 @@ export interface ReadinessGateResult {
   requiredOrganizationTypes: OrganizationType[];
   organizations: Array<{
     organizationType: OrganizationType;
-    status: ReadinessStatus | 'MISSING';
+    status: ReadinessStatus | 'MISSING' | 'AUTO_FORCED';
     version?: number;
+    warningMessage?: string;
   }>;
   ready: boolean;
 }

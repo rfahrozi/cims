@@ -15,6 +15,7 @@ import {
 } from 'class-validator';
 
 const caseClassifications = ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL'] as const;
+const judgeRoles = ['HAKIM_KETUA', 'HAKIM_ANGGOTA'] as const;
 const custodyStatuses = ['DETAINED', 'NOT_DETAINED', 'MIXED', 'UNKNOWN'] as const;
 const defendantCustodyStatuses = ['DETAINED', 'NOT_DETAINED', 'UNKNOWN'] as const;
 
@@ -24,6 +25,11 @@ export class InitialDefendantDto {
   @IsBoolean() protected_identity = false;
   @IsEnum(defendantCustodyStatuses) custody_status!: (typeof defendantCustodyStatuses)[number];
   @IsOptional() @IsString() detention_organization_id?: string;
+}
+
+export class JudgeAssignmentDto {
+  @IsString() @MinLength(1) user_id!: string;
+  @IsEnum(judgeRoles) role!: (typeof judgeRoles)[number];
 }
 
 export class ManualHearingDto {
@@ -43,6 +49,13 @@ export class ManualHearingDto {
   @ValidateNested({ each: true })
   @Type(() => InitialDefendantDto)
   defendants!: InitialDefendantDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => JudgeAssignmentDto)
+  judges?: JudgeAssignmentDto[];
+
   @IsOptional() @IsString() @MaxLength(2000) notes?: string;
 }
 

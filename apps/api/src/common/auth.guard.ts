@@ -21,13 +21,11 @@ export class CimsAuthGuard implements CanActivate {
     )
       return true;
     const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
-    const request = context
-      .switchToHttp()
-      .getRequest<{
-        headers: Record<string, string | string[] | undefined>;
-        user?: unknown;
-        query?: Record<string, string>;
-      }>();
+    const request = context.switchToHttp().getRequest<{
+      headers: Record<string, string | string[] | undefined>;
+      user?: unknown;
+      query?: Record<string, string>;
+    }>();
 
     if (mode === 'DEV') {
       const raw = request.headers['x-cims-dev-persona'];

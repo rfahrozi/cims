@@ -65,6 +65,18 @@ const initialDefendant = (): DefendantForm => ({
   custody_status: 'NOT_DETAINED'
 });
 
+interface JudgeForm {
+  user_id: string;
+  name: string;
+  role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA';
+}
+
+const initialJudge = (role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA' = 'HAKIM_ANGGOTA'): JudgeForm => ({
+  user_id: '',
+  name: '',
+  role
+});
+
 const CUSTODY_LABEL: Record<string, string> = {
   DETAINED: 'Ditahan',
   NOT_DETAINED: 'Tidak Ditahan',
@@ -96,7 +108,10 @@ function ImportSimulationButton({ onSuccess }: { onSuccess: () => void }) {
 
 const INTAKE_STATUS_LABEL: Record<string, string> = {
   DRAFT: 'Draf',
-  SUBMITTED: 'Menunggu Review',
+  SUBMITTED: 'Menunggu Review Panitera',
+  ADMIN_VERIFIED: 'Terverifikasi Administrasi',
+  JUDGE_VALIDATION: 'Menunggu Validasi Hakim',
+  DATA_APPROVED: 'Data Disetujui Hakim',
   ACTIVE: 'Aktif',
   RETURNED: 'Dikembalikan'
 };
@@ -121,7 +136,8 @@ export function HearingIntakePage() {
     corrections_organization_id: 'corrections-demo',
     defendant_custody_status: 'NOT_DETAINED',
     notes: '',
-    defendants: [initialDefendant()]
+    defendants: [initialDefendant()],
+    judges: [initialJudge('HAKIM_KETUA')]
   });
 
   const refs = useQuery({
@@ -161,7 +177,10 @@ export function HearingIntakePage() {
           item.custody_status === 'DETAINED'
             ? item.detention_organization_id || form.corrections_organization_id
             : undefined
-      }))
+      })),
+      judges: form.judges
+        .filter((j) => j.user_id.trim())
+        .map((j) => ({ user_id: j.user_id.trim(), role: j.role }))
     }),
     [form]
   );
@@ -170,6 +189,15 @@ export function HearingIntakePage() {
     setForm((current) => ({
       ...current,
       defendants: current.defendants.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, ...patch } : item
+      )
+    }));
+  }
+
+  function updateJudge(index: number, patch: Partial<JudgeForm>) {
+    setForm((current) => ({
+      ...current,
+      judges: current.judges.map((item, itemIndex) =>
         itemIndex === index ? { ...item, ...patch } : item
       )
     }));
@@ -477,6 +505,101 @@ export function HearingIntakePage() {
                   </div>
                 </section>
 
+                {/* ── Susunan Majelis Hakim ──────────────────────────────── */}
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">Susunan Majelis Hakim</h3>
+                      <p className="text-xs text-slate-500">
+                        Hakim Ketua (urutan pertama) yang berwenang melakukan validasi data
+                        persidangan. Minimal 1 Hakim Ketua. Anggota bersifat opsional.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          judges: [...form.judges, initialJudge('HAKIM_ANGGOTA')]
+                        })
+                      }
+                    >
+                      <Plus className="mr-1 h-4 w-4" />
+                      Tambah Anggota
+                    </Button>
+                  </div>
+                  {form.judges.map((judge, index) => (
+                    <div
+                      key={index}
+                      className={`grid gap-3 rounded-xl border p-4 md:grid-cols-3 ${
+                        judge.role === 'HAKIM_KETUA' ? 'border-blue-300 bg-blue-50' : 'bg-slate-50'
+                      }`}
+                    >
+                      <div className="space-y-2">
+                        <Label htmlFor={`judge_name_${index}`}>
+                          {judge.role === 'HAKIM_KETUA' ? (
+                            <span className="font-semibold text-blue-800">
+                              Hakim Ketua Majelis{' '}
+                              <span className="text-red-500" aria-hidden="true">
+                                *
+                              </span>
+                            </span>
+                          ) : (
+                            <span>Hakim Anggota {index}</span>
+                          )}
+                        </Label>
+                        <Input
+                          id={`judge_name_${index}`}
+                          value={judge.name}
+                          onChange={(e) => updateJudge(index, { name: e.target.value })}
+                          placeholder="Nama lengkap hakim"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`judge_userid_${index}`}>ID / NIP Hakim</Label>
+                        <Input
+                          id={`judge_userid_${index}`}
+                          value={judge.user_id}
+                          onChange={(e) => updateJudge(index, { user_id: e.target.value })}
+                          placeholder="Misal: judge-demo atau NIP"
+                        />
+                      </div>
+                      <div className="flex items-end justify-between gap-3">
+                        <div className="space-y-2 flex-1">
+                          <Label>Peran dalam Majelis</Label>
+                          <div
+                            className={`rounded-md border px-3 py-2 text-sm font-medium ${
+                              judge.role === 'HAKIM_KETUA'
+                                ? 'border-blue-300 bg-blue-100 text-blue-800'
+                                : 'border-slate-300 bg-slate-100 text-slate-700'
+                            }`}
+                          >
+                            {judge.role === 'HAKIM_KETUA' ? '⚖️ Ketua Majelis' : '👤 Hakim Anggota'}
+                          </div>
+                        </div>
+                        {judge.role !== 'HAKIM_KETUA' && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            aria-label={`Hapus hakim anggota ${index}`}
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                judges: form.judges.filter((_, i) => i !== index)
+                              })
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+
                 <section className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -615,7 +738,8 @@ export function HearingIntakePage() {
                         corrections_organization_id: 'corrections-demo',
                         defendant_custody_status: 'NOT_DETAINED',
                         notes: '',
-                        defendants: [initialDefendant()]
+                        defendants: [initialDefendant()],
+                        judges: [initialJudge('HAKIM_KETUA')]
                       })
                     }
                   >

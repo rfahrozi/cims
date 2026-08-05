@@ -12,6 +12,7 @@ import {
 import { OutboxService } from '../database/outbox.service.js';
 import { PersistenceModeService } from '../database/persistence-mode.service.js';
 import { PgPoolService } from '../database/pg-pool.service.js';
+import { CoreWorkflowRepository } from './core-workflow.repository.js';
 
 export interface HydratedNotice extends OfficialNoticeRecord {
   rowVersion: number;
@@ -30,7 +31,8 @@ export class NoticesRepository {
     private readonly mode: PersistenceModeService,
     private readonly memory: InMemoryStore,
     private readonly pg: PgPoolService,
-    private readonly outbox: OutboxService
+    private readonly outbox: OutboxService,
+    private readonly core: CoreWorkflowRepository
   ) {}
 
   async create(
@@ -402,7 +404,20 @@ export class NoticesRepository {
 
   async gate(hearingId: string, user: CurrentUser): Promise<NoticeGateResult> {
     const notices = await this.list(hearingId, user);
+    const schedule = await this.core.activeSchedule(hearingId, user);
+
+    // Return empty state if schedule is not available yet rather than throwing 409
+    if (!schedule) {
+      return {
+        noticeCount: 0,
+        requiredAcknowledgmentCount: 0,
+        acknowledgedCount: 0,
+        ready: false
+      };
+    }
+
     return evaluateNoticeGate({
+      scheduleStartAt: schedule.startAt,
       notices,
       recipients: notices.flatMap((notice) => notice.recipients)
     });

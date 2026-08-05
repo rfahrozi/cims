@@ -610,306 +610,307 @@
         </table>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
+
         <h2>4. Alur SOP Persidangan Elektronik (SOP 10.1 – 10.15)</h2>
+
         <p>
-          Berikut adalah representasi visual diagram interaktif dan detail dari 7 langkah utama
-          (Alur Utama) pada sistem CIMS yang diwajibkan oleh Standar Operasional Prosedur 2026:
+          Alur utama CIMS menggambarkan proses koordinasi persidangan elektronik mulai dari input
+          data perkara, validasi data persidangan oleh Panitera dan Hakim, penyusunan jadwal sidang,
+          penerbitan Penetapan Pemberitahuan Sidang Pembacaan Putusan, pemberitahuan lintas
+          instansi, verifikasi kesiapan Kejaksaan dan Rutan, hingga pelaksanaan sidang elektronik.
+        </p>
+
+        <p>
+          Mekanisme workflow menggunakan pendekatan <strong>Hard Gate</strong>, dimana setiap
+          tahapan hanya dapat dilanjutkan apabila persyaratan administratif dan validasi kewenangan
+          pada tahap sebelumnya telah terpenuhi.
         </p>
 
         <div class="card" style="margin-top: 20px; overflow-x: auto; background: white">
           <pre class="mermaid">
 stateDiagram-v2
-  direction TB
+    direction TB
 
-  state "1. Input Data Perkara" as S1
-  state "2. Penetapan Hakim" as S2
-  state "3. Jadwal & Agenda" as S3
-  state "4. Pemberitahuan & ACK" as S4
-  state "5. Checklist Kesiapan" as S5
-  state "6. Ruang Virtual" as S6
-  state "7. Kontrol Sidang" as S7
-  state "Dokumentasi & Pasca Sidang" as S8
+    [*] --> DRAFT
 
-  [*] --> DRAFT
+    state "1. Input Data Perkara" as INPUT
+    state "2. Validasi Data Persidangan" as VALIDATION
+    state "3. Penyusunan Jadwal & Agenda Sidang" as SCHEDULE
+    state "4. Penetapan Pemberitahuan Sidang Pembacaan Putusan" as DETERMINATION
+    state "5. Pemberitahuan Lintas Instansi" as NOTIFICATION
+    state "6. Checklist Kesiapan Sidang" as READINESS
+    state "7. Ruang Virtual & Pelaksanaan Sidang" as HEARING
+    state "8. Dokumentasi Pasca Sidang" as DOCUMENTATION
 
-  state "Pembuatan Kasus" as C1 {
-    DRAFT --> SUBMITTED : Panitera Pengganti (Maker)
-    SUBMITTED --> ACTIVE_INTAKE : Panitera (Checker)
-    SUBMITTED --> DRAFT : Revisi
-  }
+    DRAFT --> SUBMITTED : Panitera Pengganti Input Data Perkara
+    SUBMITTED --> ADMIN_VERIFIED : Panitera Validasi Administrasi
+    ADMIN_VERIFIED --> REVISION : Data Tidak Sesuai
+    REVISION --> DRAFT : Perbaikan Data
 
-  C1 --> S1
-  S1 --> S2 : Hard Gate
+    ADMIN_VERIFIED --> JUDGE_VALIDATION : Hakim Validasi Data Persidangan
+    JUDGE_VALIDATION --> DATA_APPROVED : Data Valid
+    JUDGE_VALIDATION --> REVISION : Perlu Perbaikan
 
-  state "Otorisasi Sidang" as C2 {
-    S2 --> REJECTED : Hakim Menolak
-  }
+    DATA_APPROVED --> SCHEDULE_DRAFT : Validasi Selesai
 
-  S2 --> S3 : Jika APPROVED
+    SCHEDULE_DRAFT --> CONFLICT_CHECK : Penyusunan Jadwal
+    CONFLICT_CHECK --> SCHEDULE_ACTIVE : Tidak Ada Konflik
+    CONFLICT_CHECK --> SCHEDULE_REVISION : Konflik Jadwal
+    SCHEDULE_REVISION --> SCHEDULE_DRAFT
 
-  state "Koordinasi Multi-Instansi" as C3 {
-    S3 --> SENT_NOTICE : Outbox Worker - Brevo/WA
-    SENT_NOTICE --> ACKNOWLEDGED : Kejaksaan & Rutan
+    SCHEDULE_ACTIVE --> CREATE_DETERMINATION : Pembuatan Penetapan
+    CREATE_DETERMINATION --> SIGNED : Penetapan Ditandatangani
+    SIGNED --> UPLOAD_DETERMINATION : Upload Dokumen CIMS
 
-    state "Kesiapan" as Readiness {
-      VERIFY_ID --> ROOM_INSPECT : Rutan (Terdakwa)
-      ROOM_INSPECT --> SUBMIT_RUTAN
-      SUBMIT_JAKSA --> SUBMIT_JAKSA
-      SUBMIT_PENGADILAN --> SUBMIT_PENGADILAN
-    }
+    UPLOAD_DETERMINATION --> COURT_NOTICE : Minimal H-7
+    COURT_NOTICE --> PROSECUTOR_RECEIVE : Kejaksaan Menerima
+    PROSECUTOR_RECEIVE --> RUTAN_NOTICE : Kejaksaan Upload Pemberitahuan Rutan
 
-    ACKNOWLEDGED --> S5 : Hard Gate
-  }
+    RUTAN_NOTICE --> READINESS : Minimal H-3 Terpenuhi
 
-  S5 --> S6 : Hard Gate
+    READINESS --> PROSECUTOR_READY : Checklist Kejaksaan
+    READINESS --> RUTAN_READY : Checklist Rutan
+    PROSECUTOR_READY --> ALL_READY : Validasi Kesiapan
+    RUTAN_READY --> ALL_READY : Validasi Kesiapan
+    READINESS --> AUTO_FORCED : Waktu Sidang < 2 Jam (Sistem Paksa Bypass)
+    AUTO_FORCED --> ALL_READY : Bypass Hard Gate
 
-  state "Virtual Session" as C4 {
-    S6 --> PROVISIONING : IT Operator
-    PROVISIONING --> READY : Zoom / WebEx Adapter
-  }
+    ALL_READY --> PROVISIONING : Hard Gate H-1 / Bypass < 2 Jam Terpenuhi
 
-  S6 --> S7 : Hard Gate
+    PROVISIONING --> READY : Ruang Virtual Siap
+    READY --> STARTED : Hakim Mulai Sidang
+    STARTED --> SUSPENDED : Gangguan / Skors
+    SUSPENDED --> STARTED : Sidang Dilanjutkan
+    STARTED --> ENDED : Hakim Menutup Sidang
 
-  state "Sidang Berlangsung" as C5 {
-    S7 --> STARTED : Hakim
-    STARTED --> SUSPENDED : Skors
-    SUSPENDED --> STARTED : Lanjut
-    STARTED --> ENDED : Hakim Tutup
-    ENDED --> DOCUMENTATION_PENDING : Flag Dok. Tertunda
-    DOCUMENTATION_PENDING --> ENDED : Selesai Dok.
-    STARTED --> POSTPONED : Ditunda
-  }
+    ENDED --> DOCUMENTATION_PENDING
+    DOCUMENTATION_PENDING --> COMPLETED
 
-  C5 --> S8
-  S8 --> [*]
+    COMPLETED --> [*]
 
-  note right of C3
-    Jika terjadi Mutasi Tahanan,
-    alur akan terputus dan dikembalikan
-    ke Checklist Kesiapan Rutan tujuan.
-  end note
+    note right of CREATE_DETERMINATION
+        Penetapan Pemberitahuan
+        Sidang Pembacaan Putusan
+        dibuat berdasarkan jadwal aktif.
 
-  note right of C5
-    Insiden CRITICAL/HIGH otomatis
-    men-trigger status SUSPENDED.
-  end note
-          </pre>
+        Batas waktu:
+        Minimal H-7 sebelum sidang.
+    end note
+
+    note right of READINESS
+        Checklist kesiapan:
+        - Kejaksaan
+        - Rutan
+
+        Dilakukan maksimal H-1
+        sebelum agenda sidang.
+    end note
+
+    note right of PROVISIONING
+        Ruang virtual hanya dapat
+        dibuat setelah seluruh
+        hard gate terpenuhi.
+    end note
+</pre
+          >
         </div>
 
         <div class="workflow">
-          <!-- Step 1 -->
           <div class="workflow-step">
             <div class="workflow-number">1</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Input Data Perkara (Intake)</div>
+                <div class="workflow-title">Input Data Perkara</div>
                 <div>
                   <span class="badge badge-actor">Panitera Pengganti</span>
                   <span class="badge badge-actor">Panitera</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Sebagai sumber data awal MVP, Panitera Pengganti memasukkan data perkara secara
-                manual ke CIMS (Nomor Kasus, Klasifikasi, Terdakwa, Instansi Terkait).
+                Panitera Pengganti melakukan input data perkara ke dalam CIMS sebagai sumber data
+                awal persidangan. Data yang dimasukkan meliputi identitas perkara, terdakwa,
+                klasifikasi perkara, serta informasi instansi terkait.
               </div>
+
               <div class="checklist">
-                <strong>Kepatuhan Maker-Checker:</strong> Data yang berstatus
-                <code>DRAFT</code> diajukan (<code>SUBMITTED</code>), dan wajib di-<em>approve</em>
-                menjadi <code>ACTIVE</code> oleh akun Panitera yang <strong>berbeda</strong>.
+                Data berstatus DRAFT diajukan menjadi SUBMITTED untuk dilakukan pemeriksaan
+                administratif oleh Panitera.
               </div>
             </div>
           </div>
 
-          <!-- Step 2 -->
           <div class="workflow-step">
             <div class="workflow-number">2</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Penetapan Hakim (SOP 10.2)</div>
+                <div class="workflow-title">Validasi Data Persidangan</div>
                 <div>
+                  <span class="badge badge-actor">Panitera</span>
                   <span class="badge badge-actor">Hakim</span>
                   <span class="badge badge-gate">Hard Gate</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Hakim yang ditunjuk mengotorisasi bahwa perkara ini diizinkan untuk disidangkan
-                secara elektronik berdasarkan alasan dan keadaan yang dibenarkan.
+                Setelah pemeriksaan administratif selesai, Panitera dan Hakim melakukan validasi
+                data persidangan. Panitera memastikan kelengkapan administrasi, sedangkan Hakim
+                melakukan validasi terhadap informasi persidangan sebelum proses penjadwalan
+                dilakukan.
               </div>
+
               <div class="checklist">
-                <strong>Data Tersimpan:</strong> Keputusan (APPROVED/REJECTED), Nomor Penetapan
-                Resmi, Mode Persidangan (<strong>LANGSUNG / ELEKTRONIK / HYBRID</strong>), dan
-                Alasan.
+                Validasi Hakim menjadi dasar bahwa data persidangan telah siap digunakan untuk
+                penyusunan jadwal sidang.
               </div>
             </div>
           </div>
 
-          <!-- Step 3 -->
           <div class="workflow-step">
             <div class="workflow-number">3</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Penjadwalan &amp; Agenda Sidang (SOP 10.3)</div>
+                <div class="workflow-title">Penyusunan Jadwal dan Agenda Sidang</div>
                 <div>
                   <span class="badge badge-actor">Panitera</span>
                   <span class="badge badge-system">Conflict Check Engine</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Panitera menyusun jadwal dan rincian agenda multi-item (misal: Pembacaan Dakwaan +
-                Pemeriksaan Saksi). Sistem CIMS otomatis memvalidasi konflik resource (Hakim,
-                Ruangan) sebelum disetujui. Tab <em>Riwayat Perubahan Jadwal</em> menampilkan semua
-                versi jadwal yang pernah aktif beserta alasan perubahannya.
+                Panitera menyusun jadwal dan agenda sidang berdasarkan data persidangan yang telah
+                tervalidasi. Sistem melakukan pemeriksaan konflik terhadap sumber daya persidangan
+                sebelum jadwal ditetapkan.
               </div>
+
               <div class="checklist">
-                <strong>SOP 10.3 (Perubahan Jadwal):</strong> Bila jadwal yang sudah
-                <code>ACTIVE</code> ditimpa jadwal baru (<code>SUPERSEDED</code>), wajib menyertakan
-                alasan (<em>change_reason</em>) dan memicu otomatis pengiriman pemberitahuan ulang
-                ke seluruh pihak via Outbox Worker.
+                Jadwal aktif menjadi sumber resmi untuk pembuatan Penetapan Pemberitahuan Sidang
+                Pembacaan Putusan.
               </div>
             </div>
           </div>
 
-          <!-- Step 4 -->
           <div class="workflow-step">
             <div class="workflow-number">4</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Pemberitahuan &amp; Tanda Terima (SOP 10.5)</div>
+                <div class="workflow-title">
+                  Pembuatan dan Upload Penetapan Pemberitahuan Sidang Pembacaan Putusan
+                </div>
                 <div>
-                  <span class="badge badge-actor">Liaison Officer</span>
-                  <span class="badge badge-actor">Semua Instansi</span>
-                  <span class="badge badge-new">Brevo</span>
+                  <span class="badge badge-actor">Hakim</span>
+                  <span class="badge badge-actor">Panitera</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Pengadilan mengirimkan pemberitahuan resmi ke Kejaksaan dan Pemasyarakatan.
-                Pengiriman dilakukan via <strong>Brevo Transactional Email</strong> atau channel
-                WhatsApp/SMS/IN_APP. Template teks diambil otomatis dari database berdasarkan jenis
-                pemberitahuan dan channel — tidak perlu mengisi manual setiap saat.
+                Berdasarkan jadwal sidang yang telah ditetapkan, Hakim membuat Penetapan
+                Pemberitahuan Sidang Pembacaan Putusan dengan ketentuan minimal H-7 sebelum agenda
+                sidang.
               </div>
+
               <div class="checklist">
-                <ul>
-                  <li>
-                    <strong>Acknowledgment:</strong> Setiap instansi penerima wajib melakukan
-                    konfirmasi tanda terima (ACK).
-                  </li>
-                  <li>
-                    <strong>SLA Monitoring:</strong> Dashboard CIMS menampilkan peringatan merah
-                    jika terdapat pemberitahuan yang melewati tenggat waktu (Overdue). SLA per jenis
-                    pemberitahuan dapat dikonfigurasi Admin di halaman <code>/admin</code>.
-                  </li>
-                  <li>
-                    <strong>Rantai Pemberitahuan Putusan Banding:</strong> PT → Kejaksaan → Rutan →
-                    Terdakwa menggunakan 4 langkah ACK yang berbeda (SOP 10.15).
-                  </li>
-                </ul>
+                Dokumen penetapan yang telah ditandatangani wajib diupload kembali ke CIMS sebagai
+                dokumen resmi.
               </div>
             </div>
           </div>
 
-          <!-- Step 5 -->
           <div class="workflow-step">
             <div class="workflow-number">5</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">
-                  Kesiapan Instansi &amp; Ceklis (SOP 10.6 &amp; 10.7)
-                </div>
+                <div class="workflow-title">Pemberitahuan dan Konfirmasi Instansi</div>
                 <div>
-                  <span class="badge badge-actor">Semua Instansi</span>
-                  <span class="badge badge-gate">Hard Gate</span>
+                  <span class="badge badge-actor">Pengadilan</span>
+                  <span class="badge badge-actor">Kejaksaan</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Sebelum ruang virtual dapat dibuat, Pengadilan, Kejaksaan, dan Rutan harus
-                melaporkan kesiapan infrastruktur (kamera, mikrofon, internet). CIMS menyediakan
-                <em>Dynamic Checklist Template</em> per jenis instansi.
+                Setelah dokumen penetapan tersedia, sistem melakukan pemberitahuan kepada pihak
+                terkait. Kejaksaan menerima pemberitahuan dan melakukan upload dokumen pemberitahuan
+                kepada Rutan.
               </div>
+
               <div class="checklist">
-                <strong>SOP 10.7 (Rutan):</strong> Pemasyarakatan secara khusus wajib melakukan
-                Verifikasi Identitas Terdakwa dan Inspeksi Sterilitas Ruangan Konsultasi sebelum
-                bisa mensubmit formulir kesiapan. Jika terdakwa dipindah (Mutasi Tahanan), kesiapan
-                dibatalkan dan wajib diisi ulang di Rutan tujuan.
+                Dokumen pemberitahuan Kejaksaan kepada Rutan wajib tersedia minimal H-3 sebelum
+                jadwal sidang.
               </div>
             </div>
           </div>
 
-          <!-- Step 6 -->
           <div class="workflow-step">
             <div class="workflow-number">6</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Registrasi Peserta &amp; Ruang Virtual</div>
+                <div class="workflow-title">Checklist Kesiapan Kejaksaan dan Rutan</div>
                 <div>
-                  <span class="badge badge-actor">Panitera</span>
-                  <span class="badge badge-actor">Operator TI</span>
+                  <span class="badge badge-actor">Kejaksaan</span>
+                  <span class="badge badge-actor">Rutan</span>
+                  <span class="badge badge-gate">Hard Gate</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Pembuatan <em>Join Token</em> satu kali pakai (Expired dalam 15 menit) untuk
-                Terdakwa, Saksi, dan Advokat. Di saat yang sama, Operator TI melakukan
-                "Provisioning" ruangan (seperti Zoom) melalui adapter video provider.
+                Kejaksaan dan Rutan melakukan pengisian kesiapan pelaksanaan sidang elektronik
+                maksimal H-1 sebelum agenda sidang. Jika waktu pelaksanaan sidang tersisa kurang
+                dari 2 Jam dan instansi belum mengisi kesiapan, sistem akan mem-bypass checklist
+                (Auto-Forced) agar ruang sidang tetap dapat dibuka.
               </div>
+
               <div class="checklist">
-                <ul>
-                  <li>
-                    <strong>SOP 10.9 (Saksi Rentan):</strong> CIMS secara otomatis mengaktifkan
-                    status "Identitas Dilindungi" dan <em>Auto-Masking Name</em> (Alias) bagi peran
-                    Saksi, Ahli, dan Penerjemah. Verifikasi per-individu untuk tiap
-                    saksi/ahli/penerjemah.
-                  </li>
-                  <li>
-                    <strong>SOP 10.8 (Lokasi Advokat):</strong> Jika advokat berada terpisah dari
-                    Rutan Terdakwa, Panitera wajib menginput Referensi Penetapan Hakim untuk izin
-                    pemisahan fisik tersebut.
-                  </li>
-                </ul>
+                Checklist meliputi kesiapan perangkat, jaringan, personel, ruang sidang, dan
+                verifikasi identitas terdakwa. (Auto-forced ditandai dengan peringatan warna merah).
               </div>
             </div>
           </div>
 
-          <!-- Step 7 -->
           <div class="workflow-step">
             <div class="workflow-number">7</div>
             <div class="workflow-content">
               <div class="workflow-header">
-                <div class="workflow-title">Kontrol Sidang &amp; Pelaksanaan (SOP 10.10)</div>
+                <div class="workflow-title">Ruang Virtual dan Pelaksanaan Sidang</div>
                 <div>
+                  <span class="badge badge-actor">Operator IT</span>
                   <span class="badge badge-actor">Hakim</span>
-                  <span class="badge badge-system">CIMS Core</span>
                 </div>
               </div>
+
               <div class="workflow-desc">
-                Hanya persona <strong>Hakim</strong> yang memiliki akses untuk mengubah status mesin
-                sidang. Setiap aksi destruktif (Tutup Sidang, Skors Sidang) memerlukan Dialog
-                Konfirmasi eksplisit untuk mencegah kesalahan. Timeline kejadian tercatat
-                append-only.
+                Setelah seluruh persyaratan terpenuhi, Operator IT melakukan provisioning ruang
+                virtual. Hakim mengendalikan status pelaksanaan sidang melalui sistem CIMS.
               </div>
+
               <div class="checklist">
-                <ul>
-                  <li>
-                    <strong>State Machine Sidang:</strong>
-                    <code>READY</code> → <code>STARTED</code> → <code>SUSPENDED</code> /
-                    <code>ENDED</code> / <code>POSTPONED</code>
-                  </li>
-                  <li>
-                    <strong>Dokumentasi Tertunda (BARU):</strong> Setelah sidang <code>ENDED</code>,
-                    Panitera dapat menandai status <code>DOCUMENTATION_PENDING</code> jika masih ada
-                    dokumen pasca-sidang yang belum dilengkapi, kemudian selesaikan dengan
-                    <code>COMPLETE_DOCUMENTATION</code>.
-                  </li>
-                  <li>
-                    <strong>Konsultasi Privat (SOP 10.8):</strong> Sistem memiliki sensor (Webhook
-                    Alert) untuk mencegah/melarang segala bentuk Recording pada sesi konsultasi
-                    tertutup Terdakwa–Advokat.
-                  </li>
-                </ul>
+                Status sidang: READY → STARTED → SUSPENDED/RESUMED → ENDED.
+              </div>
+            </div>
+          </div>
+
+          <div class="workflow-step">
+            <div class="workflow-number">8</div>
+            <div class="workflow-content">
+              <div class="workflow-header">
+                <div class="workflow-title">Dokumentasi Pasca Sidang</div>
+                <div>
+                  <span class="badge badge-actor">Panitera</span>
+                </div>
+              </div>
+
+              <div class="workflow-desc">
+                Setelah sidang selesai, seluruh dokumen pendukung dilengkapi dan disimpan dalam
+                sistem sebagai bukti pelaksanaan persidangan.
+              </div>
+
+              <div class="checklist">
+                Dokumen yang belum lengkap dapat diberi status DOCUMENTATION_PENDING hingga seluruh
+                persyaratan terpenuhi.
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════════════ -->
         <h2>5. Skenario Khusus (Edge Cases) &amp; Tindakan Administratif Lanjutan</h2>
 
         <h3>A. Penanganan Insiden (SOP 10.11, 10.12, 10.13)</h3>

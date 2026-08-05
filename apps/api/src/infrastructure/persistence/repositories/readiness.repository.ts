@@ -263,7 +263,25 @@ export class ReadinessRepository {
   async gate(hearingId: string, user: CurrentUser): Promise<ReadinessGateResult> {
     const requiredOrganizationTypes = await this.core.requiredOrganizationTypes(hearingId, user);
     const submissions = await this.list(hearingId, user);
-    return evaluateReadinessGate({ requiredOrganizationTypes, submissions });
+    const schedule = await this.core.activeSchedule(hearingId, user);
+
+    // Return empty state if schedule is not available yet rather than throwing 409
+    if (!schedule) {
+      return {
+        requiredOrganizationTypes,
+        organizations: requiredOrganizationTypes.map((org) => ({
+          organizationType: org,
+          status: 'MISSING'
+        })),
+        ready: false
+      };
+    }
+
+    return evaluateReadinessGate({
+      scheduleStartAt: schedule.startAt,
+      requiredOrganizationTypes,
+      submissions
+    });
   }
 
   async hydrate(id: string, user: CurrentUser): Promise<HydratedReadiness> {

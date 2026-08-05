@@ -758,6 +758,18 @@ export class HearingIntakeRepository {
           userId
         ]
       );
+
+    // Assign Judges
+    await client.query('delete from hearing_user_assignments where hearing_id = $1', [hearingId]);
+    if (input.judges && input.judges.length > 0) {
+      for (const judge of input.judges) {
+        await client.query(
+          `insert into hearing_user_assignments(hearing_id, user_id, assignment_role)
+           values($1, $2, $3)`,
+          [hearingId, judge.userId, judge.role]
+        );
+      }
+    }
   }
 
   private appendMemoryRevision(

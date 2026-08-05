@@ -1,8 +1,24 @@
 import { DomainError } from './errors.js';
 
 export type HearingDataSource = 'MANUAL' | 'EXTERNAL_DATABASE';
-export type HearingIntakeStatus = 'DRAFT' | 'SUBMITTED' | 'ACTIVE' | 'RETURNED' | 'ARCHIVED';
-export type HearingIntakeAction = 'SUBMIT' | 'ACTIVATE' | 'RETURN' | 'REOPEN' | 'ARCHIVE';
+export type HearingIntakeStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'ADMIN_VERIFIED'
+  | 'JUDGE_VALIDATION'
+  | 'DATA_APPROVED'
+  | 'ACTIVE'
+  | 'RETURNED'
+  | 'ARCHIVED';
+export type HearingIntakeAction =
+  | 'SUBMIT'
+  | 'ADMIN_VERIFY'
+  | 'JUDGE_VERIFY'
+  | 'APPROVE_DATA'
+  | 'ACTIVATE'
+  | 'RETURN'
+  | 'REOPEN'
+  | 'ARCHIVE';
 export type CaseClassification = 'GENERAL_CRIMINAL' | 'SPECIAL_CRIMINAL';
 export type DefendantCustodyStatus = 'DETAINED' | 'NOT_DETAINED' | 'MIXED' | 'UNKNOWN';
 
@@ -12,6 +28,11 @@ export interface InitialDefendantInput {
   protectedIdentity: boolean;
   custodyStatus: Exclude<DefendantCustodyStatus, 'MIXED'>;
   detentionOrganizationId?: string;
+}
+
+export interface JudgeAssignmentInput {
+  userId: string;
+  role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA';
 }
 
 export interface ManualHearingIntakeInput {
@@ -27,6 +48,7 @@ export interface ManualHearingIntakeInput {
   correctionsOrganizationId?: string;
   defendantCustodyStatus: DefendantCustodyStatus;
   defendants: InitialDefendantInput[];
+  judges?: JudgeAssignmentInput[];
   notes?: string;
 }
 
@@ -84,6 +106,25 @@ export function validateManualHearingIntake(input: ManualHearingIntakeInput): vo
       message: 'Rutan atau Lapas wajib dipilih ketika status terdakwa ditahan.'
     });
   }
+
+  // Validasi Multi-Hakim (Minimal ada Hakim Ketua jika array judges diberikan)
+  if (input.judges && input.judges.length > 0) {
+    const hasKetua = input.judges.some((j) => j.role === 'HAKIM_KETUA');
+    if (!hasKetua) {
+      errors.push({
+        field: 'judges',
+        message: 'Susunan Majelis Hakim harus memiliki 1 Hakim Ketua.'
+      });
+    }
+    const ketuaCount = input.judges.filter((j) => j.role === 'HAKIM_KETUA').length;
+    if (ketuaCount > 1) {
+      errors.push({
+        field: 'judges',
+        message: 'Susunan Majelis Hakim tidak boleh memiliki lebih dari 1 Hakim Ketua.'
+      });
+    }
+  }
+
   if (errors.length > 0)
     throw new DomainError(
       'HEARING_INTAKE_VALIDATION_FAILED',
@@ -102,7 +143,10 @@ export function transitionHearingIntake(
     Partial<Record<HearingIntakeAction, HearingIntakeStatus>>
   > = {
     DRAFT: { SUBMIT: 'SUBMITTED', ARCHIVE: 'ARCHIVED' },
-    SUBMITTED: { ACTIVATE: 'ACTIVE', RETURN: 'RETURNED', ARCHIVE: 'ARCHIVED' },
+    SUBMITTED: { ADMIN_VERIFY: 'ADMIN_VERIFIED', RETURN: 'RETURNED', ARCHIVE: 'ARCHIVED' },
+    ADMIN_VERIFIED: { JUDGE_VERIFY: 'JUDGE_VALIDATION', RETURN: 'RETURNED', ARCHIVE: 'ARCHIVED' },
+    JUDGE_VALIDATION: { APPROVE_DATA: 'DATA_APPROVED', RETURN: 'RETURNED', ARCHIVE: 'ARCHIVED' },
+    DATA_APPROVED: { ACTIVATE: 'ACTIVE', ARCHIVE: 'ARCHIVED' },
     ACTIVE: { ARCHIVE: 'ARCHIVED' },
     RETURNED: { REOPEN: 'DRAFT', SUBMIT: 'SUBMITTED', ARCHIVE: 'ARCHIVED' },
     ARCHIVED: {}

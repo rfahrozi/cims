@@ -216,6 +216,10 @@ export class HearingIntakeService {
         custodyStatus: item.custody_status,
         detentionOrganizationId: item.detention_organization_id
       })),
+      judges: dto.judges?.map((j) => ({
+        userId: j.user_id,
+        role: j.role
+      })),
       notes: dto.notes
     };
   }

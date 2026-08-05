@@ -132,7 +132,7 @@ export class PenetapanDocumentService {
         </tr>
       </table>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa Majelis Hakim telah memeriksa dengan
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa Majelis Hakim telah memeriksa dengan
       cermat seluruh berkas perkara yang diterima dari Pengadilan Negeri .../Pengadilan
       Tindak Pidana Korupsi pada Pengadilan Negeri ... yang terdiri dari berita acara
       pemeriksaan dari Penyidik, berita acara pemeriksaan di sidang pengadilan negeri/pengadilan
@@ -141,35 +141,31 @@ export class PenetapanDocumentService {
       Pidana Korupsi pada Pengadilan Negeri ... yang dimohonkan banding;
       <sup>1</sup></p>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa Majelis Hakim menyatakan pemeriksaan
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa Majelis Hakim menyatakan pemeriksaan
       telah selesai dan ditutup sehingga agenda berikutnya merupakan pembacaan putusan yang
       diselenggarakan secara ${modeMenimbang};</p>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa berdasarkan alasan tersebut, Majelis
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa berdasarkan alasan tersebut, Majelis
       Hakim memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)} untuk memberitahukan
       tanggal sidang pembacaan putusan dengan mengirimkan penetapan ini sebagaimana amar
       penetapan;</p>
 
-      <p class="memperhatikan"><strong>Memperhatikan</strong>, ketentuan Pasal 298 ayat (1), ayat (4),
-      dan ayat (5) KUHAP serta peraturan perundang-undangan lain yang bersangkutan;</p>
+      <p class="memperhatikan"><strong>Memperhatikan</strong>, ketentuan Pasal 298 ayat (1) dan ayat (4) KUHAP serta peraturan perundang-undangan lain yang bersangkutan;</p>
 
       <div class="amar">
         <p class="menetapkan">M E N E T A P K A N :</p>
         <ol>
           <li>
-            <p>Menetapkan sidang pembacaan putusan pada hari <strong>${this.esc(dayName)}</strong>
-            tanggal <strong>${this.esc(formattedDate)}</strong> pukul
+            <p>Menetapkan pembacaan putusan yang akan dilaksanakan pada hari
+            <strong>${this.esc(dayName)}</strong> tanggal
+            <strong>${this.esc(formattedDate)}</strong> pukul
             <strong>${this.esc(formattedTime)}</strong>
             ${modePembacaan};</p>
           </li>
           <li>
-            <p>Memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)} untuk mengirimkan
-            penetapan tanggal sidang pembacaan putusan kepada Penuntut Umum pada Kejaksaan
-            Negeri ...;</p>
-          </li>
-          <li>
-            <p>Memerintahkan Penuntut Umum pada Kejaksaan Negeri ... untuk mengirimkan penetapan
-            tanggal sidang pembacaan putusan kepada Terdakwa dan/atau Advokatnya;</p>
+            <p>Memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)}
+            menyampaikan salinan penetapan ini kepada Penuntut Umum Pengadilan Negeri ...
+            dan Terdakwa/Penasihat Hukum;</p>
           </li>
         </ol>
       </div>
@@ -177,15 +173,12 @@ export class PenetapanDocumentService {
       ${this.renderTtdBlock(penetapanCity, hakimKetua)}
 
       <div class="catatan-kaki">
-        <p><sup>1</sup> Sesuai ketentuan Pasal 291 ayat (1) KUHAP.</p>
+        <p><sup>1</sup> Sesuaikan dengan alasan permohonan banding dan kontra memori banding (jika ada)</p>
       </div>
     `,
-      `Penetapan Pemberitahuan Sidang — ${penetapanNumber}`
+      'Penetapan Pemberitahuan Sidang Pembacaan Putusan (Pasal 298 ayat (1) KUHAP)'
     );
   }
-
-  // ── Template II: Penetapan Perubahan Tanggal Pembacaan Putusan ─────────────
-  // Pasal 298 ayat (3) KUHAP — dikirim jika jadwal berubah (reschedule)
 
   private renderPerubahanTanggal(data: RenderData): string {
     const { reading, resolvedJoinUrl, formattedDate, formattedTime, dayName } = data;
@@ -231,17 +224,17 @@ export class PenetapanDocumentService {
         </tr>
       </table>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa berdasarkan Penetapan Majelis Hakim
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa berdasarkan Penetapan Majelis Hakim
       Pengadilan Tinggi ${this.esc(courtName)} Nomor ... Tanggal ..., sidang pembacaan putusan
       perkara pidana nomor ... atas nama Terdakwa/Para Terdakwa ... diselenggarakan pada hari ...
       tanggal ... pukul ... ${this.renderTimezone(reading.displayTimezone)}
       ${modeSebelumnya};</p>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa berdasarkan alasan yang sah, oleh
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa berdasarkan alasan yang sah, oleh
       karenanya Majelis Hakim perlu menetapkan perubahan tanggal pembacaan putusan yang
       diselenggarakan ${reading.deliveryMode === 'ELEKTRONIK' ? 'secara elektronik' : 'secara langsung di ruang sidang'};</p>
 
-      <p class="menimbang"><strong>Menimbang</strong> bahwa berdasarkan alasan tersebut, Majelis
+      <p class="menimbang"><strong>Menimbang</strong>, bahwa berdasarkan alasan tersebut, Majelis
       Hakim memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)} untuk memberitahukan
       perubahan tanggal sidang pembacaan putusan dengan mengirimkan penetapan ini sebagaimana
       amar penetapan;</p>
@@ -260,25 +253,18 @@ export class PenetapanDocumentService {
             ${modePembacaan};</p>
           </li>
           <li>
-            <p>Memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)} untuk mengirimkan
-            penetapan perubahan tanggal pembacaan putusan kepada Penuntut Umum pada Kejaksaan
-            Negeri ...;</p>
-          </li>
-          <li>
-            <p>Memerintahkan Penuntut Umum pada Kejaksaan Negeri ... untuk mengirimkan penetapan
-            perubahan tanggal pembacaan putusan kepada Terdakwa/Para Terdakwa dan/atau
-            Advokatnya;</p>
+            <p>Memerintahkan Panitera Pengadilan Tinggi ${this.esc(courtName)}
+            menyampaikan salinan penetapan ini kepada Penuntut Umum Pengadilan Negeri ...
+            dan Terdakwa/Penasihat Hukum;</p>
           </li>
         </ol>
       </div>
 
       ${this.renderTtdBlock(penetapanCity, hakimKetua)}
     `,
-      `Penetapan Perubahan Tanggal — ${penetapanNumber}`
+      'Penetapan Perubahan Tanggal Sidang Pembacaan Putusan (Pasal 298 ayat (3) KUHAP)'
     );
   }
-
-  // ── Template III.1: Paragraf Penutup — Tanggal Musyawarah = Ucapan ─────────
 
   private renderParagrafPenutupSama(data: RenderData): string {
     const { reading, formattedDate, dayName } = data;
