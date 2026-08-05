@@ -1,4 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  UnauthorizedException
+} from '@nestjs/common';
 import type { Observable } from 'rxjs';
 import type { CurrentUser } from './current-user.decorator.js';
 
@@ -338,7 +344,12 @@ export class DevIdentityInterceptor implements NestInterceptor {
       .getRequest<{ headers: Record<string, string | string[] | undefined>; user?: CurrentUser }>();
     const raw = request.headers['x-cims-dev-persona'];
     const key = Array.isArray(raw) ? raw[0] : raw;
-    request.user = personas[key ?? 'substitute-clerk'] ?? personas['substitute-clerk'];
+    if (!key || !personas[key]) {
+      throw new UnauthorizedException(
+        'Valid x-cims-dev-persona header is required for DEV identity interceptor.'
+      );
+    }
+    request.user = personas[key];
     return next.handle();
   }
 }

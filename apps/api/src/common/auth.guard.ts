@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+  Logger
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
@@ -7,20 +13,27 @@ import { personas } from './dev-identity.interceptor.js';
 
 @Injectable()
 export class CimsAuthGuard implements CanActivate {
+  private readonly logger = new Logger(CimsAuthGuard.name);
+
   constructor(
     private readonly reflector: Reflector,
     private readonly config: ConfigService,
     private readonly verifier: OidcTokenVerifierService
   ) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     if (
       this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
         context.getHandler(),
         context.getClass()
       ])
-    )
+    ) {
       return true;
+    }
+
     const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
+    const env = (this.config.get<string>('NODE_ENV') ?? 'development').toLowerCase();
+
     const request = context.switchToHttp().getRequest<{
       headers: Record<string, string | string[] | undefined>;
       user?: unknown;
@@ -28,9 +41,23 @@ export class CimsAuthGuard implements CanActivate {
     }>();
 
     if (mode === 'DEV') {
+      if (env !== 'development' && env !== 'test') {
+        this.logger.error(`Critical Security Incident: DEV auth attempted in ${env} environment.`);
+        throw new UnauthorizedException(
+          'DEV auth is strictly forbidden in non-development environments.'
+        );
+      }
+
       const raw = request.headers['x-cims-dev-persona'];
       const key = Array.isArray(raw) ? raw[0] : raw;
-      request.user = personas[key ?? 'substitute-clerk'] ?? personas['substitute-clerk'];
+
+      if (!key || !personas[key]) {
+        throw new UnauthorizedException(
+          'Valid x-cims-dev-persona header is required for DEV auth.'
+        );
+      }
+
+      request.user = personas[key];
       return true;
     }
 
@@ -42,8 +69,18 @@ export class CimsAuthGuard implements CanActivate {
       value = `Bearer ${request.query.token}`;
     }
 
-    if (!value?.startsWith('Bearer ')) throw new UnauthorizedException('Bearer token is required.');
-    request.user = await this.verifier.verify(value.slice(7));
-    return true;
+    if (!value?.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Bearer token is required.');
+    }
+
+    try {
+      request.user = await this.verifier.verify(value.slice(7));
+      return true;
+    } catch (err) {
+      this.logger.warn(
+        `Token verification failed: ${err instanceof Error ? err.message : String(err)}`
+      );
+      throw new UnauthorizedException('Invalid or expired token.');
+    }
   }
 }
