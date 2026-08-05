@@ -90,7 +90,7 @@ async function bootstrap(): Promise<void> {
     const swagger = new DocumentBuilder()
       .setTitle('CIMS API')
       .setDescription('Compliance-first electronic criminal hearing orchestration API')
-      .setVersion('0.20.0')
+      .setVersion('1.0.0')
       .addBearerAuth()
       .addApiKey({ type: 'apiKey', in: 'header', name: 'x-cims-dev-persona' }, 'devPersona')
       .build();

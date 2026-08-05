@@ -1,6 +1,6 @@
 {
   "name": "cims-platform-ts",
-  "version": "0.20.0",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "apps/*",

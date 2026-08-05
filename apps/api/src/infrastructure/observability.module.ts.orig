@@ -1,0 +1,23 @@
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AuditService } from './observability/audit.service.js';
+import { MetricsService } from './observability/metrics.service.js';
+import { StructuredLogger } from './observability/structured-logger.service.js';
+import { MetricsInterceptor } from './observability/metrics.interceptor.js';
+
+const providers = [
+  AuditService, 
+  MetricsService, 
+  StructuredLogger,
+  MetricsInterceptor,
+  { provide: APP_INTERCEPTOR, useExisting: MetricsInterceptor }
+];
+
+@Global()
+@Module({
+  imports: [ConfigModule],
+  providers,
+  exports: providers
+})
+export class ObservabilityModule {}

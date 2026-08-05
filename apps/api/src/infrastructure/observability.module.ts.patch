@@ -1,0 +1,26 @@
+--- apps/api/src/infrastructure/observability.module.ts
++++ apps/api/src/infrastructure/observability.module.ts
+@@ -1,6 +1,5 @@
+ import { Global, Module } from '@nestjs/common';
+ import { ConfigModule } from '@nestjs/config';
+-import { APP_INTERCEPTOR } from '@nestjs/core';
+ import { AuditService } from './observability/audit.service.js';
+ import { MetricsService } from './observability/metrics.service.js';
+ import { StructuredLogger } from './observability/structured-logger.service.js';
+@@ -9,8 +8,7 @@
+ const providers = [
+   AuditService, 
+   MetricsService, 
+-  StructuredLogger,
+-  MetricsInterceptor,
+-  { provide: APP_INTERCEPTOR, useExisting: MetricsInterceptor }
++  StructuredLogger,
++  MetricsInterceptor
+ ];
+ 
+ @Global()
+@@ -19,7 +17,7 @@
+   providers,
+   exports: providers
+ })
+ export class ObservabilityModule {}

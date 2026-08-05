@@ -1,0 +1,22 @@
+--- apps/api/test/common/oidc-token-verifier.service.spec.ts
++++ apps/api/test/common/oidc-token-verifier.service.spec.ts
+@@ -91,7 +91,8 @@
+         payload: {
+           sub: 'user-1',
+           roles: ['cims-SYSTEM-ADMIN', 'cims-COURT-CLERK'],
+-          organization_ids: ['org-1']
++          organization_ids: ['org-1'],
++          amr: ['mfa']
+         }
+       } as any);
+       
+@@ -107,7 +108,8 @@
+           resource_access: {
+             'cims-api': { roles: ['JUDGE'] }
+           },
+-          organization_ids: ['org-1']
++          organization_ids: ['org-1'],
++          amr: ['mfa']
+         }
+       } as any);
+       

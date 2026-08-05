@@ -1,0 +1,33 @@
+--- apps/api/src/common/auth.guard.ts
++++ apps/api/src/common/auth.guard.ts
+@@ -19,20 +19,30 @@
+     )
+       return true;
+     const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
++    const env = (this.config.get<string>('NODE_ENV') ?? 'development').toLowerCase();
++    
+     const request = context.switchToHttp().getRequest<{
+       headers: Record<string, string | string[] | undefined>;
+       user?: unknown;
+       query?: Record<string, string>;
+     }>();
+ 
+     if (mode === 'DEV') {
++      if (env !== 'development' && env !== 'test') {
++        throw new UnauthorizedException('DEV auth is strictly forbidden in non-development environments.');
++      }
++
+       const raw = request.headers['x-cims-dev-persona'];
+       const key = Array.isArray(raw) ? raw[0] : raw;
+-      request.user = personas[key ?? 'substitute-clerk'] ?? personas['substitute-clerk'];
++      
++      if (!key || !personas[key]) {
++        throw new UnauthorizedException('Valid x-cims-dev-persona header is required for DEV auth.');
++      }
++      
++      request.user = personas[key];
+       return true;
+     }
+ 
+     const raw = request.headers.authorization;
+     let value = Array.isArray(raw) ? raw[0] : raw;
