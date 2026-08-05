@@ -1,4 +1,4 @@
-export type NodeEnv = 'development' | 'test' | 'preproduction' | 'production';
+export type NodeEnv = 'development' | 'test' | 'staging' | 'preproduction' | 'production';
 export type AuthMode = 'DEV' | 'OIDC';
 export type PersistenceMode = 'MEMORY' | 'POSTGRES';
 
@@ -33,7 +33,7 @@ export interface RuntimeEnv {
   EVIDENCE_STORAGE_MODE: string;
 }
 
-const NODE_ENVS = ['development', 'test', 'preproduction', 'production'] as const;
+const NODE_ENVS = ['development', 'test', 'staging', 'preproduction', 'production'] as const;
 const AUTH_MODES = ['DEV', 'OIDC'] as const;
 const PERSISTENCE_MODES = ['MEMORY', 'POSTGRES'] as const;
 

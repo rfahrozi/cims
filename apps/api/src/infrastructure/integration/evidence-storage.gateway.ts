@@ -258,7 +258,7 @@ export class EvidenceStorageGateway {
   }
 
   private get mode(): 'LOCAL' | 'HTTP' | 'DISABLED' | 'S3' {
-    const value = (this.config.get<string>('EVIDENCE_STORAGE_MODE') ?? 'LOCAL').toUpperCase();
+    const value = (this.config?.get<string>('EVIDENCE_STORAGE_MODE') ?? 'LOCAL').toUpperCase();
     if (value === 'HTTP') return 'HTTP';
     if (value === 'S3') return 'S3';
     if (value === 'DISABLED') return 'DISABLED';

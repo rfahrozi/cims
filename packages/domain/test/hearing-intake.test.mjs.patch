@@ -1,0 +1,14 @@
+--- packages/domain/test/hearing-intake.test.mjs
++++ packages/domain/test/hearing-intake.test.mjs
+@@ -59,7 +59,10 @@
+ 
+ test('manual intake uses maker checker lifecycle', () => {
+   assert.equal(transitionHearingIntake('DRAFT', 'SUBMIT'), 'SUBMITTED');
+-  assert.equal(transitionHearingIntake('SUBMITTED', 'ACTIVATE'), 'ACTIVE');
++  assert.equal(transitionHearingIntake('SUBMITTED', 'ADMIN_VERIFY'), 'ADMIN_VERIFIED');
++  assert.equal(transitionHearingIntake('ADMIN_VERIFIED', 'JUDGE_VERIFY'), 'JUDGE_VALIDATION');
++  assert.equal(transitionHearingIntake('JUDGE_VALIDATION', 'APPROVE_DATA'), 'DATA_APPROVED');
++  assert.equal(transitionHearingIntake('DATA_APPROVED', 'ACTIVATE'), 'ACTIVE');
+   assert.throws(() => transitionHearingIntake('DRAFT', 'ACTIVATE'), /tidak dapat/i);
+   assert.doesNotThrow(() => assertManualIntakeEditable('RETURNED'));
+   assert.throws(() => assertManualIntakeEditable('ACTIVE'), /hanya dapat diubah/i);

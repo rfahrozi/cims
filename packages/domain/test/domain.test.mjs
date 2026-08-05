@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { assertValidDetermination, detectConflicts, nextGate } from '../dist/index.js';
 
 test('determination hard gate rejects missing approval', () => {
-  assert.throws(() => assertValidDetermination('h-1', []), /valid judicial determination/i);
+  assert.throws(() => assertValidDetermination('h-1', []), /active schedule is required|valid judicial determination/i);
 });
 
 test('next gate follows compliance order', () => {

@@ -1,4 +1,4 @@
-import type { RuntimeEnv } from '../config/env.schema.js';
+import type { NodeEnv, RuntimeEnv } from '../config/env.schema.js';
 
 export type SecretResolver = (key: string) => string | undefined;
 
@@ -20,10 +20,10 @@ function requireSecret(key: string, resolveSecret: SecretResolver): string {
   return value;
 }
 
-function assertHttpsOrigins(origins: string[]): void {
+function assertHttpsOrigins(origins: string[], envName: string): void {
   for (const origin of origins) {
     if (!origin.startsWith('https://')) {
-      throw new Error(`Production WEB_ORIGINS must use HTTPS. Invalid origin: ${origin}`);
+      throw new Error(`${envName} WEB_ORIGINS must use HTTPS. Invalid origin: ${origin}`);
     }
 
     if (
@@ -32,7 +32,7 @@ function assertHttpsOrigins(origins: string[]): void {
       origin.includes('0.0.0.0')
     ) {
       throw new Error(
-        `Production WEB_ORIGINS must not point to localhost. Invalid origin: ${origin}`
+        `${envName} WEB_ORIGINS must not point to localhost. Invalid origin: ${origin}`
       );
     }
   }
@@ -52,7 +52,16 @@ function assertBase64Key32Bytes(key: string, value: string): void {
   }
 }
 
+function isSeriousEnvironment(env: NodeEnv): boolean {
+  return ['staging', 'preproduction', 'production'].includes(env);
+}
+
+function isProductionLikeEnvironment(env: NodeEnv): boolean {
+  return ['preproduction', 'production'].includes(env);
+}
+
 export function enforceRuntimeSecurityPolicy(env: RuntimeEnv, resolveSecret: SecretResolver): void {
+  // 1. Validasi Dependensi Base Konfigurasi
   if (env.AUTH_MODE === 'OIDC') {
     if (!env.OIDC_ISSUER || !env.OIDC_JWKS_URL) {
       throw new Error('AUTH_MODE=OIDC requires OIDC_ISSUER and OIDC_JWKS_URL.');
@@ -93,49 +102,48 @@ export function enforceRuntimeSecurityPolicy(env: RuntimeEnv, resolveSecret: Sec
     assertBase64Key32Bytes('FIELD_ENCRYPTION_KEY', fieldEncryptionKey);
   }
 
-  if (env.NODE_ENV !== 'production') {
-    return;
+  // 2. FORBIDDEN ENVIRONMENT MATRIX
+
+  // Aturan untuk Serious Environments (Staging, Preproduction, Production)
+  if (isSeriousEnvironment(env.NODE_ENV)) {
+    if (env.AUTH_MODE === 'DEV') {
+      throw new Error(`AUTH_MODE=DEV is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (env.PERSISTENCE_MODE === 'MEMORY') {
+      throw new Error(`PERSISTENCE_MODE=MEMORY is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (!env.DB_SSL) {
+      throw new Error(`DB_SSL=true is required in ${env.NODE_ENV}.`);
+    }
+
+    // Validasi secret utama wajib di environment serius
+    requireSecret('DATABASE_URL', resolveSecret);
+    requireSecret('WEBHOOK_SHARED_SECRET', resolveSecret);
+    requireSecret('TOKEN_PEPPER', resolveSecret);
+    requireSecret('AUDIT_HASH_KEY', resolveSecret);
+
+    const requiredFieldKey = requireSecret('FIELD_ENCRYPTION_KEY', resolveSecret);
+    assertBase64Key32Bytes('FIELD_ENCRYPTION_KEY', requiredFieldKey);
   }
 
-  if (env.AUTH_MODE === 'DEV') {
-    throw new Error('AUTH_MODE=DEV is forbidden in production.');
+  // Aturan ekstra ketat untuk Production dan Preproduction
+  if (isProductionLikeEnvironment(env.NODE_ENV)) {
+    if (env.SWAGGER_ENABLED) {
+      throw new Error(`SWAGGER_ENABLED=true is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (env.NOTIFICATION_GATEWAY_MODE === 'MOCK') {
+      throw new Error(`NOTIFICATION_GATEWAY_MODE=MOCK is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (env.OFFICIAL_SYSTEM_GATEWAY_MODE === 'MOCK') {
+      throw new Error(`OFFICIAL_SYSTEM_GATEWAY_MODE=MOCK is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (env.VIDEO_PROVIDER_MODE === 'MOCK') {
+      throw new Error(`VIDEO_PROVIDER_MODE=MOCK is forbidden in ${env.NODE_ENV}.`);
+    }
+    if (env.EVIDENCE_STORAGE_MODE === 'LOCAL') {
+      throw new Error(`EVIDENCE_STORAGE_MODE=LOCAL is forbidden in ${env.NODE_ENV}.`);
+    }
+
+    assertHttpsOrigins(env.WEB_ORIGINS, env.NODE_ENV);
   }
-
-  if (env.SWAGGER_ENABLED) {
-    throw new Error('SWAGGER_ENABLED=true is forbidden in production.');
-  }
-
-  if (env.PERSISTENCE_MODE === 'MEMORY') {
-    throw new Error('PERSISTENCE_MODE=MEMORY is forbidden in production.');
-  }
-
-  if (!env.DB_SSL) {
-    throw new Error('DB_SSL=true is required in production.');
-  }
-
-  if (env.NOTIFICATION_GATEWAY_MODE === 'MOCK') {
-    throw new Error('NOTIFICATION_GATEWAY_MODE=MOCK is forbidden in production.');
-  }
-
-  if (env.OFFICIAL_SYSTEM_GATEWAY_MODE === 'MOCK') {
-    throw new Error('OFFICIAL_SYSTEM_GATEWAY_MODE=MOCK is forbidden in production.');
-  }
-
-  if (env.VIDEO_PROVIDER_MODE === 'MOCK') {
-    throw new Error('VIDEO_PROVIDER_MODE=MOCK is forbidden in production.');
-  }
-
-  if (env.EVIDENCE_STORAGE_MODE === 'LOCAL') {
-    throw new Error('EVIDENCE_STORAGE_MODE=LOCAL is forbidden in production.');
-  }
-
-  assertHttpsOrigins(env.WEB_ORIGINS);
-
-  requireSecret('DATABASE_URL', resolveSecret);
-  requireSecret('WEBHOOK_SHARED_SECRET', resolveSecret);
-  requireSecret('TOKEN_PEPPER', resolveSecret);
-  requireSecret('AUDIT_HASH_KEY', resolveSecret);
-
-  const requiredFieldKey = requireSecret('FIELD_ENCRYPTION_KEY', resolveSecret);
-  assertBase64Key32Bytes('FIELD_ENCRYPTION_KEY', requiredFieldKey);
 }
