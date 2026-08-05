@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { InfrastructureModule } from './infrastructure/infrastructure.module.js';
 import { SecurityModule } from './infrastructure/security.module.js';
@@ -31,6 +31,7 @@ import { LiaisonModule } from './modules/liaison/liaison.module.js';
 import { CustodyModule } from './modules/custody/custody.module.js';
 import { AdminConfigModule } from './modules/admin-config/admin-config.module.js';
 import { RealtimeModule } from './modules/realtime/realtime.module.js';
+import { MetricsInterceptor } from './infrastructure/observability/metrics.interceptor.js';
 
 @Module({
   imports: [
@@ -66,7 +67,8 @@ import { RealtimeModule } from './modules/realtime/realtime.module.js';
   providers: [
     OidcTokenVerifierService,
     { provide: APP_GUARD, useClass: CimsAuthGuard },
-    { provide: APP_GUARD, useClass: PolicyGuard }
+    { provide: APP_GUARD, useClass: PolicyGuard },
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor }
   ]
 })
 export class AppModule {}
