@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cims_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - cims_pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    build:
+      context: .
+      dockerfile: tools/Dockerfile.migrations
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/cims_dev
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: development
+      AUTH_MODE: DEV
+      DATABASE_URL: postgres://postgres:password@db:5432/cims_dev
+      PERSISTENCE_MODE: POSTGRES
+      WEB_ORIGINS: http://localhost:5173
+      API_PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      NODE_ENV: development
+      VITE_API_BASE_URL: http://localhost:3000/api/v1
+    ports:
+      - "5173:5173"
+
+  zoom-provider:
+    build:
+      context: .
+      dockerfile: services/zoom-provider/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3010
+      CIMS_API_URL: http://api:3000
+    ports:
+      - "3010:3010"
+
+  brevo-notification:
+    build:
+      context: .
+      dockerfile: services/brevo-notification/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3011
+      DATABASE_URL: postgres://postgres:password@db:5432/cims_dev
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+volumes:
+  cims_pgdata_dev:
