@@ -56,7 +56,7 @@ export class OidcTokenVerifierService {
       payload.resource_access &&
       this.audience in payload.resource_access
     ) {
-      const resource = (payload.resource_access as Record<string, any>)[this.audience];
+      const resource = (payload.resource_access as Record<string, unknown>)[this.audience];
       if (resource && Array.isArray(resource.roles)) {
         clientRoles = resource.roles;
       }

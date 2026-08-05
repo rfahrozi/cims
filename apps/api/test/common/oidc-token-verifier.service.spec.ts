@@ -1,0 +1,166 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { OidcTokenVerifierService } from '../../src/common/oidc-token-verifier.service.js';
+import * as jose from 'jose';
+
+vi.mock('jose', () => ({
+  createRemoteJWKSet: vi.fn().mockReturnValue('mocked-jwks'),
+  jwtVerify: vi.fn()
+}));
+
+describe('OidcTokenVerifierService', () => {
+  let service: OidcTokenVerifierService;
+  let config: ConfigService;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    config = {
+      get: vi.fn().mockImplementation((key) => {
+        if (key === 'OIDC_ISSUER') return 'https://sso.go.id';
+        if (key === 'OIDC_AUDIENCE') return 'cims-api';
+        if (key === 'OIDC_JWKS_URL') return 'https://sso.go.id/jwks';
+        if (key === 'OIDC_ROLE_PREFIX') return 'cims-';
+        return undefined;
+      })
+    } as unknown as ConfigService;
+    service = new OidcTokenVerifierService(config);
+  });
+
+  describe('configuration validation', () => {
+    it('throws UnauthorizedException if issuer is missing', async () => {
+      config = {
+        get: vi.fn().mockImplementation((key) => (key === 'OIDC_AUDIENCE' ? 'cims-api' : undefined))
+      } as unknown as ConfigService;
+      service = new OidcTokenVerifierService(config);
+
+      await expect(service.verify('some-token')).rejects.toThrow(
+        /OIDC configuration is incomplete/
+      );
+    });
+
+    it('throws UnauthorizedException if audience is missing', async () => {
+      config = {
+        get: vi
+          .fn()
+          .mockImplementation((key) => (key === 'OIDC_ISSUER' ? 'https://sso.go.id' : undefined))
+      } as unknown as ConfigService;
+      service = new OidcTokenVerifierService(config);
+
+      await expect(service.verify('some-token')).rejects.toThrow(
+        /OIDC configuration is incomplete/
+      );
+    });
+  });
+
+  describe('token validation', () => {
+    it('throws UnauthorizedException when signature verification fails', async () => {
+      vi.mocked(jose.jwtVerify).mockRejectedValue(new Error('signature verification failed'));
+      await expect(service.verify('invalid-token')).rejects.toThrow(
+        'signature verification failed'
+      );
+    });
+
+    it('throws UnauthorizedException when sub claim is missing', async () => {
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          roles: ['SYSTEM_ADMIN'],
+          organization_ids: ['org-1']
+        }
+      } as any);
+
+      await expect(service.verify('valid-sig-but-bad-payload')).rejects.toThrow(
+        /Missing subject \(sub\) claim/
+      );
+    });
+
+    it('throws UnauthorizedException when no valid CIMS roles are found', async () => {
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          roles: ['RANDOM_ROLE'],
+          organization_ids: ['org-1']
+        }
+      } as any);
+
+      await expect(service.verify('valid-sig-but-bad-roles')).rejects.toThrow(
+        /No valid CIMS roles found/
+      );
+    });
+
+    it('throws UnauthorizedException when organization_ids is missing', async () => {
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          roles: ['SYSTEM_ADMIN']
+        }
+      } as any);
+
+      await expect(service.verify('valid-sig-but-bad-org')).rejects.toThrow(
+        /Missing organization_ids claim/
+      );
+    });
+
+    it('strips role prefix and normalizes roles properly', async () => {
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          roles: ['cims-SYSTEM-ADMIN', 'cims-COURT-CLERK'],
+          organization_ids: ['org-1'],
+          amr: ['mfa']
+        }
+      } as any);
+
+      const user = await service.verify('good-token');
+      expect(user.roles).toContain('SYSTEM_ADMIN');
+      expect(user.roles).toContain('COURT_CLERK');
+    });
+
+    it('extracts roles from resource_access', async () => {
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          resource_access: {
+            'cims-api': { roles: ['JUDGE'] }
+          },
+          organization_ids: ['org-1'],
+          amr: ['mfa']
+        }
+      } as any);
+
+      const user = await service.verify('good-token-with-client-roles');
+      expect(user.roles).toContain('JUDGE');
+      expect(user.role).toBe('JUDGE');
+    });
+
+    it('enforces MFA via AMR or ACR for MFA_REQUIRED_ROLES', async () => {
+      // PROSECUTOR usually requires MFA (based on MFA_REQUIRED_ROLES in domain)
+      // Let's test with a role that requires MFA. We assume PROSECUTOR requires it based on domain logic.
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          roles: ['SYSTEM_ADMIN'], // system admin requires MFA
+          organization_ids: ['org-1'],
+          amr: ['pwd', 'otp']
+        }
+      } as any);
+
+      const user = await service.verify('good-mfa-token');
+      expect(user.id).toBe('user-1');
+
+      // Now without MFA
+      vi.mocked(jose.jwtVerify).mockResolvedValue({
+        payload: {
+          sub: 'user-1',
+          roles: ['SYSTEM_ADMIN'], // system admin requires MFA
+          organization_ids: ['org-1'],
+          amr: ['pwd'] // no otp/mfa
+        }
+      } as any);
+
+      await expect(service.verify('bad-mfa-token')).rejects.toThrow(
+        /Multi-Factor Authentication is strictly required/
+      );
+    });
+  });
+});
