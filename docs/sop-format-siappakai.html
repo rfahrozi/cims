@@ -424,6 +424,7 @@
                   stroke="#111"
                   stroke-width="1.7"
                 ></rect>
+                <!-- Pass the line from Row 2 down to Row 3 for the Panitera bridge -->
                 <line x1="52" y1="53" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
               </svg>
             </td>
@@ -447,9 +448,6 @@
 
                 <!-- Send line left back to Panitera -->
                 <line x1="22" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line>
-
-                <!-- Pass the line from Row 1 down to Row 3 for the CIMS bridge -->
-                <!-- Wait, Row 1 CIMS doesn't send down right now. Let's just keep it contained to Row 2. -->
               </svg>
             </td>
             <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
@@ -465,6 +463,7 @@
             <td class="flow center">
               <svg class="flowSvg" viewBox="0 0 104 54">
                 <line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <!-- Remove the incorrect arrowhead pointing down to nowhere -->
                 <line x1="52" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
                 <polygon points="104,27 97,23 97,31" fill="#111"></polygon>
               </svg>
