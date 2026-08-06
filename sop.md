@@ -45,7 +45,7 @@
 | 3   | Penetapan pemberitahuan sidang dan pemberitahuan lintas instansi       |
 | 4   | Upload surat pemberitahuan Kejaksaan kepada Rutan/Lapas                |
 | 5   | Pengisian checklist kesiapan sidang                                    |
-| 6   | Provisioning ruang sidang virtual                                      |
+| 6   | Aktivasi ruang sidang virtual                                      |
 | 7   | Registrasi kehadiran, verifikasi identitas, dan pelaksanaan sidang     |
 | 8   | Unggah petikan putusan serta pengiriman salinan putusan dan berkas     |
 | 9   | Audit trail, pengendalian mutu, pelaporan, evaluasi, dan tindak lanjut |
@@ -86,7 +86,7 @@
 | 4   | Surat pemberitahuan Kejaksaan ke Rutan/Lapas | Tersedia di CIMS minimal H-3                                                         |
 | 5   | Checklist kesiapan                           | Lengkap maksimal H-1                                                                 |
 | 6   | Auto-forced bypass                           | Hanya berlaku bila sisa waktu kurang dari 2 jam, wajib catatan merah dan audit trail |
-| 7   | Ruang sidang virtual                         | Hanya diprovisioning bila status ALL_READY atau AUTO_FORCED yang sah                 |
+| 7   | Aktivasi ruang sidang virtual                         | Hanya diprovisioning otomatis di awal, aktivasi akses bila status ALL_READY atau AUTO_FORCED yang sah                 |
 | 8   | Kehadiran pihak                              | Tercatat jelas langsung / elektronik / tidak hadir                                   |
 | 9   | Petikan putusan                              | Diunggah pada hari yang sama                                                         |
 | 10  | Salinan putusan dan berkas                   | Terkirim paling lambat 7 hari                                                        |
@@ -225,7 +225,7 @@
 | 5   | Upload surat pemberitahuan Kejaksaan ke Rutan/Lapas     |
 | 6   | Pengisian dan perubahan checklist kesiapan              |
 | 7   | Auto-forced bypass dan catatan merah                    |
-| 8   | Provisioning ruang sidang virtual                       |
+| 8   | Aktivasi ruang sidang virtual                       |
 | 9   | Registrasi kehadiran dan verifikasi identitas           |
 | 10  | Pembukaan, pelaksanaan, dan penutupan sidang            |
 | 11  | Pencatatan waktu pembacaan putusan                      |
@@ -321,7 +321,7 @@ Agar mudah dipakai untuk review pimpinan, saya susun dalam dua lapis. Tabel pert
 | 10  | Pengisian checklist kesiapan Rutan/Lapas                     | Petugas Rutan/Lapas                    | Memastikan ruang, perangkat, jaringan, keamanan, dan identifikasi terdakwa siap                                              | Semua item wajib terisi, identitas terdakwa tervalidasi                         | Maksimal H-1                          | Checklist Rutan/Lapas lengkap          | Ini sangat krusial karena menyangkut kehadiran terdakwa                    |
 | 11  | Evaluasi readiness                                           | Sistem CIMS / operator                 | Sistem membaca status seluruh checklist dan hard gate                                                                        | Status readiness mencapai ALL_READY                                             | H-1 sampai sebelum sidang             | Status readiness                       | Menjadi syarat provisioning ruang virtual                                  |
 | 12  | Auto-forced bypass checklist                                 | Sistem CIMS                            | Jika sisa waktu kurang dari 2 jam dan checklist belum lengkap, sistem memaksa status bypass agar sidang tetap dapat diproses | Status berubah ke AUTO_FORCED, muncul catatan merah, audit trail tercatat       | Saat sisa waktu < 2 jam               | Bypass readiness sah                   | Ini bukan penghapusan kewajiban, melainkan pengecualian yang harus diaudit |
-| 13  | Provisioning ruang sidang virtual                            | Operator IT / sistem                   | Sistem membuat meeting room / ruang sidang virtual                                                                           | Ruang hanya dibuat jika status ALL_READY atau AUTO_FORCED yang sah              | Setelah hard gate readiness terpenuhi | Ruang virtual aktif                    | Tidak boleh lebih awal                                                     |
+| 13  | Aktivasi / Pembukaan ruang sidang virtual                    | Operator IT / sistem                   | Membuka akses meeting room / ruang sidang virtual yang telah diprovisioning otomatis | Ruang hanya dibuka jika status ALL_READY atau AUTO_FORCED yang sah              | Setelah hard gate readiness terpenuhi | Ruang virtual dapat diakses            | Tidak boleh diakses lebih awal                                                     |
 | 14  | Registrasi kehadiran para pihak                              | Operator sidang / Panitera             | Seluruh pihak yang hadir dicatat, termasuk media kehadirannya                                                                | Klasifikasi kehadiran jelas: langsung, elektronik, tidak hadir, diwakili        | Sebelum sidang dibuka                 | Data kehadiran                         | Penting untuk kepatuhan SEMA                                               |
 | 15  | Verifikasi identitas                                         | Hakim / Panitera / petugas verifikator | Memastikan identitas hakim, jaksa, terdakwa, penasihat hukum, saksi, ahli                                                    | Identitas tervalidasi dan terekam                                               | Tepat sebelum sidang                  | Bukti verifikasi identitas             | Untuk terdakwa harus sangat ketat                                          |
 | 16  | Pelaksanaan sidang elektronik                                | Hakim / Panitera / operator teknis     | Sidang berjalan sesuai hukum acara dan SOP                                                                                   | Audio-video layak, jalannya sidang terdokumentasi, gangguan dicatat             | Pada jadwal sidang                    | Persidangan terlaksana                 | Jika ada gangguan substansial, bisa ditunda atau dijadwal ulang            |
@@ -345,7 +345,8 @@ Agar mudah dipakai untuk review pimpinan, saya susun dalam dua lapis. Tabel pert
 | Surat pemberitahuan kejaksaan ke Rutan/Lapas | Dokumen tersedia di CIMS minimal H-3                                     |
 | Checklist kesiapan                           | Seluruh checklist terisi maksimal H-1                                    |
 | Auto-forced bypass                           | Hanya boleh jika sisa waktu < 2 jam; wajib catatan merah dan audit trail |
-| Provisioning ruang virtual                   | Hanya jika status ALL_READY atau AUTO_FORCED sah                         |
+| Provisioning ruang virtual                   | Otomatis setelah jadwal ditetapkan oleh Panitera                         |
+| Aktivasi ruang virtual                       | Hanya jika status ALL_READY atau AUTO_FORCED sah                         |
 | Verifikasi kehadiran                         | Cara kehadiran terdakwa dan JPU tercatat tegas                           |
 | Unggah petikan putusan                       | 100% diunggah pada hari yang sama                                        |
 | Pengiriman salinan/berkas                    | 100% terkirim paling lambat 7 hari                                       |
