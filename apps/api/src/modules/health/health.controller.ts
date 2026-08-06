@@ -28,6 +28,7 @@ export class HealthController {
    * Digunakan oleh HEALTHCHECK Dockerfile dan load balancer basic check.
    */
   @Public()
+  @Public()
   @Get('health')
   @HttpCode(200)
   health() {
@@ -47,6 +48,7 @@ export class HealthController {
    * HTTP 200 = hidup, HTTP 503 = proses bermasalah (jarang terjadi).
    */
   @Public()
+  @Public()
   @Get('live')
   @HttpCode(200)
   live() {
@@ -64,6 +66,7 @@ export class HealthController {
    * Memeriksa: database, persistence mode, circuit breaker state.
    * HTTP 200 = siap, HTTP 503 = belum siap (dependency bermasalah).
    */
+  @Public()
   @Public()
   @Get('ready')
   async ready(@Res({ passthrough: true }) reply: FastifyReply) {

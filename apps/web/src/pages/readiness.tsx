@@ -38,7 +38,11 @@ const CHECKLIST_TEMPLATES: Record<
   ],
   PROSECUTION: [
     { code: 'PROSECUTOR_AVAILABLE', label: 'Penuntut Umum siap hadir', required: true },
-    { code: 'DOCUMENTS_READY', label: 'Dokumen dakwaan/tuntutan/bukti tersedia', required: true }
+    {
+      code: 'NOTICE_DELIVERED',
+      label: 'Surat Panggilan/Pemberitahuan telah dikirimkan ke Terdakwa/Rutan',
+      required: true
+    }
   ],
   CORRECTIONS: [
     { code: 'DEFENDANT_VERIFIED', label: 'Verifikasi identitas terdakwa', required: true },
@@ -312,7 +316,7 @@ export function ReadinessPage() {
                   org: 'Kejaksaan (Penuntut Umum)',
                   items: [
                     'Penuntut Umum siap hadir',
-                    'Dokumen dakwaan/tuntutan tersedia',
+                    'Surat Panggilan/Pemberitahuan telah dikirimkan ke Terdakwa/Rutan',
                     'Koneksi internet stabil'
                   ]
                 },

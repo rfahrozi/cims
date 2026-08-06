@@ -22,6 +22,20 @@ export class CimsAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<{
+      headers: Record<string, string | string[] | undefined>;
+      user?: unknown;
+      query?: Record<string, string>;
+      url?: string;
+      originalUrl?: string;
+    }>();
+
+    // Bypass eksplisit untuk Healthcheck (Liveness / Readiness Probe dari Docker)
+    const url = request.url || request.originalUrl || '';
+    if (url.includes('/live') || url.includes('/ready') || url.includes('/health')) {
+       return true;
+    }
+
     if (
       this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
         context.getHandler(),
@@ -33,12 +47,6 @@ export class CimsAuthGuard implements CanActivate {
 
     const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
     const env = (this.config.get<string>('NODE_ENV') ?? 'development').toLowerCase();
-
-    const request = context.switchToHttp().getRequest<{
-      headers: Record<string, string | string[] | undefined>;
-      user?: unknown;
-      query?: Record<string, string>;
-    }>();
 
     if (mode === 'DEV') {
       if (env !== 'development' && env !== 'test') {

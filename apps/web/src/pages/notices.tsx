@@ -158,7 +158,21 @@ export function NoticesPage() {
                   className="bg-slate-50 text-slate-600"
                 />
               </div>
-              <div className="flex flex-wrap gap-2">
+
+              {getPersona() === 'prosecutor' && (
+                <div className="space-y-2 mt-4 p-4 border rounded-md bg-amber-50/50">
+                  <h4 className="font-semibold text-sm text-slate-800">
+                    Dokumen Tembusan ke Rutan/Lapas (SOP H-3)
+                  </h4>
+                  <p className="text-xs text-slate-500 mb-2">
+                    Sebagai Penuntut Umum, Anda wajib mengunggah salinan surat pemberitahuan / panggilan
+                    terdakwa ke Rutan/Lapas sebelum H-3 persidangan.
+                  </p>
+                  <Input type="file" accept=".pdf,.png,.jpg" className="bg-white" />
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 pt-2">
                 <Button onClick={create} disabled={loadingCreate}>
                   {loadingCreate ? 'Membuat…' : 'Buat Pemberitahuan'}
                 </Button>

@@ -29,5 +29,5 @@ COPY --from=build /app/packages/domain/package.json ./packages/domain/package.js
 USER node
 # Liveness probe: proses masih merespons HTTP pada port default
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget -qO- http://localhost:3000/api/v1/live || exit 1
+  CMD wget -qO- http://127.0.0.1:3000/api/v1/live || wget -qO- http://0.0.0.0:3000/api/v1/live || exit 1
 CMD ["node","apps/api/dist/main.js"]
