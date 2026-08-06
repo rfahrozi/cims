@@ -743,14 +743,16 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Workflow Gate — Perkara Aktif</CardTitle>
-            <CardDescription>
-              Persidangan: <strong>{hearing?.caseNumber ?? hearingId}</strong>. Tahap selanjutnya:{' '}
-              <Badge variant="outline">
+            <div className="text-sm text-slate-500 mt-1 flex items-center gap-2">
+              <span>
+                Persidangan: <strong>{hearing?.caseNumber ?? hearingId}</strong>. Tahap selanjutnya:
+              </span>
+              <Badge variant="outline" className="inline-flex">
                 {gate.data?.next_gate
                   ? (GATE_LABEL[gate.data.next_gate] ?? gate.data.next_gate)
                   : 'Memuat…'}
               </Badge>
-            </CardDescription>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {gate.isLoading ? (
@@ -795,7 +797,7 @@ export function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Daftar Persidangan — {meta.orgLabel}</CardTitle>
-            <CardDescription>
+            <div className="text-sm text-slate-500 mt-1">
               {hearings.length} perkara yang dapat diakses sesuai kewenangan{' '}
               <span
                 className={`rounded px-1.5 py-0.5 text-xs font-semibold ${ORG_BADGE_CLASS[meta.orgType]}`}
@@ -803,7 +805,7 @@ export function DashboardPage() {
                 {meta.orgLabel}
               </span>
               .
-            </CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

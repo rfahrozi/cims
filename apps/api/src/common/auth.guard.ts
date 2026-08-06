@@ -48,13 +48,16 @@ export class CimsAuthGuard implements CanActivate {
         );
       }
 
-      const raw = request.headers['x-cims-dev-persona'];
-      const key = Array.isArray(raw) ? raw[0] : raw;
+      // In DEV mode, SSE events don't send custom headers, so we check query params first
+      const rawQuery = request.query?.persona;
+      const rawHeader = request.headers['x-cims-dev-persona'];
+
+      const key =
+        (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery) ||
+        (Array.isArray(rawHeader) ? rawHeader[0] : rawHeader);
 
       if (!key || !personas[key]) {
-        throw new UnauthorizedException(
-          'Valid x-cims-dev-persona header is required for DEV auth.'
-        );
+        throw new UnauthorizedException('Valid persona is required for DEV auth.');
       }
 
       request.user = personas[key];

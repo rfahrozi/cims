@@ -62,41 +62,52 @@ export const personas: Record<string, CurrentUser> = {
     name: 'AGUSMAN, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'court-demo',
-    organizationIds: ['court-demo'],
+    organizationId: 'pn-batam',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'substitute-clerk-2': {
+  'substitute-clerk:1': {
+    id: '196908201993031005',
+    name: 'AGUSMAN, S.H., M.H.',
+    role: 'SUBSTITUTE_CLERK',
+    roles: ['SUBSTITUTE_CLERK'],
+    organizationId: 'pn-batam',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
+    permissions: substitutClerkPermissions,
+    hearingAssignments,
+    authSource: 'DEV'
+  },
+  'substitute-clerk:2': {
     id: '196505281994032001',
     name: 'NURLAILI, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'court-demo',
-    organizationIds: ['court-demo'],
+    organizationId: 'pn-tanjungpinang',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'substitute-clerk-3': {
+  'substitute-clerk:3': {
     id: '198409022009041004',
     name: 'SYAIFUL ISLAMI, S.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'court-demo',
-    organizationIds: ['court-demo'],
+    organizationId: 'pn-tanjungpinang',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'substitute-clerk-4': {
+  'substitute-clerk:4': {
     id: '196511281993031003',
     name: 'SUPRIADI, S.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'court-demo',
-    organizationIds: ['court-demo'],
+    organizationId: 'pn-karimun',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
@@ -106,8 +117,8 @@ export const personas: Record<string, CurrentUser> = {
     name: 'SAPTA PUTRA, S.H.',
     role: 'COURT_CLERK',
     roles: ['COURT_CLERK'],
-    organizationId: 'court-demo',
-    organizationIds: ['court-demo'],
+    organizationId: 'pn-tanjungpinang',
+    organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: [
       ...workflowPermissions,
       ...intakeReviewerPermissions,
@@ -240,6 +251,25 @@ export const personas: Record<string, CurrentUser> = {
     hearingAssignments,
     authSource: 'DEV'
   },
+  'prosecutor:1': {
+    id: 'prosecutor-demo',
+    name: 'Penuntut Umum Demo',
+    role: 'PROSECUTOR',
+    roles: ['PROSECUTOR'],
+    organizationId: 'prosecution-demo',
+    organizationIds: ['prosecution-demo'],
+    permissions: [
+      'hearing.read',
+      'notice.write',
+      'notice.acknowledge',
+      'readiness.write',
+      'readiness.read',
+      'session.join',
+      'session.read'
+    ],
+    hearingAssignments: [],
+    authSource: 'DEV'
+  },
   prosecutor: {
     id: 'prosecutor-demo',
     name: 'Penuntut Umum Demo',
@@ -341,13 +371,22 @@ export class DevIdentityInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context
       .switchToHttp()
-      .getRequest<{ headers: Record<string, string | string[] | undefined>; user?: CurrentUser }>();
-    const raw = request.headers['x-cims-dev-persona'];
-    const key = Array.isArray(raw) ? raw[0] : raw;
+      .getRequest<{
+        headers: Record<string, string | string[] | undefined>;
+        user?: CurrentUser;
+        query?: Record<string, string>;
+      }>();
+
+    // In DEV mode, SSE events don't send custom headers, so we check query params first
+    const rawQuery = request.query?.persona;
+    const rawHeader = request.headers['x-cims-dev-persona'];
+
+    const key =
+      (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery) ||
+      (Array.isArray(rawHeader) ? rawHeader[0] : rawHeader);
+
     if (!key || !personas[key]) {
-      throw new UnauthorizedException(
-        'Valid x-cims-dev-persona header is required for DEV identity interceptor.'
-      );
+      throw new UnauthorizedException('Valid persona is required for DEV identity interceptor.');
     }
     request.user = personas[key];
     return next.handle();

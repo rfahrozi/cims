@@ -7,9 +7,10 @@
 -- =============================================================================
 insert into organizations(id, organization_code, name, organization_type, active)
 values
-  ('court-demo',       'PN-DEMO',     'Pengadilan Negeri Demo',    'COURT',       true),
-  ('prosecution-demo', 'KEJARI-DEMO', 'Kejaksaan Negeri Demo',     'PROSECUTION', true),
-  ('corrections-demo', 'RUTAN-DEMO',  'Rutan Demo',                'CORRECTIONS', true),
+  ('pn-tanjungpinang', 'PN-TPI',      'Pengadilan Negeri Tanjungpinang',    'COURT',       true),
+  ('pn-batam',         'PN-BTM',      'Pengadilan Negeri Batam',            'COURT',       true),
+  ('pn-karimun',       'PN-TBK',      'Pengadilan Negeri Tanjung Balai Karimun', 'COURT',       true),
+  ('pn-natuna',        'PN-NTN',      'Pengadilan Negeri Natuna',           'COURT',       true),
   ('kejati-kepri', 'KEJATI-KEPRI', 'Kejaksaan Tinggi Kepulauan Riau', 'PROSECUTION', true),
   ('kejari-tanjungpinang', 'KEJARI-TPI', 'Kejaksaan Negeri Tanjungpinang', 'PROSECUTION', true),
   ('kejari-batam', 'KEJARI-BTM', 'Kejaksaan Negeri Batam', 'PROSECUTION', true),
@@ -41,41 +42,44 @@ on conflict (id) do update
 
 insert into court_cases(id, case_number, normalized_case_number, official_case_reference, case_classification, case_type_code, case_title, court_organization_id, prosecution_organization_id, data_source, created_by, updated_by)
 values
-  ('case-demo-001', '123/Pid.Sus/2026/PN.Demo', '123/PID.SUS/2026/PN.DEMO', 'SIPP-DEMO-001', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Narkotika', 'court-demo', 'prosecution-demo', 'MANUAL', 'system', 'system'),
-  ('case-demo-002', '456/Pid.B/2026/PN.Demo',   '456/PID.B/2026/PN.DEMO',   'SIPP-DEMO-002', 'GENERAL_CRIMINAL', 'PID.B',   'Perkara Pencurian', 'court-demo', 'prosecution-demo', 'MANUAL', 'system', 'system'),
-  ('case-demo-003', '789/Pid.Sus/2026/PN.Demo', '789/PID.SUS/2026/PN.DEMO', 'SIPP-DEMO-003', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Tipikor',   'court-demo', 'prosecution-demo', 'MANUAL', 'system', 'system')
+  ('case-demo-001', '364/Pid.Sus/2026/PN Btm', '364/PID.SUS/2026/PN BTM', '369/PID.SUS/2026/PT TPG', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Narkotika', 'pn-batam', 'kejari-batam', 'MANUAL', 'system', 'system'),
+  ('case-demo-002', '101/Pid.B/2026/PN Tpg',   '101/PID.B/2026/PN TPG',   '365/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B',   'Perkara Penggelapan', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system'),
+  ('case-demo-003', '74/Pid.B/2026/PN Tpg', '74/PID.B/2026/PN TPG', '356/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B', 'Perkara Pembunuhan',   'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system')
 on conflict (id) do update
   set case_number = excluded.case_number,
       case_title  = excluded.case_title,
       updated_at  = now();
 
--- Perkara A: Status DRAFT — untuk mulai dari langkah 1
-insert into hearings(id, case_id, case_number, hearing_type, state, official_case_reference, hearing_sequence, intake_status, data_source, court_organization_id, prosecution_organization_id, corrections_organization_id, created_by, updated_by)
+insert into hearings(id, case_id, case_number, hearing_sequence, hearing_type, state, intake_status, data_source, court_organization_id, prosecution_organization_id, defendant_custody_status, created_by, updated_by)
 values
-  ('hearing-demo-001', 'case-demo-001', '123/Pid.Sus/2026/PN.Demo', 'PEMERIKSAAN_SAKSI',  'NOT_READY', 'SIPP-DEMO-001', 1, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
-  ('hearing-demo-002', 'case-demo-002', '456/Pid.B/2026/PN.Demo',   'PEMERIKSAAN_AHLI',   'NOT_READY', 'SIPP-DEMO-002', 2, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system'),
-  ('hearing-demo-003', 'case-demo-003', '789/Pid.Sus/2026/PN.Demo', 'PEMBACAAN_PUTUSAN',  'NOT_READY', 'SIPP-DEMO-003', 3, 'DRAFT', 'MANUAL', 'court-demo', 'prosecution-demo', 'corrections-demo', 'system', 'system')
+  ('hearing-demo-001', 'case-demo-001', '364/Pid.Sus/2026/PN Btm', 1, 'Pemeriksaan Saksi', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-batam', 'kejari-batam', 'UNKNOWN', 'system', 'system'),
+  ('hearing-demo-002', 'case-demo-002', '101/Pid.B/2026/PN Tpg', 1, 'Pemeriksaan Ahli', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system'),
+  ('hearing-demo-003', 'case-demo-003', '74/Pid.B/2026/PN Tpg', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system')
 on conflict (id) do update
-  set case_number    = excluded.case_number,
-      hearing_type   = excluded.hearing_type,
-      state          = excluded.state,
-      updated_at     = now();
+  set hearing_type = excluded.hearing_type,
+      state       = excluded.state,
+      updated_at   = now();
 
 -- =============================================================================
 -- 3. Assignment instansi ke perkara
 -- =============================================================================
-insert into hearing_assignments(hearing_id, organization_id)
+insert into hearing_assignments(hearing_id, organization_id, assignment_type)
 values
-  ('hearing-demo-001', 'court-demo'),
-  ('hearing-demo-001', 'prosecution-demo'),
-  ('hearing-demo-001', 'corrections-demo'),
-  ('hearing-demo-002', 'court-demo'),
-  ('hearing-demo-002', 'prosecution-demo'),
-  ('hearing-demo-002', 'corrections-demo'),
-  ('hearing-demo-003', 'court-demo'),
-  ('hearing-demo-003', 'prosecution-demo'),
-  ('hearing-demo-003', 'corrections-demo')
-on conflict do nothing;
+  -- Perkara 001
+  ('hearing-demo-001', 'pn-batam', 'PRIMARY_COURT'),
+  ('hearing-demo-001', 'kejari-batam', 'PARTICIPATING'),
+  ('hearing-demo-001', 'lapas-batam', 'PARTICIPATING'),
+
+  -- Perkara 002
+  ('hearing-demo-002', 'pn-tanjungpinang', 'PRIMARY_COURT'),
+  ('hearing-demo-002', 'kejari-tanjungpinang', 'PARTICIPATING'),
+  ('hearing-demo-002', 'rutan-tanjungpinang', 'PARTICIPATING'),
+
+  -- Perkara 003
+  ('hearing-demo-003', 'pn-tanjungpinang', 'PRIMARY_COURT'),
+  ('hearing-demo-003', 'kejari-tanjungpinang', 'PARTICIPATING'),
+  ('hearing-demo-003', 'rutan-tanjungpinang', 'PARTICIPATING')
+on conflict (hearing_id, organization_id) do nothing;
 
 -- =============================================================================
 -- 4. User demo (5 persona sesuai PANDUAN_PILOT.md)

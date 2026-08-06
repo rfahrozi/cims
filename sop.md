@@ -1,321 +1,370 @@
-# SOP Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS
 
-## A. Identitas Dokumen
+ # STANDAR OPERASIONAL PROSEDUR
 
-**Nama Dokumen:** Standar Operasional Prosedur Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS  
-**Kode Dokumen:** SOP-CIMS-PE-01  
-**Versi:** 1.0 Revisi Selaras CIMS, SEMA 2/2026, dan PKS  
-**Status:** Berlaku setelah disahkan  
-**Unit Pemilik:** [Unit Kerja/Paniteraan/Tim Transformasi Digital]  
-**Tanggal Efektif:** [diisi saat pengesahan]  
-**Peninjauan Berkala:** paling sedikit 1 kali dalam 12 bulan atau sewaktu-waktu jika terdapat perubahan regulasi, sistem, atau PKS  
-**Dokumen Terkait:** kebijakan internal, perjanjian kerja sama antar-instansi, panduan teknis CIMS, template penetapan dan format putusan yang berlaku
+## Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS
 
-## B. Tujuan
+### A. Identitas Dokumen
 
-SOP ini bertujuan untuk menjadi pedoman resmi bagi seluruh pihak yang terlibat dalam persidangan pidana umum dan pidana khusus secara elektronik agar proses berjalan tertib, sah, aman, akuntabel, terdokumentasi, dan selaras dengan:
+| Unsur | Keterangan |
+|---|---|
+| Nama SOP | SOP Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS |
+| Kode Dokumen | SOP/CIMS/PPE/001/2026 |
+| Versi | 1.0 |
+| Status | Draft Siap Review / Siap Pakai Internal |
+| Unit Pemilik | [Diisi unit pemilik] |
+| Tanggal Efektif | [Diisi saat pengesahan] |
+| Tanggal Reviu | [Diisi sesuai jadwal reviu] |
+| Klasifikasi Dokumen | Internal / Terbatas sesuai kebijakan |
 
-1. kebutuhan operasional persidangan elektronik lintas instansi,
-2. mekanisme orkestrasi proses pada CIMS,
-3. ketentuan SEMA No. 2 Tahun 2026 terkait pelaksanaan efektif ketentuan kasasi dan persidangan elektronik,
-4. pembagian peran, tanggung jawab, perlindungan data, dan evaluasi sebagaimana diatur dalam PKS pelaksanaan persidangan secara elektronik.
+### B. Dasar Hukum
 
-## C. Ruang Lingkup
+| No | Dasar Hukum / Acuan |
+|---|---|
+| 1 | Ketentuan hukum acara pidana yang berlaku |
+| 2 | Undang-Undang Nomor 20 Tahun 2025 tentang Kitab Undang-Undang Hukum Acara Pidana, khususnya ketentuan yang relevan dengan Pasal 298 dan Pasal 300 |
+| 3 | Surat Edaran Mahkamah Agung Nomor 2 Tahun 2026 tentang Pedoman Pengajuan Kasasi |
+| 4 | Perjanjian Kerja Sama antara Mahkamah Agung Republik Indonesia, Kejaksaan Republik Indonesia, dan Kementerian Imigrasi dan Pemasyarakatan Republik Indonesia tentang Pelaksanaan Persidangan Secara Elektronik |
+| 5 | Peraturan Sekretaris Mahkamah Agung Republik Indonesia Nomor 002 Tahun 2012 tentang Pedoman Penyusunan Standar Operasional Prosedur di Lingkungan Mahkamah Agung dan Badan Peradilan yang Berada di Bawahnya |
+| 6 | Pedoman teknis internal, kebijakan keamanan informasi, dan ketentuan penggunaan CIMS yang berlaku |
 
-SOP ini berlaku untuk seluruh rangkaian kegiatan persidangan pidana secara elektronik, meliputi:
+### C. Tujuan
 
-1. koordinasi pra-persidangan,
-2. input, verifikasi, dan validasi data perkara,
-3. penjadwalan sidang dan pembacaan putusan,
-4. persiapan sarana-prasarana dan konektivitas,
-5. pelaksanaan sidang melalui platform video conference yang disetujui,
-6. pengelolaan dokumen perkara dan metadata sidang dalam CIMS,
-7. pencatatan kehadiran para pihak secara langsung maupun elektronik,
-8. unggah petikan putusan dan pengiriman salinan putusan/berkas perkara sesuai tenggat,
-9. pengamanan akses, audit trail, notifikasi, dan pengendalian mutu,
-10. pelaporan, evaluasi, monitoring, penanganan gangguan, serta tindak lanjut perbaikan.
+| No | Tujuan |
+|---|---|
+| 1 | Menjamin persidangan elektronik berjalan tertib, sah, aman, akuntabel, dan terdokumentasi |
+| 2 | Menyelaraskan pelaksanaan persidangan elektronik dengan workflow CIMS |
+| 3 | Menjamin kepatuhan terhadap tenggat hukum dan administratif, termasuk ketentuan SEMA No. 2 Tahun 2026 |
+| 4 | Menegaskan pembagian tugas, tanggung jawab, dan koordinasi antar-instansi sesuai PKS |
+| 5 | Menjadi pedoman baku untuk pengendalian mutu, audit trail, dan evaluasi pelaksanaan sidang elektronik |
 
-SOP ini mengikat seluruh peran yang relevan pada pengadilan, kejaksaan, instansi pemasyarakatan/imigrasi, admin sistem, operator sidang, petugas keamanan, serta pejabat penghubung antar-instansi.
+### D. Ruang Lingkup
 
-## D. Dasar Hukum dan Acuan
+| No | Cakupan |
+|---|---|
+| 1 | Registrasi perkara dan verifikasi data |
+| 2 | Penjadwalan sidang dan pembacaan putusan |
+| 3 | Penetapan pemberitahuan sidang dan pemberitahuan lintas instansi |
+| 4 | Upload surat pemberitahuan Kejaksaan kepada Rutan/Lapas |
+| 5 | Pengisian checklist kesiapan sidang |
+| 6 | Provisioning ruang sidang virtual |
+| 7 | Registrasi kehadiran, verifikasi identitas, dan pelaksanaan sidang |
+| 8 | Unggah petikan putusan serta pengiriman salinan putusan dan berkas |
+| 9 | Audit trail, pengendalian mutu, pelaporan, evaluasi, dan tindak lanjut |
 
-SOP ini disusun dengan mengacu pada:
+### E. Definisi Singkat
 
-1. ketentuan hukum acara pidana yang berlaku, termasuk ketentuan mengenai kasasi dan persidangan elektronik,
-2. Undang-Undang Nomor 20 Tahun 2025 tentang Kitab Undang-Undang Hukum Acara Pidana sebagaimana relevan dengan Pasal 298 dan Pasal 300,
-3. SEMA Nomor 2 Tahun 2026 tentang Pedoman Pengajuan Kasasi,
-4. PKS pelaksanaan persidangan secara elektronik antara Mahkamah Agung Republik Indonesia, Kejaksaan Republik Indonesia, dan Kementerian Imigrasi dan Pemasyarakatan Republik Indonesia,
-5. kebijakan dan petunjuk teknis internal yang mengatur persidangan elektronik, keamanan informasi, serta penggunaan sistem informasi pengadilan dan CIMS,
-6. kebutuhan operasional dan kontrol proses pada CIMS versi yang berlaku.
+| Istilah | Definisi |
+|---|---|
+| CIMS | Court Intelligence Management System yang mengorkestrasi proses, status perkara, notifikasi, audit trail, dan koordinasi lintas instansi |
+| Platform Video Conference | Media konferensi video yang disetujui dan digunakan untuk sidang elektronik, tidak terbatas hanya pada satu provider |
+| Hard Gate | Titik kendali wajib yang harus terpenuhi sebelum proses lanjut ke tahap berikutnya |
+| Auto-Forced Bypass | Mekanisme sistem yang secara terkontrol memaksa status kesiapan agar sidang tetap dapat berjalan ketika checklist belum lengkap dan sisa waktu kurang dari 2 jam |
+| RBAC/ABAC | Mekanisme kontrol akses berbasis peran dan atribut |
+| Metadata Sidang | Data terstruktur mengenai jadwal, kehadiran, waktu, status, putusan, dan tindak lanjut sidang |
+| Catatan Merah | Penanda deviasi kritis dalam sistem akibat bypass, keterlambatan, atau pelanggaran SLA yang wajib dievaluasi |
 
-## E. Definisi
+### F. Pelaksana
 
-Dalam SOP ini yang dimaksud dengan:
+| No | Pelaksana | Peran Utama |
+|---|---|---|
+| 1 | Ketua Pengadilan / Pimpinan Satker | Pengendali kebijakan, persetujuan strategis, dan eskalasi lintas instansi |
+| 2 | Majelis Hakim / Hakim | Memimpin sidang, mengonfirmasi kehadiran, legalitas, dan pembacaan putusan |
+| 3 | Panitera / Panitera Pengganti | Administrasi perkara, metadata sidang, unggah dokumen, monitoring tenggat |
+| 4 | Jaksa / Penuntut Umum | Koordinasi dokumen kejaksaan, kehadiran, dan upload pemberitahuan ke Rutan/Lapas |
+| 5 | Petugas Rutan/Lapas / Instansi Pemasyarakatan | Kesiapan terdakwa, sarana, keamanan, dan kehadiran elektronik |
+| 6 | Admin CIMS / Admin Sistem | Pengelolaan akun, akses, workflow, logging, dan notifikasi sistem |
+| 7 | Operator Sidang / Operator Teknis | Kesiapan teknis, provisioning ruang virtual, bantuan teknis saat sidang |
+| 8 | Petugas Keamanan / Verifikator | Verifikasi identitas dan pengamanan akses fisik maupun virtual |
+| 9 | Liaison Officer / Pejabat Penghubung | Koordinasi, eskalasi, dan sinkronisasi antar-instansi |
 
-1. **Persidangan Elektronik** adalah sidang pidana yang dilaksanakan dengan dukungan teknologi informasi dan komunikasi melalui platform video conference yang disetujui dan terintegrasi dengan CIMS.
-2. **CIMS** adalah Court Intelligence Management System yang berfungsi sebagai lapisan orkestrasi proses, pengendalian status perkara, dokumentasi, notifikasi, dan auditabilitas lintas instansi.
-3. **Platform Video Conference** adalah sarana konferensi video yang disetujui penyelenggara. Zoom Meeting dapat digunakan sebagai implementasi aktif sepanjang ditetapkan oleh instansi pengelola, tanpa menutup kemungkinan penggunaan penyedia lain yang telah disetujui.
-4. **Hard Gate** adalah titik kendali wajib pada alur proses yang harus dipenuhi sebelum perkara dapat melanjutkan ke tahap berikutnya.
-5. **Immutable Audit Trail** adalah catatan aktivitas yang lengkap, berurutan, terlindungi integritasnya, dan tidak dapat diubah tanpa otorisasi serta mekanisme pengendalian yang sah.
-6. **RBAC** adalah pengendalian akses berbasis peran.
-7. **ABAC** adalah pengendalian akses berbasis atribut perkara, status proses, jenis dokumen, dan kewenangan pengguna.
-8. **Pejabat Penghubung/Liaison Officer** adalah pejabat yang ditunjuk oleh masing-masing instansi untuk koordinasi pelaksanaan, eskalasi masalah, dan validasi operasional lintas pihak.
-9. **Metadata Sidang** adalah data terstruktur yang memuat antara lain nomor perkara, jadwal, status, pihak yang hadir, media kehadiran, waktu pembukaan, waktu pembacaan putusan, waktu unggah petikan putusan, dan status pengiriman dokumen.
+### G. Mutu Baku Utama
 
-## F. Prinsip Umum
+| No | Objek Kendali | Mutu Baku |
+|---|---|---|
+| 1 | Data perkara | Seluruh field wajib terisi dan tervalidasi |
+| 2 | Hak akses | Tidak ada pengguna aktif tanpa kewenangan yang sah |
+| 3 | Penetapan sidang | Tersedia di CIMS minimal H-7 |
+| 4 | Surat pemberitahuan Kejaksaan ke Rutan/Lapas | Tersedia di CIMS minimal H-3 |
+| 5 | Checklist kesiapan | Lengkap maksimal H-1 |
+| 6 | Auto-forced bypass | Hanya berlaku bila sisa waktu kurang dari 2 jam, wajib catatan merah dan audit trail |
+| 7 | Ruang sidang virtual | Hanya diprovisioning bila status ALL_READY atau AUTO_FORCED yang sah |
+| 8 | Kehadiran pihak | Tercatat jelas langsung / elektronik / tidak hadir |
+| 9 | Petikan putusan | Diunggah pada hari yang sama |
+| 10 | Salinan putusan dan berkas | Terkirim paling lambat 7 hari |
+| 11 | Audit trail | Event minimum tercatat lengkap, utuh, dan dapat ditelusuri |
+| 12 | Evaluasi deviasi | Setiap catatan merah menghasilkan tindak lanjut |
 
-Pelaksanaan persidangan elektronik berpedoman pada prinsip:
+### H. Sarana dan Prasarana
 
-1. legalitas,
-2. akuntabilitas,
-3. efisiensi dan efektivitas,
-4. keamanan informasi dan perlindungan data,
-5. keterlacakan proses melalui audit trail,
-6. keterbukaan sesuai ketentuan yang berlaku,
-7. kesetaraan akses para pihak,
-8. ketertiban persidangan,
-9. kesinambungan layanan,
-10. koordinasi lintas instansi,
-11. kepatuhan pada tenggat hukum dan administratif,
-12. ketersediaan prosedur fallback dalam keadaan gangguan atau keadaan kahar.
+| No | Sarana / Prasarana | Keterangan |
+|---|---|---|
+| 1 | Komputer / laptop | Untuk akses CIMS dan dokumen sidang |
+| 2 | Kamera, mikrofon, speaker / headset | Untuk pelaksanaan sidang elektronik |
+| 3 | Internet utama dan cadangan | Menjamin kontinuitas sidang |
+| 4 | Akun platform video conference | Provider yang disetujui |
+| 5 | Akses CIMS dan sistem informasi pengadilan | Untuk workflow, dokumen, dan logging |
+| 6 | Listrik dan cadangan daya | Menjamin keberlangsungan proses |
+| 7 | Ruang sidang / ruang terdakwa | Aman, terkendali, dan sesuai kebutuhan perkara |
+| 8 | Kontak eskalasi teknis dan operasional | Untuk penyelesaian kendala secara cepat |
 
-## G. Peran dan Tanggung Jawab
+## I. Tabel SOP Utama
 
-### 1. Ketua Pengadilan/Pimpinan Satuan Kerja
-Menetapkan kebijakan lokal pelaksanaan SOP, memastikan ketersediaan sumber daya, menunjuk pejabat penghubung, serta memutuskan langkah eskalasi strategis apabila terdapat hambatan lintas instansi.
+### 1. Registrasi Perkara dan Verifikasi Awal
 
-### 2. Majelis Hakim/Hakim
-Memimpin persidangan, memastikan tertib acara, mengonfirmasi identitas dan kehadiran para pihak, memastikan kelayakan persidangan elektronik pada saat pelaksanaan, dan memastikan pembacaan putusan serta pencatatan status kehadiran dilakukan dengan benar.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Input / verifikasi data perkara | Panitera / Operator CIMS | Data lengkap dan valid | Nomor perkara, jenis perkara, identitas para pihak, dokumen awal | Segera setelah perkara siap diproses | Data perkara aktif di CIMS | Menjadi dasar seluruh alur |
+| 2 | Verifikasi kewenangan dan hak akses | Admin CIMS / pejabat berwenang | Hak akses sesuai RBAC/ABAC | Akun, role, atribut perkara, persetujuan akses | Sebelum penjadwalan aktif | User berwenang dapat mengakses proses | Jika gagal, proses berhenti di hard gate |
 
-### 3. Panitera/Panitera Pengganti
-Mengelola administrasi perkara, verifikasi kelengkapan data, pencatatan metadata sidang, unggah petikan putusan pada hari yang sama sesuai ketentuan, pengendalian salinan putusan, dan monitoring pengiriman berkas perkara.
+### 2. Penjadwalan, Penetapan, dan Pemberitahuan
 
-### 4. Jaksa/Penuntut Umum
-Memastikan kesiapan administrasi dan kehadiran pihak kejaksaan, berkoordinasi dengan operator sidang dan pejabat penghubung, serta memastikan dokumen yang menjadi kewenangan kejaksaan disampaikan sesuai prosedur.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Menetapkan jadwal sidang / pembacaan putusan | Hakim / Panitera | Jadwal sah dan tidak bentrok | Kalender sidang, conflict check, data perkara | Sebelum H-7 | Jadwal aktif | Dasar penerbitan penetapan |
+| 2 | Menyusun dan menandatangani penetapan pemberitahuan sidang pembacaan putusan | Hakim / Panitera | Dokumen sah dan lengkap | Draft penetapan, tanda tangan, metadata sidang | Minimal H-7 | Penetapan siap unggah | Harus sesuai format yang berlaku |
+| 3 | Upload penetapan ke CIMS | Panitera / Operator | Tersedia di sistem tepat waktu | File penetapan final | Minimal H-7 | Penetapan terunggah | Hard gate wajib |
+| 4 | Kirim notifikasi lintas instansi | CIMS / Panitera / Liaison Officer | Pemberitahuan terkirim dan tercatat | Kanal notifikasi, daftar penerima, status kirim | Setelah upload penetapan | Log notifikasi | Dapat memakai email, WhatsApp, SMS, in-app |
+| 5 | Reminder dan acknowledgment | Sistem / instansi penerima | Ada pencatatan acknowledgment bila diwajibkan | Konfigurasi notifikasi, reminder | Mengikuti konfigurasi aktif CIMS | Status penerimaan | Parameter default mengikuti konfigurasi sistem yang berlaku |
 
-### 5. Pejabat/Petugas Instansi Pemasyarakatan atau Imigrasi
-Menjamin kesiapan tempat, perangkat, identifikasi terdakwa, keamanan pelaksanaan dari lokasi instansi terkait, dan dukungan kehadiran terdakwa secara elektronik sesuai ketentuan.
+### 3. Upload Surat Pemberitahuan oleh Kejaksaan kepada Rutan/Lapas
 
-### 6. Admin CIMS/Admin Sistem
-Mengelola akun, pengaturan peran dan hak akses, ketersediaan sistem, integrasi notifikasi, konfigurasi platform video conference, serta pemeliharaan jejak audit dan log insiden.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Menyusun surat pemberitahuan kepada Rutan/Lapas | Kejaksaan | Dokumen sesuai kebutuhan perkara | Surat pemberitahuan, identitas terdakwa, jadwal sidang | Setelah menerima penetapan | Dokumen siap unggah | Harus mengacu pada agenda resmi |
+| 2 | Upload surat pemberitahuan ke CIMS | Kejaksaan | Dokumen tersedia di sistem | File surat, identitas pengunggah, waktu unggah | Minimal H-3 | Surat pemberitahuan tersedia | Menjadi dasar kesiapan Rutan/Lapas |
+| 3 | Verifikasi ketersediaan dokumen | Liaison Officer / petugas terkait | Tidak ada dokumen wajib yang hilang | Surat pemberitahuan, log unggah | H-3 sampai H-1 | Status verifikasi | Bila terlambat, sistem memberi status keterlambatan dan eskalasi |
 
-### 7. Operator Sidang/Operator Teknis
-Melakukan persiapan teknis sebelum sidang, membuka ruang sidang virtual, memverifikasi perangkat dan konektivitas, membantu registrasi peserta, mendokumentasikan gangguan teknis, dan mengeksekusi fallback teknis sesuai eskalasi.
+### 4. Checklist Kesiapan Sidang
 
-### 8. Petugas Keamanan/Verifikator Identitas
-Mendukung pengamanan lokasi fisik maupun akses virtual, melakukan verifikasi identitas sesuai kewenangan, serta memastikan tidak ada akses tidak sah.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Isi checklist kesiapan pengadilan | Operator Pengadilan / Panitera | Checklist lengkap | Ruang sidang, jaringan, perangkat, akun VC, personel | Maksimal H-1 | Checklist pengadilan lengkap | Bagian dari hard gate readiness |
+| 2 | Isi checklist kesiapan kejaksaan | Petugas Kejaksaan | Checklist lengkap | Perangkat, jaringan, petugas, dokumen | Maksimal H-1 | Checklist kejaksaan lengkap | Sistem memberi reminder bila belum lengkap |
+| 3 | Isi checklist kesiapan Rutan/Lapas | Petugas Rutan/Lapas | Checklist lengkap | Ruang, perangkat, jaringan, keamanan, identitas terdakwa | Maksimal H-1 | Checklist Rutan/Lapas lengkap | Sangat penting untuk validasi kehadiran terdakwa |
+| 4 | Review status readiness | Sistem CIMS / Operator | Status ALL_READY atau belum | Semua checklist dari pihak terkait | H-1 sampai sebelum sidang | Status readiness | Syarat provisioning ruang virtual |
 
-### 9. Pejabat Penghubung Antar-Instansi
-Menjadi titik kontak resmi untuk koordinasi jadwal, perubahan sidang, gangguan, kebutuhan dokumen, tindak lanjut pasca putusan, dan penyelesaian perbedaan penafsiran operasional melalui musyawarah/mekanisme koordinasi resmi.
+### 5. Auto-Forced Bypass dan Provisioning Ruang Virtual
 
-## H. Sarana dan Prasarana Minimal
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Evaluasi keterlambatan checklist | Sistem CIMS | Deviasi terdeteksi tepat waktu | Status checklist, waktu sidang | Saat mendekati sidang | Status deviasi | Trigger menuju bypass bila syarat terpenuhi |
+| 2 | Menjalankan auto-forced bypass | Sistem CIMS | Hanya saat sisa waktu kurang dari 2 jam | Status checklist belum lengkap, log waktu | Saat sisa waktu < 2 jam | Status AUTO_FORCED | Wajib menimbulkan catatan merah |
+| 3 | Mencatat catatan merah dan audit trail | Sistem CIMS / Admin | Seluruh bypass terekam | Identitas perkara, waktu, instansi yang belum lengkap | Seketika | Log catatan merah | Wajib dievaluasi pasca-sidang |
+| 4 | Provisioning ruang sidang virtual | Operator IT / Sistem | Hanya saat ALL_READY atau AUTO_FORCED sah | Status readiness, akun platform VC | Setelah syarat terpenuhi | Ruang sidang virtual aktif | Tidak boleh diprovisioning sebelum hard gate sah |
 
-Sarana dan prasarana minimal meliputi:
+### 6. Registrasi Kehadiran dan Verifikasi Identitas
 
-1. perangkat komputer/laptop operasional,
-2. kamera, mikrofon, speaker/headset, dan layar yang memadai,
-3. koneksi internet utama yang stabil dan koneksi cadangan bila tersedia,
-4. akun platform video conference yang disetujui,
-5. akses CIMS dan sistem informasi pengadilan yang relevan,
-6. perangkat pemindai/digitalisasi dokumen bila diperlukan,
-7. sumber listrik dan cadangan daya,
-8. ruang pelaksanaan yang aman dan sesuai kebutuhan keamanan perkara,
-9. sarana perekaman/log teknis sesuai kebijakan yang berlaku,
-10. daftar kontak eskalasi teknis dan operasional.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Registrasi peserta sidang | Operator Sidang / Panitera | Seluruh pihak tercatat | Daftar peserta, peran, media kehadiran | Sebelum sidang dimulai | Data peserta sidang | Termasuk pihak dari lokasi berbeda |
+| 2 | Verifikasi identitas | Hakim / Panitera / Verifikator | Identitas valid | Kartu identitas, data perkara, bukti visual | Sebelum sidang dibuka | Identitas tervalidasi | Untuk terdakwa harus lebih ketat |
+| 3 | Pencatatan cara kehadiran | Panitera | Kehadiran jelas | Status langsung / elektronik / tidak hadir / diwakili | Sebelum dan saat sidang | Metadata kehadiran | Penting untuk implikasi hukum acara |
 
-Setiap instansi wajib memastikan penyediaan, pemeliharaan, dan kesiapan sarana-prasarana yang menjadi tanggung jawabnya masing-masing sesuai PKS dan penugasan internal.
+### 7. Pelaksanaan Sidang Elektronik
 
-## I. Hard Gates Wajib dalam Alur Proses dan Timeline Operasional
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Membuka sidang | Hakim | Sidang dibuka sesuai hukum acara | Kehadiran, ruang virtual aktif, kesiapan teknis | Pada jadwal sidang | Sidang dimulai | Hakim memastikan prasyarat terpenuhi |
+| 2 | Menjaga stabilitas teknis | Operator Teknis | Kualitas audio-video layak | Koneksi, perangkat, dukungan teknis | Selama sidang | Sidang berjalan stabil | Gangguan harus dicatat |
+| 3 | Mencatat jalannya sidang | Panitera / petugas pencatat | Metadata lengkap dan akurat | Waktu mulai, pihak hadir, kejadian penting | Selama sidang | Catatan persidangan | Menjadi bagian audit trail |
+| 4 | Menangani gangguan | Hakim / Operator / Liaison Officer | Gangguan ditangani sesuai prosedur | Log gangguan, keputusan hakim, notifikasi | Jika terjadi | Keputusan lanjut / tunda / jadwal ulang | Harus terdokumentasi |
 
-Perkara tidak boleh berpindah ke tahap berikutnya apabila hard gate pada tahap sebelumnya belum terpenuhi. Timeline operasional di bawah ini mengikuti alur dan batas waktu yang dinyatakan dalam project description CIMS.
+### 8. Pembacaan Putusan dan Kepatuhan SEMA
 
-1. **Gate 1 - Registrasi Perkara Lengkap:** data pokok perkara, pihak terkait, jenis perkara, dan dokumen awal telah masuk dan tervalidasi.
-2. **Gate 2 - Verifikasi Kewenangan dan Akses:** peran pengguna, hak akses, serta atribut perkara telah diverifikasi sesuai RBAC/ABAC.
-3. **Gate 3 - Jadwal Aktif dan Penetapan Pemberitahuan:** jadwal sidang/pembacaan putusan telah aktif, tidak ada konflik, dan Penetapan Pemberitahuan Sidang Pembacaan Putusan telah dibuat, ditandatangani, serta diunggah ke CIMS **paling lambat minimal H-7 sebelum agenda sidang**.
-4. **Gate 4 - Pemberitahuan Lintas Instansi:** setelah penetapan resmi tersedia di CIMS, pemberitahuan lintas instansi harus dikirim, diterima, dan dokumen pemberitahuan dari Kejaksaan kepada Rutan/Lapas harus sudah tersedia di CIMS **paling lambat minimal H-3 sebelum jadwal sidang**.
-5. **Gate 5 - Checklist Kesiapan Sidang:** checklist kesiapan Kejaksaan dan Rutan/Lapas, yang meliputi perangkat, jaringan, personel, ruang sidang, dan verifikasi identitas terdakwa, harus diisi **maksimal H-1 sebelum agenda sidang**.
-6. **Gate 6 - Auto-Forced Readiness Bypass:** apabila waktu menuju sidang **kurang dari 2 jam** dan checklist kesiapan dari instansi terkait belum lengkap, sistem dapat menjalankan **auto-forced bypass** agar ruang sidang tetap dapat diprovisioning dan persidangan tetap dapat berjalan. Status bypass wajib diberi **catatan merah/peringatan merah** dalam sistem, tercatat dalam audit trail, dan menjadi bahan evaluasi pasca-sidang.
-7. **Gate 7 - Provisioning Ruang Virtual:** ruang sidang virtual hanya dapat dibuat setelah seluruh hard gate readiness terpenuhi, atau setelah bypass sah dilakukan oleh sistem pada kondisi kurang dari 2 jam sebelum sidang.
-8. **Gate 8 - Pelaksanaan dan Dokumentasi Sidang:** pelaksanaan sidang tercatat, insiden bila ada didokumentasikan, dan status perkara diperbarui.
-9. **Gate 9 - Putusan dan Tindak Lanjut Administratif:** metadata pembacaan putusan, unggah petikan putusan, pengiriman salinan/berkas, dan penutupan administrasi telah dipenuhi.
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Mencatat waktu pembacaan putusan | Panitera | Waktu tercatat tepat | Agenda, jam pembacaan, identitas perkara | Saat putusan dibacakan | Data waktu pembacaan | Penting untuk tenggang waktu kasasi |
+| 2 | Mencatat kehadiran terdakwa dan/atau JPU | Panitera / Hakim | Kehadiran tercatat jelas | Status hadir langsung / elektronik / tidak hadir | Saat putusan dibacakan | Metadata kehadiran putusan | Harus jelas untuk kepatuhan SEMA |
+| 3 | Verifikasi kelengkapan metadata hukum acara | Panitera | Tidak ada data hukum acara yang hilang | Waktu pembacaan, kehadiran, dokumen terkait | Segera setelah pembacaan | Metadata hukum acara lengkap | Mendukung perhitungan tenggang waktu |
 
-### Matriks Timeline Minimum
+### 9. Unggah Petikan Putusan dan Pengiriman Salinan / Berkas
 
-| Tahap | Aktor Utama | Batas Waktu Minimum | Ketentuan |
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Upload petikan putusan ke sistem informasi pengadilan | Panitera | Diunggah pada hari yang sama | Petikan putusan final, metadata unggah | Hari yang sama | Petikan putusan tersedia | Wajib sesuai SEMA |
+| 2 | Catat bukti unggah | Panitera / Operator | Bukti unggah lengkap | Waktu unggah, identitas pengunggah, status sukses | Seketika | Log unggah | Masuk audit trail |
+| 3 | Mengirim salinan putusan dan berkas perkara | Panitera / unit administrasi | Terkirim tepat waktu | Salinan putusan, berkas perkara, bukti pengiriman | Paling lambat 7 hari | Salinan/berkas terkirim | Bila terlambat, eskalasi wajib |
+| 4 | Monitoring keterlambatan | Liaison Officer / Pimpinan terkait | Tidak ada keterlambatan tanpa tindak lanjut | Status pengiriman, log reminder | Sampai selesai | Status monitoring | Menjadi bahan evaluasi |
+
+### 10. Penutupan, Audit Trail, dan Evaluasi
+
+| No | Kegiatan | Pelaksana | Mutu Baku | Kelengkapan | Waktu | Output | Keterangan |
+|---|---|---|---|---|---|---|---|
+| 1 | Menutup status sidang | Panitera / Admin | Tidak ada item wajib tertinggal | Metadata, dokumen, catatan sidang | Setelah seluruh dokumen lengkap | Status sidang closed | Menutup workflow |
+| 2 | Menyimpan audit trail | Sistem CIMS / Admin | Event minimum lengkap dan utuh | Log perubahan data, notifikasi, bypass, kehadiran, putusan | Berjalan terus | Audit trail tersimpan | Tidak boleh diubah sembarangan |
+| 3 | Evaluasi deviasi dan catatan merah | QA / Pimpinan / Liaison Officer | Setiap catatan merah ditindaklanjuti | Laporan insiden, log bypass, keterlambatan, gangguan | Pasca-sidang / berkala | Laporan evaluasi | Wajib ada tindakan korektif |
+| 4 | Monitoring KPI | Pimpinan / QA / Admin | KPI terukur dan dilaporkan | Data jadwal, notifikasi, upload, pengiriman, gangguan | Berkala | Laporan KPI | Dasar perbaikan SOP dan sistem |
+
+### 11. Skenario Khusus: Penanganan Insiden, Mutasi Tahanan, dan Putusan Banding
+
+| No | Kejadian / Skenario Khusus | Pelaksana | Tindakan Administratif / Sistem | Keterangan Tambahan |
+|---|---|---|---|---|
+| 1 | Insiden Teknis / Siber / Kahar | Operator IT / Keamanan | Mencatat insiden (SOP 10.11-10.13). Jika `CRITICAL`/`HIGH`, status sidang diubah menjadi `SUSPENDED`. | Wajib lapor 1x24 jam (Siber) atau 3x24 jam (Kahar). |
+| 2 | Mutasi / Perpindahan Tahanan | Pejabat Penghubung | Mendaftarkan Mutasi (SOP 10.14). Sistem membatalkan kesiapan Rutan sebelumnya dan mewajibkan *re-checklist* serta *re-verifikasi* di tempat baru. | Bersifat membatalkan kelayakan (Force re-eval). |
+| 3 | Pembacaan Putusan Banding | Panitera | Generate Surat Penetapan (SOP 10.15) dengan link Zoom, cetak, tanda tangan, lalu unggah pindai PDF-nya ke `EvidenceStorageGateway`. | Sesuai lampiran form SEMA No. 2/2026. |
+
+| Gate | Nama Gate | Syarat Lulus | Konsekuensi jika Tidak Lulus |
 |---|---|---|---|
-| Penetapan Pemberitahuan Sidang Pembacaan Putusan dibuat, ditandatangani, dan diunggah ke CIMS | Hakim, Panitera | **Minimal H-7** | Menjadi dasar pemberitahuan resmi lintas instansi |
-| Pemberitahuan lintas instansi dan upload surat pemberitahuan Kejaksaan kepada Rutan/Lapas | Pengadilan, Kejaksaan | **Minimal H-3** | Dokumen pemberitahuan Kejaksaan ke Rutan/Lapas wajib tersedia sebelum sidang |
-| Pengisian checklist kesiapan sidang | Kejaksaan, Rutan/Lapas | **Maksimal H-1** | Mencakup perangkat, jaringan, personel, ruang, dan identitas terdakwa |
-| Auto-forced bypass readiness | Sistem CIMS | **Saat sisa waktu < 2 jam** | Checklist dapat dipaksa oleh sistem agar sidang tetap berjalan, dengan catatan merah dan audit trail wajib |
-| Provisioning ruang virtual | Operator IT / Sistem | Setelah H-1 terpenuhi atau bypass sah | Tidak boleh dilakukan tanpa hard gate readiness atau bypass sistem |
+| 1 | Registrasi Perkara Lengkap | Data perkara dan dokumen awal lengkap | Tidak bisa lanjut penjadwalan |
+| 2 | Verifikasi Akses | Role dan atribut akses sah | User dibatasi dari proses lanjutan |
+| 3 | Penetapan Pemberitahuan | Penetapan terunggah minimal H-7 | Notifikasi resmi belum dapat dijalankan |
+| 4 | Pemberitahuan Kejaksaan ke Rutan/Lapas | Surat terunggah minimal H-3 | Status terlambat dan eskalasi |
+| 5 | Checklist Kesiapan | Semua checklist lengkap maksimal H-1 | Sistem menahan readiness |
+| 6 | Auto-Forced Bypass | Hanya jika sisa waktu < 2 jam | Muncul catatan merah dan audit trail wajib |
+| 7 | Provisioning Ruang Virtual | ALL_READY atau AUTO_FORCED sah | Ruang sidang tidak dapat dibuat |
+| 8 | Dokumentasi Sidang | Metadata dan log lengkap | Penutupan sidang tertunda |
+| 9 | Tindak Lanjut Administratif | Petikan dan pengiriman berkas dipenuhi | Status deviasi administratif |
 
-## J. Prosedur Operasional
+## K. Event Audit Trail Minimum
 
-### 1. Perencanaan dan Koordinasi Pra-Persidangan
-1. Panitera/operator melakukan input awal atau verifikasi data perkara dalam CIMS.
-2. Pejabat penghubung antar-instansi memastikan titik kontak masing-masing pihak aktif.
-3. Penjadwalan sidang dilakukan dengan mempertimbangkan kesiapan pengadilan, kejaksaan, dan instansi tempat terdakwa berada.
-4. Jika terdapat perkara pidana khusus atau kebutuhan pengamanan tambahan, status tersebut ditandai sejak awal.
+| No | Event Wajib Dicatat |
+|---|---|
+| 1 | Pembuatan, perubahan, dan penutupan data perkara |
+| 2 | Aktivasi atau perubahan jadwal sidang |
+| 3 | Upload penetapan pemberitahuan sidang |
+| 4 | Pengiriman notifikasi dan status acknowledgment |
+| 5 | Upload surat pemberitahuan Kejaksaan ke Rutan/Lapas |
+| 6 | Pengisian dan perubahan checklist kesiapan |
+| 7 | Auto-forced bypass dan catatan merah |
+| 8 | Provisioning ruang sidang virtual |
+| 9 | Registrasi kehadiran dan verifikasi identitas |
+| 10 | Pembukaan, pelaksanaan, dan penutupan sidang |
+| 11 | Pencatatan waktu pembacaan putusan |
+| 12 | Upload petikan putusan |
+| 13 | Pengiriman salinan putusan dan berkas |
+| 14 | Insiden teknis, insiden keamanan, dan tindakan korektif |
 
-### 2. Verifikasi Data dan Kesiapan Dokumen
-1. Data perkara, identitas pihak, dokumen administrasi, dan atribut perkara diverifikasi.
-2. Sistem dan petugas memastikan bahwa hanya pengguna berwenang yang dapat mengakses atau mengubah data tertentu.
-3. Jika ditemukan data tidak lengkap, proses dihentikan pada hard gate terkait sampai koreksi selesai.
+## L. Indikator Kinerja
 
-### 3. Penjadwalan, Penetapan, dan Notifikasi
-1. Jadwal sidang atau pembacaan putusan ditetapkan oleh pihak berwenang setelah conflict check dinyatakan aman.
-2. Berdasarkan jadwal aktif, Penetapan Pemberitahuan Sidang Pembacaan Putusan harus dibuat, ditandatangani, dan diunggah kembali ke CIMS sebagai dokumen resmi **paling lambat minimal H-7 sebelum agenda sidang**.
-3. Setelah penetapan tersedia, CIMS mengirim pemberitahuan lintas instansi melalui kanal yang tersedia dan disetujui, seperti email, WhatsApp, SMS, dan/atau in-app notification.
-4. Untuk notifikasi yang dikendalikan SLA di database, acknowledgment dan reminder mengikuti konfigurasi aktif pada CIMS. Apabila belum ada perubahan konfigurasi, default minimal mengikuti parameter sistem yang berlaku, termasuk **AGENDA_SIDANG = 48 jam** dan **PERUBAHAN_JADWAL = 24 jam**.
-5. Untuk setiap notifikasi penting, sistem atau petugas wajib mencatat waktu pengiriman, target penerima, status terkirim/gagal, acknowledgment, dan tindak lanjut jika gagal.
-6. Perubahan jadwal wajib diberitahukan melalui mekanisme yang terdokumentasi dan menggunakan format/templat yang berlaku.
+| No | Indikator | Target Minimum |
+|---|---|---|
+| 1 | Persentase sidang berjalan sesuai jadwal | [Diisi target internal] |
+| 2 | Persentase penetapan terunggah minimal H-7 | 100% |
+| 3 | Persentase surat pemberitahuan Kejaksaan terunggah minimal H-3 | 100% |
+| 4 | Persentase checklist lengkap maksimal H-1 | [Diisi target internal] |
+| 5 | Persentase petikan putusan diunggah di hari yang sama | 100% |
+| 6 | Persentase salinan/berkas terkirim paling lambat 7 hari | 100% |
+| 7 | Jumlah catatan merah per periode | Semakin rendah semakin baik |
+| 8 | Jumlah insiden akses tidak sah | 0 atau sesuai toleransi kebijakan |
+| 9 | Waktu respons eskalasi | [Diisi target internal] |
+| 10 | Persentase tindak lanjut evaluasi yang selesai | [Diisi target internal] |
 
-### 4. Pemberitahuan oleh Kejaksaan kepada Rutan/Lapas
-1. Setelah menerima pemberitahuan dari pengadilan, Kejaksaan wajib melakukan upload surat/dokumen pemberitahuan kepada Rutan/Lapas melalui mekanisme yang ditetapkan.
-2. Dokumen pemberitahuan Kejaksaan kepada Rutan/Lapas harus sudah tersedia di CIMS **paling lambat minimal H-3 sebelum jadwal sidang**.
-3. Sistem wajib menandai status keterlambatan apabila dokumen belum tersedia sampai melewati ambang waktu H-3, dan mengirim eskalasi kepada pejabat penghubung.
-4. Dokumen yang diunggah harus tercatat waktu unggah, pengunggah, instansi asal, dan status verifikasinya.
+## M. Ketentuan Khusus
 
-### 5. Persiapan Teknis dan Checklist Kesiapan
-1. Operator teknis melakukan uji perangkat, audio, video, jaringan, dan akses ke CIMS.
-2. Kejaksaan dan Rutan/Lapas wajib mengisi checklist kesiapan sidang elektronik **maksimal H-1 sebelum agenda sidang**.
-3. Checklist kesiapan sekurang-kurangnya memuat kesiapan perangkat, jaringan, personel, ruang sidang, serta verifikasi identitas terdakwa.
-4. Hasil pengisian checklist dicatat sebagai bagian dari hard gate readiness dan menjadi syarat provisioning ruang virtual.
-5. Operator menyiapkan alternatif teknis jika platform utama gagal, sesuai kebijakan instansi.
+| No | Ketentuan |
+|---|---|
+| 1 | Untuk perkara pidana khusus, hak akses, pengamanan, dan verifikasi dapat diperketat sesuai kewenangan |
+| 2 | Provider video conference dapat berubah sepanjang disetujui dan tetap terintegrasi dengan CIMS |
+| 3 | Auto-forced bypass tidak menghapus tanggung jawab instansi yang terlambat mengisi checklist |
+| 4 | Setiap deviasi SLA wajib dievaluasi dan dapat menjadi dasar tindakan pembinaan atau perbaikan proses |
 
-### 6. Auto-Forced Checklist dan Provisioning Ruang Virtual
-1. Apabila waktu pelaksanaan sidang tersisa **kurang dari 2 jam** dan checklist kesiapan belum dilengkapi oleh Kejaksaan dan/atau Rutan/Lapas, sistem CIMS dapat melakukan **auto-forced bypass** terhadap hard gate checklist agar persidangan tetap dapat berjalan.
-2. Auto-forced bypass harus dilakukan secara sistematis oleh sistem, bukan dengan menghapus kewajiban checklist, melainkan dengan menandai bahwa kelengkapan tidak dipenuhi tepat waktu dan sidang berjalan dengan pengecualian operasional.
-3. Setiap auto-forced bypass wajib menghasilkan **catatan merah/peringatan merah** pada tampilan workflow, audit trail, dan laporan evaluasi.
-4. Setelah seluruh hard gate readiness terpenuhi atau bypass sistem sah dilakukan, Operator IT dapat melakukan provisioning ruang sidang virtual.
-5. Ruang sidang virtual tidak boleh dibuat sebelum status readiness mencapai **ALL_READY** atau **AUTO_FORCED yang sah**.
+## N. Penutup
 
-### 7. Registrasi Kehadiran dan Verifikasi Identitas
-1. Seluruh pihak yang akan mengikuti sidang diregistrasi.
-2. Identitas hakim, panitera, jaksa, terdakwa, penasihat hukum, saksi, ahli, dan pihak lain diverifikasi sesuai kebutuhan persidangan.
-3. Kehadiran dicatat dengan klasifikasi minimal: hadir langsung, hadir secara elektronik, tidak hadir, atau diwakili sesuai ketentuan.
-4. Untuk terdakwa dan/atau penuntut umum, cara kehadiran wajib dicatat secara tegas karena berdampak pada tindak lanjut administratif dan hukum acara.
+SOP ini merupakan dokumen operasional baku untuk pengelolaan koordinasi dan pelaksanaan persidangan pidana secara elektronik berbasis CIMS. Seluruh pihak wajib melaksanakan SOP ini secara konsisten, menjaga keamanan informasi, memenuhi tenggat waktu, dan memastikan setiap deviasi tercatat serta ditindaklanjuti.
 
-### 8. Pelaksanaan Sidang Elektronik
-1. Hakim membuka sidang dan memastikan seluruh prasyarat terpenuhi.
-2. Operator teknis menjaga kestabilan teknis dan mendokumentasikan insiden selama persidangan.
-3. Panitera atau petugas yang ditunjuk melakukan pencatatan jalannya sidang dan pembaruan metadata di CIMS.
-4. Bila terjadi gangguan teknis yang mengganggu substansi persidangan, hakim dapat menunda, melanjutkan dengan mekanisme fallback yang sah, atau menjadwalkan ulang sesuai berita acara dan notifikasi resmi.
+## O. Lampiran yang Disarankan
 
-### 9. Pembacaan Putusan dan Kepatuhan SEMA 2/2026
-1. Untuk putusan pengadilan tinggi atau tahapan lain yang relevan, waktu pembacaan putusan harus dicatat secara tepat.
-2. Kehadiran atau ketidakhadiran terdakwa dan/atau penuntut umum harus dicatat secara jelas, termasuk apakah hadir langsung atau secara elektronik.
-3. Apabila redaksi atau metadata putusan memerlukan kejelasan mengenai kehadiran para pihak, panitera/petugas wajib memastikan pencatatan dilakukan secara lengkap untuk mendukung perhitungan tenggang waktu sesuai ketentuan.
-4. Ketentuan tenggang waktu kasasi dilaksanakan sesuai peraturan yang berlaku, termasuk ketentuan 14 hari sebagaimana relevan dalam SEMA No. 2 Tahun 2026.
+| No | Lampiran |
+|---|---|
+| 1 | Form checklist kesiapan pengadilan |
+| 2 | Form checklist kesiapan kejaksaan |
+| 3 | Form checklist kesiapan Rutan/Lapas |
+| 4 | Form log gangguan teknis |
+| 5 | Form log insiden keamanan |
+| 6 | Matriks RBAC/ABAC |
+| 7 | Daftar liaison officer dan escalation path |
+| 8 | Form monitoring upload petikan putusan |
+| 9 | Form monitoring pengiriman salinan putusan dan berkas |
+| 10 | Form evaluasi catatan merah dan auto-forced bypass |
 
-### 10. Unggah Petikan Putusan dan Pengiriman Salinan/Berkas
-1. Petikan putusan yang wajib diumumkan melalui sistem informasi pengadilan harus diunggah pada hari yang sama dengan pembacaan putusan.
-2. Panitera/petugas yang berwenang mencatat waktu unggah, petugas pengunggah, dan bukti unggah.
-3. Salinan putusan beserta berkas perkara yang wajib disampaikan kepada pengadilan negeri harus diproses dan dimonitor agar tersampaikan paling lambat dalam 7 hari setelah putusan dijatuhkan, sesuai ketentuan yang berlaku.
-4. Apabila terdapat keterlambatan, pejabat penghubung dan pimpinan terkait wajib menerima notifikasi eskalasi dan tindakan korektif dicatat.
 
-### 11. Penutupan Sidang dan Pasca-Sidang
-1. Status sidang ditutup setelah seluruh data wajib, berita acara, dan metadata telah lengkap.
-2. Dokumen elektronik diklasifikasikan, disimpan, dan dilindungi sesuai tingkat kerahasiaannya.
-3. CIMS memperbarui status proses untuk kebutuhan monitoring, pelaporan, dan audit.
-4. Temuan, insiden, deviasi hard gate, dan kejadian auto-forced bypass diteruskan ke proses evaluasi.
-## K. Prosedur Koordinasi Antar-Pihak
+-----------------
 
-1. Setiap instansi wajib menunjuk pejabat penghubung utama dan cadangan.
-2. Koordinasi rutin dilakukan sebelum sidang, saat terjadi perubahan jadwal, saat terdapat gangguan, dan setelah pembacaan putusan bila ada tindak lanjut administratif.
-3. Mekanisme koordinasi minimal harus memuat kanal komunikasi resmi, waktu respons, serta escalation path.
-4. Perbedaan penafsiran operasional diselesaikan terlebih dahulu melalui musyawarah antar pihak dan, bila perlu, dinaikkan kepada pimpinan sesuai kewenangan.
-5. Hasil koordinasi penting dicatat agar dapat ditelusuri.
+DETIL SOP
 
-## L. Keamanan Informasi dan Pengendalian Akses
+Berikut penjabaran SOP persidangan elektronik berbasis CIMS dalam bentuk tabel yang diselaraskan dengan Peraturan Sekretaris Mahkamah Agung RI Nomor 002 Tahun 2012 tentang Pedoman Penyusunan SOP. Dari dokumen peraturan yang Anda kirim, jelas bahwa regulasi itu memang menjadi pedoman penyusunan SOP di lingkungan Mahkamah Agung dan badan peradilan, dan dalam praktik format SOP-nya menekankan unsur prosedur, pelaksana, mutu baku, serta dokumen/kelengkapan pendukung.
 
-1. Akses sistem diberikan berdasarkan prinsip kebutuhan untuk mengetahui dan kewenangan untuk bertindak.
-2. Pengendalian akses menerapkan RBAC dan, untuk data/perkara tertentu, ABAC.
-3. Perubahan hak akses harus disetujui pejabat berwenang dan tercatat dalam audit trail.
-4. Dokumen perkara pidana khusus atau dokumen sensitif diberi pembatasan akses tambahan.
-5. Pengguna dilarang membagikan akun, kredensial, atau dokumen di luar kewenangan.
-6. Setiap dugaan akses tidak sah, kebocoran, atau penyalahgunaan data wajib dilaporkan sebagai insiden keamanan.
+Agar mudah dipakai untuk review pimpinan, saya susun dalam dua lapis. Tabel pertama menjelaskan kesesuaian struktur SOP terhadap kerangka Persekma 002/2012. Tabel kedua menjabarkan alur SOP operasional dalam format yang lebih dekat dengan tabel SOP formal: kegiatan, pelaksana, mutu baku, waktu, output, dan keterangan.
 
-## M. Audit Trail Wajib dan Pengendalian Mutu
+1. Tabel kesesuaian struktur SOP dengan Persekma 002 Tahun 2012
+| Komponen menurut pedoman SOP MA | Makna dalam pedoman | Sudah ada di sop-revisi.md | Penjelasan rinci | Status |
+| --- | --- | --- | --- | --- |
+| Judul SOP | Harus menunjukkan objek dan proses yang diatur | Ada | Judul sudah spesifik: pengelolaan koordinasi dan pelaksanaan persidangan pidana umum dan pidana khusus secara elektronik melalui platform video conference terintegrasi CIMS. Ini sudah memenuhi asas kejelasan objek dan ruang kerja. | Sesuai |
+| Identitas dokumen | Memuat nama dokumen, kode, versi, status, unit pemilik, tanggal efektif | Ada | Bagian A sudah memuat identitas dokumen, versi, status berlaku, unit pemilik, dan peninjauan berkala. Ini sesuai praktik SOP formal di lingkungan peradilan. | Sesuai |
+| Tujuan | Menjelaskan kenapa SOP dibuat dan hasil yang ingin dicapai | Ada | Bagian B menjelaskan tujuan hukum, operasional, orkestrasi CIMS, kepatuhan SEMA, dan sinkronisasi PKS. Ini cukup kuat karena tidak hanya administratif, tetapi juga compliance-oriented. | Sesuai |
+| Ruang lingkup | Menentukan batas proses yang diatur | Ada | Bagian C sudah mencakup pra-persidangan, verifikasi, penjadwalan, pelaksanaan, dokumen, audit trail, evaluasi, dan tindak lanjut. Ruang lingkupnya lengkap dan jelas. | Sesuai |
+| Dasar hukum | Menyebut regulasi yang menjadi landasan | Ada | Bagian D sudah memuat KUHAP, SEMA No. 2 Tahun 2026, PKS, dan acuan internal. Namun, jika ingin benar-benar formal menurut tata naskah SOP MA, Persekma 002 Tahun 2012 itu sendiri perlu ditambahkan eksplisit ke daftar dasar hukum/acuan. | Perlu penambahan kecil |
+| Definisi | Menyamakan pengertian istilah | Ada | Bagian E sudah baik karena mendefinisikan istilah teknis seperti CIMS, hard gate, immutable audit trail, RBAC/ABAC, dan metadata sidang. Ini penting untuk menghindari multi-tafsir. | Sesuai |
+| Prinsip SOP | Menegaskan nilai dasar pelaksanaan | Ada | Bagian F sudah memuat legalitas, akuntabilitas, efisiensi, keamanan, keterlacakan, kesetaraan akses, koordinasi, dan fallback. Ini memperkuat legitimasi SOP. | Sesuai |
+| Pelaksana | Menentukan siapa yang melakukan tiap langkah | Ada | Bagian G sudah memetakan Ketua Pengadilan, Hakim, Panitera, Jaksa, petugas pemasyarakatan/imigrasi, admin sistem, operator, keamanan, dan liaison officer. Ini sangat penting untuk format SOP formal. | Sesuai |
+| Sarana/perlengkapan | Menjelaskan kebutuhan alat dan media | Ada | Bagian H sudah memuat perangkat, koneksi, akun video conference, akses CIMS, listrik cadangan, ruang aman, dan kontak eskalasi. Ini sesuai unsur perlengkapan dalam SOP. | Sesuai |
+| Prosedur/langkah kerja | Inti SOP berupa urutan kegiatan | Ada | Bagian I dan J sudah memuat hard gate, timeline, penetapan, notifikasi, upload surat, checklist kesiapan, auto-forced bypass, sidang, putusan, dan pasca-sidang. | Sesuai |
+| Mutu baku | Ukuran keberterimaan proses/hasil | Ada, tapi belum diformat tabel SOP murni | Dalam sop-revisi.md, mutu baku tersebar di hard gate, SLA H-7/H-3/H-1, auto-forced <2 jam, unggah putusan di hari yang sama, dan pengiriman berkas 7 hari. Agar lebih sesuai gaya Persekma, mutu baku ini idealnya dipindahkan juga ke tabel prosedur formal. | Parsial |
+| Waktu penyelesaian | Batas waktu tiap tahapan | Ada | Sudah ada timeline H-7, H-3, H-1, <2 jam, same day, dan 7 hari. Ini salah satu penguatan terbesar pada SOP revisi. | Sesuai |
+| Output | Hasil dari tiap langkah | Ada secara substantif, belum dipisah konsisten | Output sudah tersirat, seperti penetapan terunggah, surat pemberitahuan tersedia, checklist lengkap, ruang virtual siap, metadata lengkap, petikan putusan terunggah. Supaya lebih formal, output sebaiknya dibuat kolom khusus. | Parsial |
+| Peringatan/eskalasi | Apa yang dilakukan jika terjadi deviasi | Ada | Sudah ada auto-forced bypass, catatan merah, eskalasi ke liaison officer, dan tindak lanjut korektif. Ini sangat baik untuk kontrol operasional. | Sesuai |
+| Pencatatan dan pendataan | Bukti proses dan arsip | Ada | Bagian audit trail, metadata sidang, log insiden, dan evaluasi sudah memenuhi unsur pencatatan. | Sesuai |
+| Evaluasi dan pengendalian | Menilai mutu pelaksanaan SOP | Ada | Bagian M, N, O, P sudah memuat audit trail, indikator kinerja, manajemen risiko, pelaporan, dan evaluasi kesiapan operasional. | Sesuai |
 
-### 1. Event minimum yang wajib tercatat
-Paling sedikit event berikut harus tercatat dalam audit trail:
+2. Penjelasan rinci SOP dalam format tabel operasional
+Tabel ini saya susun agar lebih dekat dengan model SOP formal yang lazim dipakai di lingkungan Mahkamah Agung: ada kegiatan, pelaksana, mutu baku, waktu, output, dan keterangan.
 
-1. pembuatan, perubahan, dan penutupan data perkara,
-2. perubahan jadwal sidang atau putusan,
-3. pemberian, perubahan, atau pencabutan akses pengguna,
-4. pengiriman notifikasi penting,
-5. verifikasi identitas dan kehadiran,
-6. pembukaan dan penutupan sidang,
-7. unggah petikan putusan,
-8. pencatatan pengiriman salinan putusan dan berkas perkara,
-9. insiden teknis, gangguan layanan, dan tindakan korektif,
-10. persetujuan atau penolakan pada hard gate.
+| No | Tahap/Kegiatan | Pelaksana | Uraian rinci | Mutu baku / standar hasil | Batas waktu | Output | Keterangan |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Registrasi perkara | Panitera / Operator CIMS | Data pokok perkara, jenis perkara, pihak terkait, dan dokumen awal dimasukkan ke CIMS | Data perkara lengkap dan tervalidasi, tidak ada field wajib kosong | Sejak perkara siap dijadwalkan | Data perkara aktif di CIMS | Menjadi dasar seluruh tahapan berikutnya |
+| 2 | Verifikasi akses dan kewenangan | Admin CIMS / pejabat berwenang | Memastikan user, role, dan atribut akses sesuai perkara | Hak akses valid sesuai RBAC/ABAC; tidak ada user tanpa otorisasi | Sebelum penjadwalan aktif | Hak akses tervalidasi | Jika gagal, proses berhenti di hard gate |
+| 3 | Aktivasi jadwal sidang | Panitera / Hakim / admin jadwal | Menetapkan agenda sidang/pembacaan putusan setelah conflict check | Tidak ada benturan jadwal dan agenda sah | Sebelum H-7 | Jadwal aktif | Dasar pembentukan penetapan |
+| 4 | Pembuatan dan unggah penetapan pemberitahuan sidang | Hakim / Panitera | Penetapan dibuat, ditandatangani, dan diunggah ke CIMS | Dokumen resmi tersedia dan dapat diakses pihak berwenang | Minimal H-7 | Penetapan pemberitahuan terunggah | Ini harus menjadi hard gate formal |
+| 5 | Pengiriman notifikasi lintas instansi | CIMS / Panitera / liaison officer | Sistem mengirim pemberitahuan ke pengadilan, kejaksaan, dan instansi terkait | Notifikasi terkirim, tercatat statusnya, dan ada acknowledgment bila diwajibkan | Setelah penetapan tersedia | Log notifikasi | Default SLA notifikasi mengikuti konfigurasi sistem |
+| 6 | Upload surat pemberitahuan oleh kejaksaan kepada Rutan/Lapas | Kejaksaan | Kejaksaan mengunggah surat/dokumen pemberitahuan ke Rutan/Lapas melalui mekanisme resmi | Dokumen tersedia di CIMS, asal instansi dan waktu unggah tercatat | Minimal H-3 | Surat pemberitahuan kejaksaan tersedia | Bila lewat H-3, sistem harus beri status terlambat dan eskalasi |
+| 7 | Verifikasi penerimaan lintas instansi | Liaison officer / operator instansi | Memastikan pihak penerima mengetahui agenda, dokumen, dan tanggung jawabnya | Tidak ada pihak kritikal yang belum menerima pemberitahuan | H-3 sampai H-1 | Status penerimaan tervalidasi | Penting untuk mencegah sidang gagal karena miskomunikasi |
+| 8 | Pengisian checklist kesiapan pengadilan | Operator pengadilan | Mengecek ruang sidang, perangkat, jaringan, akun VC, akses CIMS, personel | Semua item checklist terisi lengkap | Maksimal H-1 | Checklist pengadilan lengkap | Idealnya dibuat checklist terpisah sebagai lampiran |
+| 9 | Pengisian checklist kesiapan kejaksaan | Petugas kejaksaan | Memastikan perangkat, jaringan, petugas, dan dokumen siap | Semua item wajib terisi | Maksimal H-1 | Checklist kejaksaan lengkap | Jika belum lengkap, sistem harus beri reminder |
+| 10 | Pengisian checklist kesiapan Rutan/Lapas | Petugas Rutan/Lapas | Memastikan ruang, perangkat, jaringan, keamanan, dan identifikasi terdakwa siap | Semua item wajib terisi, identitas terdakwa tervalidasi | Maksimal H-1 | Checklist Rutan/Lapas lengkap | Ini sangat krusial karena menyangkut kehadiran terdakwa |
+| 11 | Evaluasi readiness | Sistem CIMS / operator | Sistem membaca status seluruh checklist dan hard gate | Status readiness mencapai ALL_READY | H-1 sampai sebelum sidang | Status readiness | Menjadi syarat provisioning ruang virtual |
+| 12 | Auto-forced bypass checklist | Sistem CIMS | Jika sisa waktu kurang dari 2 jam dan checklist belum lengkap, sistem memaksa status bypass agar sidang tetap dapat diproses | Status berubah ke AUTO_FORCED, muncul catatan merah, audit trail tercatat | Saat sisa waktu < 2 jam | Bypass readiness sah | Ini bukan penghapusan kewajiban, melainkan pengecualian yang harus diaudit |
+| 13 | Provisioning ruang sidang virtual | Operator IT / sistem | Sistem membuat meeting room / ruang sidang virtual | Ruang hanya dibuat jika status ALL_READY atau AUTO_FORCED yang sah | Setelah hard gate readiness terpenuhi | Ruang virtual aktif | Tidak boleh lebih awal |
+| 14 | Registrasi kehadiran para pihak | Operator sidang / Panitera | Seluruh pihak yang hadir dicatat, termasuk media kehadirannya | Klasifikasi kehadiran jelas: langsung, elektronik, tidak hadir, diwakili | Sebelum sidang dibuka | Data kehadiran | Penting untuk kepatuhan SEMA |
+| 15 | Verifikasi identitas | Hakim / Panitera / petugas verifikator | Memastikan identitas hakim, jaksa, terdakwa, penasihat hukum, saksi, ahli | Identitas tervalidasi dan terekam | Tepat sebelum sidang | Bukti verifikasi identitas | Untuk terdakwa harus sangat ketat |
+| 16 | Pelaksanaan sidang elektronik | Hakim / Panitera / operator teknis | Sidang berjalan sesuai hukum acara dan SOP | Audio-video layak, jalannya sidang terdokumentasi, gangguan dicatat | Pada jadwal sidang | Persidangan terlaksana | Jika ada gangguan substansial, bisa ditunda atau dijadwal ulang |
+| 17 | Pencatatan metadata sidang | Panitera / petugas pencatat | Mencatat waktu mulai, pihak hadir, kejadian penting, status perkara | Metadata lengkap dan dapat diaudit | Selama dan segera setelah sidang | Metadata sidang | Menjadi bagian immutable audit trail |
+| 18 | Pembacaan putusan | Hakim / Panitera | Mencatat waktu pembacaan putusan dan kehadiran para pihak | Waktu pembacaan tepat dan kehadiran terdakwa/JPU tercatat jelas | Saat putusan dibacakan | Data pembacaan putusan | Penting untuk implikasi tenggang kasasi |
+| 19 | Unggah petikan putusan | Panitera | Mengunggah petikan putusan ke sistem informasi pengadilan | Petikan terunggah dan bukti unggah tercatat | Hari yang sama | Petikan putusan tersedia | Ini wajib selaras dengan SEMA |
+| 20 | Pengiriman salinan putusan dan berkas perkara | Panitera / unit administrasi | Mengirim salinan putusan dan berkas perkara ke PN | Dokumen terkirim dan termonitor | Paling lambat 7 hari | Salinan/berkas terkirim | Jika terlambat, harus ada notifikasi eskalasi |
+| 21 | Penutupan administrasi sidang | Panitera / admin sistem | Menutup status sidang setelah seluruh data, log, dan dokumen lengkap | Tidak ada item wajib tertinggal | Setelah sidang selesai | Status sidang closed | Menutup workflow utama |
+| 22 | Audit trail dan logging | Admin CIMS / sistem | Menyimpan event penting: perubahan data, notifikasi, akses, readiness, putusan, insiden | Log lengkap, utuh, tidak diubah sembarangan | Berjalan terus | Audit trail | Wajib untuk pengendalian mutu dan investigasi |
+| 23 | Evaluasi deviasi dan catatan merah | QA / pimpinan / liaison officer | Meninjau keterlambatan, auto-forced bypass, gangguan teknis, atau pelanggaran akses | Ada tindak lanjut korektif yang jelas | Pasca-sidang / evaluasi berkala | Laporan evaluasi | Catatan merah tidak boleh berhenti di dashboard saja |
+| 24 | Monitoring KPI | Pimpinan / admin / QA | Mengukur ketepatan waktu, kelengkapan metadata, keberhasilan notifikasi, gangguan teknis | KPI tercapai sesuai standar internal | Berkala | Laporan KPI | Menjadi dasar perbaikan SOP |
 
-### 2. Ketentuan mutu
-1. Audit trail harus terlindungi integritasnya dan tidak boleh dihapus atau diubah di luar mekanisme resmi.
-2. Pengendalian mutu dilakukan melalui review berkala atas kepatuhan SOP, ketepatan data, kelengkapan log, ketepatan waktu, dan kualitas koordinasi.
-3. Temuan mutu ditindaklanjuti dengan rencana perbaikan dan pemantauan penyelesaiannya.
 
-## N. Indikator Kinerja
+3. Tabel “mutu baku” yang paling penting untuk SOP ini
+Karena Persekma 002/2012 menekankan mutu baku sebagai alat kendali mutu prosedur, maka untuk SOP ini mutu baku utamanya menurut saya harus dipaku seperti berikut.
 
-Indikator kinerja minimum meliputi:
+| Objek kontrol | Mutu baku yang disarankan |
+| --- | --- |
+| Registrasi perkara | 100% field wajib terisi dan tervalidasi |
+| Akses pengguna | Tidak ada user aktif tanpa role dan otorisasi yang sah |
+| Penetapan pemberitahuan sidang | Dokumen sah tersedia di CIMS minimal H-7 |
+| Surat pemberitahuan kejaksaan ke Rutan/Lapas | Dokumen tersedia di CIMS minimal H-3 |
+| Checklist kesiapan | Seluruh checklist terisi maksimal H-1 |
+| Auto-forced bypass | Hanya boleh jika sisa waktu < 2 jam; wajib catatan merah dan audit trail |
+| Provisioning ruang virtual | Hanya jika status ALL_READY atau AUTO_FORCED sah |
+| Verifikasi kehadiran | Cara kehadiran terdakwa dan JPU tercatat tegas |
+| Unggah petikan putusan | 100% diunggah pada hari yang sama |
+| Pengiriman salinan/berkas | 100% terkirim paling lambat 7 hari |
+| Audit trail | Seluruh event minimum terekam utuh |
+| Evaluasi deviasi | Setiap catatan merah menghasilkan tindak lanjut |
 
-1. persentase sidang yang berlangsung sesuai jadwal,
-2. persentase hard gate yang lolos tanpa deviasi,
-3. tingkat kelengkapan metadata sidang dan data perkara,
-4. persentase petikan putusan yang diunggah pada hari yang sama,
-5. persentase salinan putusan/berkas yang terkirim sesuai tenggat,
-6. jumlah dan tingkat keparahan gangguan teknis,
-7. tingkat keberhasilan notifikasi penting,
-8. jumlah insiden akses tidak sah atau pelanggaran keamanan,
-9. waktu respons eskalasi antar-instansi,
-10. tingkat penyelesaian tindakan perbaikan hasil evaluasi.
 
-## O. Manajemen Risiko dan Keadaan Kahar
+4. Catatan penting agar SOP ini benar-benar “sesuai format Persekma”
+Secara substansi, SOP Anda sudah sangat kuat. Tetapi kalau mau dibuat lebih patuh terhadap gaya penyusunan SOP formal di lingkungan Mahkamah Agung, saya sarankan empat penyempurnaan lagi.
 
-Risiko utama dan mitigasi minimum meliputi:
+| Penyempurnaan | Kenapa perlu |
+| --- | --- |
+| Tambahkan Persekma 002 Tahun 2012 secara eksplisit di bagian dasar hukum | Agar SOP ini jelas tunduk pada pedoman penyusunan SOP MA |
+| Pecah prosedur ke dalam tabel SOP resmi per proses utama | Supaya formatnya lebih administratif dan mudah disahkan |
+| Tambahkan kolom tetap: Pelaksana, Mutu Baku, Kelengkapan, Waktu, Output | Ini paling dekat dengan pola SOP formal MA |
+| Buat lampiran checklist, log, dan form sebagai bagian dari SOP | Agar SOP tidak berhenti di norma, tetapi langsung bisa dipakai |
 
-1. **kegagalan jaringan atau platform video conference:** gunakan koneksi cadangan, jadwal ulang terkontrol, atau mekanisme fallback yang sah;
-2. **kesalahan identifikasi pihak:** lakukan verifikasi berlapis dan dokumentasi bukti verifikasi;
-3. **akses tidak sah/kebocoran data:** pembatasan akses, monitoring log, pelaporan insiden, dan tindakan korektif segera;
-4. **keterlambatan unggah/pengiriman dokumen:** notifikasi otomatis, eskalasi ke pejabat penghubung, dan pemantauan SLA;
-5. **perbedaan penafsiran antar pihak:** gunakan forum koordinasi resmi dan musyawarah sesuai PKS;
-6. **keadaan kahar:** pelaksanaan kewajiban disesuaikan berdasarkan pemberitahuan resmi dan keputusan para pihak/pimpinan sesuai ketentuan.
-
-## P. Pelaporan, Evaluasi, dan Kesiapan Operasional
-
-1. Setiap sidang elektronik menghasilkan catatan operasional minimum yang memuat jadwal, pihak hadir, media kehadiran, gangguan, hasil sidang, dan tindak lanjut.
-2. Insiden teknis, keamanan, atau keterlambatan administratif wajib dilaporkan dan ditindaklanjuti.
-3. Evaluasi berkala dilakukan untuk menilai kepatuhan SOP, efektivitas koordinasi, kualitas layanan, dan kesiapan operasional/pilot.
-4. Sebelum implementasi skala lebih luas atau pilot, harus dipenuhi checklist kesiapan minimum meliputi kesiapan sistem, akun, hak akses, perangkat, notifikasi, logging, dan focal point antar-instansi.
-5. Hasil evaluasi digunakan untuk revisi SOP, penguatan sistem, dan penyesuaian tata kerja lintas instansi.
-
-## Q. Ketentuan Khusus untuk Pidana Khusus
-
-1. Perkara pidana khusus dapat dikenai pembatasan akses tambahan, kebutuhan verifikasi berlapis, dan pengamanan fisik/virtual yang lebih tinggi.
-2. Dokumen tertentu hanya dapat diakses oleh pihak berwenang yang ditetapkan.
-3. Koordinasi untuk perkara pidana khusus wajib melibatkan pejabat penghubung yang berwenang dan mengikuti protokol pengamanan tambahan.
-
-## R. Peninjauan dan Revisi SOP
-
-1. SOP ditinjau secara berkala paling sedikit setiap 12 bulan.
-2. Peninjauan dipercepat apabila terdapat perubahan regulasi, perubahan PKS, perubahan versi mayor CIMS, temuan audit, hasil evaluasi pilot, atau insiden signifikan.
-3. Setiap perubahan SOP harus disahkan oleh pejabat yang berwenang dan disosialisasikan kepada seluruh pihak terkait.
-
-## S. Penutup
-
-SOP ini merupakan pedoman kerja resmi dalam penyelenggaraan persidangan pidana secara elektronik yang terkoordinasi, aman, dan akuntabel. Seluruh pihak wajib mematuhi SOP ini dan melaksanakan tugasnya sesuai kewenangan, tanggung jawab, serta prinsip perlindungan data, ketertiban persidangan, dan kepatuhan hukum yang berlaku.
-
-## Lampiran yang Disarankan
-
-1. checklist hard gate per tahap,
-2. matriks RBAC/ABAC dan kewenangan akses dokumen,
-3. daftar pejabat penghubung dan jalur eskalasi,
-4. template log gangguan teknis dan insiden keamanan,
-5. template checklist kesiapan sidang elektronik,
-6. matriks notifikasi multi-channel,
-7. template monitoring unggah petikan putusan dan pengiriman salinan/berkas,
-8. format evaluasi pasca-sidang dan evaluasi berkala,
-9. daftar event audit trail minimum,
-10. rujukan template/format baku penetapan dan paragraf penutup putusan sesuai ketentuan yang berlaku.
+5. Kesimpulan
+Secara isi, sop-revisi.md sudah kompatibel dengan kebutuhan operasional persidangan elektronik, CIMS, SEMA, dan PKS. Jika dilihat dengan kacamata Persekma 002 Tahun 2012, SOP ini juga sudah memenuhi unsur pokok, tetapi akan menjadi jauh lebih kuat bila diubah menjadi paket SOP formal berbasis tabel prosedur dan mutu baku.

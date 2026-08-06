@@ -32,7 +32,7 @@ try {
   throw new Error('The pg dependency is not installed. Run npm install before db:migrate.');
 }
 
-const client = new pg.Client({
+const client = new pg.default.Client({
   connectionString: process.env.DATABASE_URL,
   ssl:
     process.env.DB_SSL === 'true'
