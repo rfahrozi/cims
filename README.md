@@ -24,24 +24,24 @@ Sistem ini didesain 100% mematuhi **SOP/CIMS/PPE/001/2026** dan selaras dengan S
 
 ## ✅ Status Kesiapan Rilis v1.0.0 (5 Agustus 2026)
 
-| Dimensi                        | Status              | Catatan                                                                              |
-| ------------------------------ | ------------------- | ------------------------------------------------------------------------------------ |
-| Alur 7 langkah inti            | ✅ **100% Selesai** | Intake → Penetapan → Jadwal → Notifikasi → Kesiapan → Ruang Virtual → Kontrol Sidang |
-| Putusan Banding (SOP 10.15)    | ✅ **Selesai**      | Same-day publication & 7-day transmission enforced by domain rules                   |
-| Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: Mode persidangan terdata + jadwal otomatis + Auto-Provisioning Zoom + file upload PDF bertanda tangan         |
-| Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                  |
-| Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan dan akses perpindahan tervalidasi              |
-| Participant Privacy Masking    | ✅ **Selesai**      | Perlindungan identitas (Saksi Mahkota/Anak) otomatis dipisah per-instansi (SOP 10.9) |
-| Notification Template          | ✅ **Selesai**      | 16 template default per jenis × channel, editable admin                              |
-| Brevo Email Adapter            | ✅ **Aktif**        | Channel EMAIL via Brevo API; Sandbox HTTP Mode Ready                                 |
-| Webhook Anti-Replay & HMAC     | ✅ **Aktif**        | Signature validation dan time-window verification untuk Video Provider webhooks      |
-| SLA Config dari DB             | ✅ **Selesai**      | `sla_configs` table, configurable tanpa deploy                                       |
-| Admin Console (`/admin`)       | ✅ **Selesai**      | Edit template & SLA inline, role SYSTEM_ADMIN                                        |
-| Dashboard Per-Instansi         | ✅ **Selesai**      | Widget berbeda per Pengadilan / Kejaksaan / Rutan                                    |
-| Docker Compose Production      | ✅ **Selesai**      | Split docker-compose lokal (dev) vs VPS (production port 4000-4002) + Nginx Ready    |
-| API Metrics & Observability    | ✅ **Selesai**      | Prometheus metrics, latency tracking, SLA worker instrumentation                     |
-| Production Gates / Security    | ✅ **Selesai**      | Environment validator terpusat, Strict OIDC Token, MFA Enforcement (ACR/AMR)         |
-| DOCUMENTATION_PENDING State    | ✅ **Selesai**      | Flag dokumen tertunda pasca sidang                                                   |
+| Dimensi                        | Status              | Catatan                                                                                                                |
+| ------------------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Alur 7 langkah inti            | ✅ **100% Selesai** | Intake → Penetapan → Jadwal → Notifikasi → Kesiapan → Ruang Virtual → Kontrol Sidang                                   |
+| Putusan Banding (SOP 10.15)    | ✅ **Selesai**      | Same-day publication & 7-day transmission enforced by domain rules                                                     |
+| Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: Mode persidangan terdata + jadwal otomatis + Auto-Provisioning Zoom + file upload PDF bertanda tangan |
+| Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                                                    |
+| Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan dan akses perpindahan tervalidasi                                                |
+| Participant Privacy Masking    | ✅ **Selesai**      | Perlindungan identitas (Saksi Mahkota/Anak) otomatis dipisah per-instansi (SOP 10.9)                                   |
+| Notification Template          | ✅ **Selesai**      | 16 template default per jenis × channel, editable admin                                                                |
+| Brevo Email Adapter            | ✅ **Aktif**        | Channel EMAIL via Brevo API; Sandbox HTTP Mode Ready                                                                   |
+| Webhook Anti-Replay & HMAC     | ✅ **Aktif**        | Signature validation dan time-window verification untuk Video Provider webhooks                                        |
+| SLA Config dari DB             | ✅ **Selesai**      | `sla_configs` table, configurable tanpa deploy                                                                         |
+| Admin Console (`/admin`)       | ✅ **Selesai**      | Edit template & SLA inline, role SYSTEM_ADMIN                                                                          |
+| Dashboard Per-Instansi         | ✅ **Selesai**      | Widget berbeda per Pengadilan / Kejaksaan / Rutan                                                                      |
+| Docker Compose Production      | ✅ **Selesai**      | Split docker-compose lokal (dev) vs VPS (production port 4000-4002) + Nginx Ready                                      |
+| API Metrics & Observability    | ✅ **Selesai**      | Prometheus metrics, latency tracking, SLA worker instrumentation                                                       |
+| Production Gates / Security    | ✅ **Selesai**      | Environment validator terpusat, Strict OIDC Token, MFA Enforcement (ACR/AMR)                                           |
+| DOCUMENTATION_PENDING State    | ✅ **Selesai**      | Flag dokumen tertunda pasca sidang                                                                                     |
 
 ---
 

@@ -42,6 +42,14 @@ export class VirtualSessionsService {
     const schedule = await this.core.activeSchedule(hearingId, user);
     if (!schedule)
       throw new DomainError('SCHEDULE_REQUIRED', 'An active schedule is required.', 409);
+
+    // Perubahan Sesuai SOP Persidangan Elektronik (Gate CIMS):
+    // Ruang virtual BISA diprovisioning untuk persiapan (SEMA 2/2026),
+    // Tetapi AKTIVASI dan ENTRY wajib menunggu kesiapan lengkap.
+    // Karena method ini menggabungkan `requestProvision` yang membuat ruangan, kita memisahkan
+    // kapabilitas join di method lain, tetapi untuk provisioning base kita izinkan jika bypass
+    // diperlukan secara force (walaupun belum ALL_READY).
+
     const noticeGate = await this.notices.gate(hearingId, user);
     if (!noticeGate.ready)
       throw new DomainError(
@@ -50,11 +58,14 @@ export class VirtualSessionsService {
         409,
         noticeGate
       );
+
     const readinessGate = await this.readiness.gate(hearingId, user);
-    if (!readinessGate.ready)
+    // Hard Gate SOP - Hanya bisa lewat kalau ALL_READY atau jika ada mekanisme force bypass.
+    // Jika tidak ALL_READY dan tidak ada bypass terkonfirmasi, kita blokir pembuatan Virtual Room-nya.
+    if (!readinessGate.ready && dto.bypass_readiness !== true)
       throw new DomainError(
         'READINESS_REQUIRED',
-        'All required organizations must be READY.',
+        'All required organizations must be READY or explicitly bypassed (AUTO_FORCED).',
         409,
         readinessGate
       );

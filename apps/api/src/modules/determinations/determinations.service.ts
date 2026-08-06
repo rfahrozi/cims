@@ -84,31 +84,31 @@ export class DeterminationsService {
       try {
         const hearingData = await this.intake.get(dto.hearing_id, user);
         if (hearingData && hearingData.scheduledAt) {
-           const startAt = new Date(hearingData.scheduledAt);
-           // Estimasi durasi 1 jam (opsional, disesuaikan)
-           const endAt = new Date(startAt.getTime() + 60 * 60 * 1000);
+          const startAt = new Date(hearingData.scheduledAt);
+          // Estimasi durasi 1 jam (opsional, disesuaikan)
+          const endAt = new Date(startAt.getTime() + 60 * 60 * 1000);
 
-           // Buat proposal dan langsung disetujui berdasarkan data intake
-           const proposal = await this.scheduling.create(
-             user,
-             dto.hearing_id,
-             {
-                start_at: startAt.toISOString(),
-                end_at: endAt.toISOString(),
-                display_timezone: 'Asia/Jakarta',
-                resources: [
-                   { resource_type: 'ROOM', resource_id: 'default-room', requirement: 'PREFERRED' }
-                ]
-             },
-             correlationId
-           );
+          // Buat proposal dan langsung disetujui berdasarkan data intake
+          const proposal = await this.scheduling.create(
+            user,
+            dto.hearing_id,
+            {
+              start_at: startAt.toISOString(),
+              end_at: endAt.toISOString(),
+              display_timezone: 'Asia/Jakarta',
+              resources: [
+                { resource_type: 'ROOM', resource_id: 'default-room', requirement: 'PREFERRED' }
+              ]
+            },
+            correlationId
+          );
 
-           await this.scheduling.approve(
-             user,
-             proposal.id,
-             { reason: 'Auto-approved berdasarkan Penetapan Hakim (SEMA 02/2026)' },
-             correlationId
-           );
+          await this.scheduling.approve(
+            user,
+            proposal.id,
+            { reason: 'Auto-approved berdasarkan Penetapan Hakim (SEMA 02/2026)' },
+            correlationId
+          );
         }
       } catch (err) {
         // Log error namun tidak membatalkan penetapan

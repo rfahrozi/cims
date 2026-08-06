@@ -1,5 +1,0 @@
-An unrecognised element was ignored: v:path
-An unrecognised element was ignored: v:stroke
-An unrecognised element was ignored: v:line
-Unrecognised paragraph style: 'Body Text' (Style ID: BodyText)
-Unrecognised paragraph style: 'List Paragraph' (Style ID: ListParagraph)
