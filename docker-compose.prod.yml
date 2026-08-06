@@ -44,22 +44,27 @@ services:
       DB_SSL: 'true'
       WEB_ORIGINS: https://devapps.pt-kepri.go.id
       API_PORT: 3000
-      WEBHOOK_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET}
-      TOKEN_PEPPER: ${TOKEN_PEPPER}
-      AUDIT_HASH_KEY: ${AUDIT_HASH_KEY}
-      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
+      WEBHOOK_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET:-dummy_webhook_secret_must_be_32_characters_long}
+      TOKEN_PEPPER: ${TOKEN_PEPPER:-dummy_token_pepper_must_be_32_characters_long}
+      AUDIT_HASH_KEY: ${AUDIT_HASH_KEY:-dummy_audit_hash_key_must_be_32_characters_long}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:-eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHg=}
       NOTIFICATION_GATEWAY_MODE: API
       NOTIFICATION_GATEWAY_URL: http://brevo-notification:3011
-      NOTIFICATION_GATEWAY_API_KEY: ${NOTIFICATION_GATEWAY_API_KEY}
+      NOTIFICATION_GATEWAY_API_KEY: ${NOTIFICATION_GATEWAY_API_KEY:-internal_auth_key}
       OFFICIAL_SYSTEM_GATEWAY_MODE: API
-      OFFICIAL_SYSTEM_GATEWAY_URL: ${OFFICIAL_SYSTEM_GATEWAY_URL}
-      OFFICIAL_SYSTEM_GATEWAY_API_KEY: ${OFFICIAL_SYSTEM_GATEWAY_API_KEY}
-      VIDEO_PROVIDER_MODE: API
+      OFFICIAL_SYSTEM_GATEWAY_URL: ${OFFICIAL_SYSTEM_GATEWAY_URL:-http://mock.internal}
+      OFFICIAL_SYSTEM_GATEWAY_API_KEY: ${OFFICIAL_SYSTEM_GATEWAY_API_KEY:-internal_auth_key}
+      VIDEO_PROVIDER_MODE: HTTP
       VIDEO_PROVIDER_URL: http://zoom-provider:3010
       EVIDENCE_STORAGE_MODE: S3
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
-      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://s3.amazonaws.com}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-dummy_access_key}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-dummy_secret_key}
+      OUTBOX_WORKER_ENABLED: 'false'
+      SWAGGER_ENABLED: 'false'
+      ENABLE_LEGACY_PROXY: 'false'
+      KMS_ENABLED: ${KMS_ENABLED:-false}
+      AWS_REGION: ${AWS_REGION:-ap-southeast-1}
     ports:
       - '127.0.0.1:4001:3000' # Expose to localhost 4001 for Nginx Reverse Proxy
     depends_on:
@@ -75,7 +80,10 @@ services:
       NODE_ENV: production
       VITE_API_BASE_URL: https://devapps.pt-kepri.go.id/cims/api/v1
     ports:
-      - '127.0.0.1:4000:5173' # Assuming Vite preview or serve runs on 5173 inside container
+      - '127.0.0.1:4000:8080' # Nginx runs on 8080 inside container
+    depends_on:
+      api:
+        condition: service_healthy
 
   zoom-provider:
     build:
@@ -86,11 +94,11 @@ services:
       NODE_ENV: production
       PORT: 3010
       CIMS_API_URL: http://api:3000
-      ZOOM_ACCOUNT_ID: ${ZOOM_ACCOUNT_ID}
-      ZOOM_CLIENT_ID: ${ZOOM_CLIENT_ID}
-      ZOOM_CLIENT_SECRET: ${ZOOM_CLIENT_SECRET}
-      ZOOM_WEBHOOK_SECRET: ${ZOOM_WEBHOOK_SECRET}
-      CIMS_INTERNAL_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET}
+      ZOOM_ACCOUNT_ID: ${ZOOM_ACCOUNT_ID:-dummy_account_id}
+      ZOOM_CLIENT_ID: ${ZOOM_CLIENT_ID:-dummy_client_id}
+      ZOOM_CLIENT_SECRET: ${ZOOM_CLIENT_SECRET:-dummy_client_secret}
+      ZOOM_WEBHOOK_SECRET: ${ZOOM_WEBHOOK_SECRET:-dummy_webhook_secret}
+      CIMS_INTERNAL_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET:-dummy_webhook_secret_must_be_32_characters_long}
     ports:
       - '127.0.0.1:4002:3010' # Webhook ingestion endpoint for external access if needed
 
@@ -103,7 +111,7 @@ services:
       NODE_ENV: production
       PORT: 3011
       DATABASE_URL: postgres://${DB_USER:-cims_prod_user}:${DB_PASSWORD:-replace_this_password}@db:5432/${DB_NAME:-cims_prod}?sslmode=require
-      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_API_KEY: ${BREVO_API_KEY:-dummy_brevo_api_key}
     depends_on:
       migrations:
         condition: service_completed_successfully

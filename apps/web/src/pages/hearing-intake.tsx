@@ -31,6 +31,7 @@ interface ReferenceData {
   caseClassifications: string[];
   custodyStatuses: string[];
   hearingTypes: string[];
+  judges?: Array<{ id: string; name: string }>;
 }
 interface DefendantForm {
   display_name: string;

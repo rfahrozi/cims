@@ -20,6 +20,8 @@ export interface HearingRecord {
   state: string;
   caseId?: string;
   hearingSequence?: number;
+  scheduledAt?: string;
+  sessionMode?: string;
   intakeStatus?: string;
   dataSource?: string;
   caseTitle?: string;
