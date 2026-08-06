@@ -558,13 +558,36 @@ export function HearingIntakePage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`judge_userid_${index}`}>ID / NIP Hakim</Label>
-                        <Input
-                          id={`judge_userid_${index}`}
+                        <Label htmlFor={`judge_userid_${index}`}>
+                          Pilih Hakim{' '}
+                          <span className="text-red-500" aria-hidden="true">
+                            *
+                          </span>
+                        </Label>
+                        <Select
                           value={judge.user_id}
-                          onChange={(e) => updateJudge(index, { user_id: e.target.value })}
-                          placeholder="Misal: judge-demo atau NIP"
-                        />
+                          onValueChange={(value) => {
+                            const selectedJudge = refs.data?.judges?.find(
+                              (j: any) => j.id === value
+                            );
+                            if (selectedJudge) {
+                              updateJudge(index, { user_id: value, name: selectedJudge.name });
+                            } else {
+                              updateJudge(index, { user_id: value });
+                            }
+                          }}
+                        >
+                          <SelectTrigger id={`judge_userid_${index}`}>
+                            <SelectValue placeholder="Pilih Hakim" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {refs.data?.judges?.map((j: any) => (
+                              <SelectItem key={j.id} value={j.id}>
+                                {j.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="flex items-end justify-between gap-3">
                         <div className="space-y-2 flex-1">

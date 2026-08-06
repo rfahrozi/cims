@@ -58,7 +58,7 @@ describe('CimsAuthGuard', () => {
 
     it('rejects DEV mode if missing valid persona header', async () => {
       await expect(guard.canActivate(context)).rejects.toThrow(
-        /Valid x-cims-dev-persona header is required/
+        /Valid persona is required for DEV auth./
       );
     });
 

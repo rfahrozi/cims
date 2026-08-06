@@ -9,11 +9,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-replace_this_password}
       POSTGRES_DB: ${DB_NAME:-cims_prod}
     ports:
-      - "5433:5432" # Bind to 5433 on VPS to avoid conflicts
+      - '5433:5432' # Bind to 5433 on VPS to avoid conflicts
     volumes:
       - cims_pgdata_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-cims_prod_user}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-cims_prod_user}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,7 +41,7 @@ services:
       OIDC_AUDIENCE: ${OIDC_AUDIENCE:-cims-api}
       DATABASE_URL: postgres://${DB_USER:-cims_prod_user}:${DB_PASSWORD:-replace_this_password}@db:5432/${DB_NAME:-cims_prod}?sslmode=require
       PERSISTENCE_MODE: POSTGRES
-      DB_SSL: "true"
+      DB_SSL: 'true'
       WEB_ORIGINS: https://devapps.pt-kepri.go.id
       API_PORT: 3000
       WEBHOOK_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET}
@@ -61,7 +61,7 @@ services:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
     ports:
-      - "127.0.0.1:4001:3000" # Expose to localhost 4001 for Nginx Reverse Proxy
+      - '127.0.0.1:4001:3000' # Expose to localhost 4001 for Nginx Reverse Proxy
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -75,7 +75,7 @@ services:
       NODE_ENV: production
       VITE_API_BASE_URL: https://devapps.pt-kepri.go.id/cims/api/v1
     ports:
-      - "127.0.0.1:4000:5173" # Assuming Vite preview or serve runs on 5173 inside container
+      - '127.0.0.1:4000:5173' # Assuming Vite preview or serve runs on 5173 inside container
 
   zoom-provider:
     build:
@@ -92,7 +92,7 @@ services:
       ZOOM_WEBHOOK_SECRET: ${ZOOM_WEBHOOK_SECRET}
       CIMS_INTERNAL_SHARED_SECRET: ${WEBHOOK_SHARED_SECRET}
     ports:
-      - "127.0.0.1:4002:3010" # Webhook ingestion endpoint for external access if needed
+      - '127.0.0.1:4002:3010' # Webhook ingestion endpoint for external access if needed
 
   brevo-notification:
     build:

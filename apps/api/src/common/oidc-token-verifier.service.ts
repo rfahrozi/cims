@@ -23,17 +23,42 @@ export class OidcTokenVerifierService {
       (this.issuer
         ? `${this.issuer.replace(/\/$/, '')}/protocol/openid-connect/certs`
         : 'http://invalid.local/jwks');
-    this.jwks = createRemoteJWKSet(new URL(jwksUrl));
+    this.jwks = createRemoteJWKSet(new URL(jwksUrl), {
+      cacheMaxAge: 600000, // 10 menit
+      cooldownDuration: 30000, // 30 detik untuk cooldown
+      timeoutDuration: 5000 // 5 detik timeout saat fetch dari IdP
+    });
   }
 
   async verify(token: string): Promise<CurrentUser> {
     if (!this.issuer || !this.audience)
       throw new UnauthorizedException('OIDC configuration is incomplete.');
-    const { payload } = await jwtVerify(token, this.jwks, {
-      issuer: this.issuer,
-      audience: this.audience
-    });
-    return this.mapClaims(payload);
+
+    try {
+      const { payload } = await jwtVerify(token, this.jwks, {
+        issuer: this.issuer,
+        audience: this.audience,
+        clockTolerance: 15 // 15 detik toleransi clock skew
+      });
+      return this.mapClaims(payload);
+    } catch (error: any) {
+      // Tangani masalah rotasi kid (Key ID) atau JWKS error
+      if (
+        error?.code === 'ERR_JWKS_MULTIPLE_MATCHING_KEYS' ||
+        error?.code === 'ERR_JWKS_NO_MATCHING_KEY'
+      ) {
+        throw new UnauthorizedException('Invalid or rotated identity key. Please re-authenticate.');
+      }
+
+      // Tangani IdP timeout atau error saat verifikasi
+      if (error?.code === 'ERR_JWKS_TIMEOUT' || error?.message?.includes('timeout')) {
+        throw new UnauthorizedException('Identity provider timeout. Please try again later.');
+      }
+
+      throw new UnauthorizedException(
+        `Token verification failed: ${error?.message || 'Invalid token'}`
+      );
+    }
   }
 
   private mapClaims(payload: JWTPayload): CurrentUser {

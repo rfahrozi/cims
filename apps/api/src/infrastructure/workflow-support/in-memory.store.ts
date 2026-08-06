@@ -102,6 +102,7 @@ export interface OrganizationRecord {
   id: string;
   name: string;
   type: OrganizationType;
+  courtCode?: string; // e.g. "PN Tpg"
 }
 export interface HearingAssignmentRecord {
   hearingId: string;
@@ -461,14 +462,46 @@ export class InMemoryStore {
   readonly courtCases: CourtCaseRecord[] = [
     {
       id: 'case-demo-001',
-      caseNumber: '123/Pid.Sus/2026/PN Demo',
-      normalizedCaseNumber: '123/PID.SUS/2026/PN DEMO',
-      officialCaseReference: 'SIPP-DEMO-001',
+      caseNumber: '125/Pid.Sus/2026/PN Tpg',
+      normalizedCaseNumber: '125/PID.SUS/2026/PN TPG',
+      officialCaseReference: 'SIPP-TPI-001',
       caseClassification: 'SPECIAL_CRIMINAL',
       caseTypeCode: 'PID.SUS',
-      caseTitle: 'Perkara Demo',
-      courtOrganizationId: 'court-demo',
-      prosecutionOrganizationId: 'prosecution-demo',
+      caseTitle: 'Perkara Narkotika',
+      courtOrganizationId: 'pn-tanjungpinang',
+      prosecutionOrganizationId: 'kejari-tanjungpinang',
+      dataSource: 'MANUAL',
+      createdBy: 'clerk-demo',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      rowVersion: 1
+    },
+    {
+      id: 'case-demo-002',
+      caseNumber: '295/Pid.B/2026/PN Btm',
+      normalizedCaseNumber: '295/PID.B/2026/PN BTM',
+      officialCaseReference: 'SIPP-BTM-002',
+      caseClassification: 'GENERAL_CRIMINAL',
+      caseTypeCode: 'PID.B',
+      caseTitle: 'Perkara Penipuan',
+      courtOrganizationId: 'pn-batam',
+      prosecutionOrganizationId: 'kejari-batam',
+      dataSource: 'MANUAL',
+      createdBy: 'clerk-demo',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      rowVersion: 1
+    },
+    {
+      id: 'case-demo-003',
+      caseNumber: '5/Pid.Sus-TPK/2026/PN Tpg',
+      normalizedCaseNumber: '5/PID.SUS-TPK/2026/PN TPG',
+      officialCaseReference: 'SIPP-TPI-003',
+      caseClassification: 'SPECIAL_CRIMINAL_TIPIKOR',
+      caseTypeCode: 'PID.SUS-TPK',
+      caseTitle: 'Perkara Tindak Pidana Korupsi',
+      courtOrganizationId: 'pn-tanjungpinang',
+      prosecutionOrganizationId: 'kejari-tanjungpinang',
       dataSource: 'MANUAL',
       createdBy: 'clerk-demo',
       createdAt: new Date().toISOString(),
@@ -480,21 +513,64 @@ export class InMemoryStore {
     {
       id: 'hearing-demo-001',
       caseId: 'case-demo-001',
-      caseNumber: '123/Pid.Sus/2026/PN Demo',
+      caseNumber: '125/Pid.Sus/2026/PN Tpg',
       type: 'PEMERIKSAAN_SAKSI',
       state: 'DRAFT',
       hearingSequence: 1,
       intakeStatus: 'ACTIVE',
       dataSource: 'MANUAL',
-      caseTitle: 'Perkara Demo',
-      courtOrganizationId: 'court-demo',
-      prosecutionOrganizationId: 'prosecution-demo',
-      correctionsOrganizationId: 'corrections-demo',
+      caseTitle: 'Perkara Narkotika',
+      courtOrganizationId: 'pn-tanjungpinang',
+      prosecutionOrganizationId: 'kejari-tanjungpinang',
+      correctionsOrganizationId: 'rutan-tanjungpinang',
+      rowVersion: 1
+    },
+    {
+      id: 'hearing-demo-002',
+      caseId: 'case-demo-002',
+      caseNumber: '295/Pid.B/2026/PN Btm',
+      type: 'PEMERIKSAAN_SAKSI',
+      state: 'DRAFT',
+      hearingSequence: 1,
+      intakeStatus: 'ACTIVE',
+      dataSource: 'MANUAL',
+      caseTitle: 'Perkara Penipuan',
+      courtOrganizationId: 'pn-batam',
+      prosecutionOrganizationId: 'kejari-batam',
+      correctionsOrganizationId: 'rutan-batam',
+      rowVersion: 1
+    },
+    {
+      id: 'hearing-demo-003',
+      caseId: 'case-demo-003',
+      caseNumber: '5/Pid.Sus-TPK/2026/PN Tpg',
+      type: 'PEMERIKSAAN_SAKSI',
+      state: 'DRAFT',
+      hearingSequence: 1,
+      intakeStatus: 'ACTIVE',
+      dataSource: 'MANUAL',
+      caseTitle: 'Perkara Tindak Pidana Korupsi',
+      courtOrganizationId: 'pn-tanjungpinang',
+      prosecutionOrganizationId: 'kejari-tanjungpinang',
+      correctionsOrganizationId: 'rutan-tanjungpinang',
       rowVersion: 1
     }
   ];
   readonly organizations: OrganizationRecord[] = [
-    { id: 'court-demo', name: 'Pengadilan Negeri Demo', type: 'COURT' },
+    {
+      id: 'pn-tanjungpinang',
+      name: 'Pengadilan Negeri Tanjungpinang',
+      type: 'COURT',
+      courtCode: 'PN Tpg'
+    },
+    { id: 'pn-batam', name: 'Pengadilan Negeri Batam', type: 'COURT', courtCode: 'PN Btm' },
+    {
+      id: 'pn-karimun',
+      name: 'Pengadilan Negeri Tanjung Balai Karimun',
+      type: 'COURT',
+      courtCode: 'PN Tbk'
+    },
+    { id: 'pn-natuna', name: 'Pengadilan Negeri Natuna', type: 'COURT', courtCode: 'PN Ntn' },
     { id: 'prosecution-demo', name: 'Kejaksaan Negeri Demo', type: 'PROSECUTION' },
     { id: 'corrections-demo', name: 'Rutan Demo', type: 'CORRECTIONS' },
     { id: 'kejati-kepri', name: 'Kejaksaan Tinggi Kepulauan Riau', type: 'PROSECUTION' },
@@ -565,7 +641,7 @@ export class InMemoryStore {
       partyType: 'DEFENDANT',
       displayName: 'Terdakwa Demo',
       protectedIdentity: false,
-      custodyStatus: 'DETAINED',
+      custodyStatus: 'DETAINED_RUTAN',
       detentionOrganizationId: 'corrections-demo',
       createdBy: 'clerk-demo',
       createdAt: new Date().toISOString()

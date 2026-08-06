@@ -1,12 +1,15 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { secretValue } from './secret-value.js';
+import { KmsSecretService } from './kms-secret.service.js';
 
 @Injectable()
 export class ProductionConfigValidator implements OnApplicationBootstrap {
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly kmsSecret: KmsSecretService
+  ) {}
 
-  onApplicationBootstrap(): void {
+  async onApplicationBootstrap(): Promise<void> {
     if (
       ((this.config && this.config.get ? this.config.get<string>('NODE_ENV') : undefined) ??
         'development') !== 'production'
@@ -14,10 +17,10 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
       return;
     const role = (this.config.get<string>('CIMS_PROCESS_ROLE') ?? 'API').toUpperCase();
     this.assertEqual('PERSISTENCE_MODE', 'POSTGRES');
-    this.requireSecret('DATABASE_URL', 12);
-    this.requireSecret('TOKEN_PEPPER', 32);
-    this.requireSecret('AUDIT_HASH_KEY', 32);
-    const encryption = this.requireSecret('FIELD_ENCRYPTION_KEY', 40);
+    await this.requireSecret('DATABASE_URL', 12);
+    await this.requireSecret('TOKEN_PEPPER', 32);
+    await this.requireSecret('AUDIT_HASH_KEY', 32);
+    const encryption = await this.requireSecret('FIELD_ENCRYPTION_KEY', 40);
     if (Buffer.from(encryption, 'base64').length !== 32)
       throw new Error('FIELD_ENCRYPTION_KEY must decode to exactly 32 bytes.');
     if (this.config.get<string>('ENABLE_LEGACY_PROXY') === 'true')
@@ -33,10 +36,10 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
       this.assertEqual('AUTH_MODE', 'OIDC');
       this.requireValue('OIDC_ISSUER');
       this.requireValue('OIDC_AUDIENCE');
-      this.requireSecret('WEBHOOK_SHARED_SECRET', 32);
+      await this.requireSecret('WEBHOOK_SHARED_SECRET', 32);
       this.assertEqual('EVIDENCE_STORAGE_MODE', 'HTTP');
       this.requireValue('EVIDENCE_STORAGE_URL');
-      this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
+      await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
       if (this.config.get<string>('OUTBOX_WORKER_ENABLED') !== 'false') {
         throw new Error('API process must use OUTBOX_WORKER_ENABLED=false in production.');
       }
@@ -44,11 +47,11 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
       if (this.config.get<string>('OUTBOX_WORKER_ENABLED') === 'false') {
         throw new Error('Worker process requires OUTBOX_WORKER_ENABLED=true.');
       }
-      this.validateGateway('NOTIFICATION_GATEWAY');
-      this.validateGateway('OFFICIAL_SYSTEM_GATEWAY');
+      await this.validateGateway('NOTIFICATION_GATEWAY');
+      await this.validateGateway('OFFICIAL_SYSTEM_GATEWAY');
       this.assertEqual('EVIDENCE_STORAGE_MODE', 'HTTP');
       this.requireValue('EVIDENCE_STORAGE_URL');
-      this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
+      await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
       if ((this.config.get<string>('VIDEO_PROVIDER_MODE') ?? 'MOCK').toUpperCase() === 'HTTP')
         this.requireValue('VIDEO_PROVIDER_URL');
     } else {
@@ -56,11 +59,11 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
     }
   }
 
-  private validateGateway(prefix: string): void {
+  private async validateGateway(prefix: string): Promise<void> {
     const mode = (this.config.get<string>(`${prefix}_MODE`) ?? 'MOCK').toUpperCase();
     if (mode !== 'HTTP') return;
     this.requireValue(`${prefix}_URL`);
-    this.requireSecret(`${prefix}_API_KEY`, 16);
+    await this.requireSecret(`${prefix}_API_KEY`, 16);
   }
 
   private assertEqual(name: string, expected: string): void {
@@ -74,8 +77,8 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
     return value;
   }
 
-  private requireSecret(name: string, minimumLength: number): string {
-    const value = secretValue(this.config, name);
+  private async requireSecret(name: string, minimumLength: number): Promise<string> {
+    const value = await this.kmsSecret.getSecret(name);
     if (!value || value.length < minimumLength)
       throw new Error(
         `${name} must be provided through a secret manager and contain at least ${minimumLength} characters.`

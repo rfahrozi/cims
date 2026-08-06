@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { enforceRuntimeSecurityPolicy } from '../../../src/infrastructure/security/runtime-security.policy.js';
+import { enforceRuntimeSecurityPolicyAsync } from '../../../src/infrastructure/security/runtime-security.policy.js';
 import type { RuntimeEnv } from '../../../src/infrastructure/config/env.schema.js';
 
-describe('enforceRuntimeSecurityPolicy', () => {
+describe('enforceRuntimeSecurityPolicyAsync', () => {
   const baseEnv: RuntimeEnv = {
     NODE_ENV: 'development',
     CIMS_PROCESS_ROLE: 'API',
@@ -52,48 +52,50 @@ describe('enforceRuntimeSecurityPolicy', () => {
     OFFICIAL_SYSTEM_GATEWAY_API_KEY: 'official-key'
   };
 
-  const resolveSecret = (key: string) => validSecrets[key];
+  const resolveSecret = async (key: string) => validSecrets[key];
 
-  it('allows development environment with mock settings', () => {
-    expect(() => enforceRuntimeSecurityPolicy(baseEnv, resolveSecret)).not.toThrow();
+  it('allows development environment with mock settings', async () => {
+    await expect(enforceRuntimeSecurityPolicyAsync(baseEnv, resolveSecret)).resolves.not.toThrow();
   });
 
-  it('allows production environment with strict settings', () => {
-    expect(() => enforceRuntimeSecurityPolicy(productionEnv, resolveSecret)).not.toThrow();
+  it('allows production environment with strict settings', async () => {
+    await expect(
+      enforceRuntimeSecurityPolicyAsync(productionEnv, resolveSecret)
+    ).resolves.not.toThrow();
   });
 
   describe('Serious Environments (staging, preprod, prod)', () => {
     const seriousEnvs = ['staging', 'preproduction', 'production'] as const;
 
     seriousEnvs.forEach((env) => {
-      it(`forbids AUTH_MODE=DEV in ${env}`, () => {
+      it(`forbids AUTH_MODE=DEV in ${env}`, async () => {
         const testEnv: RuntimeEnv = { ...productionEnv, NODE_ENV: env, AUTH_MODE: 'DEV' };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /AUTH_MODE=DEV is forbidden/
         );
       });
 
-      it(`forbids PERSISTENCE_MODE=MEMORY in ${env}`, () => {
+      it(`forbids PERSISTENCE_MODE=MEMORY in ${env}`, async () => {
         const testEnv: RuntimeEnv = { ...productionEnv, NODE_ENV: env, PERSISTENCE_MODE: 'MEMORY' };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /PERSISTENCE_MODE=MEMORY is forbidden/
         );
       });
 
-      it(`requires DB_SSL in ${env}`, () => {
+      it(`requires DB_SSL in ${env}`, async () => {
         const testEnv: RuntimeEnv = { ...productionEnv, NODE_ENV: env, DB_SSL: false };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /DB_SSL=true is required/
         );
       });
 
-      it(`requires core secrets to be resolved in ${env}`, () => {
+      it(`requires core secrets to be resolved in ${env}`, async () => {
         const testEnv: RuntimeEnv = { ...productionEnv, NODE_ENV: env };
-        const missingSecretResolver = (key: string) =>
+        const missingSecretResolver = async (key: string) =>
           key === 'DATABASE_URL' ? undefined : validSecrets[key];
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, missingSecretResolver)).toThrow(
-          /DATABASE_URL is required/
-        );
+        await expect(
+          enforceRuntimeSecurityPolicyAsync(testEnv, missingSecretResolver)
+        ).rejects.toThrow(/DATABASE_URL is required/);
       });
     });
   });
@@ -102,42 +104,42 @@ describe('enforceRuntimeSecurityPolicy', () => {
     const prodEnvs = ['preproduction', 'production'] as const;
 
     prodEnvs.forEach((env) => {
-      it(`forbids SWAGGER_ENABLED=true in ${env}`, () => {
+      it(`forbids SWAGGER_ENABLED=true in ${env}`, async () => {
         const testEnv: RuntimeEnv = { ...productionEnv, NODE_ENV: env, SWAGGER_ENABLED: true };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /SWAGGER_ENABLED=true is forbidden/
         );
       });
 
-      it(`forbids MOCK modes in ${env}`, () => {
+      it(`forbids MOCK modes in ${env}`, async () => {
         const testEnv: RuntimeEnv = {
           ...productionEnv,
           NODE_ENV: env,
           NOTIFICATION_GATEWAY_MODE: 'MOCK'
         };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /NOTIFICATION_GATEWAY_MODE=MOCK is forbidden/
         );
       });
 
-      it(`requires HTTPS for WEB_ORIGINS in ${env}`, () => {
+      it(`requires HTTPS for WEB_ORIGINS in ${env}`, async () => {
         const testEnv: RuntimeEnv = {
           ...productionEnv,
           NODE_ENV: env,
           WEB_ORIGINS: ['http://cims.go.id']
         };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /WEB_ORIGINS must use HTTPS/
         );
       });
 
-      it(`rejects localhost in WEB_ORIGINS for ${env}`, () => {
+      it(`rejects localhost in WEB_ORIGINS for ${env}`, async () => {
         const testEnv: RuntimeEnv = {
           ...productionEnv,
           NODE_ENV: env,
           WEB_ORIGINS: ['https://localhost:8080']
         };
-        expect(() => enforceRuntimeSecurityPolicy(testEnv, resolveSecret)).toThrow(
+        await expect(enforceRuntimeSecurityPolicyAsync(testEnv, resolveSecret)).rejects.toThrow(
           /WEB_ORIGINS must not point to localhost/
         );
       });
@@ -145,18 +147,18 @@ describe('enforceRuntimeSecurityPolicy', () => {
   });
 
   describe('Secret validation', () => {
-    it('rejects placeholders', () => {
-      const resolver = (key: string) =>
+    it('rejects placeholders', async () => {
+      const resolver = async (key: string) =>
         key === 'DATABASE_URL' ? 'replace-with-db-url' : validSecrets[key];
-      expect(() => enforceRuntimeSecurityPolicy(productionEnv, resolver)).toThrow(
+      await expect(enforceRuntimeSecurityPolicyAsync(productionEnv, resolver)).rejects.toThrow(
         /DATABASE_URL must not use placeholder/
       );
     });
 
-    it('validates 32-byte base64 keys', () => {
-      const resolver = (key: string) =>
+    it('validates 32-byte base64 keys', async () => {
+      const resolver = async (key: string) =>
         key === 'FIELD_ENCRYPTION_KEY' ? 'short-key' : validSecrets[key];
-      expect(() => enforceRuntimeSecurityPolicy(productionEnv, resolver)).toThrow(
+      await expect(enforceRuntimeSecurityPolicyAsync(productionEnv, resolver)).rejects.toThrow(
         /FIELD_ENCRYPTION_KEY must be a valid base64 string|decode to exactly 32 bytes/
       );
     });

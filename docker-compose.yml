@@ -8,11 +8,11 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: cims_dev
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - cims_pgdata_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -39,7 +39,7 @@ services:
       WEB_ORIGINS: http://localhost:5173
       API_PORT: 3000
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -52,7 +52,7 @@ services:
       NODE_ENV: development
       VITE_API_BASE_URL: http://localhost:3000/api/v1
     ports:
-      - "5173:5173"
+      - '5173:5173'
 
   zoom-provider:
     build:
@@ -63,7 +63,7 @@ services:
       PORT: 3010
       CIMS_API_URL: http://api:3000
     ports:
-      - "3010:3010"
+      - '3010:3010'
 
   brevo-notification:
     build:

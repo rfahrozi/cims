@@ -573,6 +573,7 @@ export class HearingIntakeRepository {
     caseClassifications: string[];
     custodyStatuses: string[];
     hearingTypes: string[];
+    judges: Array<{ id: string; name: string }>;
   }> {
     const organizations = !this.mode.postgres
       ? this.memory.organizations.map((item) => ({ id: item.id, name: item.name, type: item.type }))
@@ -587,8 +588,26 @@ export class HearingIntakeRepository {
             type: String(row.type)
           }))
         );
+
+    // Mock judges for DEV/Pilot since they aren't stored in postgres organizations table
+    // Usually these would come from an external SSO / HR API.
+    const judges = [
+      { id: '196005031988041001', name: 'Drs. ARIFIN, S.H., M.Hum.' },
+      { id: '196105171988031008', name: 'Dr ZULFAHMI, S.H., M.Hum.' },
+      { id: '196303121985032003', name: 'ELIWARTI, S.H., M.H.' },
+      { id: '196506301992121001', name: 'WENDRA RAIS, S.H., M.H.' },
+      { id: '196503151992121001', name: 'ESTIONO, S.H., M.H.' },
+      { id: '196308261988031003', name: 'BAGUS IRAWAN, S.H., M.H.' },
+      { id: '196512111992121001', name: 'ELFIAN, S.H., M.H.' },
+      { id: '196209221992121001', name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.' },
+      { id: '196301101991032002', name: 'DAHLIA PANJAITAN, S.H.' },
+      { id: '1403010103624882', name: 'Dr. M. SURYADI, S.H., M.H.' },
+      { id: 'judge-demo', name: 'Hakim Demo' }
+    ];
+
     return {
       organizations,
+      judges,
       caseClassifications: ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL'],
       custodyStatuses: ['DETAINED', 'NOT_DETAINED', 'MIXED', 'UNKNOWN'],
       hearingTypes: [

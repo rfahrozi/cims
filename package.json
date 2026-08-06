@@ -71,5 +71,8 @@
     "*.{js,ts,tsx,jsx,mjs,cjs}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
   }
 }

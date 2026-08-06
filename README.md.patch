@@ -1,0 +1,21 @@
+--- README.md
++++ README.md
+@@ -29,17 +29,22 @@
+ | Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: HTML renderable penetapan + file upload PDF bertanda tangan         |
+ | Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                  |
+ | Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan                                                |
++| Participant Privacy Masking    | ✅ **Selesai**      | Perlindungan identitas (Saksi Mahkota/Anak) otomatis dipisah per-instansi (SOP 10.9) |
+ | Notification Template          | ✅ **Selesai**      | 16 template default per jenis × channel, editable admin                              |
+ | Brevo Email Adapter            | ✅ **Aktif**        | Channel EMAIL via Brevo API; WhatsApp/SMS stub siap                                  |
++| Webhook Anti-Replay & HMAC     | ✅ **Aktif**        | Signature validation dan time-window verification untuk Video Provider webhooks      |
+ | SLA Config dari DB             | ✅ **Selesai**      | `sla_configs` table, configurable tanpa deploy                                       |
+ | Admin Console (`/admin`)       | ✅ **Selesai**      | Edit template & SLA inline, role SYSTEM_ADMIN                                        |
+ | Dashboard Per-Instansi         | ✅ **Selesai**      | Widget berbeda per Pengadilan / Kejaksaan / Rutan                                    |
++| Docker Compose Production      | ✅ **Selesai**      | Split docker-compose lokal (dev) vs VPS (production port 4000-4002) + Nginx Ready    |
+ | DOCUMENTATION_PENDING State    | ✅ **Selesai**      | Flag dokumen tertunda pasca sidang                                                   |
++| API Metrics & Observability    | ✅ **Selesai**      | Prometheus metrics, latency tracking, SLA worker instrumentation                     |
++| Production Gates / Security    | ✅ **Selesai**      | Environment validator terpusat, OIDC MFA Enforcement (ACR/AMR)                       |
+ 
+ ---
+ 
+ ## 📦 Struktur Monorepo

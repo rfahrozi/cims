@@ -11,9 +11,9 @@ import { DevIdentityInterceptor } from './common/dev-identity.interceptor.js';
 import { DomainExceptionFilter } from './common/domain-exception.filter.js';
 import { CorrelationInterceptor } from './common/correlation.interceptor.js';
 import { StructuredLogger } from './infrastructure/observability/structured-logger.service.js';
-import { secretValue } from './infrastructure/config/secret-value.js';
+import { KmsSecretService } from './infrastructure/config/kms-secret.service.js';
 import { validateEnvOrThrow } from './infrastructure/config/env.schema.js';
-import { enforceRuntimeSecurityPolicy } from './infrastructure/security/runtime-security.policy.js';
+import { enforceRuntimeSecurityPolicyAsync } from './infrastructure/security/runtime-security.policy.js';
 
 async function bootstrap(): Promise<void> {
   const env = validateEnvOrThrow(process.env);
@@ -26,10 +26,10 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
     rawBody: true
   });
-  const configService = app.get(ConfigService);
   app.useLogger(app.get(StructuredLogger));
 
-  enforceRuntimeSecurityPolicy(env, (key) => secretValue(configService, key));
+  const kmsSecret = app.get(KmsSecretService);
+  await enforceRuntimeSecurityPolicyAsync(env, (key) => kmsSecret.getSecret(key));
 
   if (env.AUTH_MODE === 'DEV') {
     app.useGlobalInterceptors(new DevIdentityInterceptor());

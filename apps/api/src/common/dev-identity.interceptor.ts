@@ -369,13 +369,17 @@ export const personas: Record<string, CurrentUser> = {
 @Injectable()
 export class DevIdentityInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context
-      .switchToHttp()
-      .getRequest<{
-        headers: Record<string, string | string[] | undefined>;
-        user?: CurrentUser;
-        query?: Record<string, string>;
-      }>();
+    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+      throw new UnauthorizedException(
+        'DEV identity interceptor is only allowed in development or test environments.'
+      );
+    }
+
+    const request = context.switchToHttp().getRequest<{
+      headers: Record<string, string | string[] | undefined>;
+      user?: CurrentUser;
+      query?: Record<string, string>;
+    }>();
 
     // In DEV mode, SSE events don't send custom headers, so we check query params first
     const rawQuery = request.query?.persona;

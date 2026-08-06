@@ -20,7 +20,7 @@ export class MetricsInterceptor implements NestInterceptor {
 
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    
+
     // Gunakan rute/pattern dari NestJS (e.g. /api/v1/hearings/:id) jika tersedia,
     // jika tidak fallback ke path aktual
     const route = request.route?.path ?? request.routerPath ?? request.url;

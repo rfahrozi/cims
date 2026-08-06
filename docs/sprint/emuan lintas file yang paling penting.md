@@ -1,12 +1,12 @@
-| Area | Temuan | Dampak |
-| --- | --- | --- |
-| Backend bootstrap | Sudah ada validation, CORS, helmet, rate-limit, logger, correlation, shutdown hooks | Fondasi ops dan security cukup baik |
-| Auth pipeline | Ada guard global auth dan policy guard | Struktur kontrol akses baik |
-| Modular backend | Domain dibagi menjadi modul yang masuk akal untuk regulasi | Maintainability dan compliance traceability baik |
-| Infrastructure | Ada audit, outbox, metrics, crypto, gateway, circuit breaker | Arsitektur production-minded |
-| Domain layer | Aturan bisnis dipisah dari framework | Sangat positif untuk sistem regulatif |
-| Testing | Ada domain tests, tetapi bukti assurance masih terbatas | Tidak cukup untuk go-live confidence |
-| Video provider | Service dipisah rapi | Desain bagus, readiness belum terbukti |
-| Legacy integration | Ada legacy-proxy dan gateway resmi | Area risiko tinggi untuk drift dan bypass |
-| In-memory support | Ada in-memory.store.ts | Harus dipastikan mustahil aktif di production |
-| Compliance-critical modules | notices, appeal-decision, scheduling, participants, custody, liaison ada | Coverage domain baik, implementasi belum terverifikasi penuh |
+| Area                        | Temuan                                                                              | Dampak                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Backend bootstrap           | Sudah ada validation, CORS, helmet, rate-limit, logger, correlation, shutdown hooks | Fondasi ops dan security cukup baik                          |
+| Auth pipeline               | Ada guard global auth dan policy guard                                              | Struktur kontrol akses baik                                  |
+| Modular backend             | Domain dibagi menjadi modul yang masuk akal untuk regulasi                          | Maintainability dan compliance traceability baik             |
+| Infrastructure              | Ada audit, outbox, metrics, crypto, gateway, circuit breaker                        | Arsitektur production-minded                                 |
+| Domain layer                | Aturan bisnis dipisah dari framework                                                | Sangat positif untuk sistem regulatif                        |
+| Testing                     | Ada domain tests, tetapi bukti assurance masih terbatas                             | Tidak cukup untuk go-live confidence                         |
+| Video provider              | Service dipisah rapi                                                                | Desain bagus, readiness belum terbukti                       |
+| Legacy integration          | Ada legacy-proxy dan gateway resmi                                                  | Area risiko tinggi untuk drift dan bypass                    |
+| In-memory support           | Ada in-memory.store.ts                                                              | Harus dipastikan mustahil aktif di production                |
+| Compliance-critical modules | notices, appeal-decision, scheduling, participants, custody, liaison ada            | Coverage domain baik, implementasi belum terverifikasi penuh |
