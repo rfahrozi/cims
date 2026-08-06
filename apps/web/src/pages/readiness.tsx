@@ -305,7 +305,7 @@ export function ReadinessPage() {
             <div className="space-y-3">
               {[
                 {
-                  org: 'Pengadilan (Panitera)',
+                  org: 'Pengadilan (Panitera / Panitera Pengganti)',
                   items: [
                     'Penetapan elektronik tersedia dan sah',
                     'Ruang sidang virtual disiapkan',

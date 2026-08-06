@@ -62,13 +62,13 @@ const nav: NavItem[] = [
     to: '/notices',
     label: 'Pemberitahuan',
     icon: BellRing,
-    roles: ['prosecutor', 'corrections', 'court-clerk', 'system-admin']
+    roles: ['substitute-clerk', 'prosecutor', 'corrections', 'court-clerk', 'system-admin']
   },
   {
     to: '/readiness',
     label: 'Kesiapan',
     icon: ClipboardCheck,
-    roles: ['court-clerk', 'prosecutor', 'corrections', 'system-admin']
+    roles: ['substitute-clerk', 'court-clerk', 'prosecutor', 'corrections', 'system-admin']
   },
   {
     to: '/virtual-session',

@@ -82,7 +82,7 @@ export class ReadinessService {
     dto: RoomInspectionDto,
     correlationId?: string
   ) {
-    requireRoles(user, ['CORRECTIONS', 'COURT_CLERK', 'IT_OPERATOR']);
+    requireRoles(user, ['CORRECTIONS', 'COURT_CLERK', 'SUBSTITUTE_CLERK', 'IT_OPERATOR']);
     await this.core.getHearing(hearingId, user);
     const result: 'PASS' | 'FAIL' =
       dto.camera_full_view && dto.unauthorized_person_absent && dto.confidentiality_ready
@@ -124,7 +124,7 @@ export class ReadinessService {
     dto: SubmitReadinessDto,
     correlationId?: string
   ) {
-    requireRoles(user, ['COURT_CLERK', 'PROSECUTOR', 'CORRECTIONS', 'IT_OPERATOR']);
+    requireRoles(user, ['COURT_CLERK', 'SUBSTITUTE_CLERK', 'PROSECUTOR', 'CORRECTIONS', 'IT_OPERATOR']);
     await this.core.getHearing(hearingId, user);
     if (!(await this.core.activeSchedule(hearingId, user)))
       throw new DomainError('SCHEDULE_REQUIRED', 'An active schedule is required.', 409);
