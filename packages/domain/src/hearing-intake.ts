@@ -1,4 +1,5 @@
 import { DomainError } from './errors.js';
+import type { SessionMode } from './types.js';
 
 export type HearingDataSource = 'MANUAL' | 'EXTERNAL_DATABASE';
 export type HearingIntakeStatus =
@@ -43,6 +44,8 @@ export interface ManualHearingIntakeInput {
   caseTitle: string;
   hearingType: string;
   hearingSequence: number;
+  scheduledAt: string;
+  sessionMode: SessionMode;
   courtOrganizationId: string;
   prosecutionOrganizationId: string;
   correctionsOrganizationId?: string;
@@ -81,6 +84,21 @@ export function validateManualHearingIntake(input: ManualHearingIntakeInput): vo
       field: 'hearing_sequence',
       message: 'Urutan persidangan harus berupa bilangan 1 sampai 999.'
     });
+
+  if (!input.scheduledAt || isNaN(Date.parse(input.scheduledAt))) {
+    errors.push({
+      field: 'scheduled_at',
+      message: 'Jadwal sidang (tanggal dan jam) wajib diisi dengan format valid.'
+    });
+  }
+
+  if (!['ONLINE', 'OFFLINE', 'HYBRID'].includes(input.sessionMode)) {
+    errors.push({
+      field: 'session_mode',
+      message: 'Mode sidang (ONLINE, OFFLINE, HYBRID) wajib ditentukan.'
+    });
+  }
+
   if (!input.courtOrganizationId.trim())
     errors.push({ field: 'court_organization_id', message: 'Pengadilan wajib dipilih.' });
   if (!input.prosecutionOrganizationId.trim())

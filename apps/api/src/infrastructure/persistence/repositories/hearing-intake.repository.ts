@@ -27,6 +27,8 @@ export interface ManualHearingRecord extends HearingRecord {
   caseTypeCode: string;
   caseTitle: string;
   hearingSequence: number;
+  scheduledAt: string;
+  sessionMode: string;
   intakeStatus: HearingIntakeStatus;
   dataSource: 'MANUAL' | 'EXTERNAL_DATABASE';
   courtOrganizationId: string;
@@ -146,6 +148,8 @@ export class HearingIntakeRepository {
         caseTypeCode: courtCase.caseTypeCode,
         caseTitle: courtCase.caseTitle,
         hearingSequence: hearing.hearingSequence ?? 1,
+        scheduledAt: String(anyHearing.scheduledAt ?? new Date().toISOString()),
+        sessionMode: String(anyHearing.sessionMode ?? 'OFFLINE'),
         intakeStatus: (hearing.intakeStatus ?? 'ACTIVE') as HearingIntakeStatus,
         dataSource: (hearing.dataSource ?? 'MANUAL') as 'MANUAL' | 'EXTERNAL_DATABASE',
         courtOrganizationId: courtCase.courtOrganizationId,
@@ -301,13 +305,15 @@ export class HearingIntakeRepository {
         );
       const hearingRow = (
         await client.query(
-          `insert into hearings(case_id,case_number,hearing_type,state,hearing_sequence,intake_status,data_source,court_organization_id,prosecution_organization_id,corrections_organization_id,defendant_custody_status,notes,created_by,updated_by)
-         values($1,$2,$3,'DRAFT',$4,'DRAFT','MANUAL',$5,$6,$7,$8,$9,$10,$10) returning id`,
+          `insert into hearings(case_id,case_number,hearing_type,state,hearing_sequence,scheduled_at,session_mode,intake_status,data_source,court_organization_id,prosecution_organization_id,corrections_organization_id,defendant_custody_status,notes,created_by,updated_by)
+         values($1,$2,$3,'DRAFT',$4,$5,$6,'DRAFT','MANUAL',$7,$8,$9,$10,$11,$12,$12) returning id`,
           [
             caseRow.id,
             input.caseNumber.trim(),
             input.hearingType.trim(),
             input.hearingSequence,
+            input.scheduledAt,
+            input.sessionMode,
             input.courtOrganizationId,
             input.prosecutionOrganizationId,
             input.correctionsOrganizationId ?? null,
@@ -396,6 +402,8 @@ export class HearingIntakeRepository {
       hearing.caseNumber = input.caseNumber.trim();
       hearing.type = input.hearingType.trim();
       hearing.hearingSequence = input.hearingSequence;
+      hearing.scheduledAt = input.scheduledAt;
+      hearing.sessionMode = input.sessionMode;
       hearing.caseTitle = input.caseTitle.trim();
       hearing.courtOrganizationId = input.courtOrganizationId;
       hearing.prosecutionOrganizationId = input.prosecutionOrganizationId;
@@ -471,13 +479,15 @@ export class HearingIntakeRepository {
           { caseNumber: input.caseNumber, hearingSequence: input.hearingSequence }
         );
       await client.query(
-        `update hearings set case_id=$2,case_number=$3,hearing_type=$4,hearing_sequence=$5,court_organization_id=$6,prosecution_organization_id=$7,corrections_organization_id=$8,defendant_custody_status=$9,notes=$10,updated_by=$11,row_version=row_version+1,updated_at=now() where id=$1`,
+        `update hearings set case_id=$2,case_number=$3,hearing_type=$4,hearing_sequence=$5,scheduled_at=$6,session_mode=$7,court_organization_id=$8,prosecution_organization_id=$9,corrections_organization_id=$10,defendant_custody_status=$11,notes=$12,updated_by=$13,row_version=row_version+1,updated_at=now() where id=$1`,
         [
           hearingId,
           targetCaseId,
           input.caseNumber.trim(),
           input.hearingType.trim(),
           input.hearingSequence,
+          input.scheduledAt,
+          input.sessionMode,
           input.courtOrganizationId,
           input.prosecutionOrganizationId,
           input.correctionsOrganizationId ?? null,
@@ -636,7 +646,7 @@ export class HearingIntakeRepository {
   ): Promise<ManualHearingRecord> {
     const row = (
       await client.query(
-        `select h.id,h.case_id,h.case_number,h.hearing_type,h.state,h.hearing_sequence,h.intake_status,h.data_source,
+        `select h.id,h.case_id,h.case_number,h.hearing_type,h.state,h.hearing_sequence,h.scheduled_at::text,h.session_mode,h.intake_status,h.data_source,
               h.court_organization_id,h.prosecution_organization_id,h.corrections_organization_id,h.defendant_custody_status,h.notes,
               h.created_by,h.updated_by,h.submitted_by,h.submitted_at::text,h.activated_by,h.activated_at::text,h.return_reason,
               h.row_version,h.created_at::text,h.updated_at::text,
@@ -665,6 +675,8 @@ export class HearingIntakeRepository {
       type: String(row.hearing_type),
       state: String(row.state),
       hearingSequence: Number(row.hearing_sequence),
+      scheduledAt: String(row.scheduled_at),
+      sessionMode: String(row.session_mode),
       intakeStatus: row.intake_status,
       dataSource: row.data_source,
       courtOrganizationId: String(row.court_organization_id),

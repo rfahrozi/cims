@@ -1,6 +1,7 @@
 export type Decision = 'APPROVED' | 'REJECTED';
 export type ProposalStatus = 'DRAFT' | 'CHECKED' | 'APPROVED';
 export type ScheduleStatus = 'ACTIVE' | 'SUPERSEDED';
+export type SessionMode = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type GateCode =
   | 'HEARING_DATA'
   | 'JUDICIAL_DETERMINATION'

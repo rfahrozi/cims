@@ -118,14 +118,14 @@ export class HealthController {
     // Tidak menandai allReady = false karena sistem tetap bisa berjalan
 
     // ── Gateway modes (informatif, bukan blocking) ────────────────────────
-    const notif = this.notification.capability();
+    const notif = await this.notification.capability();
     checks.push({
       name: 'notification_gateway',
       status: notif.configured ? 'UP' : 'DEGRADED',
       detail: `Mode: ${notif.mode}${notif.mode === 'MOCK' ? ' (mock — tidak mengirim notifikasi nyata)' : ''}`
     });
 
-    const official = this.officialSystem.capability();
+    const official = await this.officialSystem.capability();
     checks.push({
       name: 'official_system_gateway',
       status: official.configured ? 'UP' : 'DEGRADED',

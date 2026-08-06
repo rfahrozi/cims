@@ -11,13 +11,15 @@ import {
   MaxLength,
   Min,
   MinLength,
-  ValidateNested
+  ValidateNested,
+  IsDateString
 } from 'class-validator';
 
 const caseClassifications = ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL'] as const;
 const judgeRoles = ['HAKIM_KETUA', 'HAKIM_ANGGOTA'] as const;
 const custodyStatuses = ['DETAINED', 'NOT_DETAINED', 'MIXED', 'UNKNOWN'] as const;
 const defendantCustodyStatuses = ['DETAINED', 'NOT_DETAINED', 'UNKNOWN'] as const;
+const sessionModes = ['ONLINE', 'OFFLINE', 'HYBRID'] as const;
 
 export class InitialDefendantDto {
   @IsString() @MinLength(2) @MaxLength(200) display_name!: string;
@@ -40,6 +42,11 @@ export class ManualHearingDto {
   @IsString() @MinLength(3) @MaxLength(300) case_title!: string;
   @IsString() @MinLength(3) @MaxLength(100) hearing_type!: string;
   @IsInt() @Min(1) @Max(999) hearing_sequence!: number;
+
+  // SEMA No 2 Tahun 2026: Jadwal sidang dan mode kehadiran wajib ditentukan untuk Penetapan
+  @IsDateString() scheduled_at!: string;
+  @IsEnum(sessionModes) session_mode!: (typeof sessionModes)[number];
+
   @IsString() court_organization_id!: string;
   @IsString() prosecution_organization_id!: string;
   @IsOptional() @IsString() corrections_organization_id?: string;

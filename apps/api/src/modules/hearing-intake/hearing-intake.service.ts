@@ -205,6 +205,8 @@ export class HearingIntakeService {
       caseTitle: dto.case_title,
       hearingType: dto.hearing_type,
       hearingSequence: dto.hearing_sequence,
+      scheduledAt: dto.scheduled_at,
+      sessionMode: dto.session_mode,
       courtOrganizationId: dto.court_organization_id,
       prosecutionOrganizationId: dto.prosecution_organization_id,
       correctionsOrganizationId: dto.corrections_organization_id,

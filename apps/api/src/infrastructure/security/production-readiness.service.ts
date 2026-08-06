@@ -127,10 +127,10 @@ export class ProductionReadinessService {
       )
     );
 
-    const notification = this.notification.capability();
-    const official = this.officialSystem.capability();
+    const notification = await this.notification.capability();
+    const official = await this.officialSystem.capability();
     const video = this.videoProvider.capability();
-    const evidence = this.evidenceStorage.capability();
+    const evidence = await this.evidenceStorage.capability();
     checks.push(
       this.check(
         'NOTIFICATION_GATEWAY',
@@ -150,7 +150,8 @@ export class ProductionReadinessService {
     checks.push(
       this.check(
         'EVIDENCE_STORAGE',
-        (evidence.mode === 'HTTP' && evidence.configured) || !production,
+        ((evidence.mode === 'HTTP' || evidence.mode === 'S3') && evidence.configured) ||
+          !production,
         production,
         `Evidence storage mode is ${evidence.mode}.`
       )

@@ -73,6 +73,8 @@
     ]
   },
   "dependencies": {
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "html-to-text": "^10.0.0",
+    "mammoth": "^1.12.0"
   }
 }

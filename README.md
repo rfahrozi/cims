@@ -28,7 +28,7 @@ Sistem ini didesain 100% mematuhi **SOP/CIMS/PPE/001/2026** dan selaras dengan S
 | ------------------------------ | ------------------- | ------------------------------------------------------------------------------------ |
 | Alur 7 langkah inti            | ✅ **100% Selesai** | Intake → Penetapan → Jadwal → Notifikasi → Kesiapan → Ruang Virtual → Kontrol Sidang |
 | Putusan Banding (SOP 10.15)    | ✅ **Selesai**      | Same-day publication & 7-day transmission enforced by domain rules                   |
-| Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: HTML renderable penetapan + file upload PDF bertanda tangan         |
+| Generate & Upload Penetapan    | ✅ **Selesai**      | SEMA No. 2/2026: Mode persidangan terdata + jadwal otomatis + Auto-Provisioning Zoom + file upload PDF bertanda tangan         |
 | Pejabat Penghubung (SOP 7 & 8) | ✅ **Selesai**      | Liaison Officer, delegasi, eskalasi                                                  |
 | Mutasi Tahanan (SOP 10.14)     | ✅ **Selesai**      | Re-checklist otomatis di Rutan tujuan dan akses perpindahan tervalidasi              |
 | Participant Privacy Masking    | ✅ **Selesai**      | Perlindungan identitas (Saksi Mahkota/Anak) otomatis dipisah per-instansi (SOP 10.9) |
