@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { DomainError } from '@cims/domain';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { secretValue } from '../config/secret-value.js';
+import { KmsSecretService } from '../config/kms-secret.service.js';
 import { CircuitBreakerService } from './circuit-breaker.service.js';
 
 export interface EvidenceStorageResult {
@@ -22,40 +22,45 @@ export interface EvidenceStorageGetResult {
 
 @Injectable()
 export class EvidenceStorageGateway {
-  private s3Client?: S3Client;
-
   constructor(
     private readonly config: ConfigService,
+    private readonly kmsSecret: KmsSecretService,
     private readonly circuitBreaker: CircuitBreakerService
-  ) {
-    if (this.mode === 'S3') {
-      const endpoint = this.config.get<string>('S3_ENDPOINT');
-      const region = this.config.get<string>('S3_REGION') || 'us-east-1';
-      const accessKeyId = secretValue(this.config, 'S3_ACCESS_KEY');
-      const secretAccessKey = secretValue(this.config, 'S3_SECRET_KEY');
+  ) {}
 
-      if (endpoint && accessKeyId && secretAccessKey) {
-        this.s3Client = new S3Client({
-          endpoint,
-          region,
-          credentials: { accessKeyId, secretAccessKey },
-          forcePathStyle: true // Diperlukan untuk MinIO
-        });
-      }
+  private async getS3Client(): Promise<S3Client | undefined> {
+    if (this.mode !== 'S3') return undefined;
+
+    const endpoint = this.config.get<string>('S3_ENDPOINT');
+    const region = this.config.get<string>('S3_REGION') || 'us-east-1';
+    const accessKeyId = await this.kmsSecret.getSecret('S3_ACCESS_KEY');
+    const secretAccessKey = await this.kmsSecret.getSecret('S3_SECRET_KEY');
+
+    if (endpoint && accessKeyId && secretAccessKey) {
+      return new S3Client({
+        endpoint,
+        region,
+        credentials: { accessKeyId, secretAccessKey },
+        forcePathStyle: true // Diperlukan untuk MinIO
+      });
     }
+
+    return undefined;
   }
 
-  capability(): { mode: 'LOCAL' | 'HTTP' | 'DISABLED' | 'S3'; configured: boolean } {
+  async capability(): Promise<{ mode: 'LOCAL' | 'HTTP' | 'DISABLED' | 'S3'; configured: boolean }> {
     const mode = this.mode;
     if (mode === 'LOCAL') return { mode, configured: true };
     if (mode === 'DISABLED') return { mode, configured: false };
-    if (mode === 'S3') return { mode, configured: Boolean(this.s3Client) };
+    if (mode === 'S3') {
+      const s3Client = await this.getS3Client();
+      return { mode, configured: Boolean(s3Client) };
+    }
+
+    const key = await this.kmsSecret.getSecret('EVIDENCE_STORAGE_API_KEY');
     return {
       mode,
-      configured: Boolean(
-        this.config.get<string>('EVIDENCE_STORAGE_URL') &&
-          secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY')
-      )
+      configured: Boolean(this.config.get<string>('EVIDENCE_STORAGE_URL') && key)
     };
   }
 
@@ -90,7 +95,8 @@ export class EvidenceStorageGateway {
     }
 
     if (this.mode === 'S3') {
-      if (!this.s3Client) {
+      const s3Client = await this.getS3Client();
+      if (!s3Client) {
         throw new DomainError(
           'EVIDENCE_STORAGE_CONFIG_INVALID',
           'S3 configuration is incomplete.',
@@ -99,7 +105,7 @@ export class EvidenceStorageGateway {
       }
       return this.circuitBreaker.execute('evidence-storage', async () => {
         const bucket = this.config.get<string>('S3_BUCKET') || 'cims-evidence';
-        await this.s3Client!.send(
+        await s3Client.send(
           new PutObjectCommand({
             Bucket: bucket,
             Key: objectKey,
@@ -123,7 +129,7 @@ export class EvidenceStorageGateway {
 
     // Default HTTP Mode
     const baseUrl = this.config.get<string>('EVIDENCE_STORAGE_URL')?.replace(/\/$/, '');
-    const apiKey = secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY');
+    const apiKey = await this.kmsSecret.getSecret('EVIDENCE_STORAGE_API_KEY');
     if (!baseUrl || !apiKey)
       throw new DomainError(
         'EVIDENCE_STORAGE_CONFIG_INVALID',
@@ -193,7 +199,8 @@ export class EvidenceStorageGateway {
     }
 
     if (this.mode === 'S3') {
-      if (!this.s3Client)
+      const s3Client = await this.getS3Client();
+      if (!s3Client)
         throw new DomainError(
           'EVIDENCE_STORAGE_CONFIG_INVALID',
           'S3 configuration is incomplete.',
@@ -201,7 +208,7 @@ export class EvidenceStorageGateway {
         );
       return this.circuitBreaker.execute('evidence-storage', async () => {
         const bucket = this.config.get<string>('S3_BUCKET') || 'cims-evidence';
-        const response = await this.s3Client!.send(
+        const response = await s3Client.send(
           new GetObjectCommand({ Bucket: bucket, Key: objectKey })
         );
         if (!response.Body)
@@ -219,7 +226,7 @@ export class EvidenceStorageGateway {
 
     // HTTP mode
     const baseUrl = this.config.get<string>('EVIDENCE_STORAGE_URL')?.replace(/\/$/, '');
-    const apiKey = secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY');
+    const apiKey = await this.kmsSecret.getSecret('EVIDENCE_STORAGE_API_KEY');
     if (!baseUrl || !apiKey)
       throw new DomainError(
         'EVIDENCE_STORAGE_CONFIG_INVALID',
