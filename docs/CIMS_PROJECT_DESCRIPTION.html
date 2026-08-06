@@ -693,16 +693,10 @@ stateDiagram-v2
     JUDGE_VALIDATION --> DATA_APPROVED : Data Valid
     JUDGE_VALIDATION --> REVISION : Perlu Perbaikan
 
-    DATA_APPROVED --> SCHEDULE_DRAFT : Validasi Selesai
+    DATA_APPROVED --> SCHEDULE_ACTIVE : Auto-Schedule (SEMA 02/2026)
+    SCHEDULE_ACTIVE --> PROVISIONING : Auto-Provisioning Ruang Virtual (Zoom)
+    PROVISIONING --> CREATE_DETERMINATION : Link Masuk ke Penetapan
 
-    SCHEDULE_DRAFT --> CONFLICT_CHECK : Penyusunan Jadwal
-    CONFLICT_CHECK --> SCHEDULE_ACTIVE : Tidak Ada Konflik
-    SCHEDULE_ACTIVE --> PROVISIONING : Provisioning Ruang Virtual (Zoom)
-    PROVISIONING --> CREATE_DETERMINATION : Link Zoom Tersedia
-    CONFLICT_CHECK --> SCHEDULE_REVISION : Konflik Jadwal
-    SCHEDULE_REVISION --> SCHEDULE_DRAFT
-
-    
     CREATE_DETERMINATION --> SIGNED : Penetapan Ditandatangani
     SIGNED --> UPLOAD_DETERMINATION : Upload Dokumen CIMS
 
