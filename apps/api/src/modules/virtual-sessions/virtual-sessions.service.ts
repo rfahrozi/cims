@@ -102,7 +102,11 @@ export class VirtualSessionsService {
       user
     );
 
-    if (this.mode.postgres || session.state === 'READY') {
+    if (session.state === 'READY') {
+        return session;
+    }
+
+    if (this.mode.postgres) {
       // POSTGRES mode: provisioning is handled asynchronously by the outbox worker
       // (apps/worker.Dockerfile → apps/api/dist/worker.js).  The worker polls
       // outbox_events for VIRTUAL_SESSION_PROVISION_REQUESTED, calls the video

@@ -12,7 +12,7 @@ export class PgPoolService implements OnApplicationShutdown {
     const url = secretValue(config, 'DATABASE_URL');
     this.pool = new Pool({
       connectionString: url,
-      max: Number(config && config.get ? (config.get<string>('DB_POOL_MAX') ?? 20) : 20),
+      max: Number(config && config.get ? (config.get<string>('DB_POOL_MAX') ?? 100) : 100),
       min: Number(config && config.get ? (config.get<string>('DB_POOL_MIN') ?? 0) : 0),
       idleTimeoutMillis: Number(
         config && config.get ? (config.get<string>('DB_IDLE_TIMEOUT_MS') ?? 30_000) : 30_000
