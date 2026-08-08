@@ -1,3 +1,4 @@
+import { useAuth } from '@/lib/auth-context';
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, getPersona } from '@/lib/api';

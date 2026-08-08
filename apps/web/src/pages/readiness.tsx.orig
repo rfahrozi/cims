@@ -52,10 +52,6 @@ export function ReadinessPage() {
   const client = useQueryClient();
   const [error, setError] = useState<unknown>(null);
   const [success, setSuccess] = useState('');
-  const { user } = useAuth();
-  const persona = user?.role || 'UNKNOWN';
-  const myOrgType = PERSONA_ORG[persona];
-  const isCorrections = persona === 'corrections';
 
   const query = useQuery({
     queryKey: ['readiness', hearingId],

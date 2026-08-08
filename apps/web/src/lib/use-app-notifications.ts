@@ -10,13 +10,13 @@ import { useQueryClient } from '@tanstack/react-query';
  */
 export function useAppNotifications() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const persona = user?.role || 'UNKNOWN';
 
   useEffect(() => {
     // Ambil base URL dan persona/token untuk autentikasi SSE
     const baseUrl = import.meta.env.VITE_API_URL ?? '/api/v1';
     const token = localStorage.getItem('cims_token') ?? '';
-    const { user } = useAuth();
-  const persona = user?.role || 'UNKNOWN';
 
     // EventSource tidak mendukung custom headers. Kita passing via query param.
     // Jika OIDC Production kelak menggunakan HTTPOnly Cookies, param ini bisa diabaikan.

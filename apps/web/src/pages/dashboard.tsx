@@ -477,8 +477,7 @@ export function DashboardPage() {
     setExporting(true);
     setExportError('');
     const token = localStorage.getItem('cims_token');
-    const { user } = useAuth();
-  const currentPersona = user?.role || 'UNKNOWN';
+    const currentPersona = user?.role || 'UNKNOWN'; // use the user from the top of the component
 
     try {
       const response = await fetch(

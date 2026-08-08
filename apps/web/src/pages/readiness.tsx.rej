@@ -1,0 +1,13 @@
+--- apps/web/src/pages/readiness.tsx
++++ apps/web/src/pages/readiness.tsx
+@@ -19,6 +19,10 @@
+ 
+ export function ReadinessPage() {
+   const { hearingId, hearing, refresh } = useActiveHearing();
++  const { user } = useAuth();
++  const persona = user?.role || 'UNKNOWN';
++  const myOrgType = PERSONA_ORG[persona];
++  const isCorrections = persona === 'corrections';
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState<unknown>(null);
+   const [files, setFiles] = useState<Record<string, File>>({});
