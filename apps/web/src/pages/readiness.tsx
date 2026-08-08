@@ -63,7 +63,7 @@ export function ReadinessPage() {
   });
 
   const [checklistResults, setChecklistResults] = useState<Record<string, 'PASS' | 'FAIL'>>({});
-  const [techResults, setTechResults] = useState<Record<string, 'PASS' | 'FAIL'>>({
+  const [techResults] = useState<Record<string, 'PASS' | 'FAIL'>>({
     camera: 'PASS',
     microphone: 'PASS',
     audio: 'PASS',

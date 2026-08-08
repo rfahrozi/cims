@@ -156,7 +156,7 @@ Ini tahap untuk memastikan fitur-fitur hukum yang sudah ada benar-benar enforce 
 Saya sarankan audit dan perbaikan dilakukan per modul berikut, urut dari yang paling sensitif.
 
 1. appeal-decision
-Fokus:
+   Fokus:
 
 pembacaan putusan
 same-day publication
@@ -167,58 +167,51 @@ retry dan SLA breach alert
 Ini modul paling dekat ke kewajiban SEMA, jadi harus jadi salah satu prioritas tertinggi.
 
 2. notices
-Fokus:
+   Fokus:
 
 bukti pengiriman
 bukti penerimaan
 perubahan tanggal
 notifikasi yang dapat diaudit
 siapa yang diberitahu, kapan, melalui jalur apa
-fallback saat gateway gagal
-3. scheduling
+fallback saat gateway gagal 3. scheduling
 Fokus:
 
 state transition yang valid
 reschedule governance
 dependency ke readiness dan notices
-larangan publish/launch tanpa syarat wajib
-4. readiness
+larangan publish/launch tanpa syarat wajib 4. readiness
 Fokus:
 
 hard gate lintas instansi
 syarat minimum ruang virtual
 syarat kelengkapan perkara
-checklist kesiapan yang immutable/auditable
-5. participants
+checklist kesiapan yang immutable/auditable 5. participants
 Fokus:
 
 klasifikasi pihak
 masking identitas rentan
 hak akses tampilan data berbeda per role
-enforcement lokasi advokat / pihak tertentu bila diwajibkan
-6. custody
+enforcement lokasi advokat / pihak tertentu bila diwajibkan 6. custody
 Fokus:
 
 alur mutasi tahanan
 re-checklist gate
 chain of custody administratif
-dependency ke jadwal dan kesiapan sidang
-7. liaison
+dependency ke jadwal dan kesiapan sidang 7. liaison
 Fokus:
 
 pejabat penghubung per instansi
 delegasi yang valid
 masa berlaku delegasi
-jejak persetujuan/penugasan
-8. governance dan compliance
+jejak persetujuan/penugasan 8. governance dan compliance
 Fokus:
 
 legal hold
 retention preview
 access review campaign
 self-approval prevention
-maker-checker enforcement
-9. legacy-proxy
+maker-checker enforcement 9. legacy-proxy
 Fokus:
 
 jangan sampai jadi jalur bypass policy
@@ -358,17 +351,14 @@ UAT checklist
 Severity dan dampak bisnis/regulasi
 Saya ringkas prioritasnya seperti ini:
 
-
-
-
-Prioritas	Area	Severity	Alasan
-P0	Auth mode / dev bypass / forbidden env	Kritis	Salah deploy bisa membuka akses tanpa auth penuh
-P0	OIDC verifier & role mapping	Kritis	Fondasi identitas lintas instansi
-P0	Mock/local modes di stage serius	Kritis	Tidak layak untuk data perkara riil
-P1	Notification & official-system gateway	Tinggi	Menyangkut pemberitahuan, integrasi, dan bukti proses
-P1	Secrets/KMS/HSM & key rotation	Tinggi	Perlindungan data sensitif
-P1	Evidence object storage	Tinggi	Integritas dan governance dokumen
-P1	Appeal decision & notices compliance	Tinggi	Langsung terkait SEMA
-P2	CI/security scans/integration test	Tinggi	Assurance engineering
-P2	Observability & reconciliation	Tinggi	Ketahanan operasional
-P2	DR/load/soak/pentest/UAT	Tinggi	Syarat go-live nyata
+Prioritas Area Severity Alasan
+P0 Auth mode / dev bypass / forbidden env Kritis Salah deploy bisa membuka akses tanpa auth penuh
+P0 OIDC verifier & role mapping Kritis Fondasi identitas lintas instansi
+P0 Mock/local modes di stage serius Kritis Tidak layak untuk data perkara riil
+P1 Notification & official-system gateway Tinggi Menyangkut pemberitahuan, integrasi, dan bukti proses
+P1 Secrets/KMS/HSM & key rotation Tinggi Perlindungan data sensitif
+P1 Evidence object storage Tinggi Integritas dan governance dokumen
+P1 Appeal decision & notices compliance Tinggi Langsung terkait SEMA
+P2 CI/security scans/integration test Tinggi Assurance engineering
+P2 Observability & reconciliation Tinggi Ketahanan operasional
+P2 DR/load/soak/pentest/UAT Tinggi Syarat go-live nyata

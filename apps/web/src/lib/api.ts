@@ -22,7 +22,6 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('cims_token');
   const headers = new Headers(init.headers);
   headers.set('content-type', 'application/json');
-  headers.set('x-cims-dev-persona', getPersona());
   if (token) headers.set('authorization', `Bearer ${token}`);
   const response = await fetch(`${base}${path}`, { ...init, headers });
   const body = await response.json().catch(() => ({}));
@@ -52,7 +51,6 @@ export async function apiUploadFile<T>(
   // Content-Type diambil dari file — TIDAK di-override agar PDF terkirim benar
   headers.set('content-type', file.type || 'application/octet-stream');
   headers.set('x-file-name', file.name);
-  headers.set('x-cims-dev-persona', getPersona());
   if (token) headers.set('authorization', `Bearer ${token}`);
   if (extraHeaders) {
     for (const [k, v] of Object.entries(extraHeaders)) headers.set(k, v);

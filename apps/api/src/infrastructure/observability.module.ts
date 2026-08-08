@@ -5,12 +5,7 @@ import { MetricsService } from './observability/metrics.service.js';
 import { StructuredLogger } from './observability/structured-logger.service.js';
 import { MetricsInterceptor } from './observability/metrics.interceptor.js';
 
-const providers = [
-  AuditService, 
-  MetricsService, 
-  StructuredLogger,
-  MetricsInterceptor
-];
+const providers = [AuditService, MetricsService, StructuredLogger, MetricsInterceptor];
 
 @Global()
 @Module({

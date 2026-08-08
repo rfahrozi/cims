@@ -63,13 +63,16 @@ CIMS/
 ```
 
 ## 🚀 Deployment (v1.0.0 Production)
+
 Repositori ini siap dideploy menggunakan Docker Compose ke server VPS target (Nginx).
 
 1. Pull repositori ini.
 2. Salin template konfigurasi `.env` sesuai panduan rahasia produksi.
 3. Eksekusi deployment VPS:
+
 ```bash
 docker-compose -f docker-compose.prod.yml build
 docker-compose -f docker-compose.prod.yml up -d
 ```
+
 4. Tambahkan _snippet_ routing `nginx.cims.conf.snippet` ke konfigurasi Nginx _host_.

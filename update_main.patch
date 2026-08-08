@@ -1,0 +1,21 @@
+--- apps/api/src/main.ts
++++ apps/api/src/main.ts
+@@ -8,3 +8,2 @@
+ import { AppModule } from './app.module.js';
+-import { DevIdentityInterceptor } from './common/dev-identity.interceptor.js';
+ import { DomainExceptionFilter } from './common/domain-exception.filter.js';
+@@ -33,5 +32,2 @@
+ 
+-  if (env.AUTH_MODE === 'DEV') {
+-    app.useGlobalInterceptors(new DevIdentityInterceptor());
+-  }
+-
+   app.useGlobalInterceptors(new CorrelationInterceptor());
+@@ -49,3 +45,2 @@
+       'x-correlation-id',
+-      'x-cims-dev-persona',
+       'traceparent',
+@@ -94,3 +89,2 @@
+       .addBearerAuth()
+-      .addApiKey({ type: 'apiKey', in: 'header', name: 'x-cims-dev-persona' }, 'devPersona')
+       .build();

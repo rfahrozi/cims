@@ -3,42 +3,54 @@ import { useNavigate } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { setPersona, type Persona } from '@/lib/api';
-
-const ROLE_OPTIONS: { value: Persona; label: string }[] = [
-  { value: 'substitute-clerk', label: 'Panitera Pengganti (Pengadilan)' },
-  { value: 'court-clerk', label: 'Panitera Berwenang (Pengadilan)' },
-  { value: 'judge', label: 'Majelis Hakim (Pengadilan)' },
-  { value: 'prosecutor', label: 'Penuntut Umum (Kejaksaan)' },
-  { value: 'corrections', label: 'Petugas Lapas/Rutan (Pemasyarakatan)' },
-  { value: 'it-operator', label: 'Operator TI / Ruang Virtual' },
-  { value: 'security-officer', label: 'Security Officer' },
-  { value: 'auditor', label: 'Auditor Pengawasan' },
-  { value: 'system-admin', label: 'Administrasi Sistem' }
-];
+import { Input } from '@/components/ui/input';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<Persona>('court-clerk');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // Di backend DEV, identitas bergantung penuh pada persona header yang dikirim.
-    setTimeout(() => {
-      setPersona(selectedRole);
+    try {
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      if (data.token) {
+        localStorage.setItem('cims_token', data.token);
+        
+        // Also save persona from API response if available, to ensure UI correctly renders navs
+        // using the existing logic, assuming the backend returns it as part of the user obj
+        if (data.user && data.user.roles && data.user.roles.length > 0) {
+          localStorage.setItem('cims_persona', data.user.roles[0]);
+          window.dispatchEvent(new Event('cims-persona-change'));
+        }
+        
+        navigate('/dashboard');
+      } else {
+        throw new Error('Token not received from server');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during login');
+    } finally {
       setLoading(false);
-      navigate('/dashboard');
-    }, 600);
+    }
   };
 
   return (
@@ -61,20 +73,36 @@ export function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2 text-left">
-              <Label className="text-sm font-medium text-slate-700">Pilih Peran Uji Coba</Label>
-              <Select value={selectedRole} onValueChange={(val) => setSelectedRole(val as Persona)}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Pilih Peran" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="username" className="text-sm font-medium text-slate-700">Username</Label>
+              <Input 
+                id="username" 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Masukkan username Anda"
+                className="h-11"
+                required
+              />
             </div>
+            
+            <div className="space-y-2 text-left">
+              <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Masukkan password Anda"
+                className="h-11"
+                required
+              />
+            </div>
+
+            {error && (
+              <div className="text-sm text-red-500 font-medium">
+                {error}
+              </div>
+            )}
 
             <Button
               type="submit"

@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { PersonaSwitcher } from '@/components/persona-switcher';
 import { HearingSelector } from '@/components/hearing-selector';
 import { ActiveHearingBar } from '@/components/active-hearing-bar';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -191,7 +190,6 @@ export function AppLayout() {
           ))}
         </nav>
         <div className="mt-6 space-y-3">
-          {/* <PersonaSwitcher /> dinonaktifkan untuk pengujian manual */}
           <HearingSelector />
         </div>
         <div className="mt-4 rounded-lg border border-white/15 bg-white/5 p-3 text-xs text-blue-100">

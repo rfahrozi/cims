@@ -55,6 +55,8 @@
   "packageManager": "npm@10.9.0",
   "devDependencies": {
     "@eslint/js": "^8.57.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.30.0",
@@ -71,5 +73,10 @@
     "*.{js,ts,tsx,jsx,mjs,cjs}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@nestjs/jwt": "^11.0.2",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3"
   }
 }

@@ -7,7 +7,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { AppModule } from './app.module.js';
-import { DevIdentityInterceptor } from './common/dev-identity.interceptor.js';
 import { DomainExceptionFilter } from './common/domain-exception.filter.js';
 import { CorrelationInterceptor } from './common/correlation.interceptor.js';
 import { StructuredLogger } from './infrastructure/observability/structured-logger.service.js';
@@ -31,10 +30,6 @@ async function bootstrap(): Promise<void> {
 
   enforceRuntimeSecurityPolicy(env, (key) => secretValue(configService, key));
 
-  if (env.AUTH_MODE === 'DEV') {
-    app.useGlobalInterceptors(new DevIdentityInterceptor());
-  }
-
   app.useGlobalInterceptors(new CorrelationInterceptor());
   app.setGlobalPrefix('api/v1', { exclude: ['health', 'health/live', 'health/ready', 'metrics'] });
 
@@ -47,7 +42,6 @@ async function bootstrap(): Promise<void> {
       'content-type',
       'idempotency-key',
       'x-correlation-id',
-      'x-cims-dev-persona',
       'traceparent',
       'x-cims-signature',
       'x-cims-timestamp'
@@ -92,7 +86,6 @@ async function bootstrap(): Promise<void> {
       .setDescription('Compliance-first electronic criminal hearing orchestration API')
       .setVersion('1.0.0')
       .addBearerAuth()
-      .addApiKey({ type: 'apiKey', in: 'header', name: 'x-cims-dev-persona' }, 'devPersona')
       .build();
     SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, swagger), {
       jsonDocumentUrl: 'docs/openapi.json'

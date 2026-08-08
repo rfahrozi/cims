@@ -1,268 +1,739 @@
-<!DOCTYPE html><html lang="id"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOP Persidangan Elektronik CIMS</title>
-  <style>
-    @page{size:A4 landscape;margin:8mm}
-    body{margin:0;padding:14px;background:#dcdcdc;font-family:Arial,Helvetica,sans-serif;color:#000}
-    .page{width:281mm;min-height:194mm;margin:0 auto;background:#fff;border:2.5px solid #111;padding:10px;box-sizing:border-box;box-shadow:0 2px 10px rgba(0,0,0,.10)}
-    table{width:100%;border-collapse:collapse}
-    td,th{border:2px solid #111;padding:4px 6px;vertical-align:top;box-sizing:border-box}
-    .center{text-align:center}.bold{font-weight:700}.mono{font-family:"Courier New",monospace}
-    .header td{padding:0}.logo{width:108px;text-align:center}.logoBox{height:104px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-    .org{height:104px;padding:6px 10px}.org h1{margin:0 0 8px;font-size:16px;text-align:center}.org .sub{font-weight:700;line-height:1.28;text-align:center}.org .addr{margin-top:6px;font-size:11px;text-align:center}
-    .meta td{font-weight:700;font-size:11.5px}.meta td:first-child{width:48%}
-    .title{margin:6px 0}.title td{font-size:13.5px;letter-spacing:.4px;padding:7px;text-align:center;font-weight:700}
-    .info-grid{margin-top:6px}.boxTitle{font-weight:700;font-size:14px;padding-bottom:1px}.boxBody{min-height:64px;font-size:11.2px;line-height:1.2}.boxBody ol{margin:5px 0 0 17px;padding:0}.boxBody li{margin:0 0 2px}.boxBody p{margin:5px 0 0}
-    .process{margin-top:12px}.process th,.process td{font-size:10.6px;line-height:1.12}.process th{font-weight:700;text-align:center;vertical-align:middle}
-    .small{font-size:10px}
-    .flow{min-width:80px;text-align:center;color:#111;padding:0 !important;width:80px;height:54px;vertical-align:middle}
-    .flowSvg{display:block;margin:0 auto;width:104px;height:54px}
-    .noteRed{color:#8b0000;font-weight:700}
-    .tight{line-height:1.08}
-    .footerNote td{font-size:10px;line-height:1.2}
-    .approval td{font-size:10.5px;height:52px}
-    @media print{
-      body{background:#fff;padding:0}
-      .page{width:100%;min-height:auto;border:2px solid #111;margin:0;box-shadow:none;break-inside:avoid-page}
-      table, tr, td, th{break-inside:avoid-page}
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <table class="header">
-      <tbody><tr>
-        <td class="logo">
-          <div class="logoBox">
-            <img src="logo-pt-kepri.png" alt="Logo PT Kepulauan Riau" style="width: 86px; height: auto;">
-          </div>
-        </td>
-        <td class="org">
-          <h1 style="font-size:14px; margin-bottom:4px">MAHKAMAH AGUNG REPUBLIK INDONESIA</h1>
-          <div class="sub">DIREKTORAT JENDERAL BADAN PERADILAN UMUM<br>PENGADILAN TINGGI KEPULAUAN RIAU</div>
-          <div class="addr">Jalan Sultan Muhammad Syah, Dompak, Tanjungpinang, Kepulauan Riau<br>www.pt-kepri.go.id, ptkepulauanriau@gmail.com</div>
-        </td>
-        <td style="width:360px">
-          <table class="meta">
-            <tbody><tr><td>Nomor SOP</td><td>SOP-CIMS-PE-01</td></tr>
-            <tr><td>Tanggal Pembuatan</td><td>05 Agustus 2026</td></tr>
-            <tr><td>Tanggal Revisi</td><td>00</td></tr>
-            <tr><td>Tanggal Efektif</td><td>05 Agustus 2026</td></tr>
-            <tr><td>Disahkan oleh</td><td>Ketua Pengadilan Tinggi Kepulauan Riau</td></tr>
-          </tbody></table>
-        </td>
-      </tr>
-    </tbody></table>
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOP Persidangan Elektronik CIMS</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 8mm;
+      }
+      body {
+        margin: 0;
+        padding: 14px;
+        background: #dcdcdc;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+      }
+      .page {
+        width: 281mm;
+        min-height: 194mm;
+        margin: 0 auto;
+        background: #fff;
+        border: 2.5px solid #111;
+        padding: 10px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        border: 2px solid #111;
+        padding: 4px 6px;
+        vertical-align: top;
+        box-sizing: border-box;
+      }
+      .center {
+        text-align: center;
+      }
+      .bold {
+        font-weight: 700;
+      }
+      .mono {
+        font-family: 'Courier New', monospace;
+      }
+      .header td {
+        padding: 0;
+      }
+      .logo {
+        width: 108px;
+        text-align: center;
+      }
+      .logoBox {
+        height: 104px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .org {
+        height: 104px;
+        padding: 6px 10px;
+      }
+      .org h1 {
+        margin: 0 0 8px;
+        font-size: 16px;
+        text-align: center;
+      }
+      .org .sub {
+        font-weight: 700;
+        line-height: 1.28;
+        text-align: center;
+      }
+      .org .addr {
+        margin-top: 6px;
+        font-size: 11px;
+        text-align: center;
+      }
+      .meta td {
+        font-weight: 700;
+        font-size: 11.5px;
+      }
+      .meta td:first-child {
+        width: 48%;
+      }
+      .title {
+        margin: 6px 0;
+      }
+      .title td {
+        font-size: 13.5px;
+        letter-spacing: 0.4px;
+        padding: 7px;
+        text-align: center;
+        font-weight: 700;
+      }
+      .info-grid {
+        margin-top: 6px;
+      }
+      .boxTitle {
+        font-weight: 700;
+        font-size: 14px;
+        padding-bottom: 1px;
+      }
+      .boxBody {
+        min-height: 64px;
+        font-size: 11.2px;
+        line-height: 1.2;
+      }
+      .boxBody ol {
+        margin: 5px 0 0 17px;
+        padding: 0;
+      }
+      .boxBody li {
+        margin: 0 0 2px;
+      }
+      .boxBody p {
+        margin: 5px 0 0;
+      }
+      .process {
+        margin-top: 12px;
+      }
+      .process th,
+      .process td {
+        font-size: 10.6px;
+        line-height: 1.12;
+      }
+      .process th {
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+      }
+      .small {
+        font-size: 10px;
+      }
+      .flow {
+        min-width: 80px;
+        text-align: center;
+        color: #111;
+        padding: 0 !important;
+        width: 80px;
+        height: 54px;
+        vertical-align: middle;
+      }
+      .flowSvg {
+        display: block;
+        margin: 0 auto;
+        width: 104px;
+        height: 54px;
+      }
+      .noteRed {
+        color: #8b0000;
+        font-weight: 700;
+      }
+      .tight {
+        line-height: 1.08;
+      }
+      .footerNote td {
+        font-size: 10px;
+        line-height: 1.2;
+      }
+      .approval td {
+        font-size: 10.5px;
+        height: 52px;
+      }
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+        }
+        .page {
+          width: 100%;
+          min-height: auto;
+          border: 2px solid #111;
+          margin: 0;
+          box-shadow: none;
+          break-inside: avoid-page;
+        }
+        table,
+        tr,
+        td,
+        th {
+          break-inside: avoid-page;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <table class="header">
+        <tbody>
+          <tr>
+            <td class="logo">
+              <div class="logoBox">
+                <img
+                  src="logo-pt-kepri.png"
+                  alt="Logo PT Kepulauan Riau"
+                  style="width: 86px; height: auto"
+                />
+              </div>
+            </td>
+            <td class="org">
+              <h1 style="font-size: 14px; margin-bottom: 4px">MAHKAMAH AGUNG REPUBLIK INDONESIA</h1>
+              <div class="sub">
+                DIREKTORAT JENDERAL BADAN PERADILAN UMUM<br />PENGADILAN TINGGI KEPULAUAN RIAU
+              </div>
+              <div class="addr">
+                Jalan Sultan Muhammad Syah, Dompak, Tanjungpinang, Kepulauan Riau<br />www.pt-kepri.go.id,
+                ptkepulauanriau@gmail.com
+              </div>
+            </td>
+            <td style="width: 360px">
+              <table class="meta">
+                <tbody>
+                  <tr>
+                    <td>Nomor SOP</td>
+                    <td>SOP-CIMS-PE-01</td>
+                  </tr>
+                  <tr>
+                    <td>Tanggal Pembuatan</td>
+                    <td>05 Agustus 2026</td>
+                  </tr>
+                  <tr>
+                    <td>Tanggal Revisi</td>
+                    <td>00</td>
+                  </tr>
+                  <tr>
+                    <td>Tanggal Efektif</td>
+                    <td>05 Agustus 2026</td>
+                  </tr>
+                  <tr>
+                    <td>Disahkan oleh</td>
+                    <td>Ketua Pengadilan Tinggi Kepulauan Riau</td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table class="title"><tbody><tr><td class="mono">SOP PENGELOLAAN KOORDINASI DAN PELAKSANAAN PERSIDANGAN PIDANA SECARA ELEKTRONIK</td></tr></tbody></table>
+      <table class="title">
+        <tbody>
+          <tr>
+            <td class="mono">
+              SOP PENGELOLAAN KOORDINASI DAN PELAKSANAAN PERSIDANGAN PIDANA SECARA ELEKTRONIK
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table class="info-grid">
-      <tbody><tr>
-        <td style="width:50%">
-          <div class="boxTitle">Dasar Hukum:</div>
-          <div class="boxBody">
-            <ol>
-              <li>UU No. 20 Tahun 2025 tentang KUHAP, khususnya Pasal 298 dan Pasal 300</li>
-              <li>SEMA No. 2 Tahun 2026 tentang Pedoman Pengajuan Kasasi</li>
-              <li>PKS pelaksanaan persidangan secara elektronik antar-instansi</li>
-              <li>Persekma No. 002 Tahun 2012 tentang Pedoman Penyusunan SOP</li>
-            </ol>
-          </div>
-        </td>
-        <td>
-          <div class="boxTitle">Kualifikasi Pelaksana:</div>
-          <div class="boxBody">
-            <ol>
-              <li>Memahami administrasi perkara pidana dan persidangan elektronik</li>
-              <li>Mampu mengoperasikan CIMS dan platform video conference</li>
-              <li>Memahami tata kelola dokumen, notifikasi, dan audit trail</li>
-            </ol>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <div class="boxTitle">Keterkaitan:</div>
-          <div class="boxBody">
-            <ol>
-              <li>SOP registrasi dan verifikasi data perkara</li>
-              <li>SOP pengelolaan notifikasi dan dokumen persidangan</li>
-              <li>SOP evaluasi pasca-sidang dan tindak lanjut deviasi</li>
-            </ol>
-          </div>
-        </td>
-        <td>
-          <div class="boxTitle">Peralatan/Perlengkapan:</div>
-          <div class="boxBody">
-            <p>Komputer, jaringan internet, akun CIMS, akun video conference, perangkat audio-video, ruang sidang, dan daftar kontak eskalasi.</p>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <div class="boxTitle">Peringatan:</div>
-          <div class="boxBody">
-            <p>Jika SOP tidak dilaksanakan, maka dapat terjadi deviasi jadwal, keterlambatan dokumen, ketidaklengkapan checklist, dan gangguan kepatuhan administratif maupun hukum acara.</p>
-          </div>
-        </td>
-        <td>
-          <div class="boxTitle">Pencatatan dan pendataan:</div>
-          <div class="boxBody">
-            <p>Data perkara CIMS, penetapan sidang, surat pemberitahuan, checklist kesiapan, metadata kehadiran, audit trail, petikan putusan, dan log pengiriman berkas.</p>
-          </div>
-        </td>
-      </tr>
-    </tbody></table>
+      <table class="info-grid">
+        <tbody>
+          <tr>
+            <td style="width: 50%">
+              <div class="boxTitle">Dasar Hukum:</div>
+              <div class="boxBody">
+                <ol>
+                  <li>UU No. 20 Tahun 2025 tentang KUHAP, khususnya Pasal 298 dan Pasal 300</li>
+                  <li>SEMA No. 2 Tahun 2026 tentang Pedoman Pengajuan Kasasi</li>
+                  <li>PKS pelaksanaan persidangan secara elektronik antar-instansi</li>
+                  <li>Persekma No. 002 Tahun 2012 tentang Pedoman Penyusunan SOP</li>
+                </ol>
+              </div>
+            </td>
+            <td>
+              <div class="boxTitle">Kualifikasi Pelaksana:</div>
+              <div class="boxBody">
+                <ol>
+                  <li>Memahami administrasi perkara pidana dan persidangan elektronik</li>
+                  <li>Mampu mengoperasikan CIMS dan platform video conference</li>
+                  <li>Memahami tata kelola dokumen, notifikasi, dan audit trail</li>
+                </ol>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="boxTitle">Keterkaitan:</div>
+              <div class="boxBody">
+                <ol>
+                  <li>SOP registrasi dan verifikasi data perkara</li>
+                  <li>SOP pengelolaan notifikasi dan dokumen persidangan</li>
+                  <li>SOP evaluasi pasca-sidang dan tindak lanjut deviasi</li>
+                </ol>
+              </div>
+            </td>
+            <td>
+              <div class="boxTitle">Peralatan/Perlengkapan:</div>
+              <div class="boxBody">
+                <p>
+                  Komputer, jaringan internet, akun CIMS, akun video conference, perangkat
+                  audio-video, ruang sidang, dan daftar kontak eskalasi.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="boxTitle">Peringatan:</div>
+              <div class="boxBody">
+                <p>
+                  Jika SOP tidak dilaksanakan, maka dapat terjadi deviasi jadwal, keterlambatan
+                  dokumen, ketidaklengkapan checklist, dan gangguan kepatuhan administratif maupun
+                  hukum acara.
+                </p>
+              </div>
+            </td>
+            <td>
+              <div class="boxTitle">Pencatatan dan pendataan:</div>
+              <div class="boxBody">
+                <p>
+                  Data perkara CIMS, penetapan sidang, surat pemberitahuan, checklist kesiapan,
+                  metadata kehadiran, audit trail, petikan putusan, dan log pengiriman berkas.
+                </p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table class="process">
-      <tbody><tr>
-        <th rowspan="2" style="width:42px">No</th>
-        <th rowspan="2">Aktivitas</th>
-        <th colspan="5">Pelaksana</th>
-        <th colspan="3">Mutu Baku</th>
-      </tr>
-      <tr>
-        <th style="width: 80px;">Hakim</th><th>Panitera / Operator CIMS</th><th style="width: 80px;">Sistem CIMS</th>
-        <th>Kejaksaan</th>
-        <th>Rutan/Lapas</th>
-        <th>Persyaratan/Perlengkapan</th>
-        <th>Waktu</th>
-        <th>Output</th>
-      </tr>
-      <tr>
-        <td class="center">1</td>
-        <td class="tight">Registrasi perkara dan verifikasi awal data sidang elektronik</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><rect x="22" y="14" width="60" height="26" rx="13" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><polygon points="52,54 48,47 56,47" fill="#111"></polygon><line x1="82" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line><polygon points="104,27 97,23 97,31" fill="#111"></polygon></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line></svg></td>
-<td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-<td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-<td>Data perkara, dokumen awal, user berwenang, dan akses CIMS tersedia</td>
-        <td class="center">30 menit</td>
-        <td>Perkara aktif, tervalidasi, dan siap dijadwalkan</td>
-      </tr>
-      <tr>
-        <td class="center">2</td>
-        <td class="tight">Menetapkan agenda sidang, provisioning ruang virtual otomatis, dan mengunggah penetapan pemberitahuan sidang pembacaan putusan</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54">
-    <line x1="104" y1="0" x2="52" y2="0" stroke="#111" stroke-width="1.5"></line>
-    <line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line>
-    <polygon points="52,14 48,7 56,7" fill="#111"></polygon>
-    <rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect>
-    <line x1="82" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
-</svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54">
-    <!-- Pass-through line from Hakim to CIMS (y=27) -->
-    <line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
-    <!-- Receive return line from CIMS (y=40) -->
-    <line x1="104" y1="40" x2="82" y2="40" stroke="#111" stroke-width="1.5"></line>
-    <polygon points="82,40 89,36 89,44" fill="#111"></polygon>
-    
-    <!-- Panitera Rect for Unggah Penetapan -->
-    <rect x="22" y="27" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect>
-    <line x1="52" y1="53" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
-</svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54">
-    <!-- Receive from Panitera -->
-    <line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line>
-    <polygon points="22,27 15,23 15,31" fill="#111"></polygon>
-    
-    <!-- CIMS Provisioning Rect -->
-    <rect x="22" y="14" width="60" height="26" rx="13" fill="none" stroke="#111" stroke-width="1.7"></rect>
-    
-    <!-- Send line left back to Panitera -->
-    <line x1="22" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line>
-    
-    <!-- Pass the line from Row 1 down to Row 3 for the CIMS bridge -->
-    <!-- Wait, Row 1 CIMS doesn't send down right now. Let's just keep it contained to Row 2. -->
-</svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td>Jadwal aktif, conflict check lulus, penetapan final ditandatangani</td>
-        <td class="center">Minimal H-7</td>
-        <td>Penetapan resmi tersedia di CIMS dan notifikasi dapat dijalankan</td>
-      </tr>
-      <tr>
-        <td class="center">3</td>
-        <td class="tight">Upload surat pemberitahuan Kejaksaan kepada Rutan/Lapas</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line><polygon points="104,27 97,23 97,31" fill="#111"></polygon></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line><polygon points="104,27 97,23 97,31" fill="#111"></polygon></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><polygon points="52,54 48,47 56,47" fill="#111"></polygon></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td>Surat pemberitahuan, identitas perkara, akun berwenang, dan log unggah</td>
-        <td class="center">Minimal H-3</td>
-        <td>Dokumen pemberitahuan tersedia, tervalidasi, dan dapat dipantau</td>
-      </tr>
-      <tr>
-        <td class="center">4</td>
-<td class="tight">Pengisian checklist kesiapan sidang elektronik oleh seluruh pihak</td>
-<td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="104" y2="40" stroke="#111" stroke-width="1.5"></line></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="40" x2="52" y2="40" stroke="#111" stroke-width="1.5"></line><line x1="104" y1="40" x2="52" y2="40" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><polygon points="52,54 48,47 56,47" fill="#111"></polygon></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line><polygon points="104,27 97,23 97,31" fill="#111"></polygon><line x1="104" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line></svg></td>
-        <td>Perangkat, jaringan, ruang, personel, akses sistem, dan identitas terdakwa</td>
-        <td class="center">Maksimal H-1</td>
-        <td>Status readiness lengkap dan siap provisioning</td>
-      </tr>
-      <tr>
-        <td class="center">5</td>
-        <td class="tight">Evaluasi readiness dan auto-forced bypass jika checklist belum lengkap</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="10" stroke="#111" stroke-width="1.5"></line><polygon points="52,10 76,27 52,44 28,27" fill="none" stroke="#111" stroke-width="1.7"></polygon><text x="44" y="52" font-size="9" fill="#111">Ya</text><line x1="52" y1="44" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><polygon points="52,54 48,47 56,47" fill="#111"></polygon><line x1="76" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="0" y1="27" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="27" x2="52" y2="0" stroke="#111" stroke-width="1.5"></line><polygon points="52,0 48,7 56,7" fill="#111"></polygon><text x="39" y="38" font-size="9" fill="#111">Tidak</text></svg></td>
-        <td>Status checklist, waktu sidang, aturan bypass sistem, dan trigger eskalasi</td>
-        <td class="center">&lt; 2 jam</td>
-        <td><span class="noteRed">Catatan merah</span>, audit trail, dan sidang tetap dapat diproses secara sistematis</td>
-      </tr>
-      <tr>
-        <td class="center">6</td>
-        <td class="tight">Aktivasi/pembukaan ruang sidang virtual, registrasi kehadiran, dan pelaksanaan sidang</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="104" y1="27" x2="82" y2="27" stroke="#111" stroke-width="1.5"></line><polygon points="82,27 89,23 89,31" fill="#111"></polygon><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="82" y1="40" x2="104" y2="40" stroke="#111" stroke-width="1.5"></line><polygon points="104,40 97,36 97,44" fill="#111"></polygon></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="104" y1="27" x2="0" y2="27" stroke="#111" stroke-width="1.5"></line><rect x="22" y="27" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="0" y1="40" x2="22" y2="40" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="53" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line><line x1="52" y1="27" x2="0" y2="27" stroke="#111" stroke-width="1.5"></line></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td>Status ALL READY atau AUTO FORCED yang sah, akun VC, perangkat aktif</td>
-        <td class="center">Hari H</td>
-        <td>Sidang elektronik terlaksana, kehadiran tercatat, dan metadata lengkap</td>
-      </tr>
-      <tr>
-        <td class="center">7</td>
-        <td class="tight">Unggah petikan putusan dan pengiriman salinan putusan/berkas perkara</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line><rect x="22" y="14" width="60" height="26" fill="none" stroke="#111" stroke-width="1.7"></rect><line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line><polygon points="52,54 48,47 56,47" fill="#111"></polygon></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td>Putusan final, bukti unggah, log pengiriman, dan monitoring SLA</td>
-        <td class="center">Hari yang sama / 7 hari</td>
-        <td>Petikan putusan terunggah dan berkas terkirim sesuai tenggat</td>
-      </tr>
-      <tr>
-        <td class="center">8</td>
-        <td class="tight">Evaluasi pasca-sidang atas deviasi, catatan merah, dan ketepatan dokumen</td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"><line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line><rect x="22" y="14" width="60" height="26" rx="13" fill="none" stroke="#111" stroke-width="1.7"></rect></svg></td><td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
-        <td>Laporan audit trail, log gangguan, status upload, dan status pengiriman</td>
-        <td class="center">1 hari kerja</td>
-        <td>Laporan evaluasi dan tindak lanjut korektif</td>
-      </tr>
-    </tbody></table>
+      <table class="process">
+        <tbody>
+          <tr>
+            <th rowspan="2" style="width: 42px">No</th>
+            <th rowspan="2">Aktivitas</th>
+            <th colspan="5">Pelaksana</th>
+            <th colspan="3">Mutu Baku</th>
+          </tr>
+          <tr>
+            <th style="width: 80px">Hakim</th>
+            <th>Panitera / Operator CIMS</th>
+            <th style="width: 80px">Sistem CIMS</th>
+            <th>Kejaksaan</th>
+            <th>Rutan/Lapas</th>
+            <th>Persyaratan/Perlengkapan</th>
+            <th>Waktu</th>
+            <th>Output</th>
+          </tr>
+          <tr>
+            <td class="center">1</td>
+            <td class="tight">Registrasi perkara dan verifikasi awal data sidang elektronik</td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  rx="13"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,54 48,47 56,47" fill="#111"></polygon>
+                <line x1="82" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="104,27 97,23 97,31" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Data perkara, dokumen awal, user berwenang, dan akses CIMS tersedia</td>
+            <td class="center">30 menit</td>
+            <td>Perkara aktif, tervalidasi, dan siap dijadwalkan</td>
+          </tr>
+          <tr>
+            <td class="center">2</td>
+            <td class="tight">
+              Menetapkan agenda sidang, provisioning ruang virtual otomatis, dan mengunggah
+              penetapan pemberitahuan sidang pembacaan putusan
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="104" y1="0" x2="52" y2="0" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,14 48,7 56,7" fill="#111"></polygon>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="82" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <!-- Pass-through line from Hakim to CIMS (y=27) -->
+                <line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <!-- Receive return line from CIMS (y=40) -->
+                <line x1="104" y1="40" x2="82" y2="40" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="82,40 89,36 89,44" fill="#111"></polygon>
 
-    <table class="approval" style="margin-top:10px">
-      <tbody><tr>
-        <td style="width:50%;text-align:center">
-          Diperiksa oleh,<br><br>
-          <span class="bold">Wakil Ketua Pengadilan Tinggi Kepulauan Riau</span><br><br><br>
-          (........................................)
-        </td>
-        <td style="text-align:center">
-          Ditetapkan oleh,<br><br>
-          <span class="bold">Ketua Pengadilan Tinggi Kepulauan Riau</span><br><br><br>
-          (........................................)
-        </td>
-      </tr>
-    </tbody></table>
+                <!-- Panitera Rect for Unggah Penetapan -->
+                <rect
+                  x="22"
+                  y="27"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="53" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <!-- Receive from Panitera -->
+                <line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="22,27 15,23 15,31" fill="#111"></polygon>
 
-    <table class="footerNote" style="margin-top:8px">
-      <tbody><tr>
-        <td>
-          <span class="bold">Catatan:</span> dokumen ini merupakan format SOP siap pakai dan print-ready A4 landscape. Nomor naskah dinas, pejabat penandatangan, serta nomenklatur unit kerja dapat disesuaikan pada tahap penetapan resmi. Seluruh timeline, hard gate, dan ketentuan auto-forced bypass dalam dokumen ini telah dirumuskan untuk mendukung pelaksanaan persidangan elektronik terintegrasi CIMS secara tertib, terdokumentasi, dan akuntabel.
-        </td>
-      </tr>
-    </tbody></table>
-  </div>
+                <!-- CIMS Provisioning Rect -->
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  rx="13"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
 
-</body></html>
+                <!-- Send line left back to Panitera -->
+                <line x1="22" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line>
+
+                <!-- Pass the line from Row 1 down to Row 3 for the CIMS bridge -->
+                <!-- Wait, Row 1 CIMS doesn't send down right now. Let's just keep it contained to Row 2. -->
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Jadwal aktif, conflict check lulus, penetapan final ditandatangani</td>
+            <td class="center">Minimal H-7</td>
+            <td>Penetapan resmi tersedia di CIMS dan notifikasi dapat dijalankan</td>
+          </tr>
+          <tr>
+            <td class="center">3</td>
+            <td class="tight">Upload surat pemberitahuan Kejaksaan kepada Rutan/Lapas</td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="104,27 97,23 97,31" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="104,27 97,23 97,31" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,54 48,47 56,47" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Surat pemberitahuan, identitas perkara, akun berwenang, dan log unggah</td>
+            <td class="center">Minimal H-3</td>
+            <td>Dokumen pemberitahuan tersedia, tervalidasi, dan dapat dipantau</td>
+          </tr>
+          <tr>
+            <td class="center">4</td>
+            <td class="tight">Pengisian checklist kesiapan sidang elektronik oleh seluruh pihak</td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="104" y2="40" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="40" x2="52" y2="40" stroke="#111" stroke-width="1.5"></line>
+                <line x1="104" y1="40" x2="52" y2="40" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,54 48,47 56,47" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="104,27 97,23 97,31" fill="#111"></polygon>
+                <line x1="104" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="22" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="40" x2="0" y2="40" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td>Perangkat, jaringan, ruang, personel, akses sistem, dan identitas terdakwa</td>
+            <td class="center">Maksimal H-1</td>
+            <td>Status readiness lengkap dan siap provisioning</td>
+          </tr>
+          <tr>
+            <td class="center">5</td>
+            <td class="tight">
+              Evaluasi readiness dan auto-forced bypass jika checklist belum lengkap
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="10" stroke="#111" stroke-width="1.5"></line>
+                <polygon
+                  points="52,10 76,27 52,44 28,27"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></polygon>
+                <text x="44" y="52" font-size="9" fill="#111">Ya</text>
+                <line x1="52" y1="44" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,54 48,47 56,47" fill="#111"></polygon>
+                <line x1="76" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="104" y2="27" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="0" y1="27" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="27" x2="52" y2="0" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,0 48,7 56,7" fill="#111"></polygon>
+                <text x="39" y="38" font-size="9" fill="#111">Tidak</text>
+              </svg>
+            </td>
+            <td>Status checklist, waktu sidang, aturan bypass sistem, dan trigger eskalasi</td>
+            <td class="center">&lt; 2 jam</td>
+            <td>
+              <span class="noteRed">Catatan merah</span>, audit trail, dan sidang tetap dapat
+              diproses secara sistematis
+            </td>
+          </tr>
+          <tr>
+            <td class="center">6</td>
+            <td class="tight">
+              Aktivasi/pembukaan ruang sidang virtual, registrasi kehadiran, dan pelaksanaan sidang
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="104" y1="27" x2="82" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="82,27 89,23 89,31" fill="#111"></polygon>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="82" y1="40" x2="104" y2="40" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="104,40 97,36 97,44" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="104" y1="27" x2="0" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="27"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="0" y1="40" x2="22" y2="40" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="53" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="27" stroke="#111" stroke-width="1.5"></line>
+                <line x1="52" y1="27" x2="0" y2="27" stroke="#111" stroke-width="1.5"></line>
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Status ALL READY atau AUTO FORCED yang sah, akun VC, perangkat aktif</td>
+            <td class="center">Hari H</td>
+            <td>Sidang elektronik terlaksana, kehadiran tercatat, dan metadata lengkap</td>
+          </tr>
+          <tr>
+            <td class="center">7</td>
+            <td class="tight">
+              Unggah petikan putusan dan pengiriman salinan putusan/berkas perkara
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+                <line x1="52" y1="40" x2="52" y2="54" stroke="#111" stroke-width="1.5"></line>
+                <polygon points="52,54 48,47 56,47" fill="#111"></polygon>
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Putusan final, bukti unggah, log pengiriman, dan monitoring SLA</td>
+            <td class="center">Hari yang sama / 7 hari</td>
+            <td>Petikan putusan terunggah dan berkas terkirim sesuai tenggat</td>
+          </tr>
+          <tr>
+            <td class="center">8</td>
+            <td class="tight">
+              Evaluasi pasca-sidang atas deviasi, catatan merah, dan ketepatan dokumen
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center">
+              <svg class="flowSvg" viewBox="0 0 104 54">
+                <line x1="52" y1="0" x2="52" y2="14" stroke="#111" stroke-width="1.5"></line>
+                <rect
+                  x="22"
+                  y="14"
+                  width="60"
+                  height="26"
+                  rx="13"
+                  fill="none"
+                  stroke="#111"
+                  stroke-width="1.7"
+                ></rect>
+              </svg>
+            </td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td class="flow center"><svg class="flowSvg" viewBox="0 0 104 54"></svg></td>
+            <td>Laporan audit trail, log gangguan, status upload, dan status pengiriman</td>
+            <td class="center">1 hari kerja</td>
+            <td>Laporan evaluasi dan tindak lanjut korektif</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="approval" style="margin-top: 10px">
+        <tbody>
+          <tr>
+            <td style="width: 50%; text-align: center">
+              Diperiksa oleh,<br /><br />
+              <span class="bold">Wakil Ketua Pengadilan Tinggi Kepulauan Riau</span
+              ><br /><br /><br />
+              (........................................)
+            </td>
+            <td style="text-align: center">
+              Ditetapkan oleh,<br /><br />
+              <span class="bold">Ketua Pengadilan Tinggi Kepulauan Riau</span><br /><br /><br />
+              (........................................)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="footerNote" style="margin-top: 8px">
+        <tbody>
+          <tr>
+            <td>
+              <span class="bold">Catatan:</span> dokumen ini merupakan format SOP siap pakai dan
+              print-ready A4 landscape. Nomor naskah dinas, pejabat penandatangan, serta nomenklatur
+              unit kerja dapat disesuaikan pada tahap penetapan resmi. Seluruh timeline, hard gate,
+              dan ketentuan auto-forced bypass dalam dokumen ini telah dirumuskan untuk mendukung
+              pelaksanaan persidangan elektronik terintegrasi CIMS secara tertib, terdokumentasi,
+              dan akuntabel.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
