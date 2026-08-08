@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
 import { api, getPersona } from '@/lib/api';
 import { useActiveHearing } from '@/lib/hearing-context';
-import { errorMessage } from '@/lib/error-messages';
 import { PageHeader } from '@/components/page-header';
 import { AlertBanner } from '@/components/alert-banner';
 import { EmptyState } from '@/components/empty-state';

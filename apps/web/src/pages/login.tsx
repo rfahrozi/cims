@@ -21,27 +21,27 @@ export function LoginPage() {
       const response = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
       if (data.token) {
         localStorage.setItem('cims_token', data.token);
-        
+
         // Also save persona from API response if available, to ensure UI correctly renders navs
         // using the existing logic, assuming the backend returns it as part of the user obj
         if (data.user && data.user.roles && data.user.roles.length > 0) {
           localStorage.setItem('cims_persona', data.user.roles[0]);
           window.dispatchEvent(new Event('cims-persona-change'));
         }
-        
+
         navigate('/dashboard');
       } else {
         throw new Error('Token not received from server');
@@ -73,10 +73,12 @@ export function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2 text-left">
-              <Label htmlFor="username" className="text-sm font-medium text-slate-700">Username</Label>
-              <Input 
-                id="username" 
-                type="text" 
+              <Label htmlFor="username" className="text-sm font-medium text-slate-700">
+                Username
+              </Label>
+              <Input
+                id="username"
+                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username Anda"
@@ -84,12 +86,14 @@ export function LoginPage() {
                 required
               />
             </div>
-            
+
             <div className="space-y-2 text-left">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-700">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
+              <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password Anda"
@@ -98,11 +102,7 @@ export function LoginPage() {
               />
             </div>
 
-            {error && (
-              <div className="text-sm text-red-500 font-medium">
-                {error}
-              </div>
-            )}
+            {error && <div className="text-sm text-red-500 font-medium">{error}</div>}
 
             <Button
               type="submit"
