@@ -229,7 +229,7 @@ export function AppLayout() {
             </div>
           </div>
           <Badge variant="success" className="shrink-0">
-            v0.20.0 MVP
+            v1.0.0
           </Badge>
         </header>
         <ActiveHearingBar />

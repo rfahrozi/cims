@@ -292,7 +292,7 @@ export function LandingPage() {
             <span className="text-xl font-bold tracking-tight text-[#0b2a4a]">CIMS</span>
           </div>
           <p className="text-sm text-slate-500 mb-6">
-            Court Intelligence Management System v0.20.0 (Preproduction)
+            Court Intelligence Management System v1.0.0 (Preproduction)
             <br />
             Digunakan terbatas untuk simulasi Pilot Lintas Instansi.
           </p>
