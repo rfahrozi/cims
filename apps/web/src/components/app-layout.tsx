@@ -134,7 +134,10 @@ const nav: NavItem[] = [
   { to: '/admin', label: 'Konfigurasi Admin', icon: Settings, roles: ['system-admin'] }
 ];
 
+import { useAppNotifications } from '@/lib/use-app-notifications';
+
 export function AppLayout() {
+  useAppNotifications();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const currentPersona = user?.role || 'UNKNOWN';

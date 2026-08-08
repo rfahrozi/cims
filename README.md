@@ -1,8 +1,8 @@
 # CIMS — Court Intelligence Management System
 
-**Versi:** v1.0.0 · Production Ready · Diperbarui: 5 Agustus 2026
+**Versi:** v1.1.0 · Production Ready · Diperbarui: 8 Agustus 2026
 
-Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan) yang mengedepankan **Compliance-First Architecture**. CIMS tidak menggantikan register resmi perkara (SIPP / e-Berpadu), melainkan bertindak sebagai **lapisan orkestrasi, notifikasi, readiness, monitoring, dan audit** untuk operasional sidang virtual.
+Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi Tingkat Banding (Pengadilan Tinggi, Kejaksaan Tinggi, dan Pemasyarakatan) yang mengedepankan **Compliance-First Architecture**. CIMS tidak menggantikan register resmi perkara (SIPP / e-Berpadu), melainkan bertindak sebagai **lapisan orkestrasi, notifikasi, readiness, monitoring, dan audit** untuk operasional sidang virtual tingkat banding.
 
 Sistem ini didesain 100% mematuhi **SOP/CIMS/PPE/001/2026** dan selaras dengan SEMA No. 2 Tahun 2026.
 

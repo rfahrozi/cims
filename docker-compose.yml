@@ -53,6 +53,8 @@ services:
       VITE_API_BASE_URL: http://localhost:3000/api/v1
     ports:
       - '5173:8080'
+    depends_on:
+      - api
 
   zoom-provider:
     build:

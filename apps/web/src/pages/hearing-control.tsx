@@ -203,7 +203,7 @@ export function HearingControlPage() {
               </Badge>
             </div>
             <CardDescription>
-              Gunakan persona Hakim untuk mengoperasikan kontrol sidang.
+              Hanya Majelis Hakim yang dapat mengoperasikan kontrol sidang.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">

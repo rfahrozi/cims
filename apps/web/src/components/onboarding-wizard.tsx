@@ -61,7 +61,7 @@ export function OnboardingWizard() {
     const isCompleted = localStorage.getItem(ONBOARDING_KEY);
     if (isCompleted !== 'true') {
       const { user } = useAuth();
-  const persona = user?.role || 'UNKNOWN';
+      const persona = user?.role || 'UNKNOWN';
       setPersonaName(ROLE_DISPLAY[persona] ?? persona);
       setOpen(true);
     }

@@ -400,12 +400,13 @@
   <body>
     <div class="container">
       <header>
-        <div class="version-badge">v1.0.0 — Production</div>
-        <div class="updated-badge">Diperbarui: 26 Juli 2026 (rev.2)</div>
+        <div class="version-badge">v1.1.0 — Production</div>
+        <div class="updated-badge">Diperbarui: 8 Agustus 2026 (rev.3)</div>
         <h1>CIMS</h1>
         <p>
           Court Intelligence Management System &mdash; Sistem Koordinasi Persidangan Pidana
-          Elektronik Lintas Instansi (Pengadilan, Kejaksaan, dan Pemasyarakatan).
+          Elektronik Lintas Instansi Tingkat Banding (Pengadilan Tinggi, Kejaksaan Tinggi, dan
+          Pemasyarakatan).
         </p>
       </header>
 
@@ -775,8 +776,12 @@ stateDiagram-v2
 
               <div class="workflow-desc">
                 Panitera Pengganti melakukan input data perkara ke dalam CIMS sebagai sumber data
-                awal persidangan. Data yang dimasukkan meliputi identitas perkara, terdakwa,
-                klasifikasi perkara, serta informasi instansi terkait.
+                awal persidangan tingkat banding. Data yang dimasukkan meliputi Nomor Perkara
+                Tingkat Banding, Nomor Perkara Tingkat Pertama (pengadilan pengaju), flag eBerpadu,
+                identitas perkara, terdakwa (pembanding/terbanding), klasifikasi perkara, informasi
+                instansi terkait (termasuk Kejati), serta
+                <strong>status penahanan secara spesifik personal (per terdakwa)</strong> beserta
+                lokasi Rutan/Lapas.
               </div>
 
               <div class="checklist">

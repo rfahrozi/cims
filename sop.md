@@ -1,19 +1,19 @@
 # STANDAR OPERASIONAL PROSEDUR
 
-## Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS
+## Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS di Tingkat Banding
 
 ### A. Identitas Dokumen
 
-| Unsur               | Keterangan                                                                                                                                                 |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nama SOP            | SOP Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS |
-| Kode Dokumen        | SOP/CIMS/PPE/001/2026                                                                                                                                      |
-| Versi               | 1.0                                                                                                                                                        |
-| Status              | Draft Siap Review / Siap Pakai Internal                                                                                                                    |
-| Unit Pemilik        | [Diisi unit pemilik]                                                                                                                                       |
-| Tanggal Efektif     | [Diisi saat pengesahan]                                                                                                                                    |
-| Tanggal Reviu       | [Diisi sesuai jadwal reviu]                                                                                                                                |
-| Klasifikasi Dokumen | Internal / Terbatas sesuai kebijakan                                                                                                                       |
+| Unsur               | Keterangan                                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nama SOP            | SOP Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Umum dan Pidana Khusus Secara Elektronik melalui Platform Video Conference Terintegrasi CIMS Tingkat Banding |
+| Kode Dokumen        | SOP/CIMS/PPE/001/2026                                                                                                                                                      |
+| Versi               | 1.1                                                                                                                                                                        |
+| Status              | Draft Siap Review / Siap Pakai Internal                                                                                                                                    |
+| Unit Pemilik        | [Diisi unit pemilik]                                                                                                                                                       |
+| Tanggal Efektif     | [Diisi saat pengesahan]                                                                                                                                                    |
+| Tanggal Reviu       | [Diisi sesuai jadwal reviu]                                                                                                                                                |
+| Klasifikasi Dokumen | Internal / Terbatas sesuai kebijakan                                                                                                                                       |
 
 ### B. Dasar Hukum
 

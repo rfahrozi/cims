@@ -24,23 +24,31 @@ import { AuditLogPage } from '@/pages/audit-log';
 import { CalendarPage } from '@/pages/calendar';
 import { LandingPage } from '@/pages/landing';
 import { LoginPage } from '@/pages/login';
+import { PublicSchedulePage } from '@/pages/public-schedule';
 
 import { AppLayout } from '@/components/app-layout';
+import { HearingProvider } from '@/lib/hearing-context';
 import { useAppNotifications } from '@/lib/use-app-notifications';
 import { AuthProvider } from '@/lib/auth-context';
 
 function AppContent() {
   // M-08/CU-04: Mengaktifkan kapabilitas Realtime SSE
-  useAppNotifications();
 
   return (
     <Routes>
       {/* ── RUTE PUBLIK (Tanpa Sidebar) ── */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/public-schedule" element={<PublicSchedulePage />} />
 
       {/* ── RUTE APLIKASI (Dengan Sidebar) ── */}
-      <Route element={<AppLayout />}>
+      <Route
+        element={
+          <HearingProvider>
+            <AppLayout />
+          </HearingProvider>
+        }
+      >
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/hearing-intake" element={<HearingIntakePage />} />

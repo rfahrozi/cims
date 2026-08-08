@@ -7,6 +7,7 @@
 -- =============================================================================
 insert into organizations(id, organization_code, name, organization_type, active)
 values
+  ('pt-kepri',         'PT-KEPRI',    'Pengadilan Tinggi Kepulauan Riau',   'COURT',       true),
   ('pn-tanjungpinang', 'PN-TPI',      'Pengadilan Negeri Tanjungpinang',    'COURT',       true),
   ('pn-batam',         'PN-BTM',      'Pengadilan Negeri Batam',            'COURT',       true),
   ('pn-karimun',       'PN-TBK',      'Pengadilan Negeri Tanjung Balai Karimun', 'COURT',       true),
@@ -43,7 +44,7 @@ on conflict (id) do update
 insert into court_cases(id, case_number, normalized_case_number, official_case_reference, case_classification, case_type_code, case_title, court_organization_id, prosecution_organization_id, data_source, created_by, updated_by)
 values
   ('case-demo-001', '364/Pid.Sus/2026/PN Btm', '364/PID.SUS/2026/PN BTM', '369/PID.SUS/2026/PT TPG', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Narkotika', 'pn-batam', 'kejari-batam', 'MANUAL', 'system', 'system'),
-  ('case-demo-002', '101/Pid.B/2026/PN Tpg',   '101/PID.B/2026/PN TPG',   '365/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B',   'Perkara Penggelapan', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system'),
+  ('case-demo-002', '384/PID.SUS/2026/PT TPG', '384/PID.SUS/2026/PT TPG', '409/Pid.Sus/2026/PN Btm', 'SPECIAL_CRIMINAL', 'PID.SUS',   'Perkara Narkotika (Banding)', 'pt-kepri', 'kejati-kepri', 'MANUAL', 'system', 'system'),
   ('case-demo-003', '74/Pid.B/2026/PN Tpg', '74/PID.B/2026/PN TPG', '356/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B', 'Perkara Pembunuhan',   'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system')
 on conflict (id) do update
   set case_number = excluded.case_number,
@@ -53,7 +54,7 @@ on conflict (id) do update
 insert into hearings(id, case_id, case_number, hearing_sequence, hearing_type, state, intake_status, data_source, court_organization_id, prosecution_organization_id, defendant_custody_status, created_by, updated_by)
 values
   ('hearing-demo-001', 'case-demo-001', '364/Pid.Sus/2026/PN Btm', 1, 'Pemeriksaan Saksi', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-batam', 'kejari-batam', 'UNKNOWN', 'system', 'system'),
-  ('hearing-demo-002', 'case-demo-002', '101/Pid.B/2026/PN Tpg', 1, 'Pemeriksaan Ahli', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system'),
+  ('hearing-demo-002', 'case-demo-002', '384/PID.SUS/2026/PT TPG', 1, 'Pemeriksaan Ahli', 'DRAFT', 'ACTIVE', 'MANUAL', 'pt-kepri', 'kejati-kepri', 'UNKNOWN', 'system', 'system'),
   ('hearing-demo-003', 'case-demo-003', '74/Pid.B/2026/PN Tpg', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system')
 on conflict (id) do update
   set hearing_type = excluded.hearing_type,
@@ -71,9 +72,9 @@ values
   ('hearing-demo-001', 'lapas-batam', 'PARTICIPATING'),
 
   -- Perkara 002
-  ('hearing-demo-002', 'pn-tanjungpinang', 'PRIMARY_COURT'),
-  ('hearing-demo-002', 'kejari-tanjungpinang', 'PARTICIPATING'),
-  ('hearing-demo-002', 'rutan-tanjungpinang', 'PARTICIPATING'),
+  ('hearing-demo-002', 'pt-kepri', 'PRIMARY_COURT'),
+  ('hearing-demo-002', 'kejati-kepri', 'PARTICIPATING'),
+  ('hearing-demo-002', 'rutan-batam', 'PARTICIPATING'),
 
   -- Perkara 003
   ('hearing-demo-003', 'pn-tanjungpinang', 'PRIMARY_COURT'),

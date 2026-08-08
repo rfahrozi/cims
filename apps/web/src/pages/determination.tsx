@@ -75,7 +75,7 @@ export function DeterminationPage() {
           <CardHeader>
             <CardTitle>Keluarkan Penetapan</CardTitle>
             <CardDescription>
-              Hanya persona Hakim yang dapat menyimpan penetapan ini.
+              Hanya Majelis Hakim yang dapat menyimpan penetapan ini.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

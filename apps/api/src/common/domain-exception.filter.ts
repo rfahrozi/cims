@@ -7,9 +7,12 @@ export class DomainExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse();
-    
+
     // Log the actual error for debugging
-    this.logger.error(`Exception caught: ${exception instanceof Error ? exception.message : String(exception)}`, exception instanceof Error ? exception.stack : '');
+    this.logger.error(
+      `Exception caught: ${exception instanceof Error ? exception.message : String(exception)}`,
+      exception instanceof Error ? exception.stack : ''
+    );
 
     if (exception instanceof DomainError) {
       response.status(exception.status).send({
@@ -21,8 +24,12 @@ export class DomainExceptionFilter implements ExceptionFilter {
       response.status(exception.getStatus()).send(exception.getResponse());
       return;
     }
-    response
-      .status(500)
-      .send({ error: { code: 'INTERNAL_ERROR', message: 'Unexpected server error.', debug: exception instanceof Error ? exception.message : String(exception) } });
+    response.status(500).send({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Unexpected server error.',
+        debug: exception instanceof Error ? exception.message : String(exception)
+      }
+    });
   }
 }

@@ -10,13 +10,13 @@ import { Public } from '../../common/public.decorator.js';
 export class AuthController {
   constructor(private readonly service: AuthService) {}
 
-  @Public() 
-  @Post('auth/login') 
+  @Public()
+  @Post('auth/login')
   login(@Body() dto: LoginDto) {
     return this.service.login(dto.username, dto.password);
   }
 
-  @Get('me') 
+  @Get('me')
   me(@CurrentUserContext() user: CurrentUser) {
     return user;
   }

@@ -20,10 +20,10 @@ const ORG_LABEL: Record<string, string> = {
   CORRECTIONS: 'Pemasyarakatan'
 };
 const PERSONA_ORG: Record<string, string> = {
-  'COURT_CLERK': 'COURT',
-  'SUBSTITUTE_CLERK': 'COURT',
-  'PROSECUTOR': 'PROSECUTION',
-  'CORRECTIONS': 'CORRECTIONS'
+  COURT_CLERK: 'COURT',
+  SUBSTITUTE_CLERK: 'COURT',
+  PROSECUTOR: 'PROSECUTION',
+  CORRECTIONS: 'CORRECTIONS'
 };
 
 // CU-05: Template checklist kesiapan standar per instansi
@@ -87,7 +87,6 @@ export function ReadinessPage() {
       setError(e);
     }
   }
-
 
   const currentTemplate = myOrgType ? CHECKLIST_TEMPLATES[myOrgType] : [];
 
@@ -282,11 +281,11 @@ export function ReadinessPage() {
                 </Button>
               </div>
             ) : (
-              /* QW-02: Empty state untuk persona tanpa aksi */
+              /* QW-02: Empty state untuk role tanpa aksi */
               <EmptyState
                 icon={ClipboardCheck}
-                title="Tidak ada aksi untuk persona ini"
-                description={`Persona "${persona}" tidak memiliki aksi kesiapan. Gunakan persona Panitera, Penuntut Umum, atau Petugas Pemasyarakatan untuk mengirim kesiapan.`}
+                title="Tidak ada aksi untuk peran ini"
+                description={`Peran Anda tidak memiliki kewenangan mengirim kesiapan. Hanya Panitera, Penuntut Umum, atau Petugas Pemasyarakatan yang dapat mengisi form ini.`}
                 className="mt-2"
               />
             )}

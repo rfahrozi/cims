@@ -6,5 +6,5 @@ export const users = pgTable('users', {
   password_hash: varchar('password_hash', { length: 255 }).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   role: varchar('role', { length: 50 }).notNull(),
-  organizationId: uuid('organization_id').notNull(),
+  organizationId: uuid('organization_id').notNull()
 });

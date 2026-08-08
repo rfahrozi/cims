@@ -341,18 +341,18 @@ const PERSONA_META: Record<
     orgLabel: string;
   }
 > = {
-  'SUBSTITUTE_CLERK': { roleName: 'Panitera Pengganti', orgType: 'COURT', orgLabel: 'Pengadilan' },
-  'COURT_CLERK': { roleName: 'Panitera', orgType: 'COURT', orgLabel: 'Pengadilan' },
-  'JUDGE': { roleName: 'Majelis Hakim', orgType: 'COURT', orgLabel: 'Pengadilan' },
-  'PROSECUTOR': { roleName: 'Penuntut Umum', orgType: 'PROSECUTION', orgLabel: 'Kejaksaan' },
-  'CORRECTIONS': {
+  SUBSTITUTE_CLERK: { roleName: 'Panitera Pengganti', orgType: 'COURT', orgLabel: 'Pengadilan' },
+  COURT_CLERK: { roleName: 'Panitera', orgType: 'COURT', orgLabel: 'Pengadilan' },
+  JUDGE: { roleName: 'Majelis Hakim', orgType: 'COURT', orgLabel: 'Pengadilan' },
+  PROSECUTOR: { roleName: 'Penuntut Umum', orgType: 'PROSECUTION', orgLabel: 'Kejaksaan' },
+  CORRECTIONS: {
     roleName: 'Petugas Pemasyarakatan',
     orgType: 'CORRECTIONS',
     orgLabel: 'Lapas/Rutan'
   },
-  'IT_OPERATOR': { roleName: 'Operator TI', orgType: 'SYSTEM', orgLabel: 'Tim Teknis' },
-  'AUDITOR': { roleName: 'Auditor', orgType: 'SYSTEM', orgLabel: 'Pengawasan' },
-  'LIAISON_OFFICER': {
+  IT_OPERATOR: { roleName: 'Operator TI', orgType: 'SYSTEM', orgLabel: 'Tim Teknis' },
+  AUDITOR: { roleName: 'Auditor', orgType: 'SYSTEM', orgLabel: 'Pengawasan' },
+  LIAISON_OFFICER: {
     roleName: 'Pejabat Penghubung',
     orgType: 'SYSTEM',
     orgLabel: 'Lintas Instansi'

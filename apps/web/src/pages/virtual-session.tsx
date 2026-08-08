@@ -83,7 +83,7 @@ export function VirtualSessionPage() {
               </Badge>
             </div>
             <CardDescription>
-              Gunakan persona Operator TI atau Panitera untuk menyiapkan ruang.
+              Hanya Operator TI atau Panitera yang dapat menyiapkan ruang.
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -17,7 +17,7 @@ export interface CurrentUser {
 export const CurrentUserContext = createParamDecorator(
   (_data: unknown, context: ExecutionContext): CurrentUser => {
     const request = context.switchToHttp().getRequest<{ user?: CurrentUser }>();
-    if (!request.user) throw new Error('Authenticated user context is missing.');
+    if (!request.user) return undefined as unknown as CurrentUser;
     return request.user;
   }
 );

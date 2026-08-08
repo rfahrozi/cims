@@ -286,12 +286,12 @@ export function NoticesPage() {
                   </p>
                   <ol className="space-y-1 text-xs text-slate-600 list-decimal list-inside">
                     <li>
-                      Ganti persona ke <strong>Penuntut Umum</strong> → klik Acknowledgment
+                      <strong>Penuntut Umum</strong> harus melakukan Acknowledgment terlebih dahulu
                     </li>
                     <li>
-                      Ganti persona ke <strong>Pemasyarakatan</strong> → klik Acknowledgment
+                      <strong>Pemasyarakatan</strong> harus melakukan Acknowledgment
                     </li>
-                    <li>Gate akan terpenuhi otomatis setelah semua pihak konfirmasi</li>
+                    <li>Gate akan terpenuhi otomatis setelah semua instansi terkait konfirmasi</li>
                   </ol>
                 </div>
               </div>

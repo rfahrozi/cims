@@ -60,28 +60,56 @@ export class CoreWorkflowRepository {
     private readonly pg: PgPoolService
   ) {}
 
-  async listHearings(user: CurrentUser): Promise<HearingRecord[]> {
+  async listHearings(user?: CurrentUser): Promise<HearingRecord[]> {
     if (!this.mode.postgres) {
-      if (user.roles.includes('SYSTEM_ADMIN')) return this.memory.hearings;
+      if (!user) return this.memory.hearings; // If public user, return all
+      if (user!.roles.includes('SYSTEM_ADMIN')) return this.memory.hearings;
       const allowed = new Set(
         this.memory.hearingAssignments
-          .filter((item) => user.organizationIds.includes(item.organizationId))
+          .filter((item) => user!.organizationIds.includes(item.organizationId))
           .map((item) => item.hearingId)
       );
       for (const assignment of this.memory.hearingUserAssignments.filter(
-        (item) => item.userId === user.id && item.active
+        (item) => item.userId === user!.id && item.active
       ))
         allowed.add(assignment.hearingId);
       return this.memory.hearings.filter((item) => allowed.has(item.id));
     }
-    return this.pg.transactionAs(user, async (client) => {
+
+    // For postgres, we also need to allow public access (user is undefined)
+    if (!user) {
+      const client = await this.pg.pool.connect();
+      try {
+        const result = await client.query(
+          `select h.id, h.case_number, h.hearing_type, h.state, h.case_id, h.hearing_sequence, h.intake_status, h.data_source, c.case_title
+             from hearings h
+             left join court_cases c on c.id=h.case_id
+            order by h.created_at desc, h.id`
+        );
+        return result.rows.map((row: any) => ({
+          id: String(row.id),
+          caseNumber: String(row.case_number),
+          type: String(row.hearing_type),
+          state: String(row.state),
+          caseId: row.case_id ? String(row.case_id) : undefined,
+          hearingSequence: row.hearing_sequence ? Number(row.hearing_sequence) : undefined,
+          intakeStatus: row.intake_status ? String(row.intake_status) : undefined,
+          dataSource: row.data_source ? String(row.data_source) : undefined,
+          caseTitle: row.case_title ? String(row.case_title) : undefined
+        }));
+      } finally {
+        client.release();
+      }
+    }
+
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select h.id, h.case_number, h.hearing_type, h.state, h.case_id, h.hearing_sequence, h.intake_status, h.data_source, c.case_title
            from hearings h
            left join court_cases c on c.id=h.case_id
           order by h.created_at desc, h.id`
       );
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: String(row.id),
         caseNumber: String(row.case_number),
         type: String(row.hearing_type),
@@ -242,7 +270,7 @@ export class CoreWorkflowRepository {
         )
         .filter((item): item is OrganizationType => Boolean(item));
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select distinct o.organization_type
            from hearing_assignments a
@@ -274,7 +302,7 @@ export class CoreWorkflowRepository {
       this.memory.requests.push(item as unknown as Record<string, unknown>);
       return item;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       await this.getHearing(input.hearingId, user, client);
       const result = await client.query(
         `insert into electronic_hearing_requests(hearing_id,requested_mode,reason,status,created_by)
@@ -316,7 +344,7 @@ export class CoreWorkflowRepository {
       this.memory.determinations.push(item);
       return item;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       await this.getHearing(input.hearingId, user, client);
       await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
         `determination:${input.hearingId}`
@@ -362,7 +390,7 @@ export class CoreWorkflowRepository {
           rowVersion: (item as Partial<DeterminationRecord>).rowVersion ?? 1
         }));
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select id,hearing_id,version,decision,hearing_mode,official_reference,reason,is_current,created_by,created_at::text,row_version
            from judicial_determinations
@@ -423,7 +451,7 @@ export class CoreWorkflowRepository {
       this.memory.proposals.push(proposal);
       return proposal;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       await this.getHearing(input.hearingId, user, client);
       const result = await client.query(
         `insert into schedule_proposals(hearing_id,start_at,end_at,display_timezone,status,created_by)
@@ -499,7 +527,7 @@ export class CoreWorkflowRepository {
         rowVersion: (schedule as Partial<ScheduleRecord>).rowVersion ?? 1
       }));
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select id,hearing_id,start_at::text,end_at::text,display_timezone,version,status,approval_reason,approved_by,approved_at::text,row_version
            from hearing_schedules
@@ -541,7 +569,7 @@ export class CoreWorkflowRepository {
       this.memory.conflicts.set(proposalId, conflicts);
       return proposal;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const proposal = await this.getProposal(proposalId, user, client);
       const expected = expectedRowVersion ?? proposal.rowVersion;
       const update = await client.query(
@@ -595,7 +623,7 @@ export class CoreWorkflowRepository {
           order by severity,resource_type,resource_id`,
         [proposalId]
       );
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         code: String(row.conflict_code),
         severity: String(row.severity) as ScheduleConflict['severity'],
         message: String(row.message),
@@ -652,7 +680,7 @@ export class CoreWorkflowRepository {
       proposal.rowVersion += 1;
       return schedule;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const proposal = await this.getProposal(proposalId, user, client);
       if (proposal.status !== 'CHECKED')
         throw new DomainError(
@@ -743,7 +771,7 @@ export class CoreWorkflowRepository {
           rowVersion: (schedule as Partial<ScheduleRecord>).rowVersion ?? 1
         }));
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select id,hearing_id,start_at::text,end_at::text,display_timezone,version,status,approval_reason,approved_by,approved_at::text,row_version
            from hearing_schedules
@@ -787,7 +815,7 @@ export class CoreWorkflowRepository {
           rowVersion: (schedule as Partial<ScheduleRecord>).rowVersion ?? 1
         }));
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select id,hearing_id,start_at::text,end_at::text,display_timezone,version,status,approval_reason,approved_by,approved_at::text,row_version
            from hearing_schedules
@@ -941,7 +969,7 @@ export class CoreWorkflowRepository {
         };
       });
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       // H-04: Query join jadwal aktif dengan hearings dan assignment
       // Memfilter berdasarkan rentang waktu, dan memverifikasi akses (RBAC/Assignment)
       const params: unknown[] = [from, to];
@@ -1004,7 +1032,7 @@ export class CoreWorkflowRepository {
         .filter((i) => i.hearingId === hearingId)
         .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       const result = await client.query(
         `select id, hearing_id, sequence_number, item_type, item_description, estimated_duration_minutes, status
            from hearing_agenda_items
@@ -1012,7 +1040,7 @@ export class CoreWorkflowRepository {
           order by sequence_number`,
         [hearingId]
       );
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: String(row.id),
         hearingId: String(row.hearing_id),
         sequenceNumber: Number(row.sequence_number),
@@ -1045,7 +1073,7 @@ export class CoreWorkflowRepository {
       this.memory.hearingAgendaItems.push(...newItems);
       return newItems;
     }
-    return this.pg.transactionAs(user, async (client) => {
+    return this.pg.transactionAs(user!, async (client) => {
       await client.query('select pg_advisory_xact_lock(hashtextextended($1,0))', [
         `agenda:${hearingId}`
       ]);

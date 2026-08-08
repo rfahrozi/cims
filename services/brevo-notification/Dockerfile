@@ -18,6 +18,6 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/services/brevo-notification/dist ./services/brevo-notification/dist
 COPY --from=build /app/services/brevo-notification/package.json ./services/brevo-notification/package.json
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD wget -qO- http://localhost:3020/health || exit 1
+  CMD wget -qO- http://127.0.0.1:3011/health || exit 1
 USER node
 CMD ["node","services/brevo-notification/dist/main.js"]

@@ -18,7 +18,7 @@ export class HearingsService {
     private readonly hearingControl: HearingControlRepository
   ) {}
 
-  list(user: CurrentUser) {
+  list(user?: CurrentUser) {
     return this.core.listHearings(user);
   }
 

@@ -38,6 +38,8 @@ interface DefendantForm {
   alias: string;
   protected_identity: boolean;
   custody_status: 'DETAINED' | 'NOT_DETAINED' | 'UNKNOWN';
+  custody_type: string;
+  detention_type: string;
   detention_organization_id?: string;
 }
 interface IntakeRecord {
@@ -63,7 +65,10 @@ const initialDefendant = (): DefendantForm => ({
   display_name: '',
   alias: '',
   protected_identity: false,
-  custody_status: 'NOT_DETAINED'
+  custody_status: 'NOT_DETAINED',
+  custody_type: 'TIDAK_DITAHAN',
+  detention_type: '',
+  detention_organization_id: ''
 });
 
 interface JudgeForm {
@@ -77,6 +82,14 @@ const initialJudge = (role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA' = 'HAKIM_ANGGOTA'): 
   name: '',
   role
 });
+
+const DUMMY_JUDGES = [
+  { id: '196506301992121001', name: 'DAHLIA PANJAITAN, S.H.' },
+  { id: '196503151992121001', name: 'ELIWARTI, S.H., M.H.' },
+  { id: '196308261988031003', name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.' },
+  { id: '197008151996031002', name: 'WENDRA RAIS, S.H., M.H.' },
+  { id: '197503122001121003', name: 'ESTIONO, S.H., M.H.' }
+];
 
 const CUSTODY_LABEL: Record<string, string> = {
   DETAINED: 'Ditahan',
@@ -127,15 +140,19 @@ export function HearingIntakePage() {
   const [form, setForm] = useState({
     case_number: '',
     official_case_reference: '',
+    originating_court_id: 'pn-batam',
+    is_eberpadu: false,
     case_classification: 'SPECIAL_CRIMINAL',
     case_type_code: 'PID.SUS',
     case_title: '',
     hearing_type: 'PEMERIKSAAN_SAKSI',
     hearing_sequence: 1,
-    court_organization_id: 'court-demo',
-    prosecution_organization_id: 'prosecution-demo',
-    corrections_organization_id: 'corrections-demo',
+    court_organization_id: 'pt-kepri',
+    prosecution_organization_id: 'kejati-kepri',
+    corrections_organization_id: 'rutan-batam',
     defendant_custody_status: 'NOT_DETAINED',
+    custody_type: 'TIDAK_DITAHAN',
+    detention_type: '',
     notes: '',
     defendants: [initialDefendant()],
     judges: [initialJudge('HAKIM_KETUA')]
@@ -164,28 +181,37 @@ export function HearingIntakePage() {
   const currentPersona = user?.role || 'UNKNOWN';
   const canReview = currentPersona === 'court-clerk' || currentPersona === 'system-admin';
 
-  const payload = useMemo(
-    () => ({
+  const payload = useMemo(() => {
+    // Hitung status penahanan keseluruhan dari array defendants
+    let overallCustody: 'DETAINED' | 'NOT_DETAINED' | 'MIXED' | 'UNKNOWN' = 'NOT_DETAINED';
+    const detainedCount = form.defendants.filter((d) => d.custody_type === 'DITAHAN').length;
+    if (detainedCount > 0) {
+      overallCustody = detainedCount === form.defendants.length ? 'DETAINED' : 'MIXED';
+    }
+
+    // Ambil Rutan/Lapas pertama jika ada yang ditahan
+    const overallCorrectionsOrg =
+      form.defendants.find((d) => d.custody_type === 'DITAHAN' && d.detention_type === 'RUTAN')
+        ?.detention_organization_id || undefined;
+
+    return {
       ...form,
       official_case_reference: form.official_case_reference || undefined,
-      corrections_organization_id:
-        form.defendant_custody_status === 'DETAINED' || form.defendant_custody_status === 'MIXED'
-          ? form.corrections_organization_id
-          : undefined,
+      defendant_custody_status: overallCustody,
+      corrections_organization_id: overallCorrectionsOrg,
       defendants: form.defendants.map((item) => ({
         ...item,
         alias: item.alias || undefined,
         detention_organization_id:
-          item.custody_status === 'DETAINED'
-            ? item.detention_organization_id || form.corrections_organization_id
+          item.custody_type === 'DITAHAN' && item.detention_type === 'RUTAN'
+            ? item.detention_organization_id
             : undefined
       })),
       judges: form.judges
         .filter((j) => j.user_id.trim())
         .map((j) => ({ user_id: j.user_id.trim(), role: j.role }))
-    }),
-    [form]
-  );
+    };
+  }, [form]);
 
   function updateDefendant(index: number, patch: Partial<DefendantForm>) {
     setForm((current) => ({
@@ -307,28 +333,59 @@ export function HearingIntakePage() {
               <CardContent className="space-y-6">
                 <section className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="case_number">
-                      Nomor perkara{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="case_number">
+                        Nomor Perkara Tingkat Banding{' '}
+                        <span className="text-red-500" aria-hidden="true">
+                          *
+                        </span>
+                      </Label>
+                      <label className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded cursor-pointer border border-rose-100">
+                        <input
+                          type="checkbox"
+                          checked={form.is_eberpadu}
+                          onChange={(e) => setForm({ ...form, is_eberpadu: e.target.checked })}
+                          className="accent-rose-600"
+                        />
+                        eBerpadu
+                      </label>
+                    </div>
                     <Input
                       id="case_number"
                       value={form.case_number}
                       onChange={(e) => setForm({ ...form, case_number: e.target.value })}
-                      placeholder="123/Pid.Sus/2026/PN ..."
+                      placeholder="Misal: 384/PID.SUS/2026/PT TPG"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="official_case_reference">Referensi resmi sementara</Label>
+                    <Label htmlFor="originating_court_id">Nama Pengadilan TK I</Label>
+                    <Select
+                      value={form.originating_court_id}
+                      onValueChange={(value) => setForm({ ...form, originating_court_id: value })}
+                    >
+                      <SelectTrigger id="originating_court_id">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courtOptions.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="official_case_reference">
+                      Nomor Perkara Tingkat Pertama (TK I)
+                    </Label>
                     <Input
                       id="official_case_reference"
                       value={form.official_case_reference}
                       onChange={(e) =>
                         setForm({ ...form, official_case_reference: e.target.value })
                       }
-                      placeholder="Opsional"
+                      placeholder="Misal: 409/Pid.Sus/2026/PN Btm"
                     />
                   </div>
                   <div className="space-y-2">
@@ -405,19 +462,6 @@ export function HearingIntakePage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="hearing_sequence">Urutan persidangan</Label>
-                    <Input
-                      id="hearing_sequence"
-                      type="number"
-                      min={1}
-                      max={999}
-                      value={form.hearing_sequence}
-                      onChange={(e) =>
-                        setForm({ ...form, hearing_sequence: Number(e.target.value) })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="court_organization_id">
                       Pengadilan{' '}
                       <span className="text-red-500" aria-hidden="true">
@@ -458,46 +502,6 @@ export function HearingIntakePage() {
                       </SelectTrigger>
                       <SelectContent>
                         {prosecutionOptions.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="defendant_custody_status">Status penahanan keseluruhan</Label>
-                    <Select
-                      value={form.defendant_custody_status}
-                      onValueChange={(value) =>
-                        setForm({ ...form, defendant_custody_status: value })
-                      }
-                    >
-                      <SelectTrigger id="defendant_custody_status">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(refs.data?.custodyStatuses ?? []).map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {CUSTODY_LABEL[item] ?? item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="corrections_organization_id">Rutan atau Lapas</Label>
-                    <Select
-                      value={form.corrections_organization_id}
-                      onValueChange={(value) =>
-                        setForm({ ...form, corrections_organization_id: value })
-                      }
-                    >
-                      <SelectTrigger id="corrections_organization_id">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {correctionsOptions.map((item) => (
                           <SelectItem key={item.id} value={item.id}>
                             {item.name}
                           </SelectItem>
@@ -552,20 +556,36 @@ export function HearingIntakePage() {
                             <span>Hakim Anggota {index}</span>
                           )}
                         </Label>
-                        <Input
-                          id={`judge_name_${index}`}
-                          value={judge.name}
-                          onChange={(e) => updateJudge(index, { name: e.target.value })}
-                          placeholder="Nama lengkap hakim"
-                        />
+                        <Select
+                          value={judge.user_id || undefined}
+                          onValueChange={(val) => {
+                            const selected = DUMMY_JUDGES.find((j) => j.id === val);
+                            if (selected) {
+                              updateJudge(index, { user_id: selected.id, name: selected.name });
+                            }
+                          }}
+                        >
+                          <SelectTrigger id={`judge_name_${index}`}>
+                            <SelectValue placeholder="Pilih Hakim..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DUMMY_JUDGES.map((j) => (
+                              <SelectItem key={j.id} value={j.id}>
+                                {j.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`judge_userid_${index}`}>ID / NIP Hakim</Label>
                         <Input
                           id={`judge_userid_${index}`}
                           value={judge.user_id}
-                          onChange={(e) => updateJudge(index, { user_id: e.target.value })}
-                          placeholder="Misal: judge-demo atau NIP"
+                          readOnly
+                          disabled
+                          className="bg-slate-100 cursor-not-allowed"
+                          placeholder="Pilih hakim terlebih dahulu"
                         />
                       </div>
                       <div className="flex items-end justify-between gap-3">
@@ -648,29 +668,91 @@ export function HearingIntakePage() {
                           onChange={(e) => updateDefendant(index, { alias: e.target.value })}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`defendant_custody_${index}`}>Status penahanan</Label>
-                        <Select
-                          value={defendant.custody_status}
-                          onValueChange={(value) =>
-                            updateDefendant(index, {
-                              custody_status: value as DefendantForm['custody_status']
-                            })
-                          }
-                        >
-                          <SelectTrigger id={`defendant_custody_${index}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {['DETAINED', 'NOT_DETAINED', 'UNKNOWN'].map((item) => (
-                              <SelectItem key={item} value={item}>
-                                {CUSTODY_LABEL[item] ?? item}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="space-y-4 md:col-span-2">
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor={`custody_type_${index}`}>
+                              Status Penahanan (Induk)
+                            </Label>
+                            <Select
+                              value={defendant.custody_type}
+                              onValueChange={(value) => {
+                                const newCustodyStatus =
+                                  value === 'DITAHAN' ? 'DETAINED' : 'NOT_DETAINED';
+                                updateDefendant(index, {
+                                  custody_type: value,
+                                  custody_status: newCustodyStatus as
+                                    | 'DETAINED'
+                                    | 'NOT_DETAINED'
+                                    | 'UNKNOWN',
+                                  ...(value !== 'DITAHAN'
+                                    ? { detention_type: '', detention_organization_id: '' }
+                                    : {})
+                                });
+                              }}
+                            >
+                              <SelectTrigger id={`custody_type_${index}`}>
+                                <SelectValue placeholder="Pilih Status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="DITAHAN">Ditahan</SelectItem>
+                                <SelectItem value="TIDAK_DITAHAN">Tidak Ditahan</SelectItem>
+                                <SelectItem value="DITANGGUHKAN">Ditangguhkan</SelectItem>
+                                <SelectItem value="DIBANTARKAN">Dibantarkan</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {defendant.custody_type === 'DITAHAN' && (
+                            <div className="space-y-2">
+                              <Label htmlFor={`detention_type_${index}`}>Jenis Tahanan</Label>
+                              <Select
+                                value={defendant.detention_type}
+                                onValueChange={(value) =>
+                                  updateDefendant(index, {
+                                    detention_type: value,
+                                    ...(value !== 'RUTAN' ? { detention_organization_id: '' } : {})
+                                  })
+                                }
+                              >
+                                <SelectTrigger id={`detention_type_${index}`}>
+                                  <SelectValue placeholder="Pilih Jenis" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="RUTAN">Rutan</SelectItem>
+                                  <SelectItem value="RUMAH">Rumah</SelectItem>
+                                  <SelectItem value="KOTA">Kota</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {defendant.custody_type === 'DITAHAN' &&
+                          defendant.detention_type === 'RUTAN' && (
+                            <div className="space-y-2">
+                              <Label htmlFor={`detention_org_${index}`}>Rutan atau Lapas</Label>
+                              <Select
+                                value={defendant.detention_organization_id}
+                                onValueChange={(value) =>
+                                  updateDefendant(index, { detention_organization_id: value })
+                                }
+                              >
+                                <SelectTrigger id={`detention_org_${index}`}>
+                                  <SelectValue placeholder="Pilih Rutan / Lapas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {correctionsOptions.map((item) => (
+                                    <SelectItem key={item.id} value={item.id}>
+                                      {item.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
                       </div>
-                      <div className="flex items-end justify-between gap-3">
+                      <div className="flex items-end justify-between gap-3 md:col-span-2">
                         <label
                           htmlFor={`defendant_protected_${index}`}
                           className="flex items-center gap-2 pb-2 text-sm cursor-pointer"
@@ -730,15 +812,19 @@ export function HearingIntakePage() {
                       setForm({
                         case_number: '',
                         official_case_reference: '',
+                        originating_court_id: 'pn-batam',
+                        is_eberpadu: false,
                         case_classification: 'SPECIAL_CRIMINAL',
                         case_type_code: 'PID.SUS',
                         case_title: '',
                         hearing_type: 'PEMERIKSAAN_SAKSI',
                         hearing_sequence: 1,
-                        court_organization_id: 'court-demo',
-                        prosecution_organization_id: 'prosecution-demo',
-                        corrections_organization_id: 'corrections-demo',
+                        court_organization_id: 'pt-kepri',
+                        prosecution_organization_id: 'kejati-kepri',
+                        corrections_organization_id: 'rutan-batam',
                         defendant_custody_status: 'NOT_DETAINED',
+                        custody_type: 'TIDAK_DITAHAN',
+                        detention_type: '',
                         notes: '',
                         defendants: [initialDefendant()],
                         judges: [initialJudge('HAKIM_KETUA')]
