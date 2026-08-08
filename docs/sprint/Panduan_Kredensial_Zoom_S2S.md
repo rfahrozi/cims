@@ -1,36 +1,43 @@
 # Panduan Mendapatkan Kredensial Zoom Server-to-Server (S2S) OAuth
 
-Untuk mengaktifkan pembuatan *Virtual Room* otomatis di CIMS, Anda perlu menghubungkan aplikasi dengan akun Zoom Anda (misalnya `ptkepulauanriau@gmail.com`) menggunakan metode **Server-to-Server OAuth**.
+Untuk mengaktifkan pembuatan _Virtual Room_ otomatis di CIMS, Anda perlu menghubungkan aplikasi dengan akun Zoom Anda (misalnya `ptkepulauanriau@gmail.com`) menggunakan metode **Server-to-Server OAuth**.
 
 Berikut adalah langkah-langkah untuk mendapatkan `ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, dan `ZOOM_CLIENT_SECRET`.
 
 ---
 
 ## Langkah 1: Login ke Zoom App Marketplace
+
 1. Buka browser dan kunjungi [Zoom App Marketplace](https://marketplace.zoom.us/).
 2. Login menggunakan akun email instansi (misal: `ptkepulauanriau@gmail.com`).
-   *(Pastikan akun ini memiliki hak akses Administrator atau hak untuk membuat aplikasi developer di akun Zoom organisasi Anda).*
+   _(Pastikan akun ini memiliki hak akses Administrator atau hak untuk membuat aplikasi developer di akun Zoom organisasi Anda)._
 
 ## Langkah 2: Buat Aplikasi Server-to-Server
+
 1. Di pojok kanan atas, klik menu **Develop** lalu pilih **Build App**.
 2. Anda akan melihat beberapa jenis aplikasi. Cari kotak yang bernama **Server-to-Server OAuth** dan klik tombol **Create**.
 3. Beri nama aplikasi Anda, misalnya: `CIMS Virtual Court Integration`, lalu klik **Create**.
 
 ## Langkah 3: Ambil Kredensial (App Credentials)
+
 Setelah aplikasi terbuat, Anda akan berada di halaman konfigurasi aplikasi.
+
 1. Masuk ke tab **App Credentials** di menu sebelah kiri.
-2. Di halaman ini, Anda akan melihat tiga informasi penting yang harus Anda *copy*:
+2. Di halaman ini, Anda akan melihat tiga informasi penting yang harus Anda _copy_:
    - **Account ID** $\rightarrow$ ini adalah `ZOOM_ACCOUNT_ID`
    - **Client ID** $\rightarrow$ ini adalah `ZOOM_CLIENT_ID`
    - **Client Secret** $\rightarrow$ ini adalah `ZOOM_CLIENT_SECRET` (Anda perlu mengeklik ikon mata/tampilkan untuk melihatnya).
 
 ## Langkah 4: Isi Informasi Aplikasi (Information)
+
 1. Pindah ke tab **Information**.
 2. Isi kolom wajib seperti **Company Name**, **Developer Name**, dan **Developer Email Address** (bisa menggunakan `ptkepulauanriau@gmail.com`).
 3. Klik **Continue**.
 
 ## Langkah 5: Berikan Izin Akses (Scopes)
-Agar CIMS dapat membuat jadwal (*meeting*) atas nama host, Anda harus memberikan izin khusus.
+
+Agar CIMS dapat membuat jadwal (_meeting_) atas nama host, Anda harus memberikan izin khusus.
+
 1. Pindah ke tab **Scopes**.
 2. Klik tombol **+ Add Scopes**.
 3. Centang izin berikut (minimum yang dibutuhkan):
@@ -40,6 +47,7 @@ Agar CIMS dapat membuat jadwal (*meeting*) atas nama host, Anda harus memberikan
 4. Klik **Done** lalu **Continue**.
 
 ## Langkah 6: Aktivasi Aplikasi (Activation)
+
 1. Pindah ke tab **Activation**.
 2. Pastikan tertulis bahwa aplikasi siap diaktifkan, lalu klik tombol **Activate your app**.
 3. Jika sudah aktif, aplikasi siap menerima permintaan (request) dari CIMS backend.
@@ -47,6 +55,7 @@ Agar CIMS dapat membuat jadwal (*meeting*) atas nama host, Anda harus memberikan
 ---
 
 ## Memasang ke Environment CIMS
+
 Setelah semua didapatkan, buka file `.env` di server atau di proyek lokal Anda, dan isikan data tersebut:
 
 ```env
@@ -63,4 +72,4 @@ ZOOM_CLIENT_SECRET=zzzzzzzzzzzzzzzzzzzzzzzz
 ZOOM_HOST_USER_ID=ptkepulauanriau@gmail.com
 ```
 
-Setelah di-save, *restart* layanan CIMS (terutama `apps/api` dan `services/zoom-provider`).
+Setelah di-save, _restart_ layanan CIMS (terutama `apps/api` dan `services/zoom-provider`).

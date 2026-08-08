@@ -165,8 +165,8 @@ export function NoticesPage() {
                     Dokumen Tembusan ke Rutan/Lapas (SOP H-3)
                   </h4>
                   <p className="text-xs text-slate-500 mb-2">
-                    Sebagai Penuntut Umum, Anda wajib mengunggah salinan surat pemberitahuan / panggilan
-                    terdakwa ke Rutan/Lapas sebelum H-3 persidangan.
+                    Sebagai Penuntut Umum, Anda wajib mengunggah salinan surat pemberitahuan /
+                    panggilan terdakwa ke Rutan/Lapas sebelum H-3 persidangan.
                   </p>
                   <Input type="file" accept=".pdf,.png,.jpg" className="bg-white" />
                 </div>

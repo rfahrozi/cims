@@ -124,7 +124,13 @@ export class ReadinessService {
     dto: SubmitReadinessDto,
     correlationId?: string
   ) {
-    requireRoles(user, ['COURT_CLERK', 'SUBSTITUTE_CLERK', 'PROSECUTOR', 'CORRECTIONS', 'IT_OPERATOR']);
+    requireRoles(user, [
+      'COURT_CLERK',
+      'SUBSTITUTE_CLERK',
+      'PROSECUTOR',
+      'CORRECTIONS',
+      'IT_OPERATOR'
+    ]);
     await this.core.getHearing(hearingId, user);
     if (!(await this.core.activeSchedule(hearingId, user)))
       throw new DomainError('SCHEDULE_REQUIRED', 'An active schedule is required.', 409);

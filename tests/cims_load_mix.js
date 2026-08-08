@@ -27,7 +27,7 @@ export const options = {
   },
   thresholds: {
     http_req_failed: ['rate<0.05'],
-    http_req_duration: ['p(95)<1500', 'p(99)<3000'],
+    http_req_duration: ['p(95)<1500', 'p(99)<3000']
   }
 };
 
@@ -47,7 +47,7 @@ export default function () {
   const dice = Math.random();
   let res;
 
-  if (dice < 0.30) {
+  if (dice < 0.3) {
     // Cheap read: gate status
     res = http.get(`${BASE_URL}/hearings/${HEARING_ID}/gate-status`, {
       headers: authHeaders(),
@@ -75,7 +75,7 @@ export default function () {
     );
 
     check(issue, {
-      'issue token status acceptable': (r) => acceptable(r.status),
+      'issue token status acceptable': (r) => acceptable(r.status)
     });
 
     if ([200, 201].includes(issue.status)) {
@@ -86,11 +86,10 @@ export default function () {
       } catch (_) {}
 
       if (token) {
-        res = http.post(
-          `${BASE_URL}/public/join-tokens/exchange`,
-          JSON.stringify({ token }),
-          { headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, timeout: '20s' }
-        );
+        res = http.post(`${BASE_URL}/public/join-tokens/exchange`, JSON.stringify({ token }), {
+          headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+          timeout: '20s'
+        });
       } else {
         res = issue;
       }
@@ -103,7 +102,7 @@ export default function () {
 
   check(res, {
     'status acceptable': (r) => acceptable(r.status),
-    'response body exists': (r) => r.body !== null,
+    'response body exists': (r) => r.body !== null
   });
 
   if ([409, 429].includes(res.status)) duplicateOrGuarded.add(1);

@@ -103,7 +103,7 @@ export class VirtualSessionsService {
     );
 
     if (session.state === 'READY') {
-        return session;
+      return session;
     }
 
     if (this.mode.postgres) {

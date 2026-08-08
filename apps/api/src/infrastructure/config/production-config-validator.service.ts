@@ -40,12 +40,12 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
 
       const evidenceMode = (this.config.get<string>('EVIDENCE_STORAGE_MODE') ?? '').toUpperCase();
       if (evidenceMode !== 'HTTP' && evidenceMode !== 'S3') {
-         throw new Error('EVIDENCE_STORAGE_MODE must be HTTP or S3 in production.');
+        throw new Error('EVIDENCE_STORAGE_MODE must be HTTP or S3 in production.');
       }
 
       if (evidenceMode === 'HTTP') {
-         this.requireValue('EVIDENCE_STORAGE_URL');
-         await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
+        this.requireValue('EVIDENCE_STORAGE_URL');
+        await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
       }
       if (this.config.get<string>('OUTBOX_WORKER_ENABLED') !== 'false') {
         throw new Error('API process must use OUTBOX_WORKER_ENABLED=false in production.');
@@ -59,12 +59,12 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
 
       const evidenceMode = (this.config.get<string>('EVIDENCE_STORAGE_MODE') ?? '').toUpperCase();
       if (evidenceMode !== 'HTTP' && evidenceMode !== 'S3') {
-         throw new Error('EVIDENCE_STORAGE_MODE must be HTTP or S3 in production.');
+        throw new Error('EVIDENCE_STORAGE_MODE must be HTTP or S3 in production.');
       }
 
       if (evidenceMode === 'HTTP') {
-         this.requireValue('EVIDENCE_STORAGE_URL');
-         await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
+        this.requireValue('EVIDENCE_STORAGE_URL');
+        await this.requireSecret('EVIDENCE_STORAGE_API_KEY', 16);
       }
       if ((this.config.get<string>('VIDEO_PROVIDER_MODE') ?? 'MOCK').toUpperCase() === 'HTTP')
         this.requireValue('VIDEO_PROVIDER_URL');

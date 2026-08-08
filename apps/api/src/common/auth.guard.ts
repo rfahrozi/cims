@@ -33,7 +33,7 @@ export class CimsAuthGuard implements CanActivate {
     // Bypass eksplisit untuk Healthcheck (Liveness / Readiness Probe dari Docker)
     const url = request.url || request.originalUrl || '';
     if (url.includes('/live') || url.includes('/ready') || url.includes('/health')) {
-       return true;
+      return true;
     }
 
     if (
