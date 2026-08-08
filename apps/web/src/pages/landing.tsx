@@ -80,6 +80,15 @@ export function LandingPage() {
                   Masuk ke Portal <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
+              <Link to="/public-schedule">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-blue-400 bg-transparent text-white hover:bg-white/10 px-8 text-base font-semibold"
+                >
+                  Jadwal Sidang Publik
+                </Button>
+              </Link>
               <a href="#panduan">
                 <Button
                   size="lg"
