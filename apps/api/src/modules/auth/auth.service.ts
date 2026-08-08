@@ -4,17 +4,17 @@ import * as bcrypt from 'bcryptjs';
 
 const users = new Map([
   ['panitera', { 
-    passwordHash: '$2b$10$HmHSTMPJe02GYHO7sJhVauuOVoFPZs/ugEeR7paU7cRKal9kcri9G', // password123
+    passwordHash: '$2b$10$P47GSldnj3qAWAW.EFLa1O5OSOxmix8pfUUhIPioX3FvFfXPNPXtG', // password123
     name: 'Panitera Demo', 
     role: 'COURT_CLERK' 
   }],
   ['hakim', { 
-    passwordHash: '$2b$10$HmHSTMPJe02GYHO7sJhVauuOVoFPZs/ugEeR7paU7cRKal9kcri9G', // password123
+    passwordHash: '$2b$10$P47GSldnj3qAWAW.EFLa1O5OSOxmix8pfUUhIPioX3FvFfXPNPXtG', // password123
     name: 'Hakim Demo', 
     role: 'JUDGE' 
   }],
   ['admin', { 
-    passwordHash: '$2b$10$HmHSTMPJe02GYHO7sJhVauuOVoFPZs/ugEeR7paU7cRKal9kcri9G', // password123
+    passwordHash: '$2b$10$P47GSldnj3qAWAW.EFLa1O5OSOxmix8pfUUhIPioX3FvFfXPNPXtG', // password123
     name: 'Admin Demo', 
     role: 'SYSTEM_ADMIN' 
   }]
@@ -33,20 +33,23 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) throw new UnauthorizedException('Invalid credentials');
     
+    // The payload needs to exactly match the CurrentUser interface
     const payload = { 
+      id: username,
       sub: username, 
       name: user.name,
       role: user.role,
       roles: [user.role],
-      organization_ids: ['court-demo'],
+      organizationId: 'court-demo',
+      organizationIds: ['court-demo'],
       permissions: ['*'], // Simplified for dev
-      hearing_assignments: [],
+      hearingAssignments: ['hearing-demo-001', 'hearing-demo-002', 'hearing-demo-003'],
       authSource: 'DEV_LOCAL'
     };
 
     return {
       token: await this.jwtService.signAsync(payload),
-      user: { id: username, name: user.name, role: user.role, roles: [user.role], organization_id: 'court-demo' }
+      user: payload
     };
   }
 }
