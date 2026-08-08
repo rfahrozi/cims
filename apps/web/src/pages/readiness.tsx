@@ -20,10 +20,10 @@ const ORG_LABEL: Record<string, string> = {
   CORRECTIONS: 'Pemasyarakatan'
 };
 const PERSONA_ORG: Record<string, string> = {
-  'court-clerk': 'COURT',
-  'substitute-clerk': 'COURT',
-  prosecutor: 'PROSECUTION',
-  corrections: 'CORRECTIONS'
+  'COURT_CLERK': 'COURT',
+  'SUBSTITUTE_CLERK': 'COURT',
+  'PROSECUTOR': 'PROSECUTION',
+  'CORRECTIONS': 'CORRECTIONS'
 };
 
 // CU-05: Template checklist kesiapan standar per instansi
@@ -55,7 +55,7 @@ export function ReadinessPage() {
   const { user } = useAuth();
   const persona = user?.role || 'UNKNOWN';
   const myOrgType = PERSONA_ORG[persona];
-  const isCorrections = persona === 'corrections';
+  const isCorrections = persona === 'CORRECTIONS';
 
   const query = useQuery({
     queryKey: ['readiness', hearingId],

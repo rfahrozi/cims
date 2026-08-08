@@ -27,13 +27,13 @@ import { HearingSelector } from '@/components/hearing-selector';
 import { ActiveHearingBar } from '@/components/active-hearing-bar';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
-import { useAuth } from '@/app';
+import { useAuth } from '@/lib/auth-context';
 
 type NavItem = {
   to: string;
   label: string;
   icon: React.ElementType;
-  roles?: Persona[]; // Jika undefined, bisa diakses oleh semua persona
+  roles?: string[]; // Jika undefined, bisa diakses oleh semua persona
 };
 
 const nav: NavItem[] = [
@@ -136,7 +136,8 @@ const nav: NavItem[] = [
 
 export function AppLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const currentPersona = getPersona();
+  const { user } = useAuth();
+  const currentPersona = user?.role || 'UNKNOWN';
 
   // Filter menu berdasarkan hak akses
   const authorizedNav = nav.filter((item) => !item.roles || item.roles.includes(currentPersona));

@@ -43,92 +43,92 @@ const nav: NavItem[] = [
     to: '/hearing-intake',
     label: 'Data Persidangan',
     icon: FilePenLine,
-    roles: ['substitute-clerk', 'court-clerk', 'system-admin']
+    roles: ['SUBSTITUTE_CLERK', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/determination',
     label: 'Penetapan Hakim',
     icon: Scale,
-    roles: ['judge', 'court-clerk', 'system-admin']
+    roles: ['JUDGE', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/scheduling',
     label: 'Jadwal Sidang',
     icon: CalendarDays,
-    roles: ['court-clerk', 'judge', 'substitute-clerk', 'system-admin']
+    roles: ['COURT_CLERK', 'JUDGE', 'SUBSTITUTE_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/notices',
     label: 'Pemberitahuan',
     icon: BellRing,
-    roles: ['prosecutor', 'corrections', 'court-clerk', 'system-admin']
+    roles: ['PROSECUTOR', 'CORRECTIONS', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/readiness',
     label: 'Kesiapan',
     icon: ClipboardCheck,
-    roles: ['court-clerk', 'prosecutor', 'corrections', 'system-admin']
+    roles: ['COURT_CLERK', 'PROSECUTOR', 'CORRECTIONS', 'SYSTEM_ADMIN']
   },
   {
     to: '/virtual-session',
     label: 'Ruang Virtual',
     icon: Video,
-    roles: ['it-operator', 'court-clerk', 'system-admin']
+    roles: ['IT_OPERATOR', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/hearing-control',
     label: 'Kontrol Sidang',
     icon: Gavel,
-    roles: ['judge', 'system-admin']
+    roles: ['JUDGE', 'SYSTEM_ADMIN']
   },
   {
     to: '/participants',
     label: 'Peserta',
     icon: UsersRound,
     roles: [
-      'court-clerk',
-      'substitute-clerk',
-      'prosecutor',
-      'corrections',
-      'it-operator',
-      'system-admin'
+      'COURT_CLERK',
+      'SUBSTITUTE_CLERK',
+      'PROSECUTOR',
+      'CORRECTIONS',
+      'IT_OPERATOR',
+      'SYSTEM_ADMIN'
     ]
   },
   {
     to: '/attendance',
     label: 'Kehadiran',
     icon: UserRoundCheck,
-    roles: ['court-clerk', 'corrections', 'system-admin']
+    roles: ['COURT_CLERK', 'CORRECTIONS', 'SYSTEM_ADMIN']
   },
   {
     to: '/consultation',
     label: 'Konsultasi Privat',
     icon: ShieldCheck,
-    roles: ['judge', 'court-clerk', 'system-admin']
+    roles: ['JUDGE', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/incidents',
     label: 'Insiden',
     icon: ShieldAlert,
-    roles: ['court-clerk', 'it-operator', 'security-officer', 'system-admin']
+    roles: ['COURT_CLERK', 'IT_OPERATOR', 'SECURITY_OFFICER', 'SYSTEM_ADMIN']
   },
   {
     to: '/appeal-decision',
     label: 'Putusan Banding',
     icon: BookOpen,
-    roles: ['judge', 'court-clerk', 'system-admin']
+    roles: ['JUDGE', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/reconciliation',
     label: 'Rekonsiliasi (SIPP)',
     icon: RefreshCw,
-    roles: ['court-clerk', 'substitute-clerk', 'system-admin']
+    roles: ['COURT_CLERK', 'SUBSTITUTE_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/audit',
     label: 'Log Audit',
     icon: ShieldCheck,
-    roles: ['auditor', 'security-officer', 'system-admin']
+    roles: ['AUDITOR', 'SECURITY_OFFICER', 'SYSTEM_ADMIN']
   },
   { to: '/user-management', label: 'Pengelolaan User', icon: UserCog, roles: ['system-admin'] },
   { to: '/admin', label: 'Konfigurasi Admin', icon: Settings, roles: ['system-admin'] }
