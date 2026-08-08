@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 import { OidcTokenVerifierService } from './oidc-token-verifier.service.js';
-import { personas } from './dev-identity.interceptor.js';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class CimsAuthGuard implements CanActivate {
