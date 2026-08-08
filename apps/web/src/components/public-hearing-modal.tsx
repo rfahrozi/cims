@@ -88,7 +88,7 @@ export function PublicHearingModal({ isOpen, onClose, hearing }: PublicHearingMo
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Status Penahanan</p>
-                    <Badge variant="secondary" className="mt-1">{hearing.defendantStatus}</Badge>
+                    <Badge variant="outline" className="mt-1">{hearing.defendantStatus}</Badge>
                   </div>
                 </div>
               </CardContent>

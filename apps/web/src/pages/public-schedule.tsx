@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import {
@@ -224,14 +224,14 @@ export function PublicSchedulePage() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="pt-0 pb-4 px-4 mt-auto">
+                <div className="pt-0 pb-4 px-4 mt-auto">
                   <Button
                     className="w-full bg-slate-900 hover:bg-slate-800"
                     onClick={() => openModal(hearing)}
                   >
                     Detail Perkara
                   </Button>
-                </CardFooter>
+                </div>
               </Card>
             ))
           ) : (
