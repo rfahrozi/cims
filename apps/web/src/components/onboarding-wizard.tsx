@@ -8,7 +8,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { getPersona } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
 
 const ONBOARDING_KEY = 'cims_onboarding_completed';
 
@@ -60,7 +60,8 @@ export function OnboardingWizard() {
   useEffect(() => {
     const isCompleted = localStorage.getItem(ONBOARDING_KEY);
     if (isCompleted !== 'true') {
-      const persona = getPersona();
+      const { user } = useAuth();
+  const persona = user?.role || 'UNKNOWN';
       setPersonaName(ROLE_DISPLAY[persona] ?? persona);
       setOpen(true);
     }

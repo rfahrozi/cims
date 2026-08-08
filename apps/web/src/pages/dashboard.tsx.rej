@@ -1,0 +1,55 @@
+--- apps/web/src/pages/dashboard.tsx
++++ apps/web/src/pages/dashboard.tsx
+@@ -16,6 +16,7 @@
+ import { Link } from 'react-router-dom';
+ import { useQuery } from '@tanstack/react-query';
+ import { api, type Hearing } from '@/lib/api';
++import { useAuth } from '@/lib/auth-context';
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+ import { Badge } from '@/components/ui/badge';
+--- apps/web/src/pages/hearing-intake.tsx
++++ apps/web/src/pages/hearing-intake.tsx
+@@ -3,6 +3,7 @@
+ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+ import { FilePenLine, Search, Plus, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
+ import { api, type HearingIntake } from '@/lib/api';
++import { useAuth } from '@/lib/auth-context';
+ import { Button } from '@/components/ui/button';
+ import { Input } from '@/components/ui/input';
+--- apps/web/src/pages/notices.tsx
++++ apps/web/src/pages/notices.tsx
+@@ -3,6 +3,7 @@
+ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+ import { BellRing, FileSignature, CheckCircle2, UploadCloud, AlertCircle } from 'lucide-react';
+ import { api, type StepInfo, type WorkflowState } from '@/lib/api';
++import { useAuth } from '@/lib/auth-context';
+ import { useHearingContext } from '@/components/hearing-selector';
+ import { Button } from '@/components/ui/button';
+--- apps/web/src/pages/readiness.tsx
++++ apps/web/src/pages/readiness.tsx
+@@ -3,6 +3,7 @@
+ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+ import { ClipboardCheck, CheckCircle2, XCircle, FileText, AlertCircle, UploadCloud } from 'lucide-react';
+ import { api, type HearingReadiness } from '@/lib/api';
++import { useAuth } from '@/lib/auth-context';
+ import { useHearingContext } from '@/components/hearing-selector';
+ import { Button } from '@/components/ui/button';
+--- apps/web/src/pages/reconciliation.tsx
++++ apps/web/src/pages/reconciliation.tsx
+@@ -3,6 +3,7 @@
+ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+ import { RefreshCw, CheckCircle2, AlertTriangle, Play, Database, History } from 'lucide-react';
+ import { api, type ReconciliationTask } from '@/lib/api';
++import { useAuth } from '@/lib/auth-context';
+ import { Button } from '@/components/ui/button';
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+--- apps/web/src/lib/use-app-notifications.ts
++++ apps/web/src/lib/use-app-notifications.ts
+@@ -1,6 +1,7 @@
+ import { useEffect, useRef } from 'react';
+ import { useQueryClient } from '@tanstack/react-query';
++import { useAuth } from '@/lib/auth-context';
+ import {
+   setupRealtimeConnection,
+   closeRealtimeConnection,
+ 

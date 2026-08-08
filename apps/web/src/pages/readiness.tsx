@@ -1,3 +1,4 @@
+import { useAuth } from '@/lib/auth-context';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
@@ -83,7 +84,8 @@ export function ReadinessPage() {
     }
   }
 
-  const persona = getPersona();
+  const { user } = useAuth();
+  const persona = user?.role || 'UNKNOWN';
   const myOrgType = PERSONA_ORG[persona];
   const isCorrections = persona === 'corrections';
 

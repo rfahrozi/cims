@@ -1,3 +1,4 @@
+import { useAuth } from '@/lib/auth-context';
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -48,7 +49,8 @@ type Run = {
 export function ReconciliationPage() {
   const { hearingId } = useActiveHearing();
   const client = useQueryClient();
-  const persona = getPersona();
+  const { user } = useAuth();
+  const persona = user?.role || 'UNKNOWN';
   const [sourceSystem, setSourceSystem] = useState('SIPP');
   const [output, setOutput] = useState('');
   const [error, setError] = useState<unknown>(null);

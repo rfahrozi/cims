@@ -27,8 +27,9 @@ import { LoginPage } from '@/pages/login';
 
 import { AppLayout } from '@/components/app-layout';
 import { useAppNotifications } from '@/lib/use-app-notifications';
+import { AuthProvider } from '@/lib/auth-context';
 
-export default function App() {
+function AppContent() {
   // M-08/CU-04: Mengaktifkan kapabilitas Realtime SSE
   useAppNotifications();
 
@@ -69,5 +70,13 @@ export default function App() {
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

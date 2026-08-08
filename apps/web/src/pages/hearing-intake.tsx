@@ -1,3 +1,4 @@
+import { useAuth } from '@/lib/auth-context';
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Database, FilePenLine, Plus, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
@@ -159,7 +160,8 @@ export function HearingIntakePage() {
   const correctionsOptions = (refs.data?.organizations || []).filter(
     (item) => item.type === 'CORRECTIONS'
   );
-  const currentPersona = getPersona();
+  const { user } = useAuth();
+  const currentPersona = user?.role || 'UNKNOWN';
   const canReview = currentPersona === 'court-clerk' || currentPersona === 'system-admin';
 
   const payload = useMemo(

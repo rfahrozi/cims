@@ -1,6 +1,6 @@
+import { useAuth } from '@/lib/auth-context';
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getPersona } from '@/lib/api';
 
 /**
  * Hook M-08/CU-04: Menghubungkan Frontend ke Realtime SSE Backend.
@@ -15,7 +15,8 @@ export function useAppNotifications() {
     // Ambil base URL dan persona/token untuk autentikasi SSE
     const baseUrl = import.meta.env.VITE_API_URL ?? '/api/v1';
     const token = localStorage.getItem('cims_token') ?? '';
-    const persona = getPersona();
+    const { user } = useAuth();
+  const persona = user?.role || 'UNKNOWN';
 
     // EventSource tidak mendukung custom headers. Kita passing via query param.
     // Jika OIDC Production kelak menggunakan HTTPOnly Cookies, param ini bisa diabaikan.

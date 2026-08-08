@@ -26,8 +26,6 @@ type Notice = {
 export function NoticesPage() {
   const { hearingId } = useActiveHearing();
   const client = useQueryClient();
-  const { user } = useAuth();
-  const persona = user?.role || 'UNKNOWN';
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loadingCreate, setLoadingCreate] = useState(false);
