@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 import { OidcTokenVerifierService } from './oidc-token-verifier.service.js';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class CimsAuthGuard implements CanActivate {
@@ -18,7 +18,8 @@ export class CimsAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly config: ConfigService,
-    private readonly verifier: OidcTokenVerifierService
+    private readonly verifier: OidcTokenVerifierService,
+    private readonly jwtService: JwtService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,38 +32,11 @@ export class CimsAuthGuard implements CanActivate {
       return true;
     }
 
-    const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
-    const env = (this.config.get<string>('NODE_ENV') ?? 'development').toLowerCase();
-
     const request = context.switchToHttp().getRequest<{
       headers: Record<string, string | string[] | undefined>;
       user?: unknown;
       query?: Record<string, string>;
     }>();
-
-    if (mode === 'DEV') {
-      if (env !== 'development' && env !== 'test') {
-        this.logger.error(`Critical Security Incident: DEV auth attempted in ${env} environment.`);
-        throw new UnauthorizedException(
-          'DEV auth is strictly forbidden in non-development environments.'
-        );
-      }
-
-      // In DEV mode, SSE events don't send custom headers, so we check query params first
-      const rawQuery = request.query?.persona;
-      const rawHeader = request.headers['x-cims-dev-persona'];
-
-      const key =
-        (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery) ||
-        (Array.isArray(rawHeader) ? rawHeader[0] : rawHeader);
-
-      if (!key || !personas[key]) {
-        throw new UnauthorizedException('Valid persona is required for DEV auth.');
-      }
-
-      request.user = personas[key];
-      return true;
-    }
 
     const raw = request.headers.authorization;
     let value = Array.isArray(raw) ? raw[0] : raw;
@@ -76,8 +50,19 @@ export class CimsAuthGuard implements CanActivate {
       throw new UnauthorizedException('Bearer token is required.');
     }
 
+    const token = value.slice(7);
+
     try {
-      request.user = await this.verifier.verify(value.slice(7));
+      // First try to decode the token to see if it's a local one
+      const decoded = this.jwtService.decode(token) as any;
+      if (decoded && decoded.authSource === 'DEV_LOCAL') {
+        // Verify it using our local JWT service
+        request.user = await this.jwtService.verifyAsync(token);
+        return true;
+      }
+
+      // Otherwise use the OIDC verifier
+      request.user = await this.verifier.verify(token);
       return true;
     } catch (err) {
       this.logger.warn(
