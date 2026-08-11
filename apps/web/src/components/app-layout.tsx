@@ -28,6 +28,7 @@ import { ActiveHearingBar } from '@/components/active-hearing-bar';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { useAuth } from '@/lib/auth-context';
+import { GlobalSearch } from '@/components/global-search';
 
 type NavItem = {
   to: string;
@@ -46,16 +47,16 @@ const nav: NavItem[] = [
     roles: ['SUBSTITUTE_CLERK', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
-    to: '/determination',
-    label: 'Penetapan Hakim',
-    icon: Scale,
-    roles: ['JUDGE', 'COURT_CLERK', 'SYSTEM_ADMIN']
-  },
-  {
     to: '/scheduling',
     label: 'Jadwal Sidang',
     icon: CalendarDays,
     roles: ['COURT_CLERK', 'JUDGE', 'SUBSTITUTE_CLERK', 'SYSTEM_ADMIN']
+  },
+  {
+    to: '/determination',
+    label: 'Penetapan Hakim',
+    icon: Scale,
+    roles: ['JUDGE', 'COURT_CLERK', 'SYSTEM_ADMIN']
   },
   {
     to: '/notices',
@@ -215,15 +216,15 @@ export function AppLayout() {
       </aside>
 
       <main className="min-w-0 p-5 md:p-8 flex-1 w-full max-w-[100vw]">
-        <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <button
-              className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 shadow-sm md:hidden"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div>
+            <div className="hidden md:block">
               <h1 className="text-xl sm:text-2xl font-bold text-[#0b2a4a]">
                 Court Intelligence Management System
               </h1>
@@ -231,10 +232,16 @@ export function AppLayout() {
                 Koordinasi persidangan pidana elektronik lintas instansi
               </p>
             </div>
+            <div className="block md:hidden">
+              <h1 className="text-lg font-bold text-[#0b2a4a]">CIMS</h1>
+            </div>
           </div>
-          <Badge variant="success" className="shrink-0">
-            v1.0.0
-          </Badge>
+          <div className="flex items-center gap-3 ml-auto">
+            <GlobalSearch />
+            <Badge variant="success" className="shrink-0 hidden sm:inline-flex">
+              v1.0.0
+            </Badge>
+          </div>
         </header>
         <ActiveHearingBar />
         <ErrorBoundary>

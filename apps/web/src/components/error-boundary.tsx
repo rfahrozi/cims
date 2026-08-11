@@ -40,9 +40,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </p>
 
           {this.state.error && (
-            <div className="mb-6 max-w-2xl overflow-auto rounded border border-rose-200 bg-white p-3 text-left">
-              <code className="text-[11px] text-rose-800">{this.state.error.message}</code>
-            </div>
+            <details className="mb-6 w-full max-w-2xl rounded border border-rose-200 bg-white p-3 text-left text-sm text-rose-900 shadow-sm [&_summary]:cursor-pointer [&_summary]:font-medium [&_summary:focus]:outline-none [&_summary]:outline-none">
+              <summary className="mb-0">Lihat Detail Kesalahan</summary>
+              <div className="mt-3 overflow-auto rounded bg-rose-50 p-3">
+                <code className="text-[11px] text-rose-800 break-words">
+                  {this.state.error.message}
+                </code>
+              </div>
+            </details>
           )}
 
           <div className="flex gap-3">

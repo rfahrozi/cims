@@ -13,11 +13,11 @@ test('next gate follows compliance order', () => {
   assert.equal(
     nextGate({
       hearingData: true,
-      determination: true,
       schedule: true,
+      virtualSession: true,
+      determination: true,
       notice: false,
       readiness: false,
-      virtualSession: false,
       hearingEnded: false
     }),
     'OFFICIAL_NOTICE'

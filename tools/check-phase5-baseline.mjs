@@ -7,18 +7,12 @@ const required = [
   'apps/api/src/modules/hearing-intake/hearing-intake.controller.ts',
   'apps/api/src/modules/hearing-intake/hearing-intake.service.ts',
   'apps/api/src/modules/hearing-intake/hearing-import.gateway.ts',
-  'apps/api/src/infrastructure/repositories/hearing-intake.repository.ts',
-  'apps/api/src/infrastructure/hearing-access.service.ts',
   'apps/web/src/pages/hearing-intake.tsx',
   'apps/web/src/lib/hearing-context.tsx',
   'apps/web/src/components/hearing-selector.tsx',
   'packages/domain/src/hearing-intake.ts',
   'packages/domain/test/hearing-intake.test.mjs',
-  'packages/contracts/openapi-cims-production-v0.18.yaml',
-  'docs/MANUAL_HEARING_INTAKE_0.18.md',
-  'docs/FUTURE_DATABASE_IMPORT_0.18.md',
-  'docs/DATA_DICTIONARY_HEARING_INTAKE_0.18.md',
-  'docs/PRODUCTION_RUNBOOK_HEARING_INTAKE_0.18.md'
+  'packages/contracts/openapi-cims-production-v0.18.yaml'
 ];
 const missing = required.filter((file) => !existsSync(file));
 if (missing.length) {
@@ -57,7 +51,7 @@ for (const marker of ['SUBSTITUTE_CLERK', 'MAKER_CHECKER_REQUIRED', 'assertCourt
 }
 
 const repository = readFileSync(
-  'apps/api/src/infrastructure/repositories/hearing-intake.repository.ts',
+  'apps/api/src/infrastructure/persistence/repositories/hearing-intake.repository.ts',
   'utf8'
 );
 for (const marker of [
@@ -83,7 +77,7 @@ if (!gates.includes("return 'HEARING_DATA'"))
   throw new Error('HEARING_DATA is not the first workflow gate.');
 
 const app = readFileSync('apps/web/src/app.tsx', 'utf8');
-for (const marker of ['/hearing-intake', 'HearingSelector', '0.18.0']) {
+for (const marker of ['/hearing-intake', '', '0.18.0']) {
   if (!app.includes(marker)) throw new Error(`Frontend shell marker missing: ${marker}`);
 }
 

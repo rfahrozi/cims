@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import type { ConfigService } from '@nestjs/config';
 
 export function secretValue(config: ConfigService, name: string): string | undefined {
+  if (process.env[name]) return process.env[name];
   if (!config || !config.get) return undefined;
   const direct = config.get<string>(name)?.trim();
   if (direct) return direct;

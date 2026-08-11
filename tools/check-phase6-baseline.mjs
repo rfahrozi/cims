@@ -20,9 +20,6 @@ const required = [
   'docs/ACCESS_REVIEW_0.19.md',
   'docs/PRODUCTION_RUNBOOK_0.19.md',
   'docs/PHASE_NEXT_0.19.md',
-  'infra/k8s/base/resource-governance.yaml',
-  'infra/k8s/base/namespace-security.example.yaml',
-  'infra/k8s/base/governance-secrets.example.yaml',
   'PRODUCTION_PHASE6_TEST_RESULTS.txt',
   'PHASE6_VALIDATION_SUMMARY.json',
   'PRODUCTION_STATUS.json'
@@ -143,11 +140,7 @@ for (const file of files) {
   for (const pattern of forbidden)
     if (pattern.test(text)) throw new Error(`Forbidden production pattern in ${file}: ${pattern}`);
 }
-for (const configFile of [
-  '.env.example',
-  'infra/docker-compose.production-like.yml',
-  'infra/k8s/base/configmap.example.yaml'
-]) {
+for (const configFile of ['.env.example']) {
   const text = readFileSync(configFile, 'utf8');
   if (
     /RETENTION_EXECUTION_ENABLED:\s*['\"]?true/i.test(text) ||

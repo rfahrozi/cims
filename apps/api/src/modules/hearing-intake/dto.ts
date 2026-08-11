@@ -19,12 +19,13 @@ const judgeRoles = ['HAKIM_KETUA', 'HAKIM_ANGGOTA'] as const;
 const custodyStatuses = ['DETAINED', 'NOT_DETAINED', 'MIXED', 'UNKNOWN'] as const;
 const defendantCustodyStatuses = ['DETAINED', 'NOT_DETAINED', 'UNKNOWN'] as const;
 
-export class InitialDefendantDto {
+export class InitialPartyDto {
   @IsString() @MinLength(2) @MaxLength(200) display_name!: string;
   @IsOptional() @IsString() @MaxLength(100) alias?: string;
   @IsBoolean() protected_identity = false;
   @IsEnum(defendantCustodyStatuses) custody_status!: (typeof defendantCustodyStatuses)[number];
   @IsOptional() @IsString() detention_organization_id?: string;
+  @IsOptional() @IsString() appeal_role?: string;
 }
 
 export class JudgeAssignmentDto {
@@ -37,7 +38,7 @@ export class ManualHearingDto {
   @IsOptional() @IsString() @MaxLength(150) official_case_reference?: string;
   @IsEnum(caseClassifications) case_classification!: (typeof caseClassifications)[number];
   @IsString() @MinLength(2) @MaxLength(50) case_type_code!: string;
-  @IsString() @MinLength(3) @MaxLength(300) case_title!: string;
+  @IsOptional() @IsString() @MaxLength(300) case_title?: string;
   @IsString() @MinLength(3) @MaxLength(100) hearing_type!: string;
   @IsInt() @Min(1) @Max(999) hearing_sequence!: number;
   @IsString() court_organization_id!: string;
@@ -47,8 +48,13 @@ export class ManualHearingDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => InitialDefendantDto)
-  defendants!: InitialDefendantDto[];
+  @Type(() => InitialPartyDto)
+  defendants!: InitialPartyDto[];
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InitialPartyDto)
+  prosecutors?: InitialPartyDto[];
 
   @IsOptional()
   @IsArray()

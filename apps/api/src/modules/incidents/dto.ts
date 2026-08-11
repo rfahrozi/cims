@@ -8,10 +8,7 @@ export class CreateIncidentDto {
 }
 export class IncidentActionDto {
   @IsEnum(['START_MITIGATION', 'RESOLVE', 'CLOSE', 'REOPEN']) action!:
-    | 'START_MITIGATION'
-    | 'RESOLVE'
-    | 'CLOSE'
-    | 'REOPEN';
+    'START_MITIGATION' | 'RESOLVE' | 'CLOSE' | 'REOPEN';
   @IsOptional() @IsString() notes?: string;
 }
 export class NotifyIncidentDto {

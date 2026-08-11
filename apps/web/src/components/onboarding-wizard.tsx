@@ -57,15 +57,20 @@ export function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [personaName, setPersonaName] = useState('Pengguna');
 
+  // Panggil hook di level atas komponen — BUKAN di dalam useEffect
+  const { user } = useAuth();
+
   useEffect(() => {
+    // Bypass completely if running in Playwright/Automation
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
+
     const isCompleted = localStorage.getItem(ONBOARDING_KEY);
     if (isCompleted !== 'true') {
-      const { user } = useAuth();
       const persona = user?.role || 'UNKNOWN';
       setPersonaName(ROLE_DISPLAY[persona] ?? persona);
       setOpen(true);
     }
-  }, []);
+  }, [user]);
 
   const handleNext = () => {
     if (step < ONBOARDING_STEPS.length - 1) {

@@ -272,9 +272,9 @@ export function SchedulingPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Ruang Sidang</Label>
+                    <Label htmlFor="room">Ruang Sidang</Label>
                     <Select value={room} onValueChange={setRoom}>
-                      <SelectTrigger>
+                      <SelectTrigger id="room">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -498,7 +498,9 @@ export function SchedulingPage() {
                       </div>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Tipe Kegiatan</Label>
+                          <Label className="text-xs" htmlFor={`agenda-type-${index}`}>
+                            Tipe Kegiatan
+                          </Label>
                           <Select
                             value={item.itemType}
                             onValueChange={(v) =>
@@ -522,8 +524,11 @@ export function SchedulingPage() {
                           </Select>
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">Durasi (Menit)</Label>
+                          <Label className="text-xs" htmlFor={`agenda-dur-${index}`}>
+                            Durasi (Menit)
+                          </Label>
                           <Input
+                            id={`agenda-dur-${index}`}
                             type="number"
                             min={5}
                             value={item.estimatedDurationMinutes}
@@ -540,8 +545,11 @@ export function SchedulingPage() {
                           />
                         </div>
                         <div className="sm:col-span-2 space-y-1.5">
-                          <Label className="text-xs">Deskripsi Kegiatan</Label>
+                          <Label className="text-xs" htmlFor={`agenda-desc-${index}`}>
+                            Deskripsi Kegiatan
+                          </Label>
                           <Input
+                            id={`agenda-desc-${index}`}
                             value={item.itemDescription}
                             onChange={(e) =>
                               setAgendaItems(

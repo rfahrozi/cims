@@ -70,3 +70,12 @@ export function useActiveHearing(): HearingContextValue {
   if (!value) throw new Error('useActiveHearing must be used inside HearingProvider.');
   return value;
 }
+
+/**
+ * Versi aman dari useActiveHearing — TIDAK melempar error jika digunakan di luar HearingProvider.
+ * Kembalikan null jika context tidak tersedia.
+ * Gunakan ini di komponen UI yang bisa muncul sebelum/diluar HearingProvider (mis. WorkflowStepper).
+ */
+export function useActiveHearingSafe(): HearingContextValue | null {
+  return useContext(HearingContext) ?? null;
+}

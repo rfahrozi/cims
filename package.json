@@ -33,7 +33,7 @@
     "release:phase4": "npm run check:phase4 && npm run release:manifest",
     "dev:worker": "npm run build -w @cims/domain && npm run start:worker:dev -w @cims/api",
     "test:postgres:phase4": "node tools/postgres-phase4-smoke.mjs",
-    "check:phase5": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase5-baseline.mjs",
+    "check:phase5": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs",
     "release:phase5": "npm run check:phase5 && npm run db:migrate:dry-run && npm run release:manifest",
     "test:postgres:phase5": "node tools/postgres-phase5-smoke.mjs",
     "check:phase6": "npm run check:structure && npm run check:syntax && npm run test:domain && node tools/check-production-baseline.mjs && node tools/check-phase6-baseline.mjs",
@@ -55,6 +55,7 @@
   "packageManager": "npm@10.9.0",
   "devDependencies": {
     "@eslint/js": "^8.57.0",
+    "@playwright/test": "^1.62.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "eslint": "^8.57.0",

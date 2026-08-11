@@ -213,7 +213,7 @@ export function ParticipantsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Peran</Label>
+              <Label htmlFor="role">Peran</Label>
               <Select value={role} onValueChange={handleRoleChange}>
                 <SelectTrigger>
                   <SelectValue />
@@ -239,8 +239,11 @@ export function ParticipantsPage() {
               </label>
               {protectedIdentity && (
                 <div className="space-y-1.5 pl-5">
-                  <Label className="text-xs">Nama Samaran (Alias) Opsional</Label>
+                  <Label className="text-xs" htmlFor="alias">
+                    Nama Samaran (Alias) Opsional
+                  </Label>
                   <Input
+                    id="alias"
                     value={alias}
                     onChange={(e) => setAlias(e.target.value)}
                     placeholder="Misal: Saksi 1"

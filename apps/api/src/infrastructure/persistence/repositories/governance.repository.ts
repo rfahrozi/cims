@@ -51,11 +51,7 @@ export interface RetentionPreviewRecord {
   closureAt?: string;
   dueAt?: string;
   eligibilityStatus:
-    | 'NOT_CLOSED'
-    | 'POLICY_NOT_CONFIGURED'
-    | 'ON_HOLD'
-    | 'NOT_DUE'
-    | 'DUE_FOR_REVIEW';
+    'NOT_CLOSED' | 'POLICY_NOT_CONFIGURED' | 'ON_HOLD' | 'NOT_DUE' | 'DUE_FOR_REVIEW';
   activeLegalHoldCount: number;
   eligibleForReview: boolean;
   requestedBy: string;

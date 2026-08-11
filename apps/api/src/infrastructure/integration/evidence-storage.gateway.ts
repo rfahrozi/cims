@@ -54,7 +54,7 @@ export class EvidenceStorageGateway {
       mode,
       configured: Boolean(
         this.config.get<string>('EVIDENCE_STORAGE_URL') &&
-          secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY')
+        secretValue(this.config, 'EVIDENCE_STORAGE_API_KEY')
       )
     };
   }

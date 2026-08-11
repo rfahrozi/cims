@@ -20,6 +20,7 @@ export interface RuntimeEnv {
   REQUEST_BODY_LIMIT_BYTES: number;
   TRUST_PROXY: boolean;
   SWAGGER_ENABLED: boolean;
+  METRICS_BEARER_TOKEN?: string;
 
   NOTIFICATION_GATEWAY_MODE: string;
   NOTIFICATION_GATEWAY_URL?: string;
@@ -126,7 +127,8 @@ export function validateEnvOrThrow(raw: NodeJS.ProcessEnv): RuntimeEnv {
       min: 1024
     }),
     TRUST_PROXY: readBoolean(raw, 'TRUST_PROXY', false),
-    SWAGGER_ENABLED: readBoolean(raw, 'SWAGGER_ENABLED', true),
+    SWAGGER_ENABLED: readBoolean(raw, 'SWAGGER_ENABLED', readNodeEnv(raw) !== 'production'),
+    METRICS_BEARER_TOKEN: readOptional(raw, 'METRICS_BEARER_TOKEN'),
 
     NOTIFICATION_GATEWAY_MODE: (
       readOptional(raw, 'NOTIFICATION_GATEWAY_MODE') ?? 'MOCK'

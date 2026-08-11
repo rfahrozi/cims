@@ -8,8 +8,11 @@ const viteConfig = defineViteConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+      '@': path.resolve(__dirname, './src'),
+      react: path.resolve(__dirname, '../../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom')
+    },
+    dedupe: ['react', 'react-dom']
   },
   server: {
     port: 5173,

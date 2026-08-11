@@ -1,18 +1,18 @@
 import { useLocation } from 'react-router-dom';
 import { CheckCircle2, Circle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useActiveHearing } from '@/lib/hearing-context';
+import { useActiveHearingSafe } from '@/lib/hearing-context';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 // ── Definisi langkah alur sidang elektronik ─────────────────────────────────
 export const WORKFLOW_STEPS = [
   { path: '/hearing-intake', label: 'Data Perkara', shortLabel: '1', gateKey: 'hearing_data' },
-  { path: '/determination', label: 'Penetapan Hakim', shortLabel: '2', gateKey: 'determination' },
-  { path: '/scheduling', label: 'Jadwal', shortLabel: '3', gateKey: 'schedule' },
-  { path: '/notices', label: 'Pemberitahuan', shortLabel: '4', gateKey: 'notice' },
-  { path: '/readiness', label: 'Kesiapan', shortLabel: '5', gateKey: 'readiness' },
-  { path: '/virtual-session', label: 'Ruang Virtual', shortLabel: '6', gateKey: 'virtual_session' },
+  { path: '/scheduling', label: 'Jadwal', shortLabel: '2', gateKey: 'schedule' },
+  { path: '/virtual-session', label: 'Ruang Virtual', shortLabel: '3', gateKey: 'virtual_session' },
+  { path: '/determination', label: 'Penetapan Hakim', shortLabel: '4', gateKey: 'determination' },
+  { path: '/notices', label: 'Pemberitahuan', shortLabel: '5', gateKey: 'notice' },
+  { path: '/readiness', label: 'Kesiapan', shortLabel: '6', gateKey: 'readiness' },
   { path: '/hearing-control', label: 'Sidang', shortLabel: '7', gateKey: 'hearing_ended' }
 ] as const;
 
@@ -35,7 +35,9 @@ function isGateDone(gate: GateData, key: string): boolean {
 
 export function WorkflowStepper() {
   const location = useLocation();
-  const { hearingId } = useActiveHearing();
+  // Gunakan versi aman — tidak melempar error jika berada di luar HearingProvider
+  const hearingCtx = useActiveHearingSafe();
+  const hearingId = hearingCtx?.hearingId ?? '';
 
   const { data: gate } = useQuery({
     queryKey: ['hearing-gate', hearingId],

@@ -236,8 +236,9 @@ export function AppealDecisionPage() {
                   {/* Jadwal & mode */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Tanggal &amp; Waktu Pembacaan</Label>
+                      <Label htmlFor="appeal_date">Tanggal &amp; Waktu Pembacaan</Label>
                       <Input
+                        id="appeal_date"
                         type="datetime-local"
                         value={scheduledAt}
                         onChange={(e) => setScheduledAt(e.target.value)}
@@ -260,8 +261,11 @@ export function AppealDecisionPage() {
                       </Select>
                     </div>
                     <div className="space-y-2 sm:col-span-2">
-                      <Label>Referensi Penetapan Majelis Hakim PT</Label>
+                      <Label htmlFor="determination_ref">
+                        Referensi Penetapan Majelis Hakim PT
+                      </Label>
                       <Input
+                        id="determination_ref"
                         value={detRef}
                         onChange={(e) => setDetRef(e.target.value)}
                         placeholder="PEN-PT/001/2026"
@@ -280,8 +284,11 @@ export function AppealDecisionPage() {
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1">
-                        <Label className="text-xs">Nama Pengadilan Tinggi</Label>
+                        <Label className="text-xs" htmlFor="court_name">
+                          Nama Pengadilan Tinggi
+                        </Label>
                         <Input
+                          id="court_name"
                           value={courtName}
                           onChange={(e) => setCourtName(e.target.value)}
                           placeholder="Pengadilan Tinggi Jakarta"
@@ -289,8 +296,11 @@ export function AppealDecisionPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Nomor Penetapan Resmi</Label>
+                        <Label className="text-xs" htmlFor="penetapan_number">
+                          Nomor Penetapan Resmi
+                        </Label>
                         <Input
+                          id="penetapan_number"
                           value={penetapanNumber}
                           onChange={(e) => setPenetapanNumber(e.target.value)}
                           placeholder="001/PID.SUS/2026/PT.DKI"
@@ -298,8 +308,11 @@ export function AppealDecisionPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Nama Hakim Ketua</Label>
+                        <Label className="text-xs" htmlFor="hakim_ketua">
+                          Nama Hakim Ketua
+                        </Label>
                         <Input
+                          id="hakim_ketua"
                           value={hakimKetua}
                           onChange={(e) => setHakimKetua(e.target.value)}
                           placeholder="Nama lengkap Hakim Ketua"
@@ -307,8 +320,11 @@ export function AppealDecisionPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Hakim Anggota (pisah koma)</Label>
+                        <Label className="text-xs" htmlFor="hakim_anggota">
+                          Hakim Anggota (pisah koma)
+                        </Label>
                         <Input
+                          id="hakim_anggota"
                           value={hakimAnggota}
                           onChange={(e) => setHakimAnggota(e.target.value)}
                           placeholder="Hakim A, Hakim B"
@@ -316,8 +332,11 @@ export function AppealDecisionPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Panitera Pengganti</Label>
+                        <Label className="text-xs" htmlFor="panitera">
+                          Panitera Pengganti
+                        </Label>
                         <Input
+                          id="panitera"
                           value={paniterapengganti}
                           onChange={(e) => setPaniterapengganti(e.target.value)}
                           placeholder="Nama Panitera Pengganti"
@@ -325,8 +344,11 @@ export function AppealDecisionPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Nama Penuntut Umum (Jaksa)</Label>
+                        <Label className="text-xs" htmlFor="jaksa">
+                          Nama Penuntut Umum (Jaksa)
+                        </Label>
                         <Input
+                          id="jaksa"
                           value={penuntutUmum}
                           onChange={(e) => setPenuntutUmum(e.target.value)}
                           placeholder="Nama Jaksa sesuai BAP"
@@ -348,8 +370,11 @@ export function AppealDecisionPage() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-xs">Password Zoom (opsional)</Label>
+                            <Label className="text-xs" htmlFor="zoom_pass">
+                              Password Zoom (opsional)
+                            </Label>
                             <Input
+                              id="zoom_pass"
                               value={zoomPassword}
                               onChange={(e) => setZoomPassword(e.target.value)}
                               placeholder="Password meeting"
@@ -480,8 +505,11 @@ export function AppealDecisionPage() {
                   {/* Tandai READ */}
                   {latestScheduled && (
                     <div className="space-y-2 border-t pt-4">
-                      <Label>Waktu Aktual Pembacaan (untuk tandai READ)</Label>
+                      <Label htmlFor="actual_read_time">
+                        Waktu Aktual Pembacaan (untuk tandai READ)
+                      </Label>
                       <Input
+                        id="actual_read_time"
                         type="datetime-local"
                         value={readAt}
                         onChange={(e) => setReadAt(e.target.value)}
@@ -790,8 +818,9 @@ export function AppealDecisionPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Referensi Petikan di Sistem Resmi</Label>
+                    <Label htmlFor="publish_ref">Referensi Petikan di Sistem Resmi</Label>
                     <Input
+                      id="publish_ref"
                       value={excerptRef}
                       onChange={(e) => setExcerptRef(e.target.value)}
                       placeholder="PETIKAN/PT/001/2026"
@@ -840,12 +869,17 @@ export function AppealDecisionPage() {
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Nama Pengadilan Tujuan (PT1)</Label>
-                      <Input value={destCourt} onChange={(e) => setDestCourt(e.target.value)} />
+                      <Label htmlFor="dest_court">Nama Pengadilan Tujuan (PT1)</Label>
+                      <Input
+                        id="dest_court"
+                        value={destCourt}
+                        onChange={(e) => setDestCourt(e.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>Nomor Transmisi / Surat</Label>
+                      <Label htmlFor="trans_number">Nomor Transmisi / Surat</Label>
                       <Input
+                        id="trans_number"
                         value={transmissionRef}
                         onChange={(e) => setTransmissionRef(e.target.value)}
                       />

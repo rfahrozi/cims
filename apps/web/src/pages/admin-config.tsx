@@ -132,8 +132,11 @@ function TemplateEditRow({
       {editing ? (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label className="text-xs">Subjek</Label>
+            <Label className="text-xs" htmlFor={`tpl-subj-${template.id}`}>
+              Subjek
+            </Label>
             <Input
+              id={`tpl-subj-${template.id}`}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="text-sm"
@@ -225,8 +228,11 @@ function SlaConfigRow({ config, onSaved }: { config: SlaConfig; onSaved: () => v
         {editing ? (
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label className="text-xs">Batas ACK (jam)</Label>
+              <Label className="text-xs" htmlFor={`sla-ack-${config.id}`}>
+                Batas ACK (jam)
+              </Label>
               <Input
+                id={`sla-ack-${config.id}`}
                 type="number"
                 min={1}
                 value={hours}
@@ -235,8 +241,11 @@ function SlaConfigRow({ config, onSaved }: { config: SlaConfig; onSaved: () => v
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Reminder (jam sebelum batas, pisahkan koma)</Label>
+              <Label className="text-xs" htmlFor={`sla-rem-${config.id}`}>
+                Reminder (jam sebelum batas, pisahkan koma)
+              </Label>
               <Input
+                id={`sla-rem-${config.id}`}
                 value={reminders}
                 onChange={(e) => setReminders(e.target.value)}
                 className="h-8 text-sm"
@@ -491,27 +500,32 @@ export function AdminConfigPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Account ID</Label>
-                  <Input value="*** HIDDEN ***" disabled />
+                  <Label htmlFor="zoom-account">Account ID</Label>
+                  <Input id="zoom-account" value="*** HIDDEN ***" disabled />
                   <p className="text-[11px] text-slate-500">
                     ID Akun korporat Zoom yang memiliki lisensi aktif.
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Host User ID</Label>
-                  <Input value="*** HIDDEN ***" disabled />
+                  <Label htmlFor="zoom-host">Host User ID</Label>
+                  <Input id="zoom-host" value="*** HIDDEN ***" disabled />
                   <p className="text-[11px] text-slate-500">
                     Alamat email / ID akun Zoom admin yang akan bertindak sebagai Host untuk semua
                     meeting.
                   </p>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Client ID (Server-to-Server OAuth)</Label>
-                  <Input value="*** HIDDEN ***" disabled />
+                  <Label htmlFor="zoom-client">Client ID (Server-to-Server OAuth)</Label>
+                  <Input id="zoom-client" value="*** HIDDEN ***" disabled />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Client Secret</Label>
-                  <Input type="password" value="********************************" disabled />
+                  <Label htmlFor="zoom-secret">Client Secret</Label>
+                  <Input
+                    id="zoom-secret"
+                    type="password"
+                    value="********************************"
+                    disabled
+                  />
                 </div>
               </div>
 

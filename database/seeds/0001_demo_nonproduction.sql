@@ -43,9 +43,9 @@ on conflict (id) do update
 
 insert into court_cases(id, case_number, normalized_case_number, official_case_reference, case_classification, case_type_code, case_title, court_organization_id, prosecution_organization_id, data_source, created_by, updated_by)
 values
-  ('case-demo-001', '364/Pid.Sus/2026/PN Btm', '364/PID.SUS/2026/PN BTM', '369/PID.SUS/2026/PT TPG', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Narkotika', 'pn-batam', 'kejari-batam', 'MANUAL', 'system', 'system'),
-  ('case-demo-002', '384/PID.SUS/2026/PT TPG', '384/PID.SUS/2026/PT TPG', '409/Pid.Sus/2026/PN Btm', 'SPECIAL_CRIMINAL', 'PID.SUS',   'Perkara Narkotika (Banding)', 'pt-kepri', 'kejati-kepri', 'MANUAL', 'system', 'system'),
-  ('case-demo-003', '74/Pid.B/2026/PN Tpg', '74/PID.B/2026/PN TPG', '356/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B', 'Perkara Pembunuhan',   'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system')
+  ('case-demo-001', '386/PID.SUS/2026/PT TPG', '364/PID.SUS/2026/PN BTM', '369/PID.SUS/2026/PT TPG', 'SPECIAL_CRIMINAL', 'PID.SUS', 'Perkara Narkotika', 'pn-batam', 'kejari-batam', 'MANUAL', 'system', 'system'),
+  ('case-demo-002', '383/PID.SUS/2026/PT TPG', '383/PID.SUS/2026/PT TPG', '420/Pid.Sus/2026/PN Btm', 'SPECIAL_CRIMINAL', 'PID.SUS',   'Perkara Narkotika (Banding)', 'pt-kepri', 'kejati-kepri', 'MANUAL', 'system', 'system'),
+  ('case-demo-003', '16/PID.SUS-TPK/2026/PT TPG', '74/PID.B/2026/PN TPG', '356/PID/2026/PT TPG', 'GENERAL_CRIMINAL', 'PID.B', 'Tindak Pidana Korupsi',   'pn-tanjungpinang', 'kejari-tanjungpinang', 'MANUAL', 'system', 'system')
 on conflict (id) do update
   set case_number = excluded.case_number,
       case_title  = excluded.case_title,
@@ -53,9 +53,9 @@ on conflict (id) do update
 
 insert into hearings(id, case_id, case_number, hearing_sequence, hearing_type, state, intake_status, data_source, court_organization_id, prosecution_organization_id, defendant_custody_status, created_by, updated_by)
 values
-  ('hearing-demo-001', 'case-demo-001', '364/Pid.Sus/2026/PN Btm', 1, 'Pemeriksaan Saksi', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-batam', 'kejari-batam', 'UNKNOWN', 'system', 'system'),
-  ('hearing-demo-002', 'case-demo-002', '384/PID.SUS/2026/PT TPG', 1, 'Pemeriksaan Ahli', 'DRAFT', 'ACTIVE', 'MANUAL', 'pt-kepri', 'kejati-kepri', 'UNKNOWN', 'system', 'system'),
-  ('hearing-demo-003', 'case-demo-003', '74/Pid.B/2026/PN Tpg', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system')
+  ('hearing-demo-001', 'case-demo-001', '386/PID.SUS/2026/PT TPG', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-batam', 'kejari-batam', 'UNKNOWN', 'system', 'system'),
+  ('hearing-demo-002', 'case-demo-002', '383/PID.SUS/2026/PT TPG', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pt-kepri', 'kejati-kepri', 'UNKNOWN', 'system', 'system'),
+  ('hearing-demo-003', 'case-demo-003', '16/PID.SUS-TPK/2026/PT TPG', 1, 'Pembacaan Putusan', 'DRAFT', 'ACTIVE', 'MANUAL', 'pn-tanjungpinang', 'kejari-tanjungpinang', 'UNKNOWN', 'system', 'system')
 on conflict (id) do update
   set hearing_type = excluded.hearing_type,
       state       = excluded.state,
@@ -97,21 +97,21 @@ on conflict (hearing_id, organization_id) do nothing;
 -- user_id merujuk ke NIP persona DEV riil.
 --
 -- Komposisi Majelis untuk masing-masing perkara demo:
---   hearing-demo-001 (Pemeriksaan Saksi)  : 3 Hakim (Arifin + Zulfahmi + Eliwarti)
---   hearing-demo-002 (Pemeriksaan Ahli)   : 3 Hakim (Wendra + Estiono + Bagus)
+--   hearing-demo-001 (Pembacaan Putusan)  : 3 Hakim (Arifin + Zulfahmi + Eliwarti)
+--   hearing-demo-002 (Pembacaan Putusan)  : 3 Hakim (Dahlia + Eliwarti + Morgan)
 --   hearing-demo-003 (Pembacaan Putusan)  : 3 Hakim (Elfian + Morgan + Dahlia)
 
 insert into hearing_user_assignments(hearing_id, user_id, assignment_role, active)
 values
-  -- Perkara 001: 123/Pid.Sus/2026/PN.Demo — Pemeriksaan Saksi
+  -- Perkara 001: 123/Pid.Sus/2026/PN.Demo — Pembacaan Putusan
   ('hearing-demo-001', '196005031988041001', 'HAKIM_KETUA',    true),
   ('hearing-demo-001', '196105171988031008', 'HAKIM_ANGGOTA',  true),
   ('hearing-demo-001', '196303121985032003', 'HAKIM_ANGGOTA',  true),
 
-  -- Perkara 002: 456/Pid.B/2026/PN.Demo — Pemeriksaan Ahli
+  -- Perkara 002: 456/Pid.B/2026/PN.Demo — Pembacaan Putusan
   ('hearing-demo-002', '196506301992121001', 'HAKIM_KETUA',    true),
-  ('hearing-demo-002', '196503151992121001', 'HAKIM_ANGGOTA',  true),
-  ('hearing-demo-002', '196308261988031003', 'HAKIM_ANGGOTA',  true),
+  ('hearing-demo-002', '196303121985032003', 'HAKIM_ANGGOTA',  true),
+  ('hearing-demo-002', '196209221992121001', 'HAKIM_ANGGOTA',  true),
 
   -- Perkara 003: 789/Pid.Sus/2026/PN.Demo — Pembacaan Putusan
   ('hearing-demo-003', '196512111992121001', 'HAKIM_KETUA',    true),
@@ -139,7 +139,7 @@ values
 
   -- Perkara 002 — Panitera & Panitera Pengganti
   ('hearing-demo-002', '196809011996031001', 'PANITERA',           true),
-  ('hearing-demo-002', '196505281994032001', 'PANITERA_PENGGANTI', true),
+  ('hearing-demo-002', '198409022009041004', 'PANITERA_PENGGANTI', true),
 
   -- Perkara 003 — Panitera & Panitera Pengganti
   ('hearing-demo-003', '196809011996031001', 'PANITERA',           true),

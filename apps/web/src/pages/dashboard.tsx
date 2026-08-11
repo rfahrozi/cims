@@ -438,11 +438,11 @@ export function DashboardPage() {
   const stages = gate.data
     ? [
         gate.data.hearing_data,
-        gate.data.determination,
         gate.data.schedule,
+        gate.data.virtual_session,
+        gate.data.determination,
         gate.data.notice?.ready ?? false,
         gate.data.readiness?.ready ?? false,
-        gate.data.virtual_session,
         gate.data.hearing_ended
       ]
     : [];
@@ -773,11 +773,11 @@ export function DashboardPage() {
                   {gate.data &&
                     Object.entries({
                       'Data Persidangan': gate.data.hearing_data,
-                      'Penetapan Hakim': gate.data.determination,
                       'Jadwal Sidang': gate.data.schedule,
+                      'Ruang Virtual': gate.data.virtual_session,
+                      'Penetapan Hakim': gate.data.determination,
                       Pemberitahuan: gate.data.notice?.ready ?? false,
                       Kesiapan: gate.data.readiness?.ready ?? false,
-                      'Ruang Virtual': gate.data.virtual_session,
                       'Sidang Selesai': gate.data.hearing_ended
                     }).map(([label, done]) => (
                       <div

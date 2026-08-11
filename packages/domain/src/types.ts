@@ -131,13 +131,7 @@ export interface ReadinessGateResult {
 }
 
 export type HearingRuntimeState =
-  | 'NOT_READY'
-  | 'READY'
-  | 'STARTED'
-  | 'SUSPENDED'
-  | 'ENDED'
-  | 'POSTPONED'
-  | 'DOCUMENTATION_PENDING';
+  'NOT_READY' | 'READY' | 'STARTED' | 'SUSPENDED' | 'ENDED' | 'POSTPONED' | 'DOCUMENTATION_PENDING';
 export type HearingAction =
   | 'START'
   | 'SUSPEND'

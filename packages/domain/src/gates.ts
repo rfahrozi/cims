@@ -49,10 +49,10 @@ export function nextGate(input: {
 }): GateCode {
   if (!input.hearingData) return 'HEARING_DATA';
   if (!input.schedule) return 'SCHEDULING';
+  if (!input.virtualSession) return 'VIRTUAL_SESSION';
   if (!input.determination) return 'JUDICIAL_DETERMINATION';
   if (!input.notice) return 'OFFICIAL_NOTICE';
   if (!input.readiness) return 'READINESS';
-  if (!input.virtualSession) return 'VIRTUAL_SESSION';
   if (!input.hearingEnded) return 'HEARING_CONTROL';
   return 'AUDIT_AND_CLOSURE';
 }

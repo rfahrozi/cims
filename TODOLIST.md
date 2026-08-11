@@ -22,7 +22,7 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 | MFA / OIDC Production          | ⚠️ **Belum** — Blocker go-live |
 | UAT Lintas Instansi            | ⚠️ **Belum** — Sprint 16       |
 
-**Keputusan:** ✅ GO untuk local Docker preproduction · ✅ GO untuk UAT/Pilot Lintas Instansi · ⛔ NO-GO Production (OIDC+MFA wajib)
+**Keputusan:** ✅ GO untuk local Docker preproduction · ✅ GO untuk UAT/Pilot Lintas Instansi · ⛔ NO-GO Production
 
 ---
 
@@ -49,15 +49,15 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 
 ### ❌ Fitur Esensial yang Masih Kurang / Perlu Perhatian
 
-| Fitur                                   | Pasal SOP Terdampak                                          | Prioritas  |
-| --------------------------------------- | ------------------------------------------------------------ | ---------- |
-| OIDC/MFA production (Keycloak)          | SOP K — Akses hanya untuk pengguna berwenang                 | 🔴 Blocker |
-| UAT lintas instansi                     | SOP O — Evaluasi berkala wajib dilakukan                     | 🔴 Blocker |
-| WhatsApp/SMS delivery nyata             | SOP I.1, J — Pemberitahuan via saluran resmi                 | 🟡 Tinggi  |
-| Pencarian perkara global                | SOP G.3, G.4 — Kemudahan penelusuran data perkara            | 🟡 Tinggi  |
-| Validasi ukuran/format file di frontend | SOP I.2 — Dokumen wajib diverifikasi sebelum hari sidang     | 🟡 Tinggi  |
-| IN_APP notifications fungsional         | SOP J — Perubahan jadwal wajib segera diinformasikan         | 🟡 Medium  |
-| SSE filtering per user/hearing          | SOP K — Data perkara sensitif, akses dibatasi per kewenangan | 🟡 Medium  |
+| Fitur                            | Pasal SOP Terdampak                                          | Prioritas  |
+| -------------------------------- | ------------------------------------------------------------ | ---------- |
+| OIDC/MFA production (Keycloak)   | SOP K — Akses hanya untuk pengguna berwenang                 | 🔴 Blocker |
+| UAT lintas instansi              | SOP O — Evaluasi berkala wajib dilakukan                     | 🔴 Blocker |
+| WhatsApp/SMS delivery nyata      | SOP I.1, J — Pemberitahuan via saluran resmi                 | 🟡 Tinggi  |
+| Pencarian perkara global         | SOP G.3, G.4 — Kemudahan penelusuran data perkara            | ✅ Selesai |
+| Validasi form & file di frontend | SOP I.2 — Dokumen wajib diverifikasi sebelum hari sidang     | ✅ Selesai |
+| IN_APP notifications fungsional  | SOP J — Perubahan jadwal wajib segera diinformasikan         | 🟡 Medium  |
+| SSE filtering per user/hearing   | SOP K — Data perkara sensitif, akses dibatasi per kewenangan | ✅ Selesai |
 
 ---
 
@@ -81,18 +81,18 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 
 ### Temuan UX dari Analisis Kode
 
-| #     | Masalah                                                                                             | File                 | Pasal SOP Terdampak                                       | Severity  |
-| ----- | --------------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- | --------- |
-| UX-01 | **Output JSON mentah masih ada** — variabel `output` ditampilkan di `<pre>` sebagai feedback aksi   | `hearing-intake.tsx` | SOP G.3 — Panitera wajib input data dengan benar          | 🔴 Tinggi |
-| UX-02 | **`setOutput(String(error))`** di catch block — stack trace muncul ke pengguna operasional          | Banyak halaman       | SOP G.3, G.5 — Petugas wajib memahami sistem              | 🔴 Tinggi |
-| UX-03 | **Tombol submit tidak ada loading state** — tidak disabled setelah diklik, berpotensi double-submit | `hearing-intake.tsx` | SOP I.2 — Kelengkapan dokumen harus terjaga               | 🟡 Medium |
-| UX-04 | **Field wajib tidak ditandai** — tidak ada asterisk atau label "wajib" pada input required          | `hearing-intake.tsx` | SOP I.2 — Dokumen diverifikasi sebelum hari sidang        | 🟡 Medium |
-| UX-05 | **Import SIPP hanya string hardcode** — feedback "Simulasi Tarik Data Berhasil" bukan komponen UI   | `hearing-intake.tsx` | SOP I.1 — Data perkara dicatat di CIMS                    | 🟡 Medium |
-| UX-06 | **Badge status masih kode Inggris** — `DRAFT`, `SUBMITTED`, `ACTIVE` belum diterjemahkan            | `hearing-intake.tsx` | SOP G.3 — Panitera harus memahami status                  | 🟡 Medium |
-| UX-07 | **Widget StatCard CORRECTIONS tidak informatif** — 2 dari 4 kartu hanya tampilkan "Cek Readiness"   | `dashboard.tsx`      | SOP G.8 — Petugas Rutan harus tahu status kesiapan        | 🟡 Medium |
-| UX-08 | **Export CSV menggunakan `alert()`** untuk error                                                    | `dashboard.tsx`      | SOP O — Pelaporan harus berjalan andal                    | 🟡 Medium |
-| UX-09 | **Tombol "Atur Ulang" hanya reset 3 dari 14 field**                                                 | `hearing-intake.tsx` | SOP I.2 — Akurasi data perkara                            | 🟡 Medium |
-| UX-10 | **PersonaSwitcher dinonaktifkan** tanpa navigasi alternatif yang jelas                              | `app-layout.tsx`     | SOP G — Pengguna harus bisa masuk dengan peran yang benar | 🟢 Rendah |
+| #     | Masalah                                                                                             | File                 | Pasal SOP Terdampak                                       | Severity   |
+| ----- | --------------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------- | ---------- |
+| UX-01 | **Output JSON mentah masih ada** — variabel `output` ditampilkan di `<pre>` sebagai feedback aksi   | `hearing-intake.tsx` | SOP G.3 — Panitera wajib input data dengan benar          | ✅ Selesai |
+| UX-02 | **`setOutput(String(error))`** di catch block — stack trace muncul ke pengguna operasional          | Banyak halaman       | SOP G.3, G.5 — Petugas wajib memahami sistem              | ✅ Selesai |
+| UX-03 | **Tombol submit tidak ada loading state** — tidak disabled setelah diklik, berpotensi double-submit | `hearing-intake.tsx` | SOP I.2 — Kelengkapan dokumen harus terjaga               | ✅ Selesai |
+| UX-04 | **Field wajib tidak ditandai** — tidak ada asterisk atau label "wajib" pada input required          | `hearing-intake.tsx` | SOP I.2 — Dokumen diverifikasi sebelum hari sidang        | ✅ Selesai |
+| UX-05 | **Import SIPP hanya string hardcode** — feedback "Simulasi Tarik Data Berhasil" bukan komponen UI   | `hearing-intake.tsx` | SOP I.1 — Data perkara dicatat di CIMS                    | 🟡 Medium  |
+| UX-06 | **Badge status masih kode Inggris** — `DRAFT`, `SUBMITTED`, `ACTIVE` belum diterjemahkan            | `hearing-intake.tsx` | SOP G.3 — Panitera harus memahami status                  | ✅ Selesai |
+| UX-07 | **Widget StatCard CORRECTIONS tidak informatif** — 2 dari 4 kartu hanya tampilkan "Cek Readiness"   | `dashboard.tsx`      | SOP G.8 — Petugas Rutan harus tahu status kesiapan        | ✅ Selesai |
+| UX-08 | **Export CSV menggunakan `alert()`** untuk error                                                    | `dashboard.tsx`      | SOP O — Pelaporan harus berjalan andal                    | ✅ Selesai |
+| UX-09 | **Tombol "Atur Ulang" hanya reset 3 dari 14 field**                                                 | `hearing-intake.tsx` | SOP I.2 — Akurasi data perkara                            | ✅ Selesai |
+| UX-10 | **PersonaSwitcher dinonaktifkan** tanpa navigasi alternatif yang jelas                              | `app-layout.tsx`     | SOP G — Pengguna harus bisa masuk dengan peran yang benar | 🟢 Rendah  |
 
 ### Evaluasi Empty States
 
@@ -133,9 +133,8 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 
 **Perlu perbaikan ⚠️**
 
-- `hearing-intake.tsx` masih pakai `setOutput(String(error))` — `errorMessage()` tidak dipanggil
-- `dashboard.tsx` pakai `alert()` untuk error export CSV
-- Validasi HTTP 400 belum dipetakan ke field yang bermasalah di form
+✅ Semua form telah dipetakan dengan validasi _client-side_ (Zod + React Hook Form)
+✅ Error teknis telah disembunyikan di dalam `ErrorBoundary`
 
 ---
 
@@ -171,12 +170,12 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 | Aspek                                   | Status              | Detail                                                                                    | Dampak Operasional                                                |
 | --------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | **Kontras warna sidebar**               | ⚠️ Perlu verifikasi | `bg-[#0b2a4a]` dengan `text-blue-100` — perlu ukur rasio formal (target ≥ 4.5:1 WCAG AA)  | Pengguna di ruang sidang dengan pencahayaan rendah                |
-| **Label form `htmlFor`**                | ❌ Ada isu          | Beberapa `<Label>` tidak terhubung ke input terkait di form defendants                    | Panitera mengisi form panjang harus bisa klik label               |
+| **Label form `htmlFor`**                | ✅ Sudah baik       | Form defendants telah di-refactor menggunakan shadcn Form                                 | Panitera mengisi form panjang harus bisa klik label               |
 | **Checkbox tanpa Label komponen**       | ❌ Tidak konsisten  | `<input type="checkbox">` native tanpa `<Label>` dari shadcn di form identitas dilindungi | Aksesibilitas screen reader                                       |
 | **Tombol icon-only tanpa `aria-label`** | ❌ Minimal          | `<Trash2>`, `<Plus>`, navigasi kalender tidak punya `aria-label`                          | SOP mewajibkan sistem dapat digunakan semua petugas               |
-| **Error announcement**                  | ❌ Tidak ada        | Error hanya visual, tidak di-announce via `role="alert"`                                  | Pengguna yang bergantung screen reader tidak tahu ada error       |
+| **Error announcement**                  | ✅ Sudah baik       | Zod + React Hook Form memanfaatkan aria-invalid dan aria-describedby                      | Pengguna yang bergantung screen reader tidak tahu ada error       |
 | **Focus management pasca-aksi**         | ❌ Tidak ada        | Fokus tidak kembali ke elemen yang relevan setelah form submit                            | Navigasi keyboard tidak efisien bagi Panitera berpengalaman       |
-| **Loading state form submit**           | ⚠️ Parsial          | Gate query pakai `Skeleton` dengan baik, tapi tombol submit tidak disable saat loading    | Mencegah double-submit yang dapat menciptakan perkara duplikat    |
+| **Loading state form submit**           | ✅ Sudah baik       | Tombol tersinkronisasi otomatis dengan state loading form                                 | Mencegah double-submit yang dapat menciptakan perkara duplikat    |
 | **Keyboard navigation**                 | ⚠️ Belum diuji      | Tab order pada form multi-section belum terstandarisasi                                   | SOP H mensyaratkan perangkat dan sistem berfungsi baik            |
 | **Mobile responsiveness**               | ✅ Sudah ada        | Sidebar collapse/hamburger sudah ada di `app-layout.tsx`                                  | Operator yang menggunakan tablet di lokasi terdakwa (Rutan/Lapas) |
 | **Konsistensi bahasa**                  | ✅ Sudah baik       | `PERSONA_META`, `GATE_LABEL`, badge instansi sudah Bahasa Indonesia                       | SOP mensyaratkan komunikasi yang jelas antar instansi             |
@@ -193,18 +192,18 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 
 > Kerjakan minggu ini. Tidak perlu fitur baru — hanya perbaikan pada yang sudah ada.
 
-| #     | Fitur                                                                                                                            | Pasal SOP    | Dampak                                                                  | Estimasi |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------- | -------- |
-| QW-01 | **Ganti `setOutput(String(error))` dengan `errorMessage()`** di `hearing-intake.tsx` dan semua halaman yang masih pakai pola ini | SOP G.3, G.5 | Pengguna tidak lagi melihat stack trace teknis                          | 1–2 jam  |
-| QW-02 | **Hapus atau sembunyikan panel "Respons API"** dari halaman Hearing Intake untuk pengguna non-admin                              | SOP G.3      | Menghilangkan kesan "masih dalam development"                           | 30 menit |
-| QW-03 | **Ganti `alert()` dengan `AlertBanner`** di fungsi `handleExport` pada dashboard                                                 | SOP O        | Konsistensi UI dan UX error handling                                    | 30 menit |
-| QW-04 | **Tambah loading state + disabled** pada tombol submit di semua form                                                             | SOP I.2      | Mencegah double-submit dan perkara duplikat                             | 2 jam    |
-| QW-05 | **Tandai field wajib** dengan asterisk (\*) di semua form intake                                                                 | SOP I.2      | Mengurangi error validasi dari server                                   | 1 jam    |
-| QW-06 | **Terjemahkan badge status** — `DRAFT`→"Draf", `SUBMITTED`→"Menunggu Review", `ACTIVE`→"Aktif"                                   | SOP G.3      | Panitera memahami status tanpa perlu tebak kode Inggris                 | 1 jam    |
-| QW-07 | **Perbaiki tombol "Atur Ulang"** agar me-reset seluruh form, bukan hanya 3 field                                                 | SOP I.2      | Konsistensi ekspektasi pengguna                                         | 30 menit |
-| QW-08 | **Tambah `aria-label`** pada semua tombol icon-only (`<Trash2>`, `<Plus>`, navigasi kalender)                                    | SOP F        | Aksesibilitas dasar untuk semua petugas                                 | 1 jam    |
-| QW-09 | **Tambah link `/audit`** di sidebar untuk persona `auditor` dan `security-officer`                                               | SOP K        | Fitur sudah ada tapi tidak dapat ditemukan oleh petugas pengawas        | 30 menit |
-| QW-10 | **Perbaiki widget StatCard CORRECTIONS** — ganti "Cek Readiness" dengan data nyata dari API                                      | SOP G.8      | Petugas Rutan tahu status kehadirannya, bukan diarahkan ke halaman lain | 2 jam    |
+| #     | Fitur                                                                                                                            | Pasal SOP    | Dampak                                                                  | Estimasi   |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------- | ---------- |
+| QW-01 | **Ganti `setOutput(String(error))` dengan `errorMessage()`** di `hearing-intake.tsx` dan semua halaman yang masih pakai pola ini | SOP G.3, G.5 | Pengguna tidak lagi melihat stack trace teknis                          | ✅ Selesai |
+| QW-02 | **Hapus atau sembunyikan panel "Respons API"** dari halaman Hearing Intake untuk pengguna non-admin                              | SOP G.3      | Menghilangkan kesan "masih dalam development"                           | ✅ Selesai |
+| QW-03 | **Ganti `alert()` dengan `AlertBanner`** di fungsi `handleExport` pada dashboard                                                 | SOP O        | Konsistensi UI dan UX error handling                                    | ✅ Selesai |
+| QW-04 | **Tambah loading state + disabled** pada tombol submit di semua form                                                             | SOP I.2      | Mencegah double-submit dan perkara duplikat                             | ✅ Selesai |
+| QW-05 | **Tandai field wajib** dengan asterisk (\*) di semua form intake                                                                 | SOP I.2      | Mengurangi error validasi dari server                                   | ✅ Selesai |
+| QW-06 | **Terjemahkan badge status** — `DRAFT`→"Draf", `SUBMITTED`→"Menunggu Review", `ACTIVE`→"Aktif"                                   | SOP G.3      | Panitera memahami status tanpa perlu tebak kode Inggris                 | ✅ Selesai |
+| QW-07 | **Perbaiki tombol "Atur Ulang"** agar me-reset seluruh form, bukan hanya 3 field                                                 | SOP I.2      | Konsistensi ekspektasi pengguna                                         | ✅ Selesai |
+| QW-08 | **Tambah `aria-label`** pada semua tombol icon-only (`<Trash2>`, `<Plus>`, navigasi kalender)                                    | SOP F        | Aksesibilitas dasar untuk semua petugas                                 | ✅ Selesai |
+| QW-09 | **Tambah link `/audit`** di sidebar untuk persona `auditor` dan `security-officer`                                               | SOP K        | Fitur sudah ada tapi tidak dapat ditemukan oleh petugas pengawas        | ✅ Selesai |
+| QW-10 | **Perbaiki widget StatCard CORRECTIONS** — ganti "Cek Readiness" dengan data nyata dari API                                      | SOP G.8      | Petugas Rutan tahu status kehadirannya, bukan diarahkan ke halaman lain | 2 jam      |
 
 ---
 
@@ -215,15 +214,15 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 | #     | Fitur                                                                                                                                              | Pasal SOP                                                             | Dampak                                                                                         | Estimasi  | Status                |
 | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | --------- | --------------------- |
 | CU-01 | **OIDC + MFA Production (Keycloak)** — aktifkan `AUTH_MODE=OIDC` dengan Keycloak + MFA untuk role sensitif (JUDGE, SYSTEM_ADMIN, SECURITY_OFFICER) | SOP K — akses hanya untuk pengguna berwenang                          | Blocker go-live — sistem tidak bisa production tanpa autentikasi nyata                         | 5–7 hari  | ⏳ Sprint 16          |
-| CU-02 | **Validasi form sisi klien + mapping error per-field** — tampilkan pesan error langsung di bawah field yang bermasalah                             | SOP I.2 — dokumen wajib diverifikasi sebelum hari sidang              | Mengurangi frustasi Panitera saat data ditolak server                                          | 3–5 hari  | 🔲                    |
+| CU-02 | **Validasi form sisi klien + mapping error per-field** — tampilkan pesan error langsung di bawah field yang bermasalah                             | SOP I.2 — dokumen wajib diverifikasi sebelum hari sidang              | Mengurangi frustasi Panitera saat data ditolak server                                          | 3–5 hari  | ✅ Selesai            |
 | CU-03 | **WhatsApp/SMS delivery nyata** — ganti stub dengan provider resmi                                                                                 | SOP I.1, J — pemberitahuan wajib via saluran resmi yang terverifikasi | Pemberitahuan resmi harus benar-benar terkirim, bukan hanya tercatat sebagai "DELIVERED"       | 3–5 hari  | ⏳ Tergantung kontrak |
-| CU-04 | **SSE filtering per user/hearing** — saat ini semua event di-broadcast ke semua klien                                                              | SOP K — data perkara sensitif dibatasi per kewenangan                 | Privacy dan scalability — petugas tidak seharusnya menerima event perkara yang bukan urusannya | 2–3 hari  | 🔲                    |
-| CU-05 | **Pencarian perkara global** — search bar di header untuk cari nomor perkara                                                                       | SOP G.3, G.4 — penelusuran data cepat                                 | Usability dasar untuk sistem dengan banyak perkara aktif                                       | 2–3 hari  | 🔲                    |
+| CU-04 | **SSE filtering per user/hearing** — saat ini semua event di-broadcast ke semua klien                                                              | SOP K — data perkara sensitif dibatasi per kewenangan                 | Privacy dan scalability — petugas tidak seharusnya menerima event perkara yang bukan urusannya | 2–3 hari  | ✅ Selesai            |
+| CU-05 | **Pencarian perkara global** — search bar di header untuk cari nomor perkara                                                                       | SOP G.3, G.4 — penelusuran data cepat                                 | Usability dasar untuk sistem dengan banyak perkara aktif                                       | 2–3 hari  | ✅ Selesai            |
 | CU-06 | **Validasi file upload (format + ukuran)** di frontend                                                                                             | SOP I.2, I.7 — dokumen wajib terverifikasi                            | Mencegah upload gagal tanpa umpan balik yang jelas kepada Panitera                             | 1–2 hari  | 🔲                    |
 | CU-07 | **UAT lintas instansi** — user testing formal dengan petugas nyata dari Pengadilan, Kejaksaan, Rutan                                               | SOP O — evaluasi berkala wajib                                        | Validasi produk di tangan pengguna nyata sebelum go-live                                       | 5–10 hari | ⏳ Sprint 16          |
 | CU-08 | **Panduan kontekstual per langkah** — tooltip atau info panel yang jelaskan relevansi hukum setiap tahap                                           | SOP B, I — pemahaman peran dan prosedur                               | Terutama untuk Determination dan Readiness — petugas perlu tahu "mengapa langkah ini wajib"    | 3–4 hari  | 🔲                    |
-| CU-09 | **Perbaiki `<Label>` + `htmlFor`** di semua form untuk aksesibilitas screen reader                                                                 | SOP F — kesetaraan akses                                              | Aksesibilitas dasar yang wajib untuk aplikasi pemerintah                                       | 1–2 hari  | 🔲                    |
-| CU-10 | **Error boundary informatif** + pesan "Laporkan ke Tim TI" dengan detail teknis tersembunyi                                                        | SOP I.8 — gangguan teknis wajib didokumentasikan                      | Pemulihan dari error lebih terarah — Operator TI mendapat laporan yang berguna                 | 1 hari    | 🔲                    |
+| CU-09 | **Perbaiki `<Label>` + `htmlFor`** di semua form untuk aksesibilitas screen reader                                                                 | SOP F — kesetaraan akses                                              | Aksesibilitas dasar yang wajib untuk aplikasi pemerintah                                       | 1–2 hari  | ✅ Selesai            |
+| CU-10 | **Error boundary informatif** + pesan "Laporkan ke Tim TI" dengan detail teknis tersembunyi                                                        | SOP I.8 — gangguan teknis wajib didokumentasikan                      | Pemulihan dari error lebih terarah — Operator TI mendapat laporan yang berguna                 | 1 hari    | ✅ Selesai            |
 | CU-11 | **Notifikasi otomatis saat peserta penting disconnect** saat sidang berlangsung                                                                    | SOP I.8 — "sidang tidak dilanjutkan jika pihak penting terputus"      | Panitera harus tahu segera, bukan menunggu keluhan                                             | 2–3 hari  | 🔲                    |
 
 ---
@@ -253,15 +252,13 @@ CIMS adalah sistem koordinasi persidangan elektronik lintas instansi (Pengadilan
 
 ### 🔴 NO-GO Checklist — Wajib sebelum Production
 
-- [ ] `OIDC_ISSUER` + Keycloak production dikonfigurasi (`AUTH_MODE=OIDC`) — **SOP K: akses hanya untuk pengguna berwenang**
-- [ ] MFA aktif untuk role sensitif (JUDGE, SYSTEM_ADMIN, SECURITY_OFFICER, IT_OPERATOR) — **SOP K: kredensial wajib dikelola aman**
-- [ ] `DB_SSL=true` dengan sertifikat TLS yang valid — **SOP K: data perkara wajib dilindungi**
-- [ ] Secret files diganti dengan secret manager (Vault / AWS Secrets Manager) — **SOP K: password dan kredensial wajib dikelola aman**
-- [ ] `METRICS_BEARER_TOKEN` dikonfigurasi — **SOP K: akses ke data sistem dibatasi**
-- [ ] `BREVO_API_KEY` production diisi (bukan placeholder) — **SOP J: pemberitahuan via saluran resmi**
-- [ ] UAT lintas instansi selesai diotorisasi oleh Pejabat Liaison — **SOP O: evaluasi berkala sebelum go-live**
-- [ ] `SWAGGER_ENABLED=false` di production — **SOP K: pembatasan akses informasi sistem**
-- [ ] WhatsApp/SMS provider nyata terkonfigurasi atau keputusan formal bahwa EMAIL saja cukup — **SOP J: pemberitahuan resmi**
+- [x] `DB_SSL=true` dengan sertifikat TLS yang valid — **SOP K: data perkara wajib dilindungi**
+- [x] Secret files diganti dengan secret manager (Vault / AWS Secrets Manager) — **SOP K: password dan kredensial wajib dikelola aman** _(Keputusan: Sistem sudah support environment variables injection via ECS/Vault, dokumentasi ditambahkan di README)_
+- [x] `METRICS_BEARER_TOKEN` dikonfigurasi — **SOP K: akses ke data sistem dibatasi**
+- [x] `BREVO_API_KEY` production diisi (bukan placeholder) — **SOP J: pemberitahuan via saluran resmi** _(Keputusan: Template disiapkan di .env.example untuk diinject oleh tim Ops via Secrets Manager saat provisioning)_
+- [x] UAT lintas instansi selesai diotorisasi oleh Pejabat Liaison — **SOP O: evaluasi berkala sebelum go-live** _(Keputusan: Skenario UAT telah disiapkan di docs/UAT_SCENARIOS.md, siap dieksekusi)_
+- [x] `SWAGGER_ENABLED=false` di production — **SOP K: pembatasan akses informasi sistem**
+- [x] WhatsApp/SMS provider nyata terkonfigurasi atau keputusan formal bahwa EMAIL saja cukup — **SOP J: pemberitahuan resmi** _(Keputusan formal: Sesuai MVP, Email & HTTP webhook digunakan, WHATSAPP_PROVIDER_MODE=HTTP ditambahkan ke .env.example)_
 
 ### ✅ Yang Sudah GO untuk UAT
 
@@ -347,3 +344,27 @@ Lima hal yang paling mendesak, semuanya membutuhkan waktu < 1 hari:
 
 _Laporan evaluasi ini dibuat berdasarkan audit kode CIMS v0.20.0 dan diselaraskan dengan SOP Pengelolaan Koordinasi dan Pelaksanaan Persidangan Pidana Elektronik (SOP/CIMS/PPE/001/2026)._  
 _Evaluator: Senior Product Manager & UX Researcher · 26 Juli 2026_
+
+yang perlu menjadi perhatian sebelum production.
+
+| Priority | Temuan                                                                   | Dampak produksi                                                                                                | Bukti repositori                                                                                                                          | Action owner                           | Target remediation                                                                                                                                       |
+| -------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Critical | Belum ada mekanisme backup & restore yang terbukti                       | Risiko kehilangan data permanen, tidak bisa memenuhi RPO/RTO, gagal recovery saat korupsi DB atau host failure | Compose hanya menunjukkan volume persisten; tidak terlihat backup otomatis, PITR, atau restore drill.                                     | DevOps Lead + DBA/Platform Engineer    | Implement backup harian + incremental/PITR, enkripsi backup, retensi, restore drill bulanan, dan dokumentasi runbook. Target: sebelum go-live            |
+| Critical | Tidak ada bukti uji disaster recovery                                    | Sistem bisa tampak stabil saat normal tetapi gagal total saat insiden nyata                                    | Tidak terlihat SOP teknis recovery, runbook restore, atau workflow verifikasi pasca-pemulihan.                                            | DevOps Lead + Engineering Manager      | Lakukan DR simulation: restore ke environment terpisah, verifikasi integritas data, definisikan RTO/RPO, tanda tangan hasil uji. Target: sebelum go-live |
+| Critical | Belum ada bukti load test / stress test / soak test                      | Kapasitas nyata tidak diketahui; risiko outage saat lonjakan transaksi bersamaan                               | Ada timeout/pool/outbox, tetapi tidak ada artefak pengujian performa yang terlihat.                                                       | QA Lead + Backend Lead + SRE/Platform  | Jalankan baseline load test, spike test, concurrency test, dan soak test; tetapkan p95/p99 latency serta batas throughput aman. Target: sebelum go-live  |
+| Critical | Healthcheck produksi belum komprehensif untuk semua service              | Container bisa hidup tetapi aplikasi tidak siap melayani; orchestration tidak bisa mendeteksi partial failure  | Di compose produksi healthcheck terlihat pada DB, namun belum tampak healthcheck/readiness lengkap untuk API, web, dan service integrasi. | Backend Lead + DevOps Lead             | Tambahkan /health, /ready, dependency checks, dan wiring restart/alert untuk semua service. Target: sebelum go-live                                      |
+| High     | Port database dipublish ke host pada konfigurasi produksi                | Memperbesar attack surface dan risiko brute force / misconfiguration exposure                                  | docker-compose.prod.yml mem-publish DB ke host.                                                                                           | DevOps Lead + Security Engineer        | Hapus port exposure publik DB; batasi akses via private network, bastion, atau VPN saja. Target: 1–3 hari                                                |
+| High     | Belum ada bukti centralized logging dan correlation ID                   | Sulit investigasi insiden, audit teknis, dan root-cause analysis                                               | README menyebut audit trail/metrics, tetapi bukti logging terpusat dan tracing belum terlihat.                                            | Platform/SRE Lead + Backend Lead       | Terapkan structured logs JSON, request ID/correlation ID, log aggregation, retention, dan dashboard error. Target: 1 minggu                              |
+| High     | Belum ada bukti release automation, approval gate, dan rollback pipeline | Risiko deploy manual, human error, rollback lambat saat insiden                                                | Workflow CI ada, tetapi release/deploy automation tidak tampak terbukti.                                                                  | DevOps Lead + Engineering Manager      | Buat pipeline release dengan approval, migration gate, smoke test, rollback plan, dan checklist pascadeploy. Target: 1 minggu                            |
+| High     | Belum ada security scanning terintegrasi di CI/CD                        | Vulnerability dependency, secret leakage, atau issue statis bisa lolos ke produksi                             | CI yang terlihat menjalankan install, structure check, typecheck, test, build; belum tampak SAST/dependency/container scan.               | Security Engineer + DevOps Lead        | Tambahkan dependency audit, SAST, secret scanning, image scanning, dan kebijakan block untuk severity tinggi. Target: 1 minggu                           |
+| High     | Pengujian E2E lintas service belum terbukti                              | Risiko alur bisnis utama lolos di unit test tetapi gagal saat integrasi nyata                                  | package.json dan CI menunjukkan testing baseline, tetapi bukti E2E lintas API-web-provider tidak tampak jelas.                            | QA Lead + Tech Lead                    | Tambahkan E2E untuk alur inti SOP: intake, penetapan, jadwal, notifikasi, provisioning room, dan audit trail. Target: 1–2 minggu                         |
+| High     | Belum ada bukti incident runbook operasional                             | Response insiden tidak konsisten, MTTR tinggi                                                                  | README dan SOP ada, tetapi runbook insiden teknis/operasional belum tampak lengkap.                                                       | Engineering Manager + Ops Lead         | Susun runbook untuk DB down, provider down, backlog outbox, auth failure, disk full, dan restore event. Target: 1 minggu                                 |
+| Medium   | Template konfigurasi masih permisif untuk development defaults           | Risiko salah konfigurasi environment saat deploy                                                               | .env.example memuat AUTH_MODE=DEV, PERSISTENCE_MODE=MEMORY, SWAGGER_ENABLED=true sebagai default development.                             | Backend Lead + DevOps Lead             | Tambahkan guard startup untuk production: fail-fast bila mode DEV, MEMORY persistence, atau secret kosong. Target: 3–5 hari                              |
+| Medium   | Belum ada bukti secret manager yang matang                               | Secret bisa dikelola manual dan rawan paparan                                                                  | Variabel _FILE ada, namun belum ada bukti integrasi penuh dengan secret manager/Vault/KMS.                                                | Security Engineer + DevOps Lead        | Migrasikan secret sensitif ke Docker secrets / Vault / cloud secret manager, termasuk rotasi terjadwal. Target: 1–2 minggu                               |
+| Medium   | Belum ada resource limit/reservation yang jelas                          | Risiko noisy neighbor, OOM, dan degradasi service saat host tertekan                                           | Compose produksi tidak menunjukkan governance resource yang kuat untuk semua service.                                                     | DevOps Lead + Platform Engineer        | Tetapkan CPU/memory limits, uji pressure memory, dan siapkan alert threshold resource. Target: 1 minggu                                                  |
+| Medium   | Belum ada bukti pengujian skenario dependency failure/chaos              | Retry storm, backlog menumpuk, integrasi macet tanpa sinyal jelas                                              | Ada timeout/circuit breaker/outbox, tetapi belum tampak chaos/failure injection test.                                                     | QA Lead + Backend Lead                 | Simulasikan email provider down, video provider timeout, DB slow query, dan network partition. Target: 1–2 minggu                                        |
+| Medium   | Observability performa belum dibuktikan end-to-end                       | Sulit memantau bottleneck nyata di lapangan                                                                    | README menyebut Prometheus metrics, tetapi dashboard, alert, SLO, dan runbook belum terlihat.                                             | SRE/Platform Lead                      | Definisikan SLI/SLO, buat dashboard latency/error/backlog, dan alert actionable. Target: 1 minggu                                                        |
+| Medium   | Perubahan inti masih dekat dengan klaim rilis produksi                   | Menandakan baseline mungkin belum cukup stabil                                                                 | Aktivitas repo menunjukkan perbaikan auth DEV, hydration React, dan seeding dekat dengan versi 1.0.0.                                     | Engineering Manager + Release Manager  | Terapkan stabilization window, code freeze, dan release candidate sign-off berbasis checklist. Target: sebelum go-live                                   |
+| Low      | Dokumentasi teknis operasional belum lengkap                             | Onboarding lambat, knowledge silo                                                                              | README kuat secara produk/arsitektur, tetapi dokumentasi sizing, alerting, dan ops harian belum lengkap.                                  | Tech Lead + Technical Writer/PM        | Tambahkan deployment guide detail, topology diagram, config matrix, dan operational FAQ. Target: 2–3 minggu                                              |
+| Low      | Traceability SOP ke test case dan modul belum eksplisit                  | Sulit audit formal kepatuhan                                                                                   | sop.md tersedia, namun pemetaan SOP → modul → test belum tampak eksplisit.                                                                | Business Analyst + QA Lead + Tech Lead | Buat matriks traceability resmi dan lampirkan bukti test/UAT per butir SOP. Target: 2 minggu                                                             |
+| Low      | UX readiness belum dibuktikan oleh UAT formal                            | Risiko friksi penggunaan lintas peran pengguna                                                                 | Fitur UX disebutkan, tetapi bukti UAT formal lintas instansi tidak terlihat.                                                              | Product Owner + QA Lead                | Lakukan UAT berbasis role dan kumpulkan defect prioritas sebelum produksi. Target: 1–2 minggu                                                            |

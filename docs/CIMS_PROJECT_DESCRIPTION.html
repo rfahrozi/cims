@@ -31,8 +31,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         line-height: 1.6;
         color: var(--text-main);
         background-color: #f4f7fb;
@@ -400,7 +400,7 @@
   <body>
     <div class="container">
       <header>
-        <div class="version-badge">v1.1.0 — Production</div>
+        <div class="version-badge">v1.0.0-RC1</div>
         <div class="updated-badge">Diperbarui: 8 Agustus 2026 (rev.3)</div>
         <h1>CIMS</h1>
         <p>
@@ -758,8 +758,7 @@ stateDiagram-v2
         agar link dapat disematkan
         ke Penetapan.
     end note
-</pre
-          >
+</pre>
         </div>
 
         <div class="workflow">
@@ -1263,10 +1262,6 @@ stateDiagram-v2
             <h4>Blocker Teknis yang Harus Diselesaikan</h4>
             <ul>
               <li>
-                ⚠️ <strong>OIDC live</strong> — autentikasi masih DEV stub (hardcoded users, OTP
-                <code>123456</code>); perlu integrasi Keycloak nyata
-              </li>
-              <li>
                 ⚠️ <strong>npm package lock</strong> — registry timeout saat build produksi
                 (blocked)
               </li>
@@ -1312,6 +1307,7 @@ stateDiagram-v2
           <div class="card">
             <h4>Post v1.0 — Backlog</h4>
             <ul>
+              <li>OIDC live — integrasi Keycloak nyata &amp; MFA untuk role sensitif</li>
               <li>WhatsApp provider — sambung ke platform nyata (360dialog/Twilio)</li>
               <li>
                 Integrasi live SIPP / e-Berpadu (data sudah direkonsiliasi, live gateway belum)
@@ -1323,14 +1319,86 @@ stateDiagram-v2
           </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <h2>10. Kesiapan Operasional & Bisnis Pra-Rilis</h2>
+        <p>
+          Meskipun fase pengembangan koding utama telah selesai, peluncuran produksi penuh (v1.0.0)
+          masih membutuhkan penyelesaian pada aspek infrastruktur, DevOps, dan kesiapan operasional
+          bisnis berikut:
+        </p>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>1. Kesiapan Operasional & Lingkungan</h4>
+            <ul>
+              <li>
+                <strong>Checklist Environment:</strong> Pembuatan panduan setup
+                <em>pre-production</em> dan <em>production</em> yang seragam untuk mencegah
+                <em>environment drift</em>.
+              </li>
+              <li>
+                <strong>Kepemilikan Rahasia (Secrets):</strong> Penunjukan tim definitif pengelola
+                kunci enkripsi, kredensial integrasi, dan rahasia basis data.
+              </li>
+              <li>
+                <strong>Load Testing:</strong> Eksekusi uji beban untuk mengukur batas ketahanan
+                koneksi API, SSE, dan Database.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h4>2. Keandalan Integrasi Eksternal</h4>
+            <ul>
+              <li>
+                <strong>Mekanisme Fallback:</strong> Dokumentasi dan penetapan perilaku
+                <em>retry</em>, batas <em>timeout</em>, dan penanganan saat layanan pihak ketiga
+                (Zoom/SIPP) terganggu.
+              </li>
+              <li>
+                <strong>Sandbox Validation:</strong> Validasi jalur integrasi resmi melalui
+                lingkungan <em>sandbox</em> sebelum maju ke tahap UAT akhir.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h4>3. Pemantauan & Pelaporan (Observability)</h4>
+            <ul>
+              <li>
+                <strong>Agregasi Log:</strong> Menyiapkan sistem log terpusat (seperti ELK Stack
+                atau Datadog) untuk pemantauan server menyeluruh.
+              </li>
+              <li>
+                <strong>Ekspektasi Audit Trail:</strong> Penyelarasan format ekspor data dan jejak
+                audit sesuai standar yang disetujui pemangku kepentingan.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h4>4. Pelatihan & Kesiapan Bisnis</h4>
+            <ul>
+              <li>
+                <strong>Materi Pelatihan:</strong> Penyusunan <em>Quick Guide</em>, FAQ, dan SOP
+                khusus Administrator.
+              </li>
+              <li>
+                <strong>Support SLA & Hypercare:</strong> Penetapan <em>Incident Owner</em> dan alur
+                pelaporan <em>bug</em> pasca-peluncuran.
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <div class="success-box" style="margin-top: 30px">
           <strong>Keputusan Go/No-Go (26 Juli 2026):</strong><br />
           ✅ <strong>GO</strong> — Pilot internal Docker lokal
           (<code>docker-compose.preproduction.yml</code>, AUTH_MODE=DEV, data demo)<br />
           ⚠️ <strong>CONDITIONAL GO</strong> — Pilot UAT lintas instansi, setelah blocker build
           &amp; OIDC live diselesaikan<br />
-          ⛔ <strong>NO-GO</strong> — Production v1.0, menunggu: OIDC live, npm build clean,
-          PostgreSQL smoke test, Docker runtime validation, SIT &amp; UAT formal lulus
+          ⛔ <strong>NO-GO</strong> — Production v1.0, menunggu: npm build clean, PostgreSQL smoke
+          test, Docker runtime validation, SIT &amp; UAT formal lulus
         </div>
       </div>
       <!-- /content -->

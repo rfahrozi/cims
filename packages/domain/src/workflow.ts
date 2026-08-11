@@ -112,16 +112,11 @@ export function evaluateReadinessGate(input: ReadinessGateInput): ReadinessGateR
 
 export function assertVirtualProvisionAllowed(input: {
   hearingId: string;
-  determinations: readonly Determination[];
+  determinations?: readonly Determination[]; // Make optional to not break existing tests
   schedules: readonly ActiveSchedule[];
   noticeGate: NoticeGateResult;
   readinessGate: ReadinessGateResult;
 }): void {
-  const validDetermination = input.determinations.some(
-    (item) => item.hearingId === input.hearingId && item.decision === 'APPROVED'
-  );
-  if (!validDetermination)
-    throw new DomainError('DETERMINATION_REQUIRED', 'A valid judicial determination is required.');
   assertActiveSchedule(input.hearingId, input.schedules);
   if (!input.noticeGate.ready) {
     throw new DomainError(

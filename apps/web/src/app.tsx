@@ -28,12 +28,9 @@ import { PublicSchedulePage } from '@/pages/public-schedule';
 
 import { AppLayout } from '@/components/app-layout';
 import { HearingProvider } from '@/lib/hearing-context';
-import { useAppNotifications } from '@/lib/use-app-notifications';
 import { AuthProvider } from '@/lib/auth-context';
 
 function AppContent() {
-  // M-08/CU-04: Mengaktifkan kapabilitas Realtime SSE
-
   return (
     <Routes>
       {/* ── RUTE PUBLIK (Tanpa Sidebar) ── */}

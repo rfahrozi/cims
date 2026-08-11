@@ -474,8 +474,7 @@ export class CoreWorkflowRepository {
   async getProposal(id: string, user: CurrentUser, client?: PoolClient): Promise<ProposalRecord> {
     if (!this.mode.postgres) {
       const item = this.memory.proposals.find((proposal) => proposal.id === id) as
-        | ProposalRecord
-        | undefined;
+        ProposalRecord | undefined;
       if (!item) throw new NotFoundException('Proposal not found');
       return {
         ...item,

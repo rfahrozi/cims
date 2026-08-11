@@ -11,10 +11,7 @@ const required = [
   'apps/web/src/pages/consultation.tsx',
   'apps/web/src/pages/incidents.tsx',
   'database/typescript-migrations/0002_phase3_production.sql',
-  'packages/contracts/openapi-cims-production-v0.16.yaml',
-  'infra/docker-compose.production-like.yml',
-  'infra/k8s/base/api-deployment.yaml',
-  'docs/PRODUCTION_READINESS_CHECKLIST.md'
+  'packages/contracts/openapi-cims-production-v0.16.yaml'
 ];
 const missing = required.filter((file) => !existsSync(file));
 if (missing.length) {

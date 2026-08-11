@@ -33,7 +33,6 @@ export function useAppNotifications() {
     eventSource.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);
-        console.log('[Realtime SSE] Event diterima:', payload);
 
         // Invalidate cache berdasarkan jenis event
         if (payload.type === 'NOTICE_ACKNOWLEDGED') {
@@ -48,21 +47,14 @@ export function useAppNotifications() {
           queryClient.invalidateQueries({ queryKey: ['schedule-history', payload.hearingId] });
           queryClient.invalidateQueries({ queryKey: ['gate', payload.hearingId] });
         }
-      } catch (err) {
-        console.error('[Realtime SSE] Gagal memparsing event:', err);
-      }
+      } catch (err) {}
     };
 
-    eventSource.onerror = (error) => {
-      console.warn(
-        '[Realtime SSE] Koneksi terputus. EventSource akan mencoba rekoneksi otomatis.',
-        error
-      );
-    };
+    eventSource.onerror = (error) => {};
 
     return () => {
       // Pastikan untuk menutup koneksi jika komponen dibongkar (unmount)
       eventSource.close();
     };
-  }, [queryClient]);
+  }, [queryClient, persona]);
 }

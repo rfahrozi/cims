@@ -87,7 +87,6 @@ export function PublicSchedulePage() {
 
         setHearings(formattedHearings);
       } catch (error) {
-        console.error('Error fetching public hearings:', error);
         setHearings([]);
       } finally {
         setLoading(false);

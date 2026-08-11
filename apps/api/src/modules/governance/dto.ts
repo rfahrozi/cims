@@ -2,11 +2,7 @@ import { IsDateString, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from 
 
 export class CreateLegalHoldDto {
   @IsIn(['LITIGATION', 'INVESTIGATION', 'AUDIT', 'COURT_ORDER', 'OTHER']) hold_type!:
-    | 'LITIGATION'
-    | 'INVESTIGATION'
-    | 'AUDIT'
-    | 'COURT_ORDER'
-    | 'OTHER';
+    'LITIGATION' | 'INVESTIGATION' | 'AUDIT' | 'COURT_ORDER' | 'OTHER';
   @IsString() @MinLength(5) reason!: string;
   @IsString() @IsNotEmpty() official_reference!: string;
 }

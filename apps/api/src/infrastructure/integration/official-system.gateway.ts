@@ -18,7 +18,7 @@ export class OfficialSystemGateway {
         this.mode === 'MOCK' ||
         Boolean(
           this.config.get<string>('OFFICIAL_SYSTEM_GATEWAY_URL') &&
-            secretValue(this.config, 'OFFICIAL_SYSTEM_GATEWAY_API_KEY')
+          secretValue(this.config, 'OFFICIAL_SYSTEM_GATEWAY_API_KEY')
         )
     };
   }

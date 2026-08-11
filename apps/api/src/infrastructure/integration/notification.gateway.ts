@@ -35,7 +35,7 @@ export class NotificationGateway {
         this.mode === 'MOCK' ||
         Boolean(
           this.config.get<string>('NOTIFICATION_GATEWAY_URL') &&
-            secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')
+          secretValue(this.config, 'NOTIFICATION_GATEWAY_API_KEY')
         )
     };
   }

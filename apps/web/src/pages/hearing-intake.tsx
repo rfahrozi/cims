@@ -1,9 +1,13 @@
 import { useAuth } from '@/lib/auth-context';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Database, FilePenLine, Plus, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
-import { api, getPersona } from '@/lib/api';
-import { useActiveHearing } from '@/lib/hearing-context';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+import { api } from '@/lib/api';
+import { useActiveHearingSafe } from '@/lib/hearing-context';
 import { errorMessage } from '@/lib/error-messages';
 import { PageHeader } from '@/components/page-header';
 import { AlertBanner } from '@/components/alert-banner';
@@ -21,6 +25,14 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
 
 interface Organization {
   id: string;
@@ -32,15 +44,6 @@ interface ReferenceData {
   caseClassifications: string[];
   custodyStatuses: string[];
   hearingTypes: string[];
-}
-interface DefendantForm {
-  display_name: string;
-  alias: string;
-  protected_identity: boolean;
-  custody_status: 'DETAINED' | 'NOT_DETAINED' | 'UNKNOWN';
-  custody_type: string;
-  detention_type: string;
-  detention_organization_id?: string;
 }
 interface IntakeRecord {
   id: string;
@@ -61,27 +64,73 @@ interface ImportStatus {
   items: Array<{ id: string; code: string; name: string; enabled: boolean; status: string }>;
 }
 
-const initialDefendant = (): DefendantForm => ({
-  display_name: '',
-  alias: '',
-  protected_identity: false,
-  custody_status: 'NOT_DETAINED',
-  custody_type: 'TIDAK_DITAHAN',
-  detention_type: '',
-  detention_organization_id: ''
+const judgeSchema = z.object({
+  user_id: z.string().min(1, 'Silakan pilih Hakim dari daftar'),
+  name: z.string(),
+  role: z.enum(['HAKIM_KETUA', 'HAKIM_ANGGOTA'])
 });
 
-interface JudgeForm {
-  user_id: string;
-  name: string;
-  role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA';
-}
-
-const initialJudge = (role: 'HAKIM_KETUA' | 'HAKIM_ANGGOTA' = 'HAKIM_ANGGOTA'): JudgeForm => ({
-  user_id: '',
-  name: '',
-  role
+const defendantSchema = z.object({
+  display_name: z.string().min(2, 'Nama terdakwa wajib diisi (minimal 2 karakter)'),
+  alias: z.string().optional(),
+  protected_identity: z.boolean(),
+  custody_type: z.enum(['DITAHAN', 'TIDAK_DITAHAN', 'DITANGGUHKAN', 'DIBANTARKAN']),
+  custody_status: z.enum(['DETAINED', 'NOT_DETAINED', 'UNKNOWN']).optional(),
+  detention_type: z.string().optional(),
+  detention_organization_id: z.string().optional()
 });
+
+const formSchema = z.object({
+  case_number: z.string().min(3, 'Nomor perkara wajib diisi'),
+  official_case_reference: z.string().optional(),
+  originating_court_id: z.string().optional(),
+  is_eberpadu: z.boolean(),
+  case_classification: z.string().min(1, 'Klasifikasi wajib dipilih'),
+  case_type_code: z.string().optional(),
+  case_title: z.string().min(5, 'Judul perkara wajib diisi'),
+  hearing_type: z.string().min(1, 'Agenda persidangan wajib dipilih'),
+  hearing_sequence: z.number().default(1),
+  court_organization_id: z.string().min(1, 'Pengadilan wajib dipilih'),
+  prosecution_organization_id: z.string().min(1, 'Kejaksaan wajib dipilih'),
+  notes: z.string().optional(),
+  defendants: z.array(defendantSchema).min(1, 'Minimal 1 terdakwa wajib ditambahkan'),
+  judges: z.array(judgeSchema).min(1, 'Minimal 1 Hakim Ketua wajib ditambahkan')
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const initialValues: FormValues = {
+  case_number: '',
+  official_case_reference: '',
+  originating_court_id: 'pn-batam',
+  is_eberpadu: false,
+  case_classification: 'SPECIAL_CRIMINAL',
+  case_type_code: 'PID.SUS',
+  case_title: '',
+  hearing_type: 'PEMERIKSAAN_SAKSI',
+  hearing_sequence: 1,
+  court_organization_id: 'pt-kepri',
+  prosecution_organization_id: 'kejati-kepri',
+  notes: '',
+  defendants: [
+    {
+      display_name: '',
+      alias: '',
+      protected_identity: false,
+      custody_status: 'NOT_DETAINED',
+      custody_type: 'TIDAK_DITAHAN',
+      detention_type: '',
+      detention_organization_id: ''
+    }
+  ],
+  judges: [
+    {
+      user_id: '',
+      name: '',
+      role: 'HAKIM_KETUA'
+    }
+  ]
+};
 
 const DUMMY_JUDGES = [
   { id: '196506301992121001', name: 'DAHLIA PANJAITAN, S.H.' },
@@ -91,34 +140,10 @@ const DUMMY_JUDGES = [
   { id: '197503122001121003', name: 'ESTIONO, S.H., M.H.' }
 ];
 
-const CUSTODY_LABEL: Record<string, string> = {
-  DETAINED: 'Ditahan',
-  NOT_DETAINED: 'Tidak Ditahan',
-  UNKNOWN: 'Tidak Diketahui',
-  MIXED: 'Campuran'
-};
-
 const CLASS_LABEL: Record<string, string> = {
   GENERAL_CRIMINAL: 'Pidana Umum',
   SPECIAL_CRIMINAL: 'Pidana Khusus'
 };
-
-/** Tombol impor SIPP dengan local loading state — terpisah agar tidak re-render form utama */
-function ImportSimulationButton({ onSuccess }: { onSuccess: () => void }) {
-  const [loading, setLoading] = useState(false);
-  async function handleImport() {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 800)); // simulasi delay network
-    setLoading(false);
-    onSuccess();
-  }
-  return (
-    <Button onClick={handleImport} disabled={loading} className="w-full">
-      <Database className="mr-2 h-4 w-4" />
-      {loading ? 'Mengambil data dari SIPP…' : 'Import ke CIMS'}
-    </Button>
-  );
-}
 
 const INTAKE_STATUS_LABEL: Record<string, string> = {
   DRAFT: 'Draf',
@@ -130,32 +155,53 @@ const INTAKE_STATUS_LABEL: Record<string, string> = {
   RETURNED: 'Dikembalikan'
 };
 
+function ImportSimulationButton({ onSuccess }: { onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  async function handleImport() {
+    setLoading(true);
+    await new Promise((r) => setTimeout(r, 800)); // simulasi delay network
+    setLoading(false);
+    onSuccess();
+  }
+  return (
+    <Button onClick={handleImport} disabled={loading} className="w-full" type="button">
+      <Database className="mr-2 h-4 w-4" />
+      {loading ? 'Mengambil data dari SIPP…' : 'Import ke CIMS'}
+    </Button>
+  );
+}
+
 export function HearingIntakePage() {
   const queryClient = useQueryClient();
-  const { setHearingId } = useActiveHearing();
+  const activeHearing = useActiveHearingSafe();
+  const setHearingId = activeHearing?.setHearingId ?? (() => {});
+
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    case_number: '',
-    official_case_reference: '',
-    originating_court_id: 'pn-batam',
-    is_eberpadu: false,
-    case_classification: 'SPECIAL_CRIMINAL',
-    case_type_code: 'PID.SUS',
-    case_title: '',
-    hearing_type: 'PEMERIKSAAN_SAKSI',
-    hearing_sequence: 1,
-    court_organization_id: 'pt-kepri',
-    prosecution_organization_id: 'kejati-kepri',
-    corrections_organization_id: 'rutan-batam',
-    defendant_custody_status: 'NOT_DETAINED',
-    custody_type: 'TIDAK_DITAHAN',
-    detention_type: '',
-    notes: '',
-    defendants: [initialDefendant()],
-    judges: [initialJudge('HAKIM_KETUA')]
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema) as any,
+    defaultValues: initialValues
+  });
+
+  const {
+    fields: defendantFields,
+    append: appendDefendant,
+    remove: removeDefendant
+  } = useFieldArray({
+    control: form.control,
+    name: 'defendants'
+  });
+
+  const {
+    fields: judgeFields,
+    append: appendJudge,
+    remove: removeJudge
+  } = useFieldArray({
+    control: form.control,
+    name: 'judges'
   });
 
   const refs = useQuery({
@@ -166,10 +212,7 @@ export function HearingIntakePage() {
     queryKey: ['hearing-intake-list'],
     queryFn: () => api<{ items: IntakeRecord[] }>('/hearing-intake/manual')
   });
-  const importStatus = useQuery({
-    queryKey: ['hearing-import-sources'],
-    queryFn: () => api<ImportStatus>('/hearing-import/sources')
-  });
+
   const courtOptions = (refs.data?.organizations || []).filter((item) => item.type === 'COURT');
   const prosecutionOptions = (refs.data?.organizations || []).filter(
     (item) => item.type === 'PROSECUTION'
@@ -177,73 +220,50 @@ export function HearingIntakePage() {
   const correctionsOptions = (refs.data?.organizations || []).filter(
     (item) => item.type === 'CORRECTIONS'
   );
+
   const { user } = useAuth();
   const currentPersona = user?.role || 'UNKNOWN';
   const canReview = currentPersona === 'court-clerk' || currentPersona === 'system-admin';
 
-  const payload = useMemo(() => {
-    // Hitung status penahanan keseluruhan dari array defendants
+  async function onSubmit(data: FormValues) {
+    setLoadingDraft(true);
+    setSuccessMsg('');
+    setErrorMsg('');
+
     let overallCustody: 'DETAINED' | 'NOT_DETAINED' | 'MIXED' | 'UNKNOWN' = 'NOT_DETAINED';
-    const detainedCount = form.defendants.filter((d) => d.custody_type === 'DITAHAN').length;
+    const detainedCount = data.defendants.filter((d: any) => d.custody_type === 'DITAHAN').length;
     if (detainedCount > 0) {
-      overallCustody = detainedCount === form.defendants.length ? 'DETAINED' : 'MIXED';
+      overallCustody = detainedCount === data.defendants.length ? 'DETAINED' : 'MIXED';
     }
 
-    // Ambil Rutan/Lapas pertama jika ada yang ditahan
     const overallCorrectionsOrg =
-      form.defendants.find((d) => d.custody_type === 'DITAHAN' && d.detention_type === 'RUTAN')
+      data.defendants.find((d: any) => d.custody_type === 'DITAHAN' && d.detention_type === 'RUTAN')
         ?.detention_organization_id || undefined;
 
-    return {
-      ...form,
-      official_case_reference: form.official_case_reference || undefined,
+    const payload = {
+      ...data,
+      official_case_reference: data.official_case_reference || undefined,
       defendant_custody_status: overallCustody,
       corrections_organization_id: overallCorrectionsOrg,
-      defendants: form.defendants.map((item) => ({
+      defendants: data.defendants.map((item: any) => ({
         ...item,
         alias: item.alias || undefined,
         detention_organization_id:
           item.custody_type === 'DITAHAN' && item.detention_type === 'RUTAN'
             ? item.detention_organization_id
             : undefined
-      })),
-      judges: form.judges
-        .filter((j) => j.user_id.trim())
-        .map((j) => ({ user_id: j.user_id.trim(), role: j.role }))
+      }))
     };
-  }, [form]);
 
-  function updateDefendant(index: number, patch: Partial<DefendantForm>) {
-    setForm((current) => ({
-      ...current,
-      defendants: current.defendants.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item
-      )
-    }));
-  }
-
-  function updateJudge(index: number, patch: Partial<JudgeForm>) {
-    setForm((current) => ({
-      ...current,
-      judges: current.judges.map((item, itemIndex) =>
-        itemIndex === index ? { ...item, ...patch } : item
-      )
-    }));
-  }
-
-  async function createDraft() {
-    setLoadingDraft(true);
-    setSuccessMsg('');
-    setErrorMsg('');
     try {
-      const data = await api<IntakeRecord>('/hearing-intake/manual', {
+      const responseData = await api<IntakeRecord>('/hearing-intake/manual', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
       setSuccessMsg(
-        `Draf perkara "${data.caseNumber}" berhasil disimpan. Pilih perkara di bawah untuk melanjutkan.`
+        `Draf perkara "${responseData.caseNumber}" berhasil disimpan. Pilih perkara di bawah untuk melanjutkan.`
       );
-      setHearingId(data.id);
+      setHearingId(responseData.id);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['hearing-intake-list'] }),
         queryClient.invalidateQueries({ queryKey: ['hearings'] })
@@ -330,511 +350,618 @@ export function HearingIntakePage() {
                   serta diaktifkan.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <section className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="case_number">
-                        Nomor Perkara Tingkat Banding{' '}
-                        <span className="text-red-500" aria-hidden="true">
-                          *
-                        </span>
-                      </Label>
-                      <label className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded cursor-pointer border border-rose-100">
-                        <input
-                          type="checkbox"
-                          checked={form.is_eberpadu}
-                          onChange={(e) => setForm({ ...form, is_eberpadu: e.target.checked })}
-                          className="accent-rose-600"
-                        />
-                        eBerpadu
-                      </label>
-                    </div>
-                    <Input
-                      id="case_number"
-                      value={form.case_number}
-                      onChange={(e) => setForm({ ...form, case_number: e.target.value })}
-                      placeholder="Misal: 384/PID.SUS/2026/PT TPG"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="originating_court_id">Nama Pengadilan TK I</Label>
-                    <Select
-                      value={form.originating_court_id}
-                      onValueChange={(value) => setForm({ ...form, originating_court_id: value })}
-                    >
-                      <SelectTrigger id="originating_court_id">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {courtOptions.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="official_case_reference">
-                      Nomor Perkara Tingkat Pertama (TK I)
-                    </Label>
-                    <Input
-                      id="official_case_reference"
-                      value={form.official_case_reference}
-                      onChange={(e) =>
-                        setForm({ ...form, official_case_reference: e.target.value })
-                      }
-                      placeholder="Misal: 409/Pid.Sus/2026/PN Btm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="case_classification">
-                      Klasifikasi{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Select
-                      value={form.case_classification}
-                      onValueChange={(value) => setForm({ ...form, case_classification: value })}
-                    >
-                      <SelectTrigger id="case_classification">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(
-                          refs.data?.caseClassifications ?? ['GENERAL_CRIMINAL', 'SPECIAL_CRIMINAL']
-                        ).map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {CLASS_LABEL[item] ?? item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="case_type_code">Kode jenis perkara</Label>
-                    <Input
-                      id="case_type_code"
-                      value={form.case_type_code}
-                      onChange={(e) => setForm({ ...form, case_type_code: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="case_title">
-                      Judul singkat perkara{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Input
-                      id="case_title"
-                      value={form.case_title}
-                      onChange={(e) => setForm({ ...form, case_title: e.target.value })}
-                      placeholder="Penuntut Umum melawan ..."
-                    />
-                  </div>
-                </section>
-
-                <section className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="hearing_type">
-                      Agenda persidangan{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Select
-                      value={form.hearing_type}
-                      onValueChange={(value) => setForm({ ...form, hearing_type: value })}
-                    >
-                      <SelectTrigger id="hearing_type">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(refs.data?.hearingTypes ?? []).map((item) => (
-                          <SelectItem key={item} value={item}>
-                            {item}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="court_organization_id">
-                      Pengadilan{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Select
-                      value={form.court_organization_id}
-                      onValueChange={(value) => setForm({ ...form, court_organization_id: value })}
-                    >
-                      <SelectTrigger id="court_organization_id">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {courtOptions.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prosecution_organization_id">
-                      Kejaksaan{' '}
-                      <span className="text-red-500" aria-hidden="true">
-                        *
-                      </span>
-                    </Label>
-                    <Select
-                      value={form.prosecution_organization_id}
-                      onValueChange={(value) =>
-                        setForm({ ...form, prosecution_organization_id: value })
-                      }
-                    >
-                      <SelectTrigger id="prosecution_organization_id">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {prosecutionOptions.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </section>
-
-                {/* ── Susunan Majelis Hakim ──────────────────────────────── */}
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">Susunan Majelis Hakim</h3>
-                      <p className="text-xs text-slate-500">
-                        Hakim Ketua (urutan pertama) yang berwenang melakukan validasi data
-                        persidangan. Minimal 1 Hakim Ketua. Anggota bersifat opsional.
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setForm({
-                          ...form,
-                          judges: [...form.judges, initialJudge('HAKIM_ANGGOTA')]
-                        })
-                      }
-                    >
-                      <Plus className="mr-1 h-4 w-4" />
-                      Tambah Anggota
-                    </Button>
-                  </div>
-                  {form.judges.map((judge, index) => (
-                    <div
-                      key={index}
-                      className={`grid gap-3 rounded-xl border p-4 md:grid-cols-3 ${
-                        judge.role === 'HAKIM_KETUA' ? 'border-blue-300 bg-blue-50' : 'bg-slate-50'
-                      }`}
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor={`judge_name_${index}`}>
-                          {judge.role === 'HAKIM_KETUA' ? (
-                            <span className="font-semibold text-blue-800">
-                              Hakim Ketua Majelis{' '}
-                              <span className="text-red-500" aria-hidden="true">
-                                *
-                              </span>
-                            </span>
-                          ) : (
-                            <span>Hakim Anggota {index}</span>
-                          )}
-                        </Label>
-                        <Select
-                          value={judge.user_id || undefined}
-                          onValueChange={(val) => {
-                            const selected = DUMMY_JUDGES.find((j) => j.id === val);
-                            if (selected) {
-                              updateJudge(index, { user_id: selected.id, name: selected.name });
-                            }
-                          }}
-                        >
-                          <SelectTrigger id={`judge_name_${index}`}>
-                            <SelectValue placeholder="Pilih Hakim..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {DUMMY_JUDGES.map((j) => (
-                              <SelectItem key={j.id} value={j.id}>
-                                {j.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`judge_userid_${index}`}>ID / NIP Hakim</Label>
-                        <Input
-                          id={`judge_userid_${index}`}
-                          value={judge.user_id}
-                          readOnly
-                          disabled
-                          className="bg-slate-100 cursor-not-allowed"
-                          placeholder="Pilih hakim terlebih dahulu"
-                        />
-                      </div>
-                      <div className="flex items-end justify-between gap-3">
-                        <div className="space-y-2 flex-1">
-                          <Label>Peran dalam Majelis</Label>
-                          <div
-                            className={`rounded-md border px-3 py-2 text-sm font-medium ${
-                              judge.role === 'HAKIM_KETUA'
-                                ? 'border-blue-300 bg-blue-100 text-blue-800'
-                                : 'border-slate-300 bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            {judge.role === 'HAKIM_KETUA' ? '⚖️ Ketua Majelis' : '👤 Hakim Anggota'}
-                          </div>
-                        </div>
-                        {judge.role !== 'HAKIM_KETUA' && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            aria-label={`Hapus hakim anggota ${index}`}
-                            onClick={() =>
-                              setForm({
-                                ...form,
-                                judges: form.judges.filter((_, i) => i !== index)
-                              })
-                            }
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <section className="grid gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="case_number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="flex items-center justify-between">
+                              <FormLabel>
+                                Nomor Perkara Tingkat Banding{' '}
+                                <span className="text-red-500">*</span>
+                              </FormLabel>
+                              <FormField
+                                control={form.control}
+                                name="is_eberpadu"
+                                render={({ field: eberpaduField }: { field: any }) => (
+                                  <label className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded cursor-pointer border border-rose-100">
+                                    <input
+                                      type="checkbox"
+                                      checked={eberpaduField.value}
+                                      onChange={eberpaduField.onChange}
+                                      className="accent-rose-600"
+                                    />
+                                    eBerpadu
+                                  </label>
+                                )}
+                              />
+                            </div>
+                            <FormControl>
+                              <Input placeholder="Misal: 384/PID.SUS/2026/PT TPG" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
                         )}
-                      </div>
-                    </div>
-                  ))}
-                </section>
+                      />
 
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">Data terdakwa</h3>
-                      <p className="text-xs text-slate-500">
-                        Nama disimpan terenkripsi pada PostgreSQL production mode.
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        setForm({ ...form, defendants: [...form.defendants, initialDefendant()] })
-                      }
-                    >
-                      <Plus className="mr-1 h-4 w-4" />
-                      Tambah
-                    </Button>
-                  </div>
-                  {form.defendants.map((defendant, index) => (
-                    <div
-                      key={index}
-                      className="grid gap-3 rounded-xl border bg-slate-50 p-4 md:grid-cols-2"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor={`defendant_name_${index}`}>
-                          Nama terdakwa {index + 1}{' '}
-                          <span className="text-red-500" aria-hidden="true">
-                            *
-                          </span>
-                        </Label>
-                        <Input
-                          id={`defendant_name_${index}`}
-                          value={defendant.display_name}
-                          onChange={(e) => updateDefendant(index, { display_name: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`defendant_alias_${index}`}>Alias</Label>
-                        <Input
-                          id={`defendant_alias_${index}`}
-                          value={defendant.alias}
-                          onChange={(e) => updateDefendant(index, { alias: e.target.value })}
-                        />
-                      </div>
-                      <div className="space-y-4 md:col-span-2">
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor={`custody_type_${index}`}>
-                              Status Penahanan (Induk)
-                            </Label>
-                            <Select
-                              value={defendant.custody_type}
-                              onValueChange={(value) => {
-                                const newCustodyStatus =
-                                  value === 'DITAHAN' ? 'DETAINED' : 'NOT_DETAINED';
-                                updateDefendant(index, {
-                                  custody_type: value,
-                                  custody_status: newCustodyStatus as
-                                    | 'DETAINED'
-                                    | 'NOT_DETAINED'
-                                    | 'UNKNOWN',
-                                  ...(value !== 'DITAHAN'
-                                    ? { detention_type: '', detention_organization_id: '' }
-                                    : {})
-                                });
-                              }}
-                            >
-                              <SelectTrigger id={`custody_type_${index}`}>
-                                <SelectValue placeholder="Pilih Status" />
-                              </SelectTrigger>
+                      <FormField
+                        control={form.control}
+                        name="originating_court_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nama Pengadilan TK I</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih pengadilan..." />
+                                </SelectTrigger>
+                              </FormControl>
                               <SelectContent>
-                                <SelectItem value="DITAHAN">Ditahan</SelectItem>
-                                <SelectItem value="TIDAK_DITAHAN">Tidak Ditahan</SelectItem>
-                                <SelectItem value="DITANGGUHKAN">Ditangguhkan</SelectItem>
-                                <SelectItem value="DIBANTARKAN">Dibantarkan</SelectItem>
+                                {courtOptions.map((item) => (
+                                  <SelectItem key={item.id} value={item.id}>
+                                    {item.name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
-                          </div>
-
-                          {defendant.custody_type === 'DITAHAN' && (
-                            <div className="space-y-2">
-                              <Label htmlFor={`detention_type_${index}`}>Jenis Tahanan</Label>
-                              <Select
-                                value={defendant.detention_type}
-                                onValueChange={(value) =>
-                                  updateDefendant(index, {
-                                    detention_type: value,
-                                    ...(value !== 'RUTAN' ? { detention_organization_id: '' } : {})
-                                  })
-                                }
-                              >
-                                <SelectTrigger id={`detention_type_${index}`}>
-                                  <SelectValue placeholder="Pilih Jenis" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="RUTAN">Rutan</SelectItem>
-                                  <SelectItem value="RUMAH">Rumah</SelectItem>
-                                  <SelectItem value="KOTA">Kota</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                        </div>
-
-                        {defendant.custody_type === 'DITAHAN' &&
-                          defendant.detention_type === 'RUTAN' && (
-                            <div className="space-y-2">
-                              <Label htmlFor={`detention_org_${index}`}>Rutan atau Lapas</Label>
-                              <Select
-                                value={defendant.detention_organization_id}
-                                onValueChange={(value) =>
-                                  updateDefendant(index, { detention_organization_id: value })
-                                }
-                              >
-                                <SelectTrigger id={`detention_org_${index}`}>
-                                  <SelectValue placeholder="Pilih Rutan / Lapas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {correctionsOptions.map((item) => (
-                                    <SelectItem key={item.id} value={item.id}>
-                                      {item.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-                      </div>
-                      <div className="flex items-end justify-between gap-3 md:col-span-2">
-                        <label
-                          htmlFor={`defendant_protected_${index}`}
-                          className="flex items-center gap-2 pb-2 text-sm cursor-pointer"
-                        >
-                          <input
-                            id={`defendant_protected_${index}`}
-                            type="checkbox"
-                            checked={defendant.protected_identity}
-                            onChange={(e) =>
-                              updateDefendant(index, { protected_identity: e.target.checked })
-                            }
-                          />
-                          Identitas dilindungi
-                        </label>
-                        {form.defendants.length > 1 && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            aria-label={`Hapus terdakwa ${index + 1}`}
-                            onClick={() =>
-                              setForm({
-                                ...form,
-                                defendants: form.defendants.filter(
-                                  (_, itemIndex) => itemIndex !== index
-                                )
-                              })
-                            }
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <FormMessage />
+                          </FormItem>
                         )}
-                      </div>
-                    </div>
-                  ))}
-                </section>
+                      />
 
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Catatan internal</Label>
-                  <Textarea
-                    id="notes"
-                    value={form.notes}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  />
-                </div>
-                <p className="text-xs text-slate-400">
-                  Kolom bertanda <span className="text-red-500">*</span> wajib diisi.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button onClick={createDraft} disabled={loadingDraft}>
-                    <FilePenLine className="mr-2 h-4 w-4" />
-                    {loadingDraft ? 'Menyimpan…' : 'Simpan Draf'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setForm({
-                        case_number: '',
-                        official_case_reference: '',
-                        originating_court_id: 'pn-batam',
-                        is_eberpadu: false,
-                        case_classification: 'SPECIAL_CRIMINAL',
-                        case_type_code: 'PID.SUS',
-                        case_title: '',
-                        hearing_type: 'PEMERIKSAAN_SAKSI',
-                        hearing_sequence: 1,
-                        court_organization_id: 'pt-kepri',
-                        prosecution_organization_id: 'kejati-kepri',
-                        corrections_organization_id: 'rutan-batam',
-                        defendant_custody_status: 'NOT_DETAINED',
-                        custody_type: 'TIDAK_DITAHAN',
-                        detention_type: '',
-                        notes: '',
-                        defendants: [initialDefendant()],
-                        judges: [initialJudge('HAKIM_KETUA')]
-                      })
-                    }
-                  >
-                    <RotateCcw className="mr-2 h-4 w-4" />
-                    Atur Ulang
-                  </Button>
-                </div>
+                      <FormField
+                        control={form.control}
+                        name="official_case_reference"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nomor Perkara Tingkat Pertama (TK I)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Misal: 409/Pid.Sus/2026/PN Btm" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="case_classification"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Klasifikasi <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih klasifikasi..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {(
+                                  refs.data?.caseClassifications ?? [
+                                    'GENERAL_CRIMINAL',
+                                    'SPECIAL_CRIMINAL'
+                                  ]
+                                ).map((item) => (
+                                  <SelectItem key={item} value={item}>
+                                    {CLASS_LABEL[item] ?? item}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="case_type_code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Kode jenis perkara</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="case_title"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-2">
+                            <FormLabel>
+                              Judul singkat perkara <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="Penuntut Umum melawan ..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </section>
+
+                    <section className="grid gap-4 md:grid-cols-2">
+                      <FormField
+                        control={form.control}
+                        name="hearing_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Agenda persidangan <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih agenda..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {(refs.data?.hearingTypes ?? []).map((item) => (
+                                  <SelectItem key={item} value={item}>
+                                    {item}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="court_organization_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Pengadilan <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih Pengadilan..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {courtOptions.map((item) => (
+                                  <SelectItem key={item.id} value={item.id}>
+                                    {item.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="prosecution_organization_id"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Kejaksaan <span className="text-red-500">*</span>
+                            </FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value || undefined}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Pilih Kejaksaan..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {prosecutionOptions.map((item) => (
+                                  <SelectItem key={item.id} value={item.id}>
+                                    {item.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </section>
+
+                    {/* ── Susunan Majelis Hakim ──────────────────────────────── */}
+                    <section className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">Susunan Majelis Hakim</h3>
+                          <p className="text-xs text-slate-500">
+                            Hakim Ketua (urutan pertama) yang berwenang melakukan validasi data
+                            persidangan. Minimal 1 Hakim Ketua. Anggota bersifat opsional.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            appendJudge({ user_id: '', name: '', role: 'HAKIM_ANGGOTA' })
+                          }
+                        >
+                          <Plus className="mr-1 h-4 w-4" />
+                          Tambah Anggota
+                        </Button>
+                      </div>
+
+                      {form.formState.errors.judges?.root && (
+                        <p className="text-sm font-medium text-red-500">
+                          {form.formState.errors.judges.root.message}
+                        </p>
+                      )}
+
+                      {judgeFields.map((field, index) => {
+                        const currentRole = form.watch(`judges.${index}.role`);
+                        return (
+                          <div
+                            key={field.id}
+                            className={`grid gap-3 rounded-xl border p-4 md:grid-cols-3 ${
+                              currentRole === 'HAKIM_KETUA'
+                                ? 'border-blue-300 bg-blue-50'
+                                : 'bg-slate-50'
+                            }`}
+                          >
+                            <FormField
+                              control={form.control}
+                              name={`judges.${index}.user_id`}
+                              render={({ field: selectField }: { field: any }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    {currentRole === 'HAKIM_KETUA' ? (
+                                      <span className="font-semibold text-blue-800">
+                                        Hakim Ketua Majelis <span className="text-red-500">*</span>
+                                      </span>
+                                    ) : (
+                                      <span>Hakim Anggota {index}</span>
+                                    )}
+                                  </FormLabel>
+                                  <Select
+                                    value={selectField.value || undefined}
+                                    onValueChange={(val) => {
+                                      const selected = DUMMY_JUDGES.find((j) => j.id === val);
+                                      if (selected) {
+                                        selectField.onChange(val);
+                                        form.setValue(`judges.${index}.name`, selected.name);
+                                      }
+                                    }}
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Pilih Hakim..." />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      {DUMMY_JUDGES.map((j) => (
+                                        <SelectItem key={j.id} value={j.id}>
+                                          {j.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`judges.${index}.user_id`}
+                              render={({ field: inputField }: { field: any }) => (
+                                <FormItem>
+                                  <FormLabel>ID / NIP Hakim</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      readOnly
+                                      disabled
+                                      className="bg-slate-100 cursor-not-allowed"
+                                      placeholder="Pilih hakim terlebih dahulu"
+                                      value={inputField.value}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="flex items-end justify-between gap-3">
+                              <div className="space-y-2 flex-1">
+                                <Label>Peran dalam Majelis</Label>
+                                <div
+                                  className={`rounded-md border px-3 py-2 text-sm font-medium ${
+                                    currentRole === 'HAKIM_KETUA'
+                                      ? 'border-blue-300 bg-blue-100 text-blue-800'
+                                      : 'border-slate-300 bg-slate-100 text-slate-700'
+                                  }`}
+                                >
+                                  {currentRole === 'HAKIM_KETUA'
+                                    ? '⚖️ Ketua Majelis'
+                                    : '👤 Hakim Anggota'}
+                                </div>
+                              </div>
+                              {currentRole !== 'HAKIM_KETUA' && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => removeJudge(index)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </section>
+
+                    {/* ── Data Terdakwa ──────────────────────────────── */}
+                    <section className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">Data terdakwa</h3>
+                          <p className="text-xs text-slate-500">
+                            Nama disimpan terenkripsi pada PostgreSQL production mode.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            appendDefendant({
+                              display_name: '',
+                              alias: '',
+                              protected_identity: false,
+                              custody_type: 'TIDAK_DITAHAN',
+                              detention_type: '',
+                              detention_organization_id: ''
+                            })
+                          }
+                        >
+                          <Plus className="mr-1 h-4 w-4" />
+                          Tambah
+                        </Button>
+                      </div>
+
+                      {form.formState.errors.defendants?.root && (
+                        <p className="text-sm font-medium text-red-500">
+                          {form.formState.errors.defendants.root.message}
+                        </p>
+                      )}
+
+                      {defendantFields.map((field, index) => {
+                        const custodyType = form.watch(`defendants.${index}.custody_type`);
+                        const detentionType = form.watch(`defendants.${index}.detention_type`);
+
+                        return (
+                          <div
+                            key={field.id}
+                            className="grid gap-3 rounded-xl border bg-slate-50 p-4 md:grid-cols-2"
+                          >
+                            <FormField
+                              control={form.control}
+                              name={`defendants.${index}.display_name`}
+                              render={({ field: nameField }: { field: any }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Nama terdakwa {index + 1}{' '}
+                                    <span className="text-red-500">*</span>
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input {...nameField} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name={`defendants.${index}.alias`}
+                              render={({ field: aliasField }: { field: any }) => (
+                                <FormItem>
+                                  <FormLabel>Alias</FormLabel>
+                                  <FormControl>
+                                    <Input {...aliasField} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="space-y-4 md:col-span-2">
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <FormField
+                                  control={form.control}
+                                  name={`defendants.${index}.custody_type`}
+                                  render={({ field: custodyField }: { field: any }) => (
+                                    <FormItem>
+                                      <FormLabel>Status Penahanan (Induk)</FormLabel>
+                                      <Select
+                                        onValueChange={(val) => {
+                                          custodyField.onChange(val);
+                                          if (val !== 'DITAHAN') {
+                                            form.setValue(`defendants.${index}.detention_type`, '');
+                                            form.setValue(
+                                              `defendants.${index}.detention_organization_id`,
+                                              ''
+                                            );
+                                          }
+                                        }}
+                                        value={custodyField.value || undefined}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Pilih Status" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="DITAHAN">Ditahan</SelectItem>
+                                          <SelectItem value="TIDAK_DITAHAN">
+                                            Tidak Ditahan
+                                          </SelectItem>
+                                          <SelectItem value="DITANGGUHKAN">Ditangguhkan</SelectItem>
+                                          <SelectItem value="DIBANTARKAN">Dibantarkan</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                {custodyType === 'DITAHAN' && (
+                                  <FormField
+                                    control={form.control}
+                                    name={`defendants.${index}.detention_type`}
+                                    render={({ field: detentionTypeField }: { field: any }) => (
+                                      <FormItem>
+                                        <FormLabel>Jenis Tahanan</FormLabel>
+                                        <Select
+                                          onValueChange={(val) => {
+                                            detentionTypeField.onChange(val);
+                                            if (val !== 'RUTAN') {
+                                              form.setValue(
+                                                `defendants.${index}.detention_organization_id`,
+                                                ''
+                                              );
+                                            }
+                                          }}
+                                          value={detentionTypeField.value || undefined}
+                                        >
+                                          <FormControl>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Pilih Jenis" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            <SelectItem value="RUTAN">Rutan</SelectItem>
+                                            <SelectItem value="RUMAH">Rumah</SelectItem>
+                                            <SelectItem value="KOTA">Kota</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
+                              </div>
+
+                              {custodyType === 'DITAHAN' && detentionType === 'RUTAN' && (
+                                <FormField
+                                  control={form.control}
+                                  name={`defendants.${index}.detention_organization_id`}
+                                  render={({ field: orgField }: { field: any }) => (
+                                    <FormItem>
+                                      <FormLabel>
+                                        Rutan atau Lapas <span className="text-red-500">*</span>
+                                      </FormLabel>
+                                      <Select
+                                        onValueChange={orgField.onChange}
+                                        value={orgField.value || undefined}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Pilih Rutan / Lapas" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          {correctionsOptions.map((item) => (
+                                            <SelectItem key={item.id} value={item.id}>
+                                              {item.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              )}
+                            </div>
+
+                            <div className="flex items-end justify-between gap-3 md:col-span-2">
+                              <FormField
+                                control={form.control}
+                                name={`defendants.${index}.protected_identity`}
+                                render={({ field: protectedField }: { field: any }) => (
+                                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md pb-2">
+                                    <FormControl>
+                                      <input
+                                        type="checkbox"
+                                        checked={protectedField.value}
+                                        onChange={protectedField.onChange}
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 shadow-sm cursor-pointer"
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                      <FormLabel className="cursor-pointer text-sm font-medium">
+                                        Identitas dilindungi
+                                      </FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+
+                              {defendantFields.length > 1 && (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => removeDefendant(index)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </section>
+
+                    <FormField
+                      control={form.control}
+                      name="notes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Catatan internal</FormLabel>
+                          <FormControl>
+                            <Textarea {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <p className="text-xs text-slate-400">
+                      Kolom bertanda <span className="text-red-500">*</span> wajib diisi.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="submit" disabled={loadingDraft}>
+                        <FilePenLine className="mr-2 h-4 w-4" />
+                        {loadingDraft ? 'Menyimpan…' : 'Simpan Draf'}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => form.reset(initialValues)}
+                      >
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Atur Ulang
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>
@@ -861,7 +988,6 @@ export function HearingIntakePage() {
                   </div>
                 )}
                 {intake.data?.items?.map((item) => {
-                  const actionKey = `${item.id}-submit`;
                   return (
                     <div key={item.id} className="rounded-xl border p-4">
                       <div className="flex items-start justify-between gap-3">

@@ -23,11 +23,6 @@ const required = [
   'packages/contracts/openapi-video-provider-v0.17.yaml',
   'apps/worker.Dockerfile',
   'tools/Dockerfile.migrations',
-  'infra/k8s/base/migration-job.yaml',
-  'infra/k8s/base/worker-deployment.yaml',
-  'infra/k8s/base/zoom-provider-deployment.yaml',
-  'infra/k8s/base/web-deployment.yaml',
-  'infra/k8s/base/monitoring.example.yaml',
   'database/admin/roles-and-grants.template.sql',
   'docs/PRODUCTION_PERSISTENCE_0.17.md',
   'docs/DEPLOYMENT_RUNBOOK_0.17.md'

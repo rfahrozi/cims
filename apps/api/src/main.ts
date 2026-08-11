@@ -48,12 +48,12 @@ async function bootstrap(): Promise<void> {
     ]
   });
 
-  await app.register(helmet, {
+  await app.register(helmet as any, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"], // unsafe-inline untuk Swagger UI
+        styleSrc: env.SWAGGER_ENABLED ? ["'self'", "'unsafe-inline'"] : ["'self'"], // unsafe-inline untuk Swagger UI
         imgSrc: ["'self'", 'data:'],
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],
@@ -62,9 +62,9 @@ async function bootstrap(): Promise<void> {
         upgradeInsecureRequests: env.NODE_ENV === 'production' ? [] : null
       }
     },
-    crossOriginEmbedderPolicy: false // Perlu false agar Swagger UI berfungsi normal
+    crossOriginEmbedderPolicy: !env.SWAGGER_ENABLED // Perlu false agar Swagger UI berfungsi normal
   });
-  await app.register(rateLimit, {
+  await app.register(rateLimit as any, {
     max: env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_WINDOW_MS
   });

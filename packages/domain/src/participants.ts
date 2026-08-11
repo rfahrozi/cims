@@ -13,13 +13,7 @@ export type ParticipantRole =
   | 'IT_OPERATOR';
 
 export type ParticipantState =
-  | 'REGISTERED'
-  | 'TOKEN_ISSUED'
-  | 'WAITING'
-  | 'ADMITTED'
-  | 'LEFT'
-  | 'REMOVED'
-  | 'REVOKED';
+  'REGISTERED' | 'TOKEN_ISSUED' | 'WAITING' | 'ADMITTED' | 'LEFT' | 'REMOVED' | 'REVOKED';
 
 export interface ParticipantAccessTokenState {
   id: string;
@@ -32,12 +26,7 @@ export interface ParticipantAccessTokenState {
 }
 
 export type ParticipantAction =
-  | 'ISSUE_TOKEN'
-  | 'ENTER_WAITING'
-  | 'ADMIT'
-  | 'LEAVE'
-  | 'REMOVE'
-  | 'REVOKE';
+  'ISSUE_TOKEN' | 'ENTER_WAITING' | 'ADMIT' | 'LEAVE' | 'REMOVE' | 'REVOKE';
 
 export function transitionParticipant(
   current: ParticipantState,

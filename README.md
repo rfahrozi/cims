@@ -1,6 +1,6 @@
 # CIMS — Court Intelligence Management System
 
-**Versi:** v1.1.0 · Production Ready · Diperbarui: 8 Agustus 2026
+**Versi:** v1.0.0-RC1 · Release Candidate · Diperbarui: 8 Agustus 2026
 
 Sistem Koordinasi Persidangan Pidana Elektronik Lintas Instansi Tingkat Banding (Pengadilan Tinggi, Kejaksaan Tinggi, dan Pemasyarakatan) yang mengedepankan **Compliance-First Architecture**. CIMS tidak menggantikan register resmi perkara (SIPP / e-Berpadu), melainkan bertindak sebagai **lapisan orkestrasi, notifikasi, readiness, monitoring, dan audit** untuk operasional sidang virtual tingkat banding.
 
@@ -62,6 +62,10 @@ CIMS/
     └── brevo-notification/  # Microservice untuk Email via Brevo API
 ```
 
+## Production Secrets Management
+
+Di lingkungan produksi, CIMS mendukung injeksi _secrets_ secara langsung melalui _Environment Variables_ (misalnya via AWS Secrets Manager atau HashiCorp Vault). Jika variabel lingkungan dengan nama _secret_ terdeteksi, CIMS akan memprioritaskannya dibanding berkas _Docker Secrets_ lokal. Ini memenuhi standar 12-factor app untuk keamanan dan skalabilitas.
+
 ## 🚀 Deployment (v1.0.0 Production)
 
 Repositori ini siap dideploy menggunakan Docker Compose ke server VPS target (Nginx).
@@ -76,3 +80,28 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 4. Tambahkan _snippet_ routing `nginx.cims.conf.snippet` ke konfigurasi Nginx _host_.
+
+## 🔄 Continuous Integration & Deployment (CI/CD)
+
+CIMS mengadopsi standar DevOps modern untuk memastikan keandalan, keamanan, dan kualitas kode yang dirilis ke produksi. Pipeline ini diotomatisasi melalui **GitHub Actions**.
+
+### 1. Security Audit & Quality (`.github/workflows/security-audit.yml`)
+
+Berjalan secara otomatis pada setiap `push` atau `pull_request` ke `main`:
+
+- **Dependency Audit:** Memeriksa kerentanan paket (NPM Audit) tingkat tinggi (High/Critical).
+- **Secret Scan:** Menggunakan TruffleHog untuk mencegah kredensial, API Key, atau password yang bocor ke repository.
+- **SAST (Static Application Security Testing):** Memanfaatkan GitHub CodeQL untuk mendeteksi celah keamanan di tingkat source code (JavaScript/TypeScript).
+
+### 2. Production Deployment Pipeline (`.github/workflows/deployment-pipeline.yml`)
+
+Berjalan otomatis saat _Release Tag_ (`v*.*.*`) dibuat:
+
+- **Build & Test:** Mengeksekusi linter, strict typecheck, dan unit test.
+- **Automated Deployment:** Menginjeksi _secrets_ dan mem-build image Docker untuk dikirim ke environment Production (VPS / AWS ECS).
+- **Smoke Test:** Memverifikasi ketersediaan endpoint `/health/live` dan `/health/ready` sesaat setelah deployment.
+- **Automated Rollback:** Jika Smoke Test gagal, pipeline akan otomatis memicu skrip pembatalan (revert) ke image Docker versi stabil sebelumnya.
+
+### 3. End-to-End (E2E) Testing
+
+Terdapat kerangka pengujian integrasi front-to-back menggunakan **Playwright** (`playwright.config.ts`). Tes E2E (seperti `e2e/hearing-intake.spec.ts`) dirancang untuk menyimulasikan interaksi nyata panitera/hakim di browser guna mencegah regresi pada _user flow_ lintas layanan.

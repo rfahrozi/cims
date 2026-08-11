@@ -22,12 +22,13 @@ export type HearingIntakeAction =
 export type CaseClassification = 'GENERAL_CRIMINAL' | 'SPECIAL_CRIMINAL';
 export type DefendantCustodyStatus = 'DETAINED' | 'NOT_DETAINED' | 'MIXED' | 'UNKNOWN';
 
-export interface InitialDefendantInput {
+export interface InitialPartyInput {
   displayName: string;
   alias?: string;
   protectedIdentity: boolean;
   custodyStatus: Exclude<DefendantCustodyStatus, 'MIXED'>;
   detentionOrganizationId?: string;
+  appealRole?: string;
 }
 
 export interface JudgeAssignmentInput {
@@ -47,7 +48,8 @@ export interface ManualHearingIntakeInput {
   prosecutionOrganizationId: string;
   correctionsOrganizationId?: string;
   defendantCustodyStatus: DefendantCustodyStatus;
-  defendants: InitialDefendantInput[];
+  defendants: InitialPartyInput[];
+  prosecutors?: InitialPartyInput[];
   judges?: JudgeAssignmentInput[];
   notes?: string;
 }

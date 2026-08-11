@@ -80,7 +80,7 @@ export function DeterminationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Mode Persidangan</Label>
+              <Label htmlFor="hearing_mode">Mode Persidangan</Label>
               <Select value={mode} onValueChange={setMode}>
                 <SelectTrigger>
                   <SelectValue />
@@ -93,15 +93,21 @@ export function DeterminationPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Referensi Resmi / Nomor Penetapan</Label>
+              <Label htmlFor="official_ref">Referensi Resmi / Nomor Penetapan</Label>
               <Input
+                id="official_ref"
                 value={reference}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => setReference(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label>Alasan Penetapan</Label>
-              <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} />
+              <Label htmlFor="reason">Alasan Penetapan</Label>
+              <Textarea
+                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+              />
             </div>
             <Button onClick={save} disabled={!reference.trim() || !reason.trim()}>
               Simpan Penetapan

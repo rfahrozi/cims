@@ -23,6 +23,13 @@ export class ProductionConfigValidator implements OnApplicationBootstrap {
     if (this.config.get<string>('ENABLE_LEGACY_PROXY') === 'true')
       throw new Error('ENABLE_LEGACY_PROXY=true is forbidden in production.');
     this.assertEqual('DB_SSL', 'TRUE');
+    if (this.config.get<string>('DB_SSL_REJECT_UNAUTHORIZED') === 'false') {
+      throw new Error(
+        'PRODUCTION SECURITY VIOLATION: DB_SSL_REJECT_UNAUTHORIZED=false is forbidden in production.'
+      );
+    }
+
+    this.requireSecret('METRICS_BEARER_TOKEN', 16);
     if (this.config.get<string>('RETENTION_EXECUTION_ENABLED') === 'true') {
       throw new Error(
         'RETENTION_EXECUTION_ENABLED=true is forbidden until a legally approved disposition workflow is implemented.'

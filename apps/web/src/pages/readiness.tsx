@@ -263,8 +263,8 @@ export function ReadinessPage() {
                 {isCorrections && (
                   <>
                     <p className="text-xs text-amber-700">
-                      ⚠ Pemasyarakatan wajib menyelesaikan verifikasi identitas dan inspeksi
-                      ruangan sebelum submit kesiapan.
+                      ⚠ Pemasyarakatan wajib menyelesaikan verifikasi identitas dan inspeksi ruangan
+                      sebelum submit kesiapan.
                     </p>
                     <div className="flex flex-wrap gap-2 mb-2">
                       <Button variant="outline" onClick={verifyIdentity}>

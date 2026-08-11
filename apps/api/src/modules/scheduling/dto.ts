@@ -13,10 +13,7 @@ import {
 
 class ResourceDto {
   @IsIn(['JUDGE', 'ROOM', 'PROSECUTOR', 'CORRECTIONS']) resource_type!:
-    | 'JUDGE'
-    | 'ROOM'
-    | 'PROSECUTOR'
-    | 'CORRECTIONS';
+    'JUDGE' | 'ROOM' | 'PROSECUTOR' | 'CORRECTIONS';
   @IsString() resource_id!: string;
   @IsIn(['REQUIRED', 'PREFERRED']) requirement!: 'REQUIRED' | 'PREFERRED';
 }

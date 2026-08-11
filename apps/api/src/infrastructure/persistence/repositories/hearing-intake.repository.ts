@@ -745,8 +745,8 @@ export class HearingIntakeRepository {
   ): Promise<void> {
     for (const defendant of input.defendants)
       await client.query(
-        `insert into hearing_intake_parties(hearing_id,party_type,display_name_encrypted,display_name_search_hash,alias,protected_identity,custody_status,detention_organization_id,created_by)
-       values($1,'DEFENDANT',$2,$3,$4,$5,$6,$7,$8)`,
+        `insert into hearing_intake_parties(hearing_id,party_type,display_name_encrypted,display_name_search_hash,alias,protected_identity,custody_status,detention_organization_id,created_by,appeal_role)
+       values($1,'DEFENDANT',$2,$3,$4,$5,$6,$7,$8,$9)`,
         [
           hearingId,
           this.crypto.encrypt(defendant.displayName.trim()),
@@ -755,9 +755,29 @@ export class HearingIntakeRepository {
           defendant.protectedIdentity,
           defendant.custodyStatus,
           defendant.detentionOrganizationId ?? null,
-          userId
+          userId,
+          (defendant as any).appealRole ?? null
         ]
       );
+
+    if (input.prosecutors) {
+      for (const prosecutor of input.prosecutors)
+        await client.query(
+          `insert into hearing_intake_parties(hearing_id,party_type,display_name_encrypted,display_name_search_hash,alias,protected_identity,custody_status,detention_organization_id,created_by,appeal_role)
+         values($1,'PROSECUTOR',$2,$3,$4,$5,$6,$7,$8,$9)`,
+          [
+            hearingId,
+            this.crypto.encrypt(prosecutor.displayName.trim()),
+            this.crypto.searchHash(prosecutor.displayName),
+            prosecutor.alias?.trim() || null,
+            prosecutor.protectedIdentity,
+            prosecutor.custodyStatus,
+            prosecutor.detentionOrganizationId ?? null,
+            userId,
+            (prosecutor as any).appealRole ?? null
+          ]
+        );
+    }
 
     // Assign Judges
     await client.query('delete from hearing_user_assignments where hearing_id = $1', [hearingId]);
