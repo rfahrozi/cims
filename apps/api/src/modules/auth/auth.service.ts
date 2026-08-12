@@ -23,6 +23,30 @@ const users = new Map<string, { password: string; name: string; role: CimsRole; 
   ['dahlia@pt-kepri.go.id', { password: 'Cims123!', name: 'DAHLIA PANJAITAN, S.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
   ['suryadi@pt-kepri.go.id', { password: 'Cims123!', name: 'Dr. M. SURYADI, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
 
+
+  // ── Kejaksaan (Penuntut Umum) (Password default: Cims123!) ──────────────
+  ['admin@kejati-kepri.go.id', { password: 'Cims123!', name: 'Jaksa Kejati Kepri', role: 'PROSECUTOR', organizationId: 'kejati-kepri' }],
+  ['admin@kejari-tanjungpinang.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Tanjungpinang', role: 'PROSECUTOR', organizationId: 'kejari-tanjungpinang' }],
+  ['admin@kejari-batam.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Batam', role: 'PROSECUTOR', organizationId: 'kejari-batam' }],
+  ['admin@kejari-bintan.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Bintan', role: 'PROSECUTOR', organizationId: 'kejari-bintan' }],
+  ['admin@kejari-lingga.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Lingga', role: 'PROSECUTOR', organizationId: 'kejari-lingga' }],
+  ['admin@kejari-karimun.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Karimun', role: 'PROSECUTOR', organizationId: 'kejari-karimun' }],
+  ['admin@kejari-natuna.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Natuna', role: 'PROSECUTOR', organizationId: 'kejari-natuna' }],
+  ['admin@kejari-anambas.go.id', { password: 'Cims123!', name: 'Jaksa Kejari Anambas', role: 'PROSECUTOR', organizationId: 'kejari-anambas' }],
+  ['admin@cabjari-moro.go.id', { password: 'Cims123!', name: 'Jaksa Cabjari Moro', role: 'PROSECUTOR', organizationId: 'cabjari-moro' }],
+  ['admin@cabjari-tanjungbatu.go.id', { password: 'Cims123!', name: 'Jaksa Cabjari Tanjungbatu', role: 'PROSECUTOR', organizationId: 'cabjari-tanjungbatu' }],
+
+  // ── Pemasyarakatan (Lapas/Rutan) (Password default: Cims123!) ───────────
+  ['admin@lapas-batam.go.id', { password: 'Cims123!', name: 'Petugas Lapas Batam', role: 'CORRECTIONS', organizationId: 'lapas-batam' }],
+  ['admin@lapas-tanjungpinang.go.id', { password: 'Cims123!', name: 'Petugas Lapas Tanjungpinang', role: 'CORRECTIONS', organizationId: 'lapas-tanjungpinang' }],
+  ['admin@lapas-perempuan-batam.go.id', { password: 'Cims123!', name: 'Petugas Lapas Perempuan Batam', role: 'CORRECTIONS', organizationId: 'lapas-perempuan-batam' }],
+  ['admin@lapas-narkotika-tanjungpinang.go.id', { password: 'Cims123!', name: 'Petugas Lapas Narkotika TPI', role: 'CORRECTIONS', organizationId: 'lapas-narkotika-tanjungpinang' }],
+  ['admin@lapas-dabo-singkep.go.id', { password: 'Cims123!', name: 'Petugas Lapas Dabo Singkep', role: 'CORRECTIONS', organizationId: 'lapas-dabo-singkep' }],
+  ['admin@lpka-batam.go.id', { password: 'Cims123!', name: 'Petugas LPKA Batam', role: 'CORRECTIONS', organizationId: 'lpka-batam' }],
+  ['admin@rutan-tanjungpinang.go.id', { password: 'Cims123!', name: 'Petugas Rutan Tanjungpinang', role: 'CORRECTIONS', organizationId: 'rutan-tanjungpinang' }],
+  ['admin@rutan-batam.go.id', { password: 'Cims123!', name: 'Petugas Rutan Batam', role: 'CORRECTIONS', organizationId: 'rutan-batam' }],
+  ['admin@rutan-karimun.go.id', { password: 'Cims123!', name: 'Petugas Rutan Karimun', role: 'CORRECTIONS', organizationId: 'rutan-karimun' }],
+
   // User Default / Fallback
   ['clerk@cims.local', { password: 'Clerk123!', name: 'Panitera Demo', role: 'COURT_CLERK', organizationId: 'court-demo' }],
   ['judge@cims.local', { password: 'Judge123!', name: 'Hakim Demo', role: 'JUDGE', organizationId: 'court-demo' }],

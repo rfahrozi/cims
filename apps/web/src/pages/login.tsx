@@ -8,21 +8,41 @@ import { setPersona, type Persona } from '@/lib/api';
 
 // Pemetaan dari email ke DEV persona agar fitur bypass UI DEV tetap konsisten dengan backend DEV
 const EMAIL_TO_PERSONA: Record<string, Persona> = {
-  'agusman@pn-kepri.go.id': 'substitute-clerk',
-  'nurlaili@pn-kepri.go.id': 'substitute-clerk',
-  'syaiful@pn-kepri.go.id': 'substitute-clerk',
-  'supriadi@pn-kepri.go.id': 'substitute-clerk',
-  'sapta@pn-kepri.go.id': 'substitute-clerk',
-  'arifin@pn-kepri.go.id': 'judge',
-  'zulfahmi@pn-kepri.go.id': 'judge',
-  'eliwarti@pn-kepri.go.id': 'judge',
-  'wendra@pn-kepri.go.id': 'judge',
-  'estiono@pn-kepri.go.id': 'judge',
-  'bagus@pn-kepri.go.id': 'judge',
-  'elfian@pn-kepri.go.id': 'judge',
-  'morgan@pn-kepri.go.id': 'judge',
-  'dahlia@pn-kepri.go.id': 'judge',
-  'suryadi@pn-kepri.go.id': 'judge',
+  'agusman@pt-kepri.go.id': 'substitute-clerk',
+  'nurlaili@pt-kepri.go.id': 'substitute-clerk',
+  'syaiful@pt-kepri.go.id': 'substitute-clerk',
+  'supriadi@pt-kepri.go.id': 'substitute-clerk',
+  'sapta@pt-kepri.go.id': 'substitute-clerk',
+  'arifin@pt-kepri.go.id': 'judge',
+  'zulfahmi@pt-kepri.go.id': 'judge',
+  'eliwarti@pt-kepri.go.id': 'judge',
+  'wendra@pt-kepri.go.id': 'judge',
+  'estiono@pt-kepri.go.id': 'judge',
+  'bagus@pt-kepri.go.id': 'judge',
+  'elfian@pt-kepri.go.id': 'judge',
+  'morgan@pt-kepri.go.id': 'judge',
+  'dahlia@pt-kepri.go.id': 'judge',
+  'suryadi@pt-kepri.go.id': 'judge',
+
+  'admin@kejati-kepri.go.id': 'prosecutor',
+  'admin@kejari-tanjungpinang.go.id': 'prosecutor',
+  'admin@kejari-batam.go.id': 'prosecutor',
+  'admin@kejari-bintan.go.id': 'prosecutor',
+  'admin@kejari-lingga.go.id': 'prosecutor',
+  'admin@kejari-karimun.go.id': 'prosecutor',
+  'admin@kejari-natuna.go.id': 'prosecutor',
+  'admin@kejari-anambas.go.id': 'prosecutor',
+  'admin@cabjari-moro.go.id': 'prosecutor',
+  'admin@cabjari-tanjungbatu.go.id': 'prosecutor',
+  'admin@lapas-batam.go.id': 'corrections',
+  'admin@lapas-tanjungpinang.go.id': 'corrections',
+  'admin@lapas-perempuan-batam.go.id': 'corrections',
+  'admin@lapas-narkotika-tanjungpinang.go.id': 'corrections',
+  'admin@lapas-dabo-singkep.go.id': 'corrections',
+  'admin@lpka-batam.go.id': 'corrections',
+  'admin@rutan-tanjungpinang.go.id': 'corrections',
+  'admin@rutan-batam.go.id': 'corrections',
+  'admin@rutan-karimun.go.id': 'corrections',
   'clerk@cims.local': 'court-clerk',
   'judge@cims.local': 'judge',
   'prosecutor@cims.local': 'prosecutor',
@@ -32,7 +52,7 @@ const EMAIL_TO_PERSONA: Record<string, Persona> = {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('agusman@pn-kepri.go.id');
+  const [email, setEmail] = useState('agusman@pt-kepri.go.id');
   const [password, setPassword] = useState('Cims123!');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -109,7 +129,7 @@ export function LoginPage() {
                 type="email" 
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="nama@pn-kepri.go.id"
+                placeholder="nama@pt-kepri.go.id"
                 required
                 className="h-11"
               />
