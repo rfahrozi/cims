@@ -52,7 +52,7 @@ services:
       NODE_ENV: development
       VITE_API_BASE_URL: http://localhost:3000/api/v1
     ports:
-      - "5173:5173"
+      - "5173:8080"
 
   zoom-provider:
     build:
