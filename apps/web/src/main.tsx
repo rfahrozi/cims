@@ -7,10 +7,12 @@ import { HearingProvider } from './lib/hearing-context';
 import './index.css';
 
 const client = new QueryClient();
+const base = import.meta.env.MODE === 'production' ? '/cims' : '/';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={client}>
-      <BrowserRouter>
+      <BrowserRouter basename={base}>
         <HearingProvider>
           <App />
         </HearingProvider>
