@@ -58,7 +58,6 @@ const substitutClerkPermissions = [...workflowPermissions, ...intakeWriterPermis
 export const personas: Record<string, CurrentUser> = {
   // ── Panitera Pengganti (4 persona sesuai data pegawai nyata) ─────────────
   'agusman@pt-kepri.go.id': {
-  'substitute-clerk': {
     id: '196908201993031005',
     name: 'AGUSMAN, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
@@ -70,7 +69,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'nurlaili@pt-kepri.go.id': {
-  'substitute-clerk:1': {
     id: '196908201993031005',
     name: 'AGUSMAN, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
@@ -82,7 +80,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'syaiful@pt-kepri.go.id': {
-  'substitute-clerk:2': {
     id: '196505281994032001',
     name: 'NURLAILI, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
@@ -94,7 +91,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'supriadi@pt-kepri.go.id': {
-  'substitute-clerk:3': {
     id: '198409022009041004',
     name: 'SYAIFUL ISLAMI, S.H.',
     role: 'SUBSTITUTE_CLERK',
@@ -106,7 +102,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'sapta@pt-kepri.go.id': {
-  'substitute-clerk:4': {
     id: '196511281993031003',
     name: 'SUPRIADI, S.H.',
     role: 'SUBSTITUTE_CLERK',
@@ -118,7 +113,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'clerk@cims.local': {
-  'court-clerk': {
     id: '196809011996031001',
     name: 'SAPTA PUTRA, S.H.',
     role: 'COURT_CLERK',
@@ -137,7 +131,6 @@ export const personas: Record<string, CurrentUser> = {
   },
   // ── Hakim (10 persona sesuai data nyata) ──────────────────────────────
   'arifin@pt-kepri.go.id': {
-  'judge-1': {
     id: '196005031988041001',
     name: 'Drs. ARIFIN, S.H., M.Hum.',
     role: 'JUDGE',
@@ -149,7 +142,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'zulfahmi@pt-kepri.go.id': {
-  'judge-2': {
     id: '196105171988031008',
     name: 'Dr ZULFAHMI, S.H., M.Hum.',
     role: 'JUDGE',
@@ -161,7 +153,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'eliwarti@pt-kepri.go.id': {
-  'judge-3': {
     id: '196303121985032003',
     name: 'ELIWARTI, S.H., M.H.',
     role: 'JUDGE',
@@ -173,7 +164,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'wendra@pt-kepri.go.id': {
-  'judge-4': {
     id: '196506301992121001',
     name: 'WENDRA RAIS, S.H., M.H.',
     role: 'JUDGE',
@@ -185,7 +175,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'estiono@pt-kepri.go.id': {
-  'judge-5': {
     id: '196503151992121001',
     name: 'ESTIONO, S.H., M.H.',
     role: 'JUDGE',
@@ -197,7 +186,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'bagus@pt-kepri.go.id': {
-  'judge-6': {
     id: '196308261988031003',
     name: 'BAGUS IRAWAN, S.H., M.H.',
     role: 'JUDGE',
@@ -209,7 +197,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'elfian@pt-kepri.go.id': {
-  'judge-7': {
     id: '196512111992121001',
     name: 'ELFIAN, S.H., M.H.',
     role: 'JUDGE',
@@ -221,7 +208,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'morgan@pt-kepri.go.id': {
-  'judge-8': {
     id: '196209221992121001',
     name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.',
     role: 'JUDGE',
@@ -233,7 +219,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'dahlia@pt-kepri.go.id': {
-  'judge-9': {
     id: '196301101991032002',
     name: 'DAHLIA PANJAITAN, S.H.',
     role: 'JUDGE',
@@ -245,7 +230,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'suryadi@pt-kepri.go.id': {
-  'judge-10': {
     id: '1403010103624882',
     name: 'Dr. M. SURYADI, S.H., M.H.',
     role: 'JUDGE',
@@ -370,7 +354,6 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   'admin@cims.local': {
-  'system-admin': {
     id: 'admin-demo',
     name: 'Administrator Demo',
     role: 'SYSTEM_ADMIN',
