@@ -11,7 +11,9 @@ COPY . .
 RUN npm run build -w @cims/web
 
 FROM nginx:1.27-alpine AS runtime
-COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+# Create a cims directory and put files inside it
+RUN mkdir -p /usr/share/nginx/html/cims
+COPY --from=build /app/apps/web/dist /usr/share/nginx/html/cims
 COPY apps/web/nginx.conf /etc/nginx/nginx.conf
 USER nginx
 EXPOSE 8080
