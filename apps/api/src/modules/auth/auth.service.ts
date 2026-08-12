@@ -5,23 +5,23 @@ import type { CimsRole } from '@cims/domain';
 // Simulasi user lokal untuk OIDC bypass di lingkungan DEV/SIT
 const users = new Map<string, { password: string; name: string; role: CimsRole; organizationId: string }>([
   // Panitera Pengganti (Password default: Cims123!)
-  ['agusman@pn-kepri.go.id', { password: 'Cims123!', name: 'AGUSMAN, S.H., M.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pn-tanjungpinang' }],
-  ['nurlaili@pn-kepri.go.id', { password: 'Cims123!', name: 'NURLAILI, S.H., M.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pn-batam' }],
-  ['syaiful@pn-kepri.go.id', { password: 'Cims123!', name: 'SYAIFUL ISLAMI, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pn-karimun' }],
-  ['supriadi@pn-kepri.go.id', { password: 'Cims123!', name: 'SUPRIADI, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pn-natuna' }],
-  ['sapta@pn-kepri.go.id', { password: 'Cims123!', name: 'SAPTA PUTRA, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pn-tanjungpinang' }],
+  ['agusman@pt-kepri.go.id', { password: 'Cims123!', name: 'AGUSMAN, S.H., M.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pt-kepri' }],
+  ['nurlaili@pt-kepri.go.id', { password: 'Cims123!', name: 'NURLAILI, S.H., M.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pt-kepri' }],
+  ['syaiful@pt-kepri.go.id', { password: 'Cims123!', name: 'SYAIFUL ISLAMI, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pt-kepri' }],
+  ['supriadi@pt-kepri.go.id', { password: 'Cims123!', name: 'SUPRIADI, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pt-kepri' }],
+  ['sapta@pt-kepri.go.id', { password: 'Cims123!', name: 'SAPTA PUTRA, S.H.', role: 'SUBSTITUTE_CLERK', organizationId: 'pt-kepri' }],
   
   // Hakim / Majelis (Password default: Cims123!)
-  ['arifin@pn-kepri.go.id', { password: 'Cims123!', name: 'Drs. ARIFIN, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pn-tanjungpinang' }],
-  ['zulfahmi@pn-kepri.go.id', { password: 'Cims123!', name: 'Dr ZULFAHMI, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pn-tanjungpinang' }],
-  ['eliwarti@pn-kepri.go.id', { password: 'Cims123!', name: 'ELIWARTI, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-tanjungpinang' }],
-  ['wendra@pn-kepri.go.id', { password: 'Cims123!', name: 'WENDRA RAIS, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-batam' }],
-  ['estiono@pn-kepri.go.id', { password: 'Cims123!', name: 'ESTIONO, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-batam' }],
-  ['bagus@pn-kepri.go.id', { password: 'Cims123!', name: 'BAGUS IRAWAN, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-batam' }],
-  ['elfian@pn-kepri.go.id', { password: 'Cims123!', name: 'ELFIAN, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-karimun' }],
-  ['morgan@pn-kepri.go.id', { password: 'Cims123!', name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pn-karimun' }],
-  ['dahlia@pn-kepri.go.id', { password: 'Cims123!', name: 'DAHLIA PANJAITAN, S.H.', role: 'JUDGE', organizationId: 'pn-natuna' }],
-  ['suryadi@pn-kepri.go.id', { password: 'Cims123!', name: 'Dr. M. SURYADI, S.H., M.H.', role: 'JUDGE', organizationId: 'pn-natuna' }],
+  ['arifin@pt-kepri.go.id', { password: 'Cims123!', name: 'Drs. ARIFIN, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['zulfahmi@pt-kepri.go.id', { password: 'Cims123!', name: 'Dr ZULFAHMI, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['eliwarti@pt-kepri.go.id', { password: 'Cims123!', name: 'ELIWARTI, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['wendra@pt-kepri.go.id', { password: 'Cims123!', name: 'WENDRA RAIS, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['estiono@pt-kepri.go.id', { password: 'Cims123!', name: 'ESTIONO, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['bagus@pt-kepri.go.id', { password: 'Cims123!', name: 'BAGUS IRAWAN, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['elfian@pt-kepri.go.id', { password: 'Cims123!', name: 'ELFIAN, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['morgan@pt-kepri.go.id', { password: 'Cims123!', name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['dahlia@pt-kepri.go.id', { password: 'Cims123!', name: 'DAHLIA PANJAITAN, S.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
+  ['suryadi@pt-kepri.go.id', { password: 'Cims123!', name: 'Dr. M. SURYADI, S.H., M.H.', role: 'JUDGE', organizationId: 'pt-kepri' }],
 
   // User Default / Fallback
   ['clerk@cims.local', { password: 'Clerk123!', name: 'Panitera Demo', role: 'COURT_CLERK', organizationId: 'court-demo' }],

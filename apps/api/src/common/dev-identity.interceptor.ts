@@ -57,61 +57,61 @@ const substitutClerkPermissions = [...workflowPermissions, ...intakeWriterPermis
 
 export const personas: Record<string, CurrentUser> = {
   // ── Panitera Pengganti (4 persona sesuai data pegawai nyata) ─────────────
-  'agusman@pn-kepri.go.id': {
+  'agusman@pt-kepri.go.id': {
   'substitute-clerk': {
     id: '196908201993031005',
     name: 'AGUSMAN, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'pn-batam',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'nurlaili@pn-kepri.go.id': {
+  'nurlaili@pt-kepri.go.id': {
   'substitute-clerk:1': {
     id: '196908201993031005',
     name: 'AGUSMAN, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'pn-batam',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'syaiful@pn-kepri.go.id': {
+  'syaiful@pt-kepri.go.id': {
   'substitute-clerk:2': {
     id: '196505281994032001',
     name: 'NURLAILI, S.H., M.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'pn-tanjungpinang',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'supriadi@pn-kepri.go.id': {
+  'supriadi@pt-kepri.go.id': {
   'substitute-clerk:3': {
     id: '198409022009041004',
     name: 'SYAIFUL ISLAMI, S.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'pn-tanjungpinang',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
     authSource: 'DEV'
   },
-  'sapta@pn-kepri.go.id': {
+  'sapta@pt-kepri.go.id': {
   'substitute-clerk:4': {
     id: '196511281993031003',
     name: 'SUPRIADI, S.H.',
     role: 'SUBSTITUTE_CLERK',
     roles: ['SUBSTITUTE_CLERK'],
-    organizationId: 'pn-karimun',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: substitutClerkPermissions,
     hearingAssignments,
@@ -123,7 +123,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'SAPTA PUTRA, S.H.',
     role: 'COURT_CLERK',
     roles: ['COURT_CLERK'],
-    organizationId: 'pn-tanjungpinang',
+    organizationId: 'pt-kepri',
     organizationIds: ['pn-batam', 'pn-tanjungpinang', 'pn-karimun'],
     permissions: [
       ...workflowPermissions,
@@ -136,121 +136,121 @@ export const personas: Record<string, CurrentUser> = {
     authSource: 'DEV'
   },
   // ── Hakim (10 persona sesuai data nyata) ──────────────────────────────
-  'arifin@pn-kepri.go.id': {
+  'arifin@pt-kepri.go.id': {
   'judge-1': {
     id: '196005031988041001',
     name: 'Drs. ARIFIN, S.H., M.Hum.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'zulfahmi@pn-kepri.go.id': {
+  'zulfahmi@pt-kepri.go.id': {
   'judge-2': {
     id: '196105171988031008',
     name: 'Dr ZULFAHMI, S.H., M.Hum.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'eliwarti@pn-kepri.go.id': {
+  'eliwarti@pt-kepri.go.id': {
   'judge-3': {
     id: '196303121985032003',
     name: 'ELIWARTI, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'wendra@pn-kepri.go.id': {
+  'wendra@pt-kepri.go.id': {
   'judge-4': {
     id: '196506301992121001',
     name: 'WENDRA RAIS, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'estiono@pn-kepri.go.id': {
+  'estiono@pt-kepri.go.id': {
   'judge-5': {
     id: '196503151992121001',
     name: 'ESTIONO, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'bagus@pn-kepri.go.id': {
+  'bagus@pt-kepri.go.id': {
   'judge-6': {
     id: '196308261988031003',
     name: 'BAGUS IRAWAN, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'elfian@pn-kepri.go.id': {
+  'elfian@pt-kepri.go.id': {
   'judge-7': {
     id: '196512111992121001',
     name: 'ELFIAN, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'morgan@pn-kepri.go.id': {
+  'morgan@pt-kepri.go.id': {
   'judge-8': {
     id: '196209221992121001',
     name: 'MORGAN SIMANJUNTAK, S.H., M.Hum.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'dahlia@pn-kepri.go.id': {
+  'dahlia@pt-kepri.go.id': {
   'judge-9': {
     id: '196301101991032002',
     name: 'DAHLIA PANJAITAN, S.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
     authSource: 'DEV'
   },
-  'suryadi@pn-kepri.go.id': {
+  'suryadi@pt-kepri.go.id': {
   'judge-10': {
     id: '1403010103624882',
     name: 'Dr. M. SURYADI, S.H., M.H.',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
@@ -261,7 +261,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'Hakim Demo',
     role: 'JUDGE',
     roles: ['JUDGE'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [...workflowPermissions, 'hearing.control', 'participant.protected.read'],
     hearingAssignments,
@@ -327,7 +327,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'Operator TI Demo',
     role: 'IT_OPERATOR',
     roles: ['IT_OPERATOR'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [
       'hearing.read',
@@ -345,7 +345,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'Security Officer Demo',
     role: 'SECURITY_OFFICER',
     roles: ['SECURITY_OFFICER'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: [
       'hearing.read',
@@ -363,7 +363,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'Auditor Demo',
     role: 'AUDITOR',
     roles: ['AUDITOR'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo'],
     permissions: ['hearing.read', 'incident.read', 'audit.read', ...governanceManagePermissions],
     hearingAssignments,
@@ -375,7 +375,7 @@ export const personas: Record<string, CurrentUser> = {
     name: 'Administrator Demo',
     role: 'SYSTEM_ADMIN',
     roles: ['SYSTEM_ADMIN'],
-    organizationId: 'court-demo',
+    organizationId: 'pt-kepri',
     organizationIds: ['court-demo', 'prosecution-demo', 'corrections-demo'],
     permissions: ['*'],
     hearingAssignments,

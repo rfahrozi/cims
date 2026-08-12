@@ -7,6 +7,7 @@
 -- =============================================================================
 insert into organizations(id, organization_code, name, organization_type, active)
 values
+  ('pt-kepri', 'PT-KEPRI', 'Pengadilan Tinggi Kepulauan Riau', 'COURT', true),
   ('pn-tanjungpinang', 'PN-TPI',      'Pengadilan Negeri Tanjungpinang',    'COURT',       true),
   ('pn-batam',         'PN-BTM',      'Pengadilan Negeri Batam',            'COURT',       true),
   ('pn-karimun',       'PN-TBK',      'Pengadilan Negeri Tanjung Balai Karimun', 'COURT',       true),
