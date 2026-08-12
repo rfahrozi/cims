@@ -3,42 +3,85 @@ import { useNavigate } from 'react-router-dom';
 import { Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { setPersona, type Persona } from '@/lib/api';
 
-const ROLE_OPTIONS: { value: Persona; label: string }[] = [
-  { value: 'substitute-clerk', label: 'Panitera Pengganti (Pengadilan)' },
-  { value: 'court-clerk', label: 'Panitera Berwenang (Pengadilan)' },
-  { value: 'judge', label: 'Majelis Hakim (Pengadilan)' },
-  { value: 'prosecutor', label: 'Penuntut Umum (Kejaksaan)' },
-  { value: 'corrections', label: 'Petugas Lapas/Rutan (Pemasyarakatan)' },
-  { value: 'it-operator', label: 'Operator TI / Ruang Virtual' },
-  { value: 'security-officer', label: 'Security Officer' },
-  { value: 'auditor', label: 'Auditor Pengawasan' },
-  { value: 'system-admin', label: 'Administrasi Sistem' }
-];
+// Pemetaan dari email ke DEV persona agar fitur bypass UI DEV tetap konsisten dengan backend DEV
+const EMAIL_TO_PERSONA: Record<string, Persona> = {
+  'agusman@pn-kepri.go.id': 'substitute-clerk',
+  'nurlaili@pn-kepri.go.id': 'substitute-clerk',
+  'syaiful@pn-kepri.go.id': 'substitute-clerk',
+  'supriadi@pn-kepri.go.id': 'substitute-clerk',
+  'sapta@pn-kepri.go.id': 'substitute-clerk',
+  'arifin@pn-kepri.go.id': 'judge',
+  'zulfahmi@pn-kepri.go.id': 'judge',
+  'eliwarti@pn-kepri.go.id': 'judge',
+  'wendra@pn-kepri.go.id': 'judge',
+  'estiono@pn-kepri.go.id': 'judge',
+  'bagus@pn-kepri.go.id': 'judge',
+  'elfian@pn-kepri.go.id': 'judge',
+  'morgan@pn-kepri.go.id': 'judge',
+  'dahlia@pn-kepri.go.id': 'judge',
+  'suryadi@pn-kepri.go.id': 'judge',
+  'clerk@cims.local': 'court-clerk',
+  'judge@cims.local': 'judge',
+  'prosecutor@cims.local': 'prosecutor',
+  'corrections@cims.local': 'corrections',
+  'admin@cims.local': 'system-admin'
+};
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<Persona>('court-clerk');
+  const [email, setEmail] = useState('agusman@pn-kepri.go.id');
+  const [password, setPassword] = useState('Cims123!');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // Di backend DEV, identitas bergantung penuh pada persona header yang dikirim.
-    setTimeout(() => {
-      setPersona(selectedRole);
-      setLoading(false);
+    try {
+      // 1. Lakukan request login Auth ke backend CIMS 
+      const response = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || data.error?.message || 'Login gagal, periksa email dan kata sandi.');
+      }
+
+      // 2. Verify challenge with development OTP
+      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challenge_id: data.challenge_id, otp: data.development_otp })
+      });
+      
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyRes.ok) {
+        throw new Error('Verifikasi OTP gagal.');
+      }
+
+      // 3. Simpan token
+      localStorage.setItem('cims_token', verifyData.access_token);
+      
+      // 4. Set fallback DEV Persona agar tampilan UI (Sidebar/Tombol) terupdate sesuai hak akses
+      const mappedPersona = EMAIL_TO_PERSONA[email] || 'substitute-clerk';
+      setPersona(mappedPersona);
+
       navigate('/dashboard');
-    }, 600);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -61,20 +104,34 @@ export function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2 text-left">
-              <Label className="text-sm font-medium text-slate-700">Pilih Peran Uji Coba</Label>
-              <Select value={selectedRole} onValueChange={(val) => setSelectedRole(val as Persona)}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Pilih Peran" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-sm font-medium text-slate-700">Email Pegawai</Label>
+              <Input 
+                type="email" 
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="nama@pn-kepri.go.id"
+                required
+                className="h-11"
+              />
             </div>
+            
+            <div className="space-y-2 text-left">
+              <Label className="text-sm font-medium text-slate-700">Kata Sandi</Label>
+              <Input 
+                type="password" 
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Masukkan kata sandi"
+                required
+                className="h-11"
+              />
+            </div>
+
+            {error && (
+              <div className="text-sm text-red-500 font-medium bg-red-50 p-3 rounded-md">
+                {error}
+              </div>
+            )}
 
             <Button
               type="submit"
