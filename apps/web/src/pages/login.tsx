@@ -77,7 +77,7 @@ export function LoginPage() {
       }
 
       // 2. Verify challenge with development OTP
-      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/verify`, {
+      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ challenge_id: data.challenge_id, otp: data.development_otp })
