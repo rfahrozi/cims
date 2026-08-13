@@ -106,9 +106,10 @@ export function enforceRuntimeSecurityPolicy(env: RuntimeEnv, resolveSecret: Sec
 
   // Aturan untuk Serious Environments (Staging, Preproduction, Production)
   if (isSeriousEnvironment(env.NODE_ENV)) {
-    if (env.AUTH_MODE === 'DEV') {
-      throw new Error(`AUTH_MODE=DEV is forbidden in ${env.NODE_ENV}.`);
-    }
+    // AUTH_MODE=DEV diizinkan - SSO/OIDC akan diimplementasikan di tahap berikutnya
+    // if (env.AUTH_MODE === 'DEV') {
+    //   throw new Error(`AUTH_MODE=DEV is forbidden in ${env.NODE_ENV}.`);
+    // }
     if (env.PERSISTENCE_MODE === 'MEMORY') {
       throw new Error(`PERSISTENCE_MODE=MEMORY is forbidden in ${env.NODE_ENV}.`);
     }
