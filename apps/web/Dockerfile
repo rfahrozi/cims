@@ -10,8 +10,8 @@ RUN npm install --no-audit --no-fund
 COPY . .
 
 # Variabel ini HARUS tersedia saat build time (Vite men-bake nilai ini ke dalam JS)
-ARG VITE_API_BASE_URL=https://devapps.pt-kepri.go.id/cims/api/v1
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ARG VITE_API_URL=https://devapps.pt-kepri.go.id/cims/api/v1
+ENV VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build -w @cims/web
 
