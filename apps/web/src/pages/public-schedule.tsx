@@ -2,13 +2,30 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CalendarDays, Filter, RefreshCw, Scale, Search, Clock, Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+// Helper function to format date
+const formatDate = (dateString: string | number | Date) => {
+  const d = new Date(dateString);
+  return d.toLocaleDateString('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+const formatTime = (dateString: string | number | Date) => {
+  const d = new Date(dateString);
+  return d.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
 export function PublicSchedulePage() {
   const now = new Date();
@@ -170,9 +187,9 @@ export function PublicSchedulePage() {
                     <div className="flex items-center text-slate-700">
                       <Clock className="mr-3 h-5 w-5 text-blue-500 shrink-0" />
                       <div>
-                        <p className="text-sm font-medium">{format(startDate, 'EEEE, d MMMM yyyy', { locale: id })}</p>
+                        <p className="text-sm font-medium">{formatDate(startDate)}</p>
                         <p className="text-sm text-slate-500">
-                          {format(startDate, 'HH:mm')} - {format(endDate, 'HH:mm')} WIB
+                          {formatTime(startDate)} - {formatTime(endDate)} WIB
                         </p>
                       </div>
                     </div>
