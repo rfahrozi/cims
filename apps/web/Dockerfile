@@ -9,9 +9,9 @@ COPY packages/contracts/package.json packages/contracts/package.json
 RUN npm install --no-audit --no-fund
 COPY . .
 
-# Variabel ini HARUS tersedia saat build time (Vite men-bake nilai ini ke dalam JS)
+# Buat file .env.production agar Vite membaca URL yang benar saat build
 ARG VITE_API_URL=https://devapps.pt-kepri.go.id/cims/api/v1
-ENV VITE_API_URL=${VITE_API_URL}
+RUN echo "VITE_API_URL=${VITE_API_URL}" > apps/web/.env.production
 
 RUN npm run build -w @cims/web
 
