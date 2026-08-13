@@ -112,11 +112,12 @@ export class VideoProviderGateway implements OnApplicationBootstrap {
   }
 
   private get mode(): 'MOCK' | 'HTTP' {
-    return (this.config && this.config.get
-      ? this.config.get<string>('VIDEO_PROVIDER_MODE', 'MOCK')
-      : 'MOCK') === 'HTTP'
-      ? 'HTTP'
-      : 'MOCK';
+    const val = (
+      (this.config && this.config.get
+        ? this.config.get<string>('VIDEO_PROVIDER_MODE')
+        : undefined) ?? process.env['VIDEO_PROVIDER_MODE'] ?? 'MOCK'
+    ).toUpperCase();
+    return val === 'HTTP' ? 'HTTP' : 'MOCK';
   }
   private baseUrl(): string {
     return this.config && this.config.get
