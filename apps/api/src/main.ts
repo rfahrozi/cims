@@ -31,9 +31,10 @@ async function bootstrap(): Promise<void> {
 
   enforceRuntimeSecurityPolicy(env, (key) => secretValue(configService, key));
 
-  if (env.AUTH_MODE === 'DEV') {
-    app.useGlobalInterceptors(new DevIdentityInterceptor());
-  }
+  // Matikan DevIdentityInterceptor karena kita akan pakai login lokal
+  // if (env.AUTH_MODE === 'DEV') {
+  //   app.useGlobalInterceptors(new DevIdentityInterceptor());
+  // }
 
   app.useGlobalInterceptors(new CorrelationInterceptor());
   app.setGlobalPrefix('api/v1', { exclude: ['health', 'health/live', 'health/ready', 'metrics'] });
