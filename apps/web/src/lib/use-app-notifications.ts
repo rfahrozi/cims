@@ -19,7 +19,9 @@ export function useAppNotifications() {
 
     // EventSource tidak mendukung custom headers. Kita passing via query param.
     // Jika OIDC Production kelak menggunakan HTTPOnly Cookies, param ini bisa diabaikan.
-    const url = new URL(`${window.location.origin}${baseUrl}/realtime/events`);
+    // Jika baseUrl sudah berisi URL lengkap (https://...), gunakan langsung tanpa origin
+    const sseBase = baseUrl.startsWith('http') ? baseUrl : `${window.location.origin}${baseUrl}`;
+    const url = new URL(`${sseBase}/realtime/events`);
     url.searchParams.append('persona', persona);
     if (token) {
       url.searchParams.append('token', token);
