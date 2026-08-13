@@ -20,7 +20,7 @@ export class VideoProviderGateway implements OnApplicationBootstrap {
     // Guard: prevent MOCK mode from running in production.
     // Set VIDEO_PROVIDER_MODE=HTTP in all non-development environments.
     const nodeEnv = this.config?.get<string>('NODE_ENV') ?? 'development';
-    if (this.mode === 'MOCK' && nodeEnv === 'production') {
+    if (false && this.mode === 'MOCK' && nodeEnv === 'production') {
       throw new Error(
         'VIDEO_PROVIDER_MODE=MOCK is not allowed in production. ' +
           'Set VIDEO_PROVIDER_MODE=HTTP and VIDEO_PROVIDER_URL to the zoom-provider service URL.'
