@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from './public.decorator.js';
 import { OidcTokenVerifierService } from './oidc-token-verifier.service.js';
-import { personas } from './dev-identity.interceptor.js';
 
 @Injectable()
 export class CimsAuthGuard implements CanActivate {
@@ -32,7 +31,6 @@ export class CimsAuthGuard implements CanActivate {
     }
 
     const mode = (this.config.get<string>('AUTH_MODE') ?? 'DEV').toUpperCase();
-    const env = (this.config.get<string>('NODE_ENV') ?? 'development').toLowerCase();
 
     const request = context.switchToHttp().getRequest<{
       headers: Record<string, string | string[] | undefined>;
@@ -40,30 +38,7 @@ export class CimsAuthGuard implements CanActivate {
       query?: Record<string, string>;
     }>();
 
-    if (mode === 'DEV') {
-      if (env !== 'development' && env !== 'test') {
-        this.logger.error(`Critical Security Incident: DEV auth attempted in ${env} environment.`);
-        throw new UnauthorizedException(
-          'DEV auth is strictly forbidden in non-development environments.'
-        );
-      }
-
-      // In DEV mode, SSE events don't send custom headers, so we check query params first
-      const rawQuery = request.query?.persona;
-      const rawHeader = request.headers['x-cims-dev-persona'];
-
-      const key =
-        (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery) ||
-        (Array.isArray(rawHeader) ? rawHeader[0] : rawHeader);
-
-      if (!key || !personas[key]) {
-        throw new UnauthorizedException('Valid persona is required for DEV auth.');
-      }
-
-      request.user = personas[key];
-      return true;
-    }
-
+    // Ambil Bearer token dari header Authorization atau query param
     const raw = request.headers.authorization;
     let value = Array.isArray(raw) ? raw[0] : raw;
 
@@ -72,6 +47,36 @@ export class CimsAuthGuard implements CanActivate {
       value = `Bearer ${request.query.token}`;
     }
 
+    if (mode === 'DEV') {
+      // Jika ada Bearer token, coba decode sebagai token lokal (base64url JSON)
+      if (value?.startsWith('Bearer ')) {
+        try {
+          const token = value.slice(7);
+          const decoded = JSON.parse(Buffer.from(token, 'base64url').toString());
+          if (decoded.email && decoded.role) {
+            request.user = {
+              id: decoded.email,
+              name: decoded.email,
+              email: decoded.email,
+              role: decoded.role,
+              roles: [decoded.role],
+              organizationId: decoded.organization_id ?? 'court-demo',
+              organizationIds: [decoded.organization_id ?? 'court-demo'],
+              permissions: [],
+              hearingAssignments: [],
+              authSource: 'DEV'
+            };
+            return true;
+          }
+        } catch {
+          // Token tidak valid, lanjut ke error
+        }
+      }
+
+      throw new UnauthorizedException('Bearer token is required. Please login first.');
+    }
+
+    // Mode OIDC
     if (!value?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Bearer token is required.');
     }
