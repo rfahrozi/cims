@@ -34,6 +34,9 @@ export function LandingPage() {
             <a href="#faq" className="hover:text-blue-600 transition-colors">
               FAQ
             </a>
+            <Link to="/public-schedule" className="hover:text-blue-600 transition-colors font-semibold text-blue-600">
+              Jadwal Sidang Publik
+            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link to="/login">

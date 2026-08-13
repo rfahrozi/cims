@@ -24,6 +24,7 @@ import { AuditLogPage } from '@/pages/audit-log';
 import { CalendarPage } from '@/pages/calendar';
 import { LandingPage } from '@/pages/landing';
 import { LoginPage } from '@/pages/login';
+import { PublicSchedulePage } from '@/pages/public-schedule';
 
 import { AppLayout } from '@/components/app-layout';
 import { useAppNotifications } from '@/lib/use-app-notifications';
@@ -37,6 +38,7 @@ export default function App() {
       {/* ── RUTE PUBLIK (Tanpa Sidebar) ── */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/public-schedule" element={<PublicSchedulePage />} />
 
       {/* ── RUTE APLIKASI (Dengan Sidebar) ── */}
       <Route element={<AppLayout />}>
