@@ -63,35 +63,24 @@ export function LoginPage() {
     setError('');
 
     try {
-      // 1. Lakukan request login Auth ke backend CIMS 
+      // 1. Lakukan request login Auth ke backend CIMS
       const response = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.message || data.error?.message || 'Login gagal, periksa email dan kata sandi.');
+        throw new Error(
+          data.message || data.error?.message || 'Login gagal, periksa email dan kata sandi.'
+        );
       }
 
-      // 2. Verify challenge with development OTP
-      const verifyRes = await fetch(`${import.meta.env.VITE_API_URL ?? '/api/v1'}/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challenge_id: data.challenge_id, otp: data.development_otp })
-      });
-      
-      const verifyData = await verifyRes.json();
-      
-      if (!verifyRes.ok) {
-        throw new Error('Verifikasi OTP gagal.');
-      }
+      // 3. Simpan token (Data login sekarang langsung berisi token karena backend bypass OTP)
+      localStorage.setItem('cims_token', data.access_token);
 
-      // 3. Simpan token
-      localStorage.setItem('cims_token', verifyData.access_token);
-      
       // 4. Set fallback DEV Persona agar tampilan UI (Sidebar/Tombol) terupdate sesuai hak akses
       const mappedPersona = EMAIL_TO_PERSONA[email] || 'substitute-clerk';
       setPersona(mappedPersona);
@@ -125,22 +114,22 @@ export function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2 text-left">
               <Label className="text-sm font-medium text-slate-700">Email Pegawai</Label>
-              <Input 
-                type="email" 
+              <Input
+                type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@pt-kepri.go.id"
                 required
                 className="h-11"
               />
             </div>
-            
+
             <div className="space-y-2 text-left">
               <Label className="text-sm font-medium text-slate-700">Kata Sandi</Label>
-              <Input 
-                type="password" 
+              <Input
+                type="password"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan kata sandi"
                 required
                 className="h-11"
