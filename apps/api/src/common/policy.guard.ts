@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { DomainError } from '@cims/domain';
 import type { CurrentUser } from './current-user.decorator.js';
 import { PERMISSIONS_KEY } from './permissions.decorator.js';
+import { IS_PUBLIC_KEY } from './public.decorator.js';
 import { HearingAccessService } from '../infrastructure/security/hearing-access.service.js';
 
 @Injectable()
@@ -13,6 +14,15 @@ export class PolicyGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (
+      this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+        context.getHandler(),
+        context.getClass()
+      ])
+    ) {
+      return true;
+    }
+
     const permissions =
       this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
         context.getHandler(),

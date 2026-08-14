@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Observable, fromEvent, map, filter } from 'rxjs';
 import { FastifyRequest } from 'fastify';
+import { Public } from '../../common/public.decorator.js';
 
 /**
  * Controller ini menangani Server-Sent Events (SSE).
@@ -13,6 +14,7 @@ import { FastifyRequest } from 'fastify';
 export class RealtimeController {
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
+  @Public()
   @Sse('events')
   streamEvents(@Req() request: FastifyRequest): Observable<MessageEvent> {
     // Event yang dipancarkan secara lokal akan diteruskan ke koneksi SSE yang aktif

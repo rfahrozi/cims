@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarDays, Filter, RefreshCw, Scale, Search, Clock, Users, ArrowLeft } from 'lucide-react';
+import {
+  CalendarDays,
+  Filter,
+  RefreshCw,
+  Scale,
+  Search,
+  Clock,
+  Users,
+  ArrowLeft
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { api } from '@/lib/api';
@@ -43,17 +52,18 @@ export function PublicSchedulePage() {
       const q = new URLSearchParams();
       q.set('from', `${from}T00:00:00Z`);
       q.set('to', `${to}T23:59:59Z`);
-      return api<any[]>(`/hearings?${q.toString()}`);
+      return api<any[]>(`/hearings/public?${q.toString()}`);
     }
   });
 
   const events = Array.isArray(query.data) ? query.data : [];
 
   // Filter lokal berdasarkan pencarian perkara
-  const filteredEvents = events.filter(e =>
-    !search ||
-    e.case_number?.toLowerCase().includes(search.toLowerCase()) ||
-    e.title?.toLowerCase().includes(search.toLowerCase())
+  const filteredEvents = events.filter(
+    (e) =>
+      !search ||
+      e.case_number?.toLowerCase().includes(search.toLowerCase()) ||
+      e.title?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -69,7 +79,10 @@ export function PublicSchedulePage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/">
-              <Button variant="ghost" className="text-slate-600 hover:text-slate-900 hidden sm:flex">
+              <Button
+                variant="ghost"
+                className="text-slate-600 hover:text-slate-900 hidden sm:flex"
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
               </Button>
             </Link>
@@ -88,7 +101,8 @@ export function PublicSchedulePage() {
             Jadwal Sidang Elektronik
           </h1>
           <p className="text-lg text-slate-600">
-            Informasi publik jadwal persidangan pidana elektronik lintas instansi (Pengadilan, Kejaksaan, Rutan).
+            Informasi publik jadwal persidangan pidana elektronik lintas instansi (Pengadilan,
+            Kejaksaan, Rutan).
           </p>
         </div>
 
@@ -151,7 +165,12 @@ export function PublicSchedulePage() {
           </div>
         ) : query.isError ? (
           <div className="flex h-64 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 p-6 text-center">
-            <p>Terjadi kesalahan saat memuat jadwal. <br/><span className="text-sm opacity-80">Pastikan backend API sudah aktif dan tidak membutuhkan autentikasi untuk route ini.</span></p>
+            <p>
+              Terjadi kesalahan saat memuat jadwal. <br />
+              <span className="text-sm opacity-80">
+                Pastikan backend API sudah aktif dan tidak membutuhkan autentikasi untuk route ini.
+              </span>
+            </p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="flex h-64 items-center justify-center rounded-xl border border-slate-200 border-dashed bg-slate-50/50">
@@ -165,10 +184,15 @@ export function PublicSchedulePage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((event) => {
               const startDate = new Date(event.schedule?.start_at || event.created_at);
-              const endDate = new Date(event.schedule?.end_at || new Date(startDate.getTime() + 3600000));
+              const endDate = new Date(
+                event.schedule?.end_at || new Date(startDate.getTime() + 3600000)
+              );
 
               return (
-                <div key={event.id} className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                <div
+                  key={event.id}
+                  className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                >
                   <div className="bg-slate-50 border-b border-slate-100 px-5 py-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">

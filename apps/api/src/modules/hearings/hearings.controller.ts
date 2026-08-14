@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CurrentUserContext, type CurrentUser } from '../../common/current-user.decorator.js';
 import { AuditService } from '../../infrastructure/observability/audit.service.js';
 import { HearingsService } from './hearings.service.js';
 import { SaveAgendaDto } from './dto.js';
+import { Public } from '../../common/public.decorator.js';
 
 @ApiTags('hearings')
 @Controller('hearings')
@@ -12,6 +13,23 @@ export class HearingsController {
     private readonly service: HearingsService,
     private readonly audit: AuditService
   ) {}
+
+  @Public()
+  @Get('public')
+  async listPublic(@Query('from') from?: string, @Query('to') to?: string) {
+    const publicUser: CurrentUser = {
+      id: 'public',
+      name: 'Public User',
+      role: 'COURT_CLERK',
+      roles: ['COURT_CLERK'],
+      organizationId: 'public',
+      organizationIds: ['public'],
+      permissions: [],
+      hearingAssignments: [],
+      authSource: 'DEV'
+    };
+    return await this.service.list(publicUser);
+  }
 
   @Get()
   async list(@CurrentUserContext() user: CurrentUser) {
